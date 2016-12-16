@@ -66,8 +66,6 @@ __kernel void apply(__global float* buffer, size_t width, __global float* xs, __
 }
 "#;
 
-const DIM: usize = 100;
-
 pub fn run_poly(xs: &[f32], ys: &[f32], width: usize, height: usize) -> Buffer<f32> {
     assert_eq!(xs.len(), ys.len());
     let len = xs.len();
@@ -82,7 +80,7 @@ pub fn run_poly(xs: &[f32], ys: &[f32], width: usize, height: usize) -> Buffer<f
 
     kernel
         .arg_buf(&buf)
-        .arg_scl(DIM)
+        .arg_scl(width)
         .arg_buf(&xs_buf)
         .arg_buf(&ys_buf)
         .arg_scl(len)

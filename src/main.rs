@@ -5,7 +5,7 @@ use ocl::ProQue;
 use implicit_gpu::image::{ColorMode, save_image};
 use implicit_gpu::*;
 
-const DIM: usize = 100;
+const DIM: usize = 1000;
 const SIZE: f32 = 20.0;
 
 fn run(program: &str) {
@@ -39,10 +39,10 @@ fn main() {
         let x = x as f32;
         let n = n as f32;
         xs.push(f32::cos(2.0 * pi / n * x) * r + 50.0);
-        ys.push(f32::sin(2.0 * pi / n * x) * r + 50.0);
+        ys.push(f32::sin(2.0 * pi / n * x) * (r * 1.5) + 50.0);
     }
 
-    let buffer = implicit_gpu::polygon::run_poly(&xs, &ys);
+    let buffer = implicit_gpu::polygon::run_poly(&xs, &ys, DIM, DIM);
     let mut vec = vec![0.0f32; buffer.len()];
     buffer.read(&mut vec).enq().unwrap();
 
