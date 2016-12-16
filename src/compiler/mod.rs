@@ -12,7 +12,7 @@ pub fn compile(node: &NodePtr) -> String {
     cc.add_stage(stage);
 
     let preamble = r#"
-__kernel void circle(__global float* buffer, size_t width) {
+__kernel void apply(__global float* buffer, size_t width) {
     size_t x = get_global_id(0);
     size_t y = get_global_id(1);
     size_t pos = x + y * width;
@@ -30,8 +30,10 @@ __kernel void circle(__global float* buffer, size_t width) {
     buffer.push_str(&preamble);
     for line in cc.lines {
         buffer.push_str(&line);
+        buffer.push('\n');
     }
     buffer.push_str(&postamble);
+
     buffer
 }
 
@@ -74,8 +76,10 @@ impl CompilationContext {
     pub fn add_stage(&mut self, stage: Stage) {
         self.lines.push("".into());
         self.lines.push(format!("    float {};", stage.result));
+        self.lines.push("    {".into());
         for line in stage.lines {
             self.lines.push(format!("        {}", line));
         }
+        self.lines.push("    }".into());
     }
 }
