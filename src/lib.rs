@@ -3,11 +3,15 @@ extern crate gc;
 #[macro_use]
 extern crate lazy_static;
 
+extern crate vecmath;
 extern crate ocl;
+extern crate fnv;
+extern crate itertools;
 extern crate image as image_crate;
 
-mod nodes;
-mod compiler;
+pub mod nodes;
+pub mod util;
+pub mod compiler;
 pub mod opencl;
 pub mod image;
 pub mod polygon;
