@@ -5,6 +5,7 @@ extern crate lazy_static;
 
 extern crate vecmath;
 extern crate ocl;
+extern crate flame;
 extern crate fnv;
 extern crate itertools;
 extern crate image as image_crate;

@@ -1,6 +1,7 @@
 extern crate ocl;
 extern crate implicit_gpu;
 extern crate lux;
+extern crate flame;
 
 use ocl::Buffer;
 use implicit_gpu::image::{ColorMode, save_image};
@@ -9,18 +10,24 @@ use implicit_gpu::opencl::OpenClContext;
 
 use lux::prelude::*;
 
-const DIM: usize = 1000;
+const DIM: usize = 100;
 
 fn run(program: &str, dims: [usize; 2], ctx: &OpenClContext) -> Buffer<f32> {
+    ::flame::start("prep");
     let buf = ctx.output_buffer(dims);
     let kernel = ctx.compile("apply", program);
+    ::flame::end("prep");
 
     kernel.gws(dims).arg_buf(&buf).arg_scl(DIM).enq().unwrap();
 
+    /*
+    ::flame::start("teardown");
     let mut vec = vec![0.0f32; buf.len()];
     buf.read(&mut vec).enq().unwrap();
+    ::flame::start("teardown");
 
     save_image(&vec, DIM, "out.png", ColorMode::Debug);
+    */
 
     buf
 }
@@ -29,12 +36,21 @@ fn main() {
     let ctx = OpenClContext::default();
 
     let scene = circle(50.0, 50.0, 20.0).and(&circle(60.0, 60.0, 20.0));
-    let _scene = circle(50.0, 50.0, 0.0);
 
     let program  = compile(&scene);
-    let buff = run(&program, [DIM, DIM], &ctx);
+    ::flame::start("entire");
+        ::flame::start("first program");
+        let buff = run(&program, [DIM, DIM], &ctx);
+        ::flame::end("first program");
 
-    let lines = implicit_gpu::marching::march(buff, DIM, DIM, true, &ctx);
+        ::flame::start("marching");
+        let lines = implicit_gpu::marching::march(buff, DIM, DIM, true, &ctx);
+        ::flame::end("marching");
+    ::flame::end("entire");
+
+    ::flame::dump_stdout();
+
+    /*
 
     let mut window = Window::new_with_defaults().unwrap();
     while window.is_open() {
@@ -54,4 +70,5 @@ fn main() {
             frame.draw_line(p1x, p1y, p2x, p2y, 1.0);
         }
     }
+    */
 }

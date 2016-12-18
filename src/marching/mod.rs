@@ -9,10 +9,11 @@ use self::util::geom::{Point, Line};
 const PROGRAM: &'static str = include_str!("marching.c");
 
 fn run_marching(input: Buffer<f32>, width: usize, height: usize, ctx: &OpenClContext) -> Buffer<f32> {
+    ::flame::start("prep");
     let kernel = ctx.compile("apply", PROGRAM);
-
     let from = vec![::std::f32::NAN; width * height * 4];
     let out = ctx.input_buffer([from.len()], &from);
+    ::flame::end("prep");
 
     kernel
         .gws([width, height])
@@ -26,25 +27,33 @@ fn run_marching(input: Buffer<f32>, width: usize, height: usize, ctx: &OpenClCon
 }
 
 pub fn march(input: Buffer<f32>, width: usize, height: usize, simplify: bool, ctx: &OpenClContext) -> Vec<Vec<(f32, f32)>> {
+    ::flame::start("opencl marching");
     let out = run_marching(input, width, height, ctx);
+    ::flame::end("opencl marching");
 
     let mut out_vec = vec![::std::f32::NAN; out.len()];
     out.read(&mut out_vec).enq().unwrap();
 
+    ::flame::start("point filtering");
     let lines =
         out_vec.into_iter()
                .tuples()
                .filter(|&(a, b, c, d)| !(a.is_nan() && b.is_nan() && c.is_nan() && d.is_nan()))
                .map(|(a, b, c, d)| Line(Point{x: a, y: b}, Point{x: c, y: d}))
                .collect::<Vec<_>>();
+    ::flame::end("point filtering");
+
+    ::flame::start("line connecting");
     let (lns, _) = polygonize::connect_lines(lines);
-    lns.into_iter()
+    let r = lns.into_iter()
         .map(|line| {
             let line = if simplify {
                 polygonize::simplify_line(line)
             } else { line };
             line.into_iter().map(|pt| (pt.x, pt.y)).collect()
-        }).collect()
+        }).collect();
+    ::flame::end("line connecting");
+    r
 }
 
 #[test]

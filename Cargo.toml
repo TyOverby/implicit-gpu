@@ -10,6 +10,7 @@ path = "./src/main.rs"
 [dependencies]
 ocl = "0.11.*"
 gc = "0.2.*"
+flame = "*"
 lazy_static = "0.2.*"
 image = "0.10.*"
 itertools = "0.5.*"
