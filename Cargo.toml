@@ -8,7 +8,12 @@ name = "implicit-gpu-bin"
 path = "./src/main.rs"
 
 [dependencies]
-ocl = "0.11.0"
-gc = "0.2.1"
-lazy_static = "0.2.2"
-image = "0.10.4"
+ocl = "0.11.*"
+gc = "0.2.*"
+lazy_static = "0.2.*"
+image = "0.10.*"
+itertools = "0.5.*"
+lux = "0.1.2"
+
+#[dependencies.lux]
+#path = "../lux"

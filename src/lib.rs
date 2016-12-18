@@ -8,8 +8,10 @@ extern crate image as image_crate;
 
 mod nodes;
 mod compiler;
+pub mod opencl;
 pub mod image;
 pub mod polygon;
+pub mod marching;
 
 pub use nodes::{circle, construct, NodePtr};
 pub use compiler::compile;
