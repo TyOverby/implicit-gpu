@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use std::ops::{Neg, Add, Sub, Mul, Div};
 use vecmath::*;
 

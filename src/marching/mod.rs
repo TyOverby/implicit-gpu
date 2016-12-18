@@ -1,9 +1,10 @@
 mod polygonize;
+mod util;
 
 use itertools::Itertools;
 use ocl::{Buffer};
 use opencl::OpenClContext;
-use ::util::geom::{Point, Line};
+use self::util::geom::{Point, Line};
 
 const PROGRAM: &'static str = include_str!("marching.c");
 
@@ -24,7 +25,7 @@ fn run_marching(input: Buffer<f32>, width: usize, height: usize, ctx: &OpenClCon
     out
 }
 
-pub fn march(input: Buffer<f32>, width: usize, height: usize, ctx: &OpenClContext) -> Vec<Vec<(f32, f32)>> {
+pub fn march(input: Buffer<f32>, width: usize, height: usize, simplify: bool, ctx: &OpenClContext) -> Vec<Vec<(f32, f32)>> {
     let out = run_marching(input, width, height, ctx);
 
     let mut out_vec = vec![::std::f32::NAN; out.len()];
@@ -37,7 +38,13 @@ pub fn march(input: Buffer<f32>, width: usize, height: usize, ctx: &OpenClContex
                .map(|(a, b, c, d)| Line(Point{x: a, y: b}, Point{x: c, y: d}))
                .collect::<Vec<_>>();
     let (lns, _) = polygonize::connect_lines(lines);
-    lns.into_iter().map(|line| line.into_iter().map(|pt| (pt.x, pt.y)).collect()).collect()
+    lns.into_iter()
+        .map(|line| {
+            let line = if simplify {
+                polygonize::simplify_line(line)
+            } else { line };
+            line.into_iter().map(|pt| (pt.x, pt.y)).collect()
+        }).collect()
 }
 
 #[test]

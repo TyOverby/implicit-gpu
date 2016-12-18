@@ -1,16 +1,13 @@
 extern crate ocl;
-extern crate itertools;
 extern crate implicit_gpu;
 extern crate lux;
 
-use itertools::Itertools;
 use ocl::Buffer;
 use implicit_gpu::image::{ColorMode, save_image};
 use implicit_gpu::*;
 use implicit_gpu::opencl::OpenClContext;
 
 use lux::prelude::*;
-use lux::graphics::ColorVertex;
 
 const DIM: usize = 1000;
 
@@ -37,7 +34,7 @@ fn main() {
     let program  = compile(&scene);
     let buff = run(&program, [DIM, DIM], &ctx);
 
-    let lines = implicit_gpu::marching::march(buff, DIM, DIM, &ctx);
+    let lines = implicit_gpu::marching::march(buff, DIM, DIM, true, &ctx);
 
     let mut window = Window::new_with_defaults().unwrap();
     while window.is_open() {

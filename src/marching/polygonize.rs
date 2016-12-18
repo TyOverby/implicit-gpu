@@ -1,7 +1,7 @@
 use std::cmp::{PartialOrd, Ordering};
 
-use ::util::geom::{Point, Line, Rect};
-use ::util::quadtree::QuadTree;
+use super::util::geom::{Point, Line, Rect};
+use super::util::quadtree::QuadTree;
 
 const EPSILON: f32 = 0.001;
 const OPT_EPSILON: f32 = 0.05;
@@ -10,14 +10,6 @@ const OPT_EPSILON: f32 = 0.05;
 pub enum LineType {
     Joined(Vec<Point>),
     Unjoined(Vec<Point>)
-}
-
-impl LineType {
-    pub fn points(self) -> Vec<Point> {
-        match self {
-            LineType::Joined(p) | LineType::Unjoined(p) => p
-        }
-    }
 }
 
 pub fn connect_lines(lines: Vec<Line>) -> (Vec<Vec<Point>>, QuadTree<Line>) {

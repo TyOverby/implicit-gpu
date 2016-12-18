@@ -10,7 +10,6 @@ extern crate itertools;
 extern crate image as image_crate;
 
 pub mod nodes;
-pub mod util;
 pub mod compiler;
 pub mod opencl;
 pub mod image;
