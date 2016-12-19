@@ -1,4 +1,4 @@
-use super::nodes::NodePtr;
+use super::nodes::{NodePtr, NodeTrait};
 
 pub struct CompilationContext {
     identifier_id: usize,

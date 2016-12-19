@@ -10,24 +10,24 @@ use implicit_gpu::opencl::OpenClContext;
 
 use lux::prelude::*;
 
-const DIM: usize = 100;
+const DIM: usize = 1000;
 
 fn run(program: &str, dims: [usize; 2], ctx: &OpenClContext) -> Buffer<f32> {
     ::flame::start("prep");
     let buf = ctx.output_buffer(dims);
+    ::flame::start("compiling");
     let kernel = ctx.compile("apply", program);
+    ::flame::end("compiling");
     ::flame::end("prep");
 
     kernel.gws(dims).arg_buf(&buf).arg_scl(DIM).enq().unwrap();
 
-    /*
     ::flame::start("teardown");
     let mut vec = vec![0.0f32; buf.len()];
     buf.read(&mut vec).enq().unwrap();
-    ::flame::start("teardown");
+    ::flame::end("teardown");
 
     save_image(&vec, DIM, "out.png", ColorMode::Debug);
-    */
 
     buf
 }

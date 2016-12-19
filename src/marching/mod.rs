@@ -10,7 +10,9 @@ const PROGRAM: &'static str = include_str!("marching.c");
 
 fn run_marching(input: Buffer<f32>, width: usize, height: usize, ctx: &OpenClContext) -> Buffer<f32> {
     ::flame::start("prep");
+    ::flame::start("compile");
     let kernel = ctx.compile("apply", PROGRAM);
+    ::flame::end("compile");
     let from = vec![::std::f32::NAN; width * height * 4];
     let out = ctx.input_buffer([from.len()], &from);
     ::flame::end("prep");
@@ -27,21 +29,16 @@ fn run_marching(input: Buffer<f32>, width: usize, height: usize, ctx: &OpenClCon
 }
 
 pub fn march(input: Buffer<f32>, width: usize, height: usize, simplify: bool, ctx: &OpenClContext) -> Vec<Vec<(f32, f32)>> {
-    ::flame::start("opencl marching");
-    let out = run_marching(input, width, height, ctx);
-    ::flame::end("opencl marching");
-
+    let out = ::flame::span_of("opencl marching", || run_marching(input, width, height, ctx));
     let mut out_vec = vec![::std::f32::NAN; out.len()];
     out.read(&mut out_vec).enq().unwrap();
 
-    ::flame::start("point filtering");
-    let lines =
+    let lines = ::flame::span_of("point filtering", ||
         out_vec.into_iter()
                .tuples()
                .filter(|&(a, b, c, d)| !(a.is_nan() && b.is_nan() && c.is_nan() && d.is_nan()))
                .map(|(a, b, c, d)| Line(Point{x: a, y: b}, Point{x: c, y: d}))
-               .collect::<Vec<_>>();
-    ::flame::end("point filtering");
+               .collect::<Vec<_>>());
 
     ::flame::start("line connecting");
     let (lns, _) = polygonize::connect_lines(lines);
@@ -90,8 +87,5 @@ fn basic() {
     assert_close(test_this(-0.75, 0.35, 0.45, 0.55, &ctx), ((0.0, 0.5769231), (0.6818182, 0.0)));
     assert_close(test_this(-0.75, -0.35, 0.45, -0.55, &ctx), ((0.55, 1.0), (1.0, 0.43750003)));
     assert_close(test_this(0.75, -0.35, -0.45, -0.55, &ctx), ((0.0, 0.5769231), (0.6818182, 0.0)));
-
-    println!("{:?}", test_this(0.75, 0.35, -0.45, 0.55, &ctx));
     assert_close(test_this(0.75, 0.35, -0.45, 0.55, &ctx), ((0.55, 1.0), (1.0, 0.4375)));
-
 }

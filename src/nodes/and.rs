@@ -1,13 +1,13 @@
 use super::*;
 use compiler::{CompilationContext, Stage};
 
+#[derive(PartialEq, Debug, Clone)]
 pub struct And {
     pub left: NodePtr,
     pub right: NodePtr,
 }
 
-
-impl Node for And {
+impl NodeTrait for And {
     fn compile(&self, cc: &mut CompilationContext) -> (Stage, InputInfo) {
         let (left_stage, _) = self.left.compile(cc);
         let (right_stage, _) = self.right.compile(cc);

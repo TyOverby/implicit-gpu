@@ -16,6 +16,7 @@ pub mod opencl;
 pub mod image;
 pub mod polygon;
 pub mod marching;
+pub mod node_group;
 
-pub use nodes::{circle, construct, NodePtr};
+pub use nodes::{circle, NodePtr};
 pub use compiler::compile;

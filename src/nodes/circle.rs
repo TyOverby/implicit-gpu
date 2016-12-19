@@ -1,13 +1,13 @@
 use super::*;
 use compiler::{CompilationContext, Stage};
 
+#[derive(PartialEq, Debug, Clone)]
 pub struct Circle {
     pub position: (f32, f32),
     pub radius: f32
 }
 
-
-impl Node for Circle {
+impl NodeTrait for Circle {
     fn compile(&self, cc: &mut CompilationContext) -> (Stage, InputInfo) {
         let res = cc.get_id("circle");
         let dx = cc.get_id("dx");

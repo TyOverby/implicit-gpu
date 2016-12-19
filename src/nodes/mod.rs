@@ -4,24 +4,43 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 
 use compiler::{CompilationContext, Stage};
 
-mod id;
 mod circle;
 mod not;
 mod and;
+mod polygon;
 
-#[derive(Clone)]
+pub use circle::Circle;
+pub use not::Not;
+pub use and::And;
+pub use polygon::Polygon;
+
+lazy_static! {
+    static ref ID_POOL: AtomicUsize = AtomicUsize::new(0);
+}
+
+#[derive(PartialEq, Debug, Clone)]
 pub struct NodePtr(Gc<Node>);
 
-pub struct InputInfo;
+#[derive(Hash, Eq, PartialEq, Debug, Clone, Copy)]
+pub struct NodeId(usize);
 
-pub trait Node: Trace {
-    fn id(&self) -> usize {
-        panic!("wrap all ops with a IdOp");
+#[derive(PartialEq, Debug)]
+pub enum Node {
+    And(NodeId, and::And),
+    Circle(NodeId, circle::Circle),
+    Not(NodeId, not::Not),
+    Poly(NodeId, polygon::Polygon),
+}
+
+impl Node {
+    pub fn id(&self) -> NodeId {
+        match self {
+            &Node::And(id, _) => id,
+            &Node::Circle(id, _) => id,
+            &Node::Not(id, _) => id,
+            &Node::Poly(id, _) => id,
+        }
     }
-
-    fn compile(&self, &mut CompilationContext) -> (Stage, InputInfo);
-
-    fn is_break(&self) -> bool { false }
 }
 
 impl Deref for NodePtr {
@@ -40,35 +59,63 @@ unsafe impl Trace for NodePtr {
 
 impl NodePtr {
     pub fn and(&self, other: &NodePtr) -> NodePtr {
-        and(self, other)
+        NodePtr(Gc::new(Node::And(NodeId::new(), and::And {
+            left: self.clone(),
+            right: other.clone(),
+        })))
     }
 
     pub fn invert(&self) -> NodePtr {
-        not(self)
+        NodePtr(Gc::new(Node::Not(NodeId::new(), not::Not {
+            inner: self.clone()
+        })))
     }
 }
 
-pub fn construct<T: Node + 'static>(v: T) -> NodePtr {
-    NodePtr(Gc::new(id::Id::new(v)))
+impl NodeTrait for Node {
+    fn compile(&self, cc: &mut CompilationContext) -> (Stage, InputInfo) {
+        match self {
+            &Node::And(_, ref a) => a.compile(cc),
+            &Node::Circle(_, ref a) => a.compile(cc),
+            &Node::Not(_, ref a) => a.compile(cc),
+            &Node::Poly(_, ref a) => a.compile(cc),
+        }
+    }
+
+    fn is_break(&self) -> bool {
+        match self {
+            &Node::And(_, ref a) => a.is_break(),
+            &Node::Circle(_, ref a) => a.is_break(),
+            &Node::Not(_, ref a) => a.is_break(),
+            &Node::Poly(_, ref a) => a.is_break(),
+        }
+    }
 }
 
+unsafe impl Trace for Node {
+    custom_trace!(this, {
+        match this {
+            &Node::And(_, ref a) => mark(a),
+            &Node::Circle(_, ref a) => mark(a),
+            &Node::Not(_, ref a) => mark(a),
+            &Node::Poly(_, ref a) => mark(a),
+        }
+    });
+}
+
+impl NodeId {
+    pub fn new() -> NodeId {
+         NodeId(ID_POOL.fetch_add(1, Ordering::SeqCst))
+    }
+}
+
+pub struct InputInfo;
+
+pub trait NodeTrait: Trace {
+    fn compile(&self, &mut CompilationContext) -> (Stage, InputInfo);
+    fn is_break(&self) -> bool { false }
+}
 
 pub fn circle(x: f32, y: f32, r: f32) -> NodePtr {
-    let circle = circle::Circle{
-        position: (x, y),
-        radius: r
-    };
-
-    construct(circle)
-}
-
-fn not(inner: &NodePtr) -> NodePtr {
-    construct(not::Not {inner: inner.clone()})
-}
-
-fn and(left: &NodePtr, right: &NodePtr) -> NodePtr {
-    construct(and::And {
-        left: left.clone(),
-        right: right.clone(),
-    })
+    NodePtr(Gc::new(Node::Circle(NodeId::new(), circle::Circle{position: (x, y), radius: r})))
 }
