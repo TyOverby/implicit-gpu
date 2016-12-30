@@ -3,6 +3,7 @@ extern crate gc;
 #[macro_use]
 extern crate lazy_static;
 
+extern crate typed_arena;
 extern crate vecmath;
 extern crate ocl;
 extern crate flame;
@@ -16,7 +17,4 @@ pub mod opencl;
 pub mod image;
 pub mod polygon;
 pub mod marching;
-pub mod node_group;
 
-pub use nodes::{circle, NodePtr};
-pub use compiler::compile;

@@ -17,6 +17,7 @@ itertools = "0.5.*"
 lux = "0.1.2"
 vecmath = "*"
 fnv = "*"
+typed-arena = "1.2.0"
 
 #[dependencies.lux]
 #path = "../lux"
