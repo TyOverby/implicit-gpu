@@ -1,25 +1,54 @@
 #[macro_use]
 extern crate implicit_gpu;
 extern crate typed_arena;
+extern crate ocl;
+extern crate flame;
+
 use implicit_gpu::nodes::*;
 use implicit_gpu::compiler::*;
 
+use ocl::Buffer;
+use implicit_gpu::image::{ColorMode, save_image};
+use implicit_gpu::opencl::OpenClContext;
 
-fn build<'a, F>(a: &F) -> &'a Node<'a>
-where F: Fn(Node<'a>) -> &'a Node <'a> {
-    a(Node::Circle{ x: 0.0, y: 0.0, r: 10.0 })
+const DIM: usize = 1000;
+
+fn run(program: &str, dims: [usize; 2], ctx: &OpenClContext) -> Buffer<f32> {
+    ::flame::start("prep");
+    let buf = ctx.output_buffer(dims);
+    ::flame::start("compiling");
+    let kernel = ctx.compile("apply", program);
+    ::flame::end("compiling");
+    ::flame::end("prep");
+
+    kernel.gws(dims).arg_buf(&buf).arg_scl(DIM).enq().unwrap();
+
+    ::flame::start("teardown");
+    let mut vec = vec![0.0f32; buf.len()];
+    buf.read(&mut vec).enq().unwrap();
+    ::flame::end("teardown");
+
+    save_image(&vec, DIM, "out.png", ColorMode::Debug);
+
+    buf
 }
-
-type F = for<'a> Fn(Node<'a>) -> &'a Node<'a>;
 
 fn main() {
     let stat = create_node!(a, {
-        a(Node::And(vec![
-            build(&a),
-            a(Node::Circle{ x: 5.0, y: 5.0, r: 10.0 }),
-        ]))
+        a(Node::Modulate(-20.0,
+            a(Node::And(vec![
+                a(Node::Circle{ x: 50.0, y: 50.0, r: 50.0 }),
+                a(Node::Not(a(Node::Circle{ x: 100.0, y: 100.0, r: 50.0 }))),
+            ]))
+        ))
     });
 
+    let compiled = compile(stat.node());
+
     println!("{:?}", stat);
-    println!("{}", compile(stat.node()));
+    println!("{}", compiled);
+
+    let ctx = OpenClContext::default();
+
+    run(&compiled, [DIM, DIM], &ctx);
 }

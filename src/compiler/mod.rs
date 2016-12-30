@@ -21,7 +21,7 @@ __kernel void apply(__global float* buffer, size_t width) {
     let mut buffer = preamble.into();
     let final_result = comp(node, &mut cc, &mut buffer);
     buffer.push('\n');
-    writeln!(&mut buffer, "  buffer[pos] = {}; \n}}", final_result);
+    writeln!(&mut buffer, "  buffer[pos] = {}; \n}}", final_result).unwrap();
     buffer
 }
 
@@ -85,6 +85,14 @@ fn comp(node: &Node, cc: &mut CompilationContext, buff: &mut String) -> String {
             let res = cc.get_id("not");
             buff.push('\n');
             writeln!(buff, "  float {result} = - {val};", result = res, val = child_result).unwrap();
+            res
+        }
+
+        Node::Modulate(v, ref child) => {
+            let child_result = comp(child, cc, buff);
+            let res = cc.get_id("modulate");
+            buff.push('\n');
+            writeln!(buff, "  float {result} = {other} + {value};", result = res, other = child_result, value = v).unwrap();
             res
         }
 

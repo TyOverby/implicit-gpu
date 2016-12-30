@@ -8,6 +8,7 @@ pub enum Node<'a> {
     Or(Vec<&'a Node<'a>>),
     Not(&'a Node<'a>),
     Polygon(Vec<f32>, Vec<f32>),
+    Modulate(f32, &'a Node<'a>),
 }
 
 pub struct StaticNode {
