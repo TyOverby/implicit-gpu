@@ -10,6 +10,7 @@ pub enum Node<'a> {
     Not(&'a Node<'a>),
     Polygon(PolyGroup),
     Modulate(f32, &'a Node<'a>),
+    Break(&'a Node<'a>),
     OtherGroup(GroupId),
 }
 

@@ -66,6 +66,10 @@ where F: Fn(Node<'b>) -> &'b Node<'b> {
             let og = nest.group(node);
             a(Node::OtherGroup(og))
         }
+        &Node::Break(o) => {
+            let og = nest.group(o);
+            a(Node::OtherGroup(og))
+        }
         &Node::Circle {x, y, r} => a(Node::Circle{ x:x, y:y, r:r }),
         &Node::And(ref ch) => a(Node::And(ch.iter().map(|c| do_group(c, nest, a)).collect())),
         &Node::Or(ref ch) => a(Node::And(ch.iter().map(|c| do_group(c, nest, a)).collect())),

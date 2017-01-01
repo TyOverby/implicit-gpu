@@ -19,7 +19,7 @@ pub fn compile(node: &Node) -> (String, CompilationContext) {
 
     let mut preamble = r"__kernel void apply(__global float* buffer, size_t width".to_string();
     for b in &cc.dep_strings {
-        preamble.push_str(&format!(", {}", b));
+        preamble.push_str(&format!(", __global float* {}", b));
     }
     preamble.push_str( r#") {
   size_t x = get_global_id(0);
@@ -109,7 +109,7 @@ fn comp(node: &Node, cc: &mut CompilationContext, buff: &mut String) -> String {
             let buffer_ref = cc.buffer_ref(group_id);
             let res = cc.get_id("other_group");
 
-            writeln!(buff, "float {result} = {buffer_ref}[pos]", result = res, buffer_ref = buffer_ref).unwrap();
+            writeln!(buff, "float {result} = {buffer_ref}[pos];", result = res, buffer_ref = buffer_ref).unwrap();
             res
         }
 

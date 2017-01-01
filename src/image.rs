@@ -12,7 +12,8 @@ pub enum ColorMode {
 }
 
 pub fn save_field_buffer(buffer: &FieldBuffer, name: &str, color_mode: ColorMode) {
-    let samples = buffer.values();
+    let _guard = ::flame::start_guard("save_field_buffer");
+    let samples = ::flame::span_of("fetch values", || buffer.values());
     save_image(&samples, buffer.width(), name, color_mode);
 }
 

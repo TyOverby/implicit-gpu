@@ -18,7 +18,7 @@ fn main() {
         a(Node::Modulate(-20.0,
             a(Node::And(vec![
                 a(Node::Circle{ x: 50.0, y: 50.0, r: 50.0 }),
-                a(Node::Not(a(Node::Circle{ x: 100.0, y: 100.0, r: 50.0 }))),
+                a(Node::Break(a(Node::Not(a(Node::Circle{ x: 100.0, y: 100.0, r: 50.0 }))))),
             ]))
         ))
     });
@@ -36,4 +36,7 @@ fn main() {
 
     // Save the image
     save_field_buffer(&result, "field.png", ColorMode::Debug);
+
+    // Print the timings
+    ::flame::dump_stdout();
 }

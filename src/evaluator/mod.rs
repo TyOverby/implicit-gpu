@@ -26,6 +26,7 @@ impl Evaluator {
     }
 
     pub fn evaluate(&self, which: GroupId, ctx: &OpenClContext) -> FieldBuffer {
+        let _guard = ::flame::start_guard(format!("evaluate {:?}", which));
         {
             let finished = self.finished.lock().unwrap();
             if let Some(buff) = finished.get(&which) {
@@ -50,7 +51,7 @@ impl Evaluator {
                     kc = kc.arg_buf(dep.buffer());
                 }
 
-                kc.enq().unwrap();
+                ::flame::span_of("eval", || kc.enq().unwrap());
 
                 out
             }
