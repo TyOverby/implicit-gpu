@@ -7,10 +7,10 @@ extern crate flame;
 use implicit_gpu::nodes::*;
 use implicit_gpu::compiler::*;
 
-use ocl::Buffer;
 use implicit_gpu::image::{ColorMode, save_image};
 use implicit_gpu::opencl::OpenClContext;
 
+/*
 const DIM: usize = 1000;
 
 fn run(program: &str, dims: [usize; 2], ctx: &OpenClContext) -> Buffer<f32> {
@@ -31,7 +31,7 @@ fn run(program: &str, dims: [usize; 2], ctx: &OpenClContext) -> Buffer<f32> {
     save_image(&vec, DIM, "out.png", ColorMode::Debug);
 
     buf
-}
+}*/
 
 fn main() {
     let stat = create_node!(a, {
@@ -39,16 +39,13 @@ fn main() {
             a(Node::And(vec![
                 a(Node::Circle{ x: 50.0, y: 50.0, r: 50.0 }),
                 a(Node::Not(a(Node::Circle{ x: 100.0, y: 100.0, r: 50.0 }))),
+                a(Node::Polygon(PolyGroup::single_additive(vec![0.0, 1.0], vec![0.0, 1.0]))),
+                a(Node::Polygon(PolyGroup::single_additive(vec![0.0, 1.0], vec![0.0, 1.0]))),
             ]))
         ))
     });
 
-    let compiled = compile(stat.node());
-
-    println!("{:?}", stat);
-    println!("{}", compiled);
-
-    let ctx = OpenClContext::default();
-
-    run(&compiled, [DIM, DIM], &ctx);
+    let mut nest = Nest::new();
+    nest.group(stat.node());
+    println!("{:#?}", nest);
 }

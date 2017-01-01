@@ -10,6 +10,7 @@ pub enum ColorMode {
 }
 
 pub fn save_image(samples: &[f32], width: usize, file_name: &str, color_mode: ColorMode) {
+    let _guard = ::flame::start_guard("save_image");
     let mut min = INFINITY;
     let mut max = NEG_INFINITY;
 

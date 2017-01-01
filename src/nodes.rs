@@ -1,5 +1,6 @@
 use typed_arena::Arena;
 use std::mem::transmute;
+use ::compiler::GroupId;
 
 #[derive(Debug, PartialEq)]
 pub enum Node<'a> {
@@ -7,8 +8,21 @@ pub enum Node<'a> {
     And(Vec<&'a Node<'a>>),
     Or(Vec<&'a Node<'a>>),
     Not(&'a Node<'a>),
-    Polygon(Vec<f32>, Vec<f32>),
+    Polygon(PolyGroup),
     Modulate(f32, &'a Node<'a>),
+    OtherGroup(GroupId),
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct Polygon {
+    pub xs: Vec<f32>,
+    pub ys: Vec<f32>,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct PolyGroup {
+    pub additive: Vec<Polygon>,
+    pub subtractive: Vec<Polygon>,
 }
 
 pub struct StaticNode {
@@ -16,33 +30,15 @@ pub struct StaticNode {
     node: &'static Node<'static>,
 }
 
-#[macro_export]
-macro_rules! create_node {
-    ($alloc: ident, $code: block) => {
-        {
-            let anchor = $crate::nodes::Anchor::new();
-            let arena = ::typed_arena::Arena::new();
-            let result: &'static $crate::nodes::Node<'static> = {
-                let $alloc = |a| {
-                    let r: &'static $crate::nodes::Node<'static> = unsafe {
-                        ::std::mem::transmute(arena.alloc(a))
-                    };
-
-                    anchor.hold(r)
-                };
-
-                let result = $code;
-
-                unsafe { ::std::mem::transmute(result) }
-            };
-
-            unsafe {
-                $crate::nodes::StaticNode::new(arena, result)
-            }
+impl PolyGroup {
+    pub fn single_additive(xs: Vec<f32>, ys: Vec<f32>) -> PolyGroup {
+        PolyGroup {
+            additive: vec![ Polygon{ xs: xs, ys: ys } ],
+            subtractive: vec![],
         }
-    };
-
+    }
 }
+
 
 impl StaticNode {
     pub unsafe fn new<'a>(arena: Arena<Node<'a>>, node: &'static Node<'static>) -> StaticNode {
@@ -60,6 +56,12 @@ impl StaticNode {
 impl ::std::fmt::Debug for StaticNode {
     fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> Result<(), ::std::fmt::Error> {
         self.node.fmt(formatter)
+    }
+}
+
+impl ::std::cmp::PartialEq for StaticNode {
+    fn eq(&self, other: &StaticNode) -> bool {
+        self.node == other.node
     }
 }
 

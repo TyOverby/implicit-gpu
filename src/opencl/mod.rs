@@ -1,14 +1,20 @@
 use ocl::{Platform, Device, Context, Queue, Program, Kernel, Buffer};
 use ocl::enums::{DeviceInfo, DeviceInfoResult};
-use ocl::traits::{MemLen, OclPrm};
 use ocl::flags::{MEM_COPY_HOST_PTR};
+use std::sync::Mutex;
+
+mod buffers;
+
+pub use self::buffers::*;
 
 pub struct OpenClContext {
     platform: Platform,
     device: Device,
     context: Context,
     queue: Queue,
+    program_cache: Mutex<Vec<(String, Program)>>,
 }
+
 
 pub fn all_devices() -> Vec<(Platform, Device)> {
     let mut out = vec![];
@@ -42,6 +48,7 @@ impl OpenClContext {
             device: device,
             context: context,
             queue: queue,
+            program_cache: Mutex::new(vec![]),
         }
     }
 
@@ -51,17 +58,48 @@ impl OpenClContext {
     }
 
     pub fn compile<S2: Into<String>, S1: Into<String>>(&self, name: S1, source: S2) -> Kernel {
-        let program = Program::builder().src(source).devices(self.device).build(&self.context).unwrap();
+        let _guard = ::flame::start_guard("OpenClContext::compile");
+        let name = name.into();
+        let source = source.into();
+
+        {
+            let program_cache = self.program_cache.lock().unwrap();
+            if let Some(&(_, ref p)) = program_cache.iter().filter(|&&(ref s, _)| s == &source).next() {
+                return Kernel::new(name, p, &self.queue).unwrap();
+            }
+        }
+
+        let program = Program::builder().src(source.clone()).devices(self.device).build(&self.context).unwrap();
+
+        {
+            let mut program_cache = self.program_cache.lock().unwrap();
+            program_cache.push((source, program.clone()));
+        }
+
         Kernel::new(name, &program, &self.queue).unwrap()
     }
 
-    pub fn output_buffer<D: MemLen, O: OclPrm>(&self, dims: D) -> Buffer<O> {
-        Buffer::new(&self.queue, None, &dims, None).unwrap()
+    pub fn field_buffer(&self, width: usize, height: usize, fill: Option<&[f32]>) -> FieldBuffer {
+        let _guard = ::flame::start_guard("OpenClContext::field_buffer");
+        let buffer = if let Some(fill) = fill {
+            assert_eq!(fill.len(), width * height);
+            Buffer::new(&self.queue, Some(MEM_COPY_HOST_PTR), &[width, height], Some(fill)).unwrap()
+        } else {
+            Buffer::new(&self.queue, None, &[width, height], None).unwrap()
+        };
+
+        FieldBuffer {
+            dims: (width, height),
+            internal: buffer,
+        }
     }
 
-    pub fn input_buffer<D: MemLen, O: OclPrm>(&self, dims: D, input: &[O]) -> Buffer<O> {
-        let buffer = Buffer::new(&self.queue, Some(MEM_COPY_HOST_PTR), &dims, Some(input)).unwrap();
-        buffer
+    pub fn line_buffer(&self, fill: &[f32]) -> LineBuffer {
+        let _guard = ::flame::start_guard("OpenClContext::line_buffer");
+        LineBuffer {
+            size: fill.len(),
+            internal: Buffer::new(&self.queue, Some(MEM_COPY_HOST_PTR), &[fill.len()], Some(fill)).unwrap()
+        }
     }
 
     pub fn platform(&self) -> &Platform {

@@ -2,36 +2,35 @@ mod polygonize;
 mod util;
 
 use itertools::Itertools;
-use ocl::{Buffer};
-use opencl::OpenClContext;
+use opencl::{OpenClContext, FieldBuffer, LineBuffer};
 use self::util::geom::{Point, Line};
+use ::nodes::Polygon;
 
 const PROGRAM: &'static str = include_str!("marching.c");
 
-fn run_marching(input: Buffer<f32>, width: usize, height: usize, ctx: &OpenClContext) -> Buffer<f32> {
-    ::flame::start("prep");
-    ::flame::start("compile");
+fn run_marching(input: FieldBuffer, width: usize, height: usize, ctx: &OpenClContext) -> LineBuffer {
+    let _guard = ::flame::start_guard("opencl marching [run_marching]");
+
     let kernel = ctx.compile("apply", PROGRAM);
-    ::flame::end("compile");
     let from = vec![::std::f32::NAN; width * height * 4];
-    let out = ctx.input_buffer([from.len()], &from);
-    ::flame::end("prep");
+    let out = ctx.line_buffer(&from);
 
     kernel
         .gws([width, height])
-        .arg_buf(&input)
+        .arg_buf(input.buffer())
         .arg_scl(width)
         .arg_scl(height)
-        .arg_buf(&out)
+        .arg_buf(out.buffer())
         .enq().unwrap();
 
     out
 }
 
-pub fn march(input: Buffer<f32>, width: usize, height: usize, simplify: bool, ctx: &OpenClContext) -> Vec<Vec<(f32, f32)>> {
-    let out = ::flame::span_of("opencl marching", || run_marching(input, width, height, ctx));
-    let mut out_vec = vec![::std::f32::NAN; out.len()];
-    out.read(&mut out_vec).enq().unwrap();
+pub fn march(input: FieldBuffer, width: usize, height: usize, simplify: bool, ctx: &OpenClContext) -> Vec<Polygon> {
+    let _guard = ::flame::start_guard("march");
+
+    let out = run_marching(input, width, height, ctx);
+    let out_vec = out.values();
 
     let lines = ::flame::span_of("point filtering", ||
         out_vec.into_iter()
@@ -42,15 +41,25 @@ pub fn march(input: Buffer<f32>, width: usize, height: usize, simplify: bool, ct
 
     ::flame::start("line connecting");
     let (lns, _) = polygonize::connect_lines(lines);
-    let r = lns.into_iter()
-        .map(|line| {
-            let line = if simplify {
-                polygonize::simplify_line(line)
-            } else { line };
-            line.into_iter().map(|pt| (pt.x, pt.y)).collect()
-        }).collect();
+    let mut polygons = vec![];
+    for polygon in lns.into_iter() {
+        let polygon = if simplify {
+            polygonize::simplify_line(polygon)
+        } else { polygon};
+
+        let mut xs = Vec::with_capacity(polygon.len());
+        let mut ys = Vec::with_capacity(polygon.len());
+
+        for pt in polygon {
+            xs.push(pt.x);
+            ys.push(pt.y);
+        }
+
+        polygons.push(Polygon{ xs: xs, ys: ys });
+    }
     ::flame::end("line connecting");
-    r
+
+    polygons
 }
 
 #[test]
