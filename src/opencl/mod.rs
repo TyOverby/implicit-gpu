@@ -1,6 +1,6 @@
 use ocl::{Platform, Device, Context, Queue, Program, Kernel, Buffer};
 use ocl::enums::{DeviceInfo, DeviceInfoResult};
-use ocl::flags::{MEM_COPY_HOST_PTR};
+use ocl::flags::{MEM_COPY_HOST_PTR, MEM_READ_WRITE};
 use std::sync::Mutex;
 
 mod buffers;
@@ -83,9 +83,9 @@ impl OpenClContext {
         let _guard = ::flame::start_guard("OpenClContext::field_buffer");
         let buffer = if let Some(fill) = fill {
             assert_eq!(fill.len(), width * height);
-            Buffer::new(&self.queue, Some(MEM_COPY_HOST_PTR), &[width, height], Some(fill)).unwrap()
+            Buffer::new(&self.queue, Some(MEM_COPY_HOST_PTR | MEM_READ_WRITE), &[width, height], Some(fill)).unwrap()
         } else {
-            Buffer::new(&self.queue, None, &[width, height], None).unwrap()
+            Buffer::new(&self.queue, Some(MEM_READ_WRITE), &[width, height], None).unwrap()
         };
 
         FieldBuffer {

@@ -3,10 +3,17 @@ use std::f32::{INFINITY, NEG_INFINITY};
 use std::fs::File;
 use std::io::BufWriter;
 
+use ::opencl::FieldBuffer;
+
 #[derive(Copy, Clone)]
 pub enum ColorMode {
     BlackAndWhite,
     Debug
+}
+
+pub fn save_field_buffer(buffer: &FieldBuffer, name: &str, color_mode: ColorMode) {
+    let samples = buffer.values();
+    save_image(&samples, buffer.width(), name, color_mode);
 }
 
 pub fn save_image(samples: &[f32], width: usize, file_name: &str, color_mode: ColorMode) {

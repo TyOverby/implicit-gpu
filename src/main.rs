@@ -6,46 +6,34 @@ extern crate flame;
 
 use implicit_gpu::nodes::*;
 use implicit_gpu::compiler::*;
-
-use implicit_gpu::image::{ColorMode, save_image};
 use implicit_gpu::opencl::OpenClContext;
-
-/*
-const DIM: usize = 1000;
-
-fn run(program: &str, dims: [usize; 2], ctx: &OpenClContext) -> Buffer<f32> {
-    ::flame::start("prep");
-    let buf = ctx.output_buffer(dims);
-    ::flame::start("compiling");
-    let kernel = ctx.compile("apply", program);
-    ::flame::end("compiling");
-    ::flame::end("prep");
-
-    kernel.gws(dims).arg_buf(&buf).arg_scl(DIM).enq().unwrap();
-
-    ::flame::start("teardown");
-    let mut vec = vec![0.0f32; buf.len()];
-    buf.read(&mut vec).enq().unwrap();
-    ::flame::end("teardown");
-
-    save_image(&vec, DIM, "out.png", ColorMode::Debug);
-
-    buf
-}*/
+use implicit_gpu::evaluator::Evaluator;
+use implicit_gpu::image::{save_field_buffer, ColorMode};
 
 fn main() {
+    let ctx = OpenClContext::default();
+
+    // Build a node tree
     let stat = create_node!(a, {
         a(Node::Modulate(-20.0,
             a(Node::And(vec![
                 a(Node::Circle{ x: 50.0, y: 50.0, r: 50.0 }),
                 a(Node::Not(a(Node::Circle{ x: 100.0, y: 100.0, r: 50.0 }))),
-                a(Node::Polygon(PolyGroup::single_additive(vec![0.0, 1.0], vec![0.0, 1.0]))),
-                a(Node::Polygon(PolyGroup::single_additive(vec![0.0, 1.0], vec![0.0, 1.0]))),
             ]))
         ))
     });
 
+    // Group them into a nest
     let mut nest = Nest::new();
-    nest.group(stat.node());
+    let target = nest.group(stat.node());
+
     println!("{:#?}", nest);
+
+    // Create a new Execution Context
+    let evaluator = Evaluator::new(nest, 1000, 1000, None);
+    let result = evaluator.evaluate(target, &ctx);
+    println!("{:?}", result);
+
+    // Save the image
+    save_field_buffer(&result, "field.png", ColorMode::Debug);
 }

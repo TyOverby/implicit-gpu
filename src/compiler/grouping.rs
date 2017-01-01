@@ -6,12 +6,19 @@ pub enum NodeGroup {
     Polygon(PolyGroup)
 }
 
-#[derive(Debug, Eq, PartialEq, Hash)]
+#[derive(Debug, Eq, PartialEq, Hash, Clone, Copy)]
 pub struct GroupId(usize);
 
 #[derive(Debug)]
 pub struct Nest {
     groups: Vec<NodeGroup>
+}
+
+impl GroupId {
+    pub fn number(&self) -> usize {
+        let &GroupId(ret) = self;
+        ret
+    }
 }
 
 impl Nest {
@@ -44,6 +51,11 @@ impl Nest {
         };
 
         self.add(group)
+    }
+
+    pub fn get(&self, id: GroupId) -> &NodeGroup {
+        let GroupId(id) = id;
+        &self.groups[id]
     }
 }
 

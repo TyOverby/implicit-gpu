@@ -1,10 +1,12 @@
 use ocl::Buffer;
 
+#[derive(Debug, Clone)]
 pub struct FieldBuffer {
     pub(crate) dims: (usize, usize),
     pub(crate) internal: Buffer<f32>,
 }
 
+#[derive(Debug, Clone)]
 pub struct LineBuffer {
     pub(crate) size: usize,
     pub(crate) internal: Buffer<f32>,
@@ -20,7 +22,7 @@ impl FieldBuffer {
     }
 
     pub fn values(&self) -> Vec<f32> {
-        let mut out = Vec::with_capacity(self.width() * self.height());
+        let mut out = vec![0.0; self.width() * self.height()];
         self.internal.read(&mut out).enq().unwrap();
         out
     }
@@ -36,7 +38,7 @@ impl LineBuffer {
     }
 
     pub fn values(&self) -> Vec<f32> {
-        let mut out = Vec::with_capacity(self.size());
+        let mut out = vec![0.0; self.size()];
         self.internal.read(&mut out).enq().unwrap();
         out
     }

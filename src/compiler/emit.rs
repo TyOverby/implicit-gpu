@@ -1,28 +1,37 @@
 use ::nodes::{Node};
+use ::compiler::GroupId;
 use std::fmt::Write;
 
 pub struct CompilationContext {
     identifier_id: usize,
+    dependencies: Vec<GroupId>,
+    dep_strings: Vec<String>,
 }
 
-pub fn compile(node: &Node) -> String {
+pub fn compile(node: &Node) -> (String, CompilationContext) {
     let mut cc = CompilationContext::new();
 
-    let preamble = r#"
-__kernel void apply(__global float* buffer, size_t width) {
+    let mut buffer = "".into(); //preamble.into();
+    let final_result = comp(node, &mut cc, &mut buffer);
+    buffer.push('\n');
+    writeln!(&mut buffer, "  buffer[pos] = {}; \n}}", final_result).unwrap();
+
+
+    let mut preamble = r"__kernel void apply(__global float* buffer, size_t width".to_string();
+    for b in &cc.dep_strings {
+        preamble.push_str(&format!(", {}", b));
+    }
+    preamble.push_str( r#") {
   size_t x = get_global_id(0);
   size_t y = get_global_id(1);
   size_t pos = x + y * width;
 
   float x_s = (float) x;
   float y_s = (float) y;
-"#;
+"#);
 
-    let mut buffer = preamble.into();
-    let final_result = comp(node, &mut cc, &mut buffer);
-    buffer.push('\n');
-    writeln!(&mut buffer, "  buffer[pos] = {}; \n}}", final_result).unwrap();
-    buffer
+
+    (format!("{}{}", preamble, buffer), cc)
 }
 
 fn comp(node: &Node, cc: &mut CompilationContext, buff: &mut String) -> String {
@@ -96,6 +105,14 @@ fn comp(node: &Node, cc: &mut CompilationContext, buff: &mut String) -> String {
             res
         }
 
+        Node::OtherGroup(group_id) => {
+            let buffer_ref = cc.buffer_ref(group_id);
+            let res = cc.get_id("other_group");
+
+            writeln!(buff, "float {result} = {buffer_ref}[pos]", result = res, buffer_ref = buffer_ref).unwrap();
+            res
+        }
+
         ref o => panic!("unexpected {:?}", o),
     }
 }
@@ -104,7 +121,19 @@ impl CompilationContext {
     pub fn new() -> CompilationContext {
         CompilationContext {
             identifier_id: 0,
+            dependencies: vec![],
+            dep_strings: vec![],
         }
+    }
+
+    pub fn buffer_ref(&mut self, group_id: GroupId) -> String {
+        if !self.dependencies.contains(&group_id) {
+            self.dependencies.push(group_id);
+        }
+
+        let s = format!("buffer_{}", group_id.number());
+        self.dep_strings.push(s.clone());
+        return s;
     }
 
     pub fn get_x(&self) -> &'static str { "x_s" }
@@ -115,5 +144,9 @@ impl CompilationContext {
         let r = format!("{}_{}", prefix, self.identifier_id);
         self.identifier_id += 1;
         r
+    }
+
+    pub fn deps(&self) -> &[GroupId] {
+        &self.dependencies
     }
 }
