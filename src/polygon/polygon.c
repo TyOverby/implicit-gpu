@@ -42,18 +42,28 @@ __kernel void apply(__global float* buffer, size_t width, __global float* xs, __
     float x_s = (float) x;
     float y_s = (float) y;
 
-    float minimum = dist_to_line(
-        x_s, y_s,
-        xs[count - 1], ys[count-1],
-        xs[0], ys[0]);
+    if (count < 2) {
+        buffer[pos] = NAN;
+        return;
+    }
 
-    for(size_t i = 0; i < count - 1; i++) {
+    float minimum = INFINITY;
+
+    for(size_t i = 0; i < count; i += 2) {
+        if (pos == 0) {
+            printf("(%f, %f) -> (%f, %f)\n",
+                    xs[i], ys[i],
+                    xs[i + 1], ys[i +1]);
+        }
+
         float new = dist_to_line(
             x_s, y_s,
             xs[i], ys[i],
             xs[i + 1], ys[i + 1]);
+
         float new_abs = fabs(new);
         float min_abs = fabs(minimum);
+
         if (new_abs < min_abs) {
             minimum = new;
         }

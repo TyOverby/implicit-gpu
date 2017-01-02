@@ -31,6 +31,41 @@ pub struct StaticNode {
     node: &'static Node<'static>,
 }
 
+impl ::std::iter::FromIterator<(f32, f32)> for Polygon {
+    fn from_iter<T>(iterator: T) -> Polygon
+    where T: IntoIterator<Item=(f32, f32)> {
+        let mut iterator = iterator.into_iter();
+        let mut xs = vec![];
+        let mut ys = vec![];
+
+        let (fx, fy) = if let Some(first) = iterator.next() {
+            first
+        } else {
+            return Polygon { xs: xs, ys: ys };
+        };
+
+        xs.push(fx);
+        ys.push(fy);
+
+        for (x, y) in iterator {
+            xs.push(x);
+            xs.push(x);
+
+            ys.push(y);
+            ys.push(y);
+        }
+
+        xs.push(fx);
+        ys.push(fy);
+
+        xs.reverse();
+        ys.reverse();
+
+
+        Polygon {xs: xs, ys: ys}
+    }
+}
+
 impl PolyGroup {
     pub fn single_additive(xs: Vec<f32>, ys: Vec<f32>) -> PolyGroup {
         PolyGroup {

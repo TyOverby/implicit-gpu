@@ -10,17 +10,33 @@ use implicit_gpu::opencl::OpenClContext;
 use implicit_gpu::evaluator::Evaluator;
 use implicit_gpu::image::{save_field_buffer, ColorMode};
 
+fn basic_poly() -> PolyGroup {
+    PolyGroup {
+        additive: vec![
+            vec![(0.0, 0.0), (300.0, 0.0), (300.0, 300.0), (200.0, 100.0)].into_iter().collect()
+        ],
+        subtractive: vec![],
+    }
+}
+
 fn main() {
     let ctx = OpenClContext::default();
 
     // Build a node tree
     let stat = create_node!(a, {
-        a(Node::Modulate(-20.0,
-            a(Node::And(vec![
-                a(Node::Circle{ x: 50.0, y: 50.0, r: 50.0 }),
-                a(Node::Break(a(Node::Not(a(Node::Circle{ x: 100.0, y: 100.0, r: 50.0 }))))),
-            ]))
-        ))
+        a(Node::Or(vec![
+            a(Node::Modulate(-20.0,
+                a(Node::And(vec![
+                    a(Node::Circle{ x: 50.0, y: 50.0, r: 50.0 }),
+                    a(Node::Break(a(Node::Not(a(Node::Circle{ x: 100.0, y: 100.0, r: 50.0 }))))),
+                ]))
+            )),
+            //a(Node::Polygon(basic_poly()))
+        ]))
+    });
+
+    let stat = create_node!(a, {
+        a(Node::Polygon(basic_poly()))
     });
 
     // Group them into a nest

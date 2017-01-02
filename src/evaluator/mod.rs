@@ -4,6 +4,8 @@ use std::sync::Mutex;
 use ::opencl::OpenClContext;
 use ::compiler::*;
 use ::opencl::FieldBuffer;
+use ::polygon::run_poly;
+use ::nodes::Node;
 
 
 #[derive(Debug)]
@@ -35,7 +37,7 @@ impl Evaluator {
         }
 
         let group = self.nest.get(which);
-        match group {
+        let out = match group {
             &NodeGroup::Basic(ref root) => {
                 let (program, compilation) = ::compiler::compile(root.node());
                 let deps: Vec<FieldBuffer> = compilation.deps().iter().map(|&g| self.evaluate(g, ctx)).collect();
@@ -55,9 +57,52 @@ impl Evaluator {
 
                 out
             }
-            &NodeGroup::Polygon(ref _poly) => {
-                unimplemented!()
+            &NodeGroup::Polygon(ref poly) => {
+                let additive_field = {
+                    let _guard = ::flame::start_guard("additive field");
+                    let xs_all: Vec<_> = poly.additive.iter().flat_map(|a| a.xs.iter().cloned()).collect();
+                    let ys_all: Vec<_> = poly.additive.iter().flat_map(|a| a.ys.iter().cloned()).collect();
+                    run_poly(&xs_all, &ys_all, self.width, self.height, ctx)
+                };
+
+                let subtractive_field = {
+                    let _guard = ::flame::start_guard("subtractive field");
+                    let xs_all: Vec<_> = poly.subtractive.iter().flat_map(|a| a.xs.iter().cloned()).collect();
+                    let ys_all: Vec<_> = poly.subtractive.iter().flat_map(|a| a.ys.iter().cloned()).collect();
+                    run_poly(&xs_all, &ys_all, self.width, self.height, ctx)
+                };
+
+                let program = create_node!(a, {
+                    a(Node::And(vec![
+                        a(Node::OtherGroup(GroupId(0))),
+                        a(Node::Not(
+                            a(Node::OtherGroup(GroupId(1)))
+                        )),
+                    ]))
+                });
+
+                let (program, _) = ::compiler::compile(program.node());
+                let kernel = ctx.compile("apply", program);
+
+                let out = ctx.field_buffer(self.width, self.height, None);
+
+                let kc = kernel.gws([self.width, self.height])
+                      .arg_buf(out.buffer())
+                      .arg_scl(self.width)
+                      .arg_buf(additive_field.buffer())
+                      .arg_buf(subtractive_field.buffer());
+
+                ::flame::span_of("eval", || kc.enq().unwrap());
+
+                out
             }
+        };
+
+        {
+            let mut finished = self.finished.lock().unwrap();
+            finished.insert(which, out.clone());
         }
+
+        out
     }
 }
