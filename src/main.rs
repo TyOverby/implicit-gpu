@@ -31,27 +31,20 @@ fn main() {
                     a(Node::Break(a(Node::Not(a(Node::Circle{ x: 100.0, y: 100.0, r: 50.0 }))))),
                 ]))
             )),
-            //a(Node::Polygon(basic_poly()))
+            a(Node::Polygon(basic_poly()))
         ]))
     });
 
-    let stat = create_node!(a, {
-        a(Node::Polygon(basic_poly()))
-    });
+    for _ in 0 .. 5 {
+        ::flame::clear();
+        // Group them into a nest
+        let mut nest = Nest::new();
+        let target = nest.group(stat.node());
 
-    // Group them into a nest
-    let mut nest = Nest::new();
-    let target = nest.group(stat.node());
-
-    println!("{:#?}", nest);
-
-    // Create a new Execution Context
-    let evaluator = Evaluator::new(nest, 1000, 1000, None);
-    let result = evaluator.evaluate(target, &ctx);
-    println!("{:?}", result);
-
-    // Save the image
-    save_field_buffer(&result, "field.png", ColorMode::Debug);
+        // Create a new Execution Context
+        let evaluator = Evaluator::new(nest, 1000, 1000, None);
+        let result = evaluator.evaluate(target, &ctx);
+    }
 
     // Print the timings
     ::flame::dump_stdout();

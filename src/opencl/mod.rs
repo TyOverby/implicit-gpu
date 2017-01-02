@@ -57,6 +57,8 @@ impl OpenClContext {
         OpenClContext::new(pt, dv)
     }
 
+    // TODO(tyoverby): You should use a Kernel Cache instead of Program Cache once Kernels
+    // implement Clone.
     pub fn compile<S2: Into<String>, S1: Into<String>>(&self, name: S1, source: S2) -> Kernel {
         let _guard = ::flame::start_guard("OpenClContext::compile");
         let name = name.into();
@@ -65,6 +67,7 @@ impl OpenClContext {
         {
             let program_cache = self.program_cache.lock().unwrap();
             if let Some(&(_, ref p)) = program_cache.iter().filter(|&&(ref s, _)| s == &source).next() {
+                let _guard = ::flame::start_guard("Kernel::new");
                 return Kernel::new(name, p, &self.queue).unwrap();
             }
         }

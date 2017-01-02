@@ -64,10 +64,6 @@ __kernel void apply(__global float* buffer, size_t width, __global float* xs, __
         float new = dist_to_line(x_s, y_s, x1, y1, x2, y2);
         float pos = position(x_s, y_s, x1, y1, x2, y2);
 
-        if (x == 200 && y == 800) {
-            printf("(%f, %f) -> (%f, %f): %f by %f\n", x1, y1, x2, y2, new, pos);
-        }
-
         float new_abs = fabs(new);
         float min_abs = fabs(minimum);
 
@@ -81,5 +77,5 @@ __kernel void apply(__global float* buffer, size_t width, __global float* xs, __
         }
     }
 
-    buffer[pos] = minimum;
+    buffer[pos] = -minimum;
 }

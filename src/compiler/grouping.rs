@@ -72,7 +72,7 @@ where F: Fn(Node<'b>) -> &'b Node<'b> {
         }
         &Node::Circle {x, y, r} => a(Node::Circle{ x:x, y:y, r:r }),
         &Node::And(ref ch) => a(Node::And(ch.iter().map(|c| do_group(c, nest, a)).collect())),
-        &Node::Or(ref ch) => a(Node::And(ch.iter().map(|c| do_group(c, nest, a)).collect())),
+        &Node::Or(ref ch) => a(Node::Or(ch.iter().map(|c| do_group(c, nest, a)).collect())),
         &Node::Not(ref ch) => do_group(ch, nest, a),
         &Node::Modulate(how_much, ch) => a(Node::Modulate(how_much, do_group(ch, nest, a))),
         &Node::OtherGroup(_) => panic!("OtherGroup found while grouping"),

@@ -19,14 +19,16 @@ pub fn run_poly(xs: &[f32], ys: &[f32], width: usize, height: usize, ctx: &OpenC
     let xs_buf = ctx.line_buffer(xs);
     let ys_buf = ctx.line_buffer(ys);
 
-    kernel
-        .gws([width, height])
-        .arg_buf(out.buffer())
-        .arg_scl(width)
-        .arg_buf(xs_buf.buffer())
-        .arg_buf(ys_buf.buffer())
-        .arg_scl(len)
-        .enq().unwrap();
+    ::flame::span_of("eval", || {
+        kernel
+            .gws([width, height])
+            .arg_buf(out.buffer())
+            .arg_scl(width)
+            .arg_buf(xs_buf.buffer())
+            .arg_buf(ys_buf.buffer())
+            .arg_scl(len)
+            .enq().unwrap();
+    });
 
     out
 }

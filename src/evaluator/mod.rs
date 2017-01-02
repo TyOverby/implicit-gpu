@@ -69,32 +69,40 @@ impl Evaluator {
                     let _guard = ::flame::start_guard("subtractive field");
                     let xs_all: Vec<_> = poly.subtractive.iter().flat_map(|a| a.xs.iter().cloned()).collect();
                     let ys_all: Vec<_> = poly.subtractive.iter().flat_map(|a| a.ys.iter().cloned()).collect();
-                    run_poly(&xs_all, &ys_all, self.width, self.height, ctx)
+                    if xs_all.len() != 0 {
+                        Some(run_poly(&xs_all, &ys_all, self.width, self.height, ctx))
+                    } else {
+                        None
+                    }
                 };
 
-                let program = create_node!(a, {
-                    a(Node::And(vec![
-                        a(Node::OtherGroup(GroupId(0))),
-                        a(Node::Not(
-                            a(Node::OtherGroup(GroupId(1)))
-                        )),
-                    ]))
-                });
+                if let Some(subtractive_field) = subtractive_field {
+                    let program = create_node!(a, {
+                        a(Node::And(vec![
+                            a(Node::OtherGroup(GroupId(0))),
+                            a(Node::Not(
+                                a(Node::OtherGroup(GroupId(1)))
+                            )),
+                        ]))
+                    });
 
-                let (program, _) = ::compiler::compile(program.node());
-                let kernel = ctx.compile("apply", program);
+                    let (program, _) = ::compiler::compile(program.node());
+                    let kernel = ctx.compile("apply", program);
 
-                let out = ctx.field_buffer(self.width, self.height, None);
+                    let out = ctx.field_buffer(self.width, self.height, None);
 
-                let kc = kernel.gws([self.width, self.height])
-                      .arg_buf(out.buffer())
-                      .arg_scl(self.width)
-                      .arg_buf(additive_field.buffer())
-                      .arg_buf(subtractive_field.buffer());
+                    let kc = kernel.gws([self.width, self.height])
+                          .arg_buf(out.buffer())
+                          .arg_scl(self.width)
+                          .arg_buf(additive_field.buffer())
+                          .arg_buf(subtractive_field.buffer());
 
-                ::flame::span_of("eval", || kc.enq().unwrap());
+                    ::flame::span_of("eval", || kc.enq().unwrap());
 
-                out
+                    out
+                } else {
+                    additive_field
+                }
             }
         };
 
