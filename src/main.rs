@@ -35,16 +35,16 @@ fn main() {
         ]))
     });
 
-    for _ in 0 .. 5 {
-        ::flame::clear();
-        // Group them into a nest
-        let mut nest = Nest::new();
-        let target = nest.group(stat.node());
 
-        // Create a new Execution Context
-        let evaluator = Evaluator::new(nest, 1000, 1000, None);
-        let result = evaluator.evaluate(target, &ctx);
-    }
+    // Group them into a nest
+    let mut nest = Nest::new();
+    let target = nest.group(stat.node());
+
+    // Create a new Execution Context
+    let evaluator = Evaluator::new(nest, 1000, 1000, None);
+    let result = evaluator.evaluate(target, &ctx);
+
+    save_field_buffer(&result, "out-field.png", ColorMode::BlackAndWhite);
 
     // Print the timings
     ::flame::dump_stdout();
