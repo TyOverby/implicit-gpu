@@ -58,10 +58,6 @@ impl ::std::iter::FromIterator<(f32, f32)> for Polygon {
         xs.push(fx);
         ys.push(fy);
 
-        xs.reverse();
-        ys.reverse();
-
-
         Polygon {xs: xs, ys: ys}
     }
 }

@@ -13,7 +13,7 @@ use implicit_gpu::image::{save_field_buffer, ColorMode};
 fn basic_poly() -> PolyGroup {
     PolyGroup {
         additive: vec![
-            vec![(0.0, 0.0), (300.0, 0.0), (300.0, 300.0), (200.0, 100.0)].into_iter().collect()
+            vec![(0.0, 0.0), (300.0, 0.0), (400.0, 300.0), (200.0, 100.0)].into_iter().collect()
         ],
         subtractive: vec![],
     }
