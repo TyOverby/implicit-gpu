@@ -30,15 +30,24 @@ pub fn save_image(samples: &[f32], width: usize, file_name: &str, color_mode: Co
     let mut buf = ImageBuffer::new(width as u32, (samples.len() / width) as u32);
     for (x, y, pixel) in buf.enumerate_pixels_mut() {
         let sample = samples[x as usize + y as usize * width];
-        let color = match (color_mode, sample > 0.0) {
-            (ColorMode::BlackAndWhite, true) => [0, 0, 0],
-            (ColorMode::BlackAndWhite, false) => [255, 255, 255],
-            (ColorMode::Debug, true) => {
+        let sample_abs = sample.abs();
+        let color = match (color_mode, sample > 0.0, sample_abs < 1.0) {
+            (ColorMode::BlackAndWhite, true, true) => {
+                let v = 127 - (sample_abs * 127.0) as u8;
+                [v, v, v]
+            }
+            (ColorMode::BlackAndWhite, false, true) => {
+                let v = 127 + (sample_abs * 127.0) as u8;
+                [v, v, v]
+            }
+            (ColorMode::BlackAndWhite, true, false) => [0, 0, 0],
+            (ColorMode::BlackAndWhite, false, false) => [255, 255, 255],
+            (ColorMode::Debug, true, _) => {
                 let compressed = sample / max;
                 let rounded = (compressed * 255.0) as u8;
                 [0, 0, 255 - rounded]
             }
-            (ColorMode::Debug, false) => {
+            (ColorMode::Debug, false, _) => {
                 let compressed = sample / min;
                 let rounded = (compressed * 255.0) as u8;
                 [255 - rounded, 0, 0]
