@@ -54,6 +54,7 @@ impl OpenClContext {
 
     pub fn default() -> OpenClContext {
         let (pt, dv) = all_devices().into_iter().nth(0).unwrap();
+        println!("using ({:?}, {:?}) {:?}", pt.vendor(), pt.name(), dv.name());
         OpenClContext::new(pt, dv)
     }
 

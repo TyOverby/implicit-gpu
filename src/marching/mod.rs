@@ -18,8 +18,8 @@ fn run_marching(input: FieldBuffer, width: usize, height: usize, ctx: &OpenClCon
     kernel
         .gws([width, height])
         .arg_buf(input.buffer())
-        .arg_scl(width)
-        .arg_scl(height)
+        .arg_scl(width as u64)
+        .arg_scl(height as u64)
         .arg_buf(out.buffer())
         .enq().unwrap();
 

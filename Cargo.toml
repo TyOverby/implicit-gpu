@@ -9,15 +9,10 @@ path = "./src/main.rs"
 
 [dependencies]
 ocl = "0.11.*"
-gc = "0.2.*"
 flame = "0.1.11"
 lazy_static = "0.2.*"
 image = "0.10.*"
 itertools = "0.5.*"
-lux = "0.1.2"
 vecmath = "*"
 fnv = "*"
 typed-arena = "1.2.0"
-
-#[dependencies.lux]
-#path = "../lux"

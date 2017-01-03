@@ -1,8 +1,6 @@
 #![feature(pub_restricted)]
 
 #[macro_use]
-extern crate gc;
-#[macro_use]
 extern crate lazy_static;
 
 extern crate typed_arena;

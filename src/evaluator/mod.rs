@@ -47,7 +47,7 @@ impl Evaluator {
 
                 let mut kc = kernel.gws([self.width, self.height])
                       .arg_buf(out.buffer())
-                      .arg_scl(self.width);
+                      .arg_scl(self.width as u64);
 
                 for dep in &deps {
                     kc = kc.arg_buf(dep.buffer());
@@ -93,7 +93,7 @@ impl Evaluator {
 
                     let kc = kernel.gws([self.width, self.height])
                           .arg_buf(out.buffer())
-                          .arg_scl(self.width)
+                          .arg_scl(self.width as u64)
                           .arg_buf(additive_field.buffer())
                           .arg_buf(subtractive_field.buffer());
 

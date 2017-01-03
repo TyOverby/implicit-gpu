@@ -39,7 +39,7 @@ float dist_to_line(float x, float y, float x1, float y1, float x2, float y2) {
     return sqrt(dx * dx + dy * dy);
 }
 
-__kernel void apply(__global float* buffer, size_t width, __global float* xs, __global float* ys, size_t count) {
+__kernel void apply(__global float* buffer, ulong width, __global float* xs, __global float* ys, ulong count) {
     size_t x = get_global_id(0);
     size_t y = get_global_id(1);
     size_t pos = x + y * width;

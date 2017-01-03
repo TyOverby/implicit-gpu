@@ -23,10 +23,10 @@ pub fn run_poly(xs: &[f32], ys: &[f32], width: usize, height: usize, ctx: &OpenC
         kernel
             .gws([width, height])
             .arg_buf(out.buffer())
-            .arg_scl(width)
+            .arg_scl(width as u64)
             .arg_buf(xs_buf.buffer())
             .arg_buf(ys_buf.buffer())
-            .arg_scl(len)
+            .arg_scl(len as u64)
             .enq().unwrap();
     });
 

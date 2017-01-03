@@ -178,7 +178,7 @@ static void march(
     }
 }
 
-__kernel void apply(__global float* buffer, size_t width, size_t height, __global float* out) {
+__kernel void apply(__global float* buffer, ulong width, ulong height, __global float* out) {
     size_t x = get_global_id(0);
     size_t y = get_global_id(1);
 
