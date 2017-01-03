@@ -30,14 +30,13 @@ pub fn march(input: FieldBuffer, width: usize, height: usize, simplify: bool, ct
     let _guard = ::flame::start_guard("march");
 
     let out = run_marching(input, width, height, ctx);
-    let out_vec = out.values();
 
     let lines = ::flame::span_of("point filtering", ||
-        out_vec.into_iter()
-               .tuples()
-               .filter(|&(a, b, c, d)| !(a.is_nan() && b.is_nan() && c.is_nan() && d.is_nan()))
-               .map(|(a, b, c, d)| Line(Point{x: a, y: b}, Point{x: c, y: d}))
-               .collect::<Vec<_>>());
+        out.values().into_iter()
+           .tuples()
+           .filter(|&(a, b, c, d)| !(a.is_nan() && b.is_nan() && c.is_nan() && d.is_nan()))
+           .map(|(a, b, c, d)| Line(Point{x: a, y: b}, Point{x: c, y: d}))
+           .collect::<Vec<_>>());
 
     ::flame::start("line connecting");
     let (lns, _) = polygonize::connect_lines(lines);
