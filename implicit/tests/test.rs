@@ -69,3 +69,12 @@ fn poly_ops() {
 
     util::run_test("poly_ops", node.node(), 300, 250);
 }
+
+#[test]
+fn frozen_circle() {
+    let node = create_node!(a, {
+        a(Node::Freeze(a(Node::Circle{x: 55.0, y: 55.0, r: 50.0})))
+    });
+
+    util::run_test("frozen_circle", node.node(), 110, 110);
+}

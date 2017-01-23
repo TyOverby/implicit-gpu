@@ -13,6 +13,9 @@ pub struct LineBuffer {
 }
 
 impl FieldBuffer {
+    pub fn size(&self) -> (usize, usize) {
+        (self.width(), self.height())
+    }
     pub fn width(&self) -> usize {
         self.dims.0
     }

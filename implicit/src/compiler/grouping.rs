@@ -78,8 +78,8 @@ where F: Fn(Node<'b>) -> &'b Node<'b> {
             let og = nest.group(o);
             a(Node::OtherGroup(og))
         }
-        &Node::Freeze(o) => {
-            let og = nest.group(o);
+        &Node::Freeze(_) => {
+            let og = nest.group(node);
             a(Node::OtherGroup(og))
         }
         &Node::Circle {x, y, r} => a(Node::Circle{ x:x, y:y, r:r }),

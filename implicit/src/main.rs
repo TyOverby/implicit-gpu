@@ -1,14 +1,14 @@
 #[macro_use]
-extern crate implicit_gpu;
+extern crate implicit;
 extern crate typed_arena;
 extern crate ocl;
 extern crate flame;
 
-use implicit_gpu::nodes::*;
-use implicit_gpu::compiler::*;
-use implicit_gpu::opencl::OpenClContext;
-use implicit_gpu::evaluator::Evaluator;
-use implicit_gpu::image::{save_field_buffer, ColorMode};
+use implicit::nodes::*;
+use implicit::compiler::*;
+use implicit::opencl::OpenClContext;
+use implicit::evaluator::Evaluator;
+use implicit::image::{save_field_buffer, ColorMode};
 
 fn basic_poly() -> PolyGroup {
     PolyGroup {

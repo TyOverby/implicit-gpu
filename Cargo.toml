@@ -1,23 +1,2 @@
-[package]
-name = "implicit-gpu"
-version = "0.1.0"
-authors = ["Ty Overby <ty@pre-alpha.com>"]
-
-[[bin]]
-name = "implicit-gpu-bin"
-path = "./src/main.rs"
-
-[[bin]]
-name = "text-2-png"
-path = "./src/text2png.rs"
-
-[dependencies]
-ocl = "0.11.*"
-flame = "0.1.11"
-lazy_static = "0.2.*"
-image = "0.10.*"
-itertools = "0.5.*"
-vecmath = "*"
-fnv = "*"
-typed-arena = "1.2.0"
-latin = "0.1.5"
+[workspace]
+members = ["./implicit", "./util"]

@@ -1,8 +1,8 @@
 extern crate latin;
-extern crate implicit_gpu;
+extern crate implicit;
 
 use std::str::FromStr;
-use implicit_gpu::image::*;
+use implicit::image::*;
 
 fn main() {
     let mut args = std::env::args();

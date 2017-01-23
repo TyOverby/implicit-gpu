@@ -11,15 +11,13 @@ pub fn run_poly(xs: &[f32], ys: &[f32], width: usize, height: usize, ctx: &OpenC
         return ctx.field_buffer(width, height, Some(&vec![INFINITY; width * height]));
     }
 
-    let len = xs.len();
-
     let xs_buf = ctx.line_buffer(xs);
     let ys_buf = ctx.line_buffer(ys);
 
-    run_poly_raw(xs_buf, ys_buf, width, height, len, ctx)
+    run_poly_raw(xs_buf, ys_buf, width, height, ctx)
 }
 
-pub fn run_poly_raw(xs: LineBuffer, ys: LineBuffer, width: usize, height: usize, len: usize, ctx: &OpenClContext) -> FieldBuffer {
+pub fn run_poly_raw(xs: LineBuffer, ys: LineBuffer, width: usize, height: usize, ctx: &OpenClContext) -> FieldBuffer {
     let _guard = ::flame::start_guard("run_poly_raw");
     let out = ctx.field_buffer(width, height, None);
     let kernel = ctx.compile("apply", PROGRAM);
@@ -30,7 +28,7 @@ pub fn run_poly_raw(xs: LineBuffer, ys: LineBuffer, width: usize, height: usize,
         .arg_scl(width as u64)
         .arg_buf(xs.buffer())
         .arg_buf(ys.buffer())
-        .arg_scl(len as u64)
+        .arg_scl(xs.size())
         .enq().unwrap();
     out
 }

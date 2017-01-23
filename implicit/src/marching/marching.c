@@ -100,8 +100,8 @@ static void march(
 
         // 0100
         case 4:
-            o1 = n(dist, p, lerp(sra, srb, dist));
-            o2 = e(dist, p, lerp(srb, src, dist));
+            o2 = n(dist, p, lerp(sra, srb, dist));
+            o1 = e(dist, p, lerp(srb, src, dist));
             break;
 
         // 0101
@@ -111,8 +111,8 @@ static void march(
 
         // 0110
         case 6:
-            o1 = n(dist, p, -lerp(srb, sra, dist));
-            o2 = s(dist, p, -lerp(src, srd, dist));
+            o2 = n(dist, p, -lerp(srb, sra, dist));
+            o1 = s(dist, p, -lerp(src, srd, dist));
             break;
 
         // 0111
@@ -123,8 +123,8 @@ static void march(
 
         // 1000
         case 8:
-            o1 = w(dist, p, lerp(sra, srd, dist));
-            o2 = n(dist, p, lerp(sra, srb, dist));
+            o2 = w(dist, p, lerp(sra, srd, dist));
+            o1 = n(dist, p, lerp(sra, srb, dist));
             break;
 
         // 1001
@@ -146,8 +146,8 @@ static void march(
 
         // 1100
         case 12:
-            o1 = w(dist, p, lerp(sra, srd, dist));
-            o2 = e(dist, p, lerp(srb, src, dist));
+            o2 = w(dist, p, lerp(sra, srd, dist));
+            o1 = e(dist, p, lerp(srb, src, dist));
             break;
 
         // 1101
@@ -157,14 +157,14 @@ static void march(
             let dd = lerp(srd, src, dist);
             MarchResult::One(Line(s(dist, p, dd), e(dist, p, db)))
             */
-            o1 = s(dist, p, lerp(srd, src, dist));
-            o2 = e(dist, p, lerp(srb, src, dist));
+            o2 = s(dist, p, lerp(srd, src, dist));
+            o1 = e(dist, p, lerp(srb, src, dist));
             break;
 
         // 1110
         case 14:
-            o1 = w(dist, p, lerp(sra, srd, dist));
-            o2 = s(dist, p, lerp(srd, src, dist));
+            o2 = w(dist, p, lerp(sra, srd, dist));
+            o1 = s(dist, p, lerp(srd, src, dist));
             break;
 
         // 1111
