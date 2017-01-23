@@ -36,18 +36,18 @@ static float2 w(float distance, float2 point, float how_much) {
     return result;
 }
 
-static void write_line(float2 o1, float2 o2, __global float* out, size_t out_pos) {
-    out[out_pos + 0] = o1.x;
-    out[out_pos + 1] = o1.y;
-    out[out_pos + 2] = o2.x;
-    out[out_pos + 3] = o2.y;
+static void write_line(float2 o1, float2 o2, __global float* out_xs, __global float* out_ys, size_t out_pos) {
+    out_xs[out_pos + 0] = o1.x;
+    out_ys[out_pos + 0] = o1.y;
+    out_xs[out_pos + 1] = o2.x;
+    out_ys[out_pos + 1] = o2.y;
 }
 
 static void march(
     float sra, float srb, float src, float srd,
     float2 p,
     float dist,
-    __global float* out, size_t out_pos) {
+    __global float* out_xs, __global float* out_ys, size_t out_pos) {
 
     //printf("sra: %f srb: %f, src: %f, srd: %f\n", sra, srb, src, srd);
 
@@ -174,16 +174,16 @@ static void march(
     }
 
     if(!isnan(o1.x)) {
-        write_line(o1, o2, out, out_pos);
+        write_line(o1, o2, out_xs, out_ys, out_pos);
     }
 }
 
-__kernel void apply(__global float* buffer, ulong width, ulong height, __global float* out) {
+__kernel void apply(__global float* buffer, ulong width, ulong height, __global float* out_xs, __global float* out_ys) {
     size_t x = get_global_id(0);
     size_t y = get_global_id(1);
 
     size_t pos = x + y * width;
-    size_t out_pos = pos * 4;
+    size_t out_pos = pos * 2;
 
 
     if (x == width - 1 || y == height - 1) {
@@ -200,5 +200,5 @@ __kernel void apply(__global float* buffer, ulong width, ulong height, __global 
         buffer[a], buffer[b], buffer[c], buffer[d],
         p,
         1.0f,
-        out, out_pos);
+        out_xs, out_ys, out_pos);
 }

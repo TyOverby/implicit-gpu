@@ -3,7 +3,8 @@ use ::nodes::{StaticNode, Node, PolyGroup};
 #[derive(Debug, PartialEq)]
 pub enum NodeGroup {
     Basic(StaticNode),
-    Polygon(PolyGroup)
+    Freeze(StaticNode),
+    Polygon(PolyGroup),
 }
 
 #[derive(Debug, Eq, PartialEq, Hash, Clone, Copy)]
@@ -41,6 +42,13 @@ impl Nest {
     pub fn group<'a>(&mut self, node: &'a Node<'a>) -> GroupId {
         let group = match node {
             &Node::Polygon(ref poly) => NodeGroup::Polygon((*poly).clone()),
+            &Node::Freeze(ref ch) => {
+                let s_node: StaticNode = create_node!(a, {
+                    let node: &Node = do_group(ch, self, &a);
+                    node
+                });
+                NodeGroup::Freeze(s_node)
+            }
             other => {
                 let s_node: StaticNode = create_node!(a, {
                     let node: &Node = do_group(other, self, &a);
@@ -67,6 +75,10 @@ where F: Fn(Node<'b>) -> &'b Node<'b> {
             a(Node::OtherGroup(og))
         }
         &Node::Break(o) => {
+            let og = nest.group(o);
+            a(Node::OtherGroup(og))
+        }
+        &Node::Freeze(o) => {
             let og = nest.group(o);
             a(Node::OtherGroup(og))
         }

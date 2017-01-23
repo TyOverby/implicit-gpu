@@ -46,3 +46,17 @@ pub mod polygon;
 pub mod marching;
 pub mod evaluator;
 
+pub fn run_single(node: &nodes::Node, width: usize, height: usize) -> ::opencl::FieldBuffer {
+    use compiler::Nest;
+    use evaluator::Evaluator;
+
+    let ctx = opencl::OpenClContext::default();
+
+    let mut nest = Nest::new();
+    let target = nest.group(node);
+
+    // Create a new Execution Context
+    let evaluator = Evaluator::new(nest, width, height, None);
+    let result = evaluator.evaluate(target, &ctx);
+    result
+}

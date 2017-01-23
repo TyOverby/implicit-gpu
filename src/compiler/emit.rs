@@ -16,7 +16,6 @@ pub fn compile(node: &Node) -> (String, CompilationContext) {
     buffer.push('\n');
     writeln!(&mut buffer, "  buffer[pos] = {}; \n}}", final_result).unwrap();
 
-
     let mut preamble = r"__kernel void apply(__global float* buffer, ulong width".to_string();
     for b in &cc.dep_strings {
         preamble.push_str(&format!(", __global float* {}", b));
