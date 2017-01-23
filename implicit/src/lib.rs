@@ -2,7 +2,7 @@
 
 #[macro_use]
 extern crate lazy_static;
-
+extern crate latin;
 extern crate typed_arena;
 extern crate vecmath;
 extern crate ocl;
@@ -41,7 +41,7 @@ macro_rules! create_node {
 pub mod nodes;
 pub mod compiler;
 pub mod opencl;
-pub mod image;
+pub mod debug;
 pub mod polygon;
 pub mod marching;
 pub mod evaluator;

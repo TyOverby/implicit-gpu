@@ -1,24 +1,24 @@
 #![allow(unused_imports)]
-extern crate implicit_gpu;
+extern crate implicit;
 extern crate itertools;
 extern crate latin;
 
 use self::itertools::Itertools;
-use self::implicit_gpu::opencl::FieldBuffer;
-use self::implicit_gpu::nodes::Node;
-use self::implicit_gpu::image::{save_field_buffer, ColorMode};
+use self::implicit::opencl::FieldBuffer;
+use self::implicit::nodes::Node;
+use self::implicit::debug::image::{save_field_buffer, ColorMode};
 
 pub fn run_test(name: &str, node: &Node, width: usize, height: usize) {
     let actual_img_loc = format!("./target/{}-actual.png", name);
     let actual_text_loc = format!("./target/{}-actual.txt", name);
     let actual_frozen_loc = format!("./target/{}-frozen.png", name);
 
-    let actual_buf = implicit_gpu::run_single(node, width, height);
+    let actual_buf = implicit::run_single(node, width, height);
     {
-        let frozen = implicit_gpu::run_single(&Node::Freeze(node), width, height);
+        let frozen = implicit::run_single(&Node::Freeze(node), width, height);
         if !pretty_close(&actual_buf, &frozen) {
-            implicit_gpu::image::save_field_buffer(&actual_buf, &actual_img_loc, ColorMode::Debug);
-            implicit_gpu::image::save_field_buffer(&frozen, &actual_frozen_loc, ColorMode::Debug);
+            save_field_buffer(&actual_buf, &actual_img_loc, ColorMode::Debug);
+            save_field_buffer(&frozen, &actual_frozen_loc, ColorMode::Debug);
             panic!("frozen copy not similar \n open {} {}",
                    actual_img_loc, actual_frozen_loc);
         }
@@ -35,7 +35,7 @@ pub fn run_test(name: &str, node: &Node, width: usize, height: usize) {
     };
 
     if expected != actual {
-        implicit_gpu::image::save_field_buffer(&actual_buf, &actual_img_loc, ColorMode::Debug);
+        save_field_buffer(&actual_buf, &actual_img_loc, ColorMode::Debug);
         panic!("expected field is not the actual field. saved to {}", actual_img_loc);
     }
 }

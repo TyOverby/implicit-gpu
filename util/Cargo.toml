@@ -8,8 +8,13 @@ workspace = "../"
 name = "text-2-png"
 path = "./src/text2png.rs"
 
+[[bin]]
+name = "vis-poly"
+path = "./src/vispoly.rs"
+
 [dependencies]
 latin = "0.1.5"
+lux = "*"
 
 [dependencies.implicit]
 path = "../implicit"

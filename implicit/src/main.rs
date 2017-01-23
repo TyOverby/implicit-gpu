@@ -8,7 +8,7 @@ use implicit::nodes::*;
 use implicit::compiler::*;
 use implicit::opencl::OpenClContext;
 use implicit::evaluator::Evaluator;
-use implicit::image::{save_field_buffer, ColorMode};
+use implicit::debug::image::{save_field_buffer, ColorMode};
 
 fn basic_poly() -> PolyGroup {
     PolyGroup {

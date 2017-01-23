@@ -2,7 +2,7 @@ extern crate latin;
 extern crate implicit;
 
 use std::str::FromStr;
-use implicit::image::*;
+use implicit::debug::image::*;
 
 fn main() {
     let mut args = std::env::args();
@@ -27,5 +27,4 @@ fn write_image(name: &str, floats: Vec<Vec<f32>>) {
     let buff = floats.into_iter().flat_map(|line| line.into_iter()).collect::<Vec<_>>();
 
     save_image(&buff, width, &out_name, ColorMode::Debug);
-
 }

@@ -1,10 +1,10 @@
 #[macro_use]
-extern crate implicit_gpu;
+extern crate implicit;
 extern crate typed_arena;
 
 mod util;
 
-use implicit_gpu::nodes::{Node, PolyGroup};
+use implicit::nodes::{Node, PolyGroup};
 
 #[test]
 fn single_circle() {
