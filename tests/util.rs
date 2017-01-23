@@ -1,3 +1,4 @@
+#![allow(unused_imports)]
 extern crate implicit_gpu;
 extern crate itertools;
 extern crate latin;
@@ -7,20 +8,15 @@ use self::implicit_gpu::opencl::FieldBuffer;
 use self::implicit_gpu::nodes::Node;
 use self::implicit_gpu::image::{save_field_buffer, ColorMode};
 
-fn main() {
-    println!("don't run this file");
-}
-
-pub fn run_test(name: &str, node: &Node, ) {
-
-    let actual_buf = implicit_gpu::run_single(node, 100, 100);
+pub fn run_test(name: &str, node: &Node, width: usize, height: usize) {
+    let actual_buf = implicit_gpu::run_single(node, width, height);
     let actual = field_to_text(&actual_buf);
 
     let expected = match latin::file::read(format!("./tests/{}.txt", name)) {
         Ok(bytes) => String::from_utf8(bytes).unwrap(),
-        Err(e) => {
+        Err(_) => {
             let actual_text_loc = format!("./target/{}-actual.txt", name);
-            latin::file::write(&actual_text_loc, actual);
+            latin::file::write(&actual_text_loc, actual).unwrap();
             panic!("could not find expected text, saved to {}", actual_text_loc)
         }
     };
