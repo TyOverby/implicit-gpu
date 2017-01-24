@@ -49,108 +49,121 @@ static void march(
     float dist,
     __global float* out_xs, __global float* out_ys, size_t out_pos) {
 
-    //printf("sra: %f srb: %f, src: %f, srd: %f\n", sra, srb, src, srd);
-
-    size_t a_on = sra <= 0.0f;
-    size_t b_on = srb <= 0.0f;
-    size_t c_on = src <= 0.0f;
-    size_t d_on = srd <= 0.0f;
+    size_t a_on = sra < 0.0f;
+    size_t b_on = srb < 0.0f;
+    size_t c_on = src < 0.0f;
+    size_t d_on = srd < 0.0f;
 
     size_t which = (a_on << 3) + (b_on << 2) + (c_on << 1) + (d_on << 0);
 
     float2 o1 = (float2) (NAN, NAN);
     float2 o2 = (float2) (NAN, NAN);
 
-    /*
-    switch (which) {
-        case 0:
-        case 15:
-            break;
-        case 3:
-            write_line(p, (NAN, NAN), out, out_pos);
-            break;
-    }
-    return;
-    */
-
-
     switch (which) {
         // 0000
+        // 00
+        // 00
         case 0:
             // Don't do anything
             break;
 
         // 0001
+        // 00
+        // 10
         case 1:
             o1 = w(dist, p, lerp(sra, srd, dist));
             o2 = s(dist, p, -lerp(src, srd, dist));
             break;
 
         // 0010
+        // 00
+        // 01
         case 2:
             o1 = s(dist, p, lerp(srd, src, dist));
             o2 = e(dist, p, -lerp(src, srb, dist));
             break;
 
         // 0011
+        // 00
+        // 11
         case 3:
             o1 = w(dist, p, lerp(sra, srd, dist));
             o2 = e(dist, p, lerp(srb, src, dist));
             break;
 
         // 0100
+        // 01
+        // 00
         case 4:
             o2 = n(dist, p, lerp(sra, srb, dist));
             o1 = e(dist, p, lerp(srb, src, dist));
             break;
 
         // 0101
+        // 01
+        // 10
         case 5:
             // PUNT
             break;
 
         // 0110
+        // 01
+        // 01
         case 6:
             o2 = n(dist, p, -lerp(srb, sra, dist));
             o1 = s(dist, p, -lerp(src, srd, dist));
             break;
 
         // 0111
+        // 01
+        // 11
         case 7:
             o1 = w(dist, p, lerp(sra, srd, dist));
             o2 = n(dist, p, lerp(sra, srb, dist));
             break;
 
         // 1000
+        // 10
+        // 00
         case 8:
             o2 = w(dist, p, lerp(sra, srd, dist));
             o1 = n(dist, p, lerp(sra, srb, dist));
             break;
 
         // 1001
+        // 10
+        // 10
         case 9:
             o1 = n(dist, p, -lerp(srb, sra, dist));
             o2 = s(dist, p, -lerp(src, srd, dist));
             break;
 
         // 1010
+        // 10
+        // 01
         case 10:
             // PUNT
             break;
 
         // 1011
+        // 10
+        // 11
         case 11:
             o1 = n(dist, p, lerp(sra, srb, dist));
             o2 = e(dist, p, -lerp(src, srb, dist));
             break;
 
         // 1100
+        // 11
+        // 00
         case 12:
             o2 = w(dist, p, lerp(sra, srd, dist));
             o1 = e(dist, p, lerp(srb, src, dist));
             break;
 
         // 1101
+        // 11
+        // 10
         case 13:
             /*
             let db = lerp(srb, src, dist);
@@ -162,12 +175,16 @@ static void march(
             break;
 
         // 1110
+        // 11
+        // 01
         case 14:
             o2 = w(dist, p, lerp(sra, srd, dist));
             o1 = s(dist, p, lerp(srd, src, dist));
             break;
 
         // 1111
+        // 11
+        // 11
         case 15:
             // do nothing
             break;
@@ -195,9 +212,14 @@ __kernel void apply(__global float* buffer, ulong width, ulong height, __global 
     size_t c = pos + 1 + width;
     size_t d = pos + width;
 
+    float sra = buffer[a];
+    float srb = buffer[b];
+    float src = buffer[c];
+    float srd = buffer[d];
+
     float2 p = (float2) (x + 0.5f, y + 0.5f);
     march(
-        buffer[a], buffer[b], buffer[c], buffer[d],
+        sra, srb, src, srd,
         p,
         1.0f,
         out_xs, out_ys, out_pos);

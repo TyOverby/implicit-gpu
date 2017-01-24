@@ -21,7 +21,7 @@ fn main() {
 
     while window.is_open() {
         let mut frame = window.cleared_frame(color::WHITE);
-
+        frame.color((0.0, 0.0, 0.0, 0.5));
         for event in window.events() {
             if let lux::interactive::Event::MouseMoved((mx, my)) = event {
                 let mx = mx as f32;

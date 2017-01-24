@@ -112,7 +112,6 @@ impl Evaluator {
                 let field_buf = eval_basic_group(root);
                 let (width, height) = field_buf.size();
                 let (xs, ys) = ::marching::run_marching(field_buf, ctx);
-                ::debug::polygon::dump_poly_lines("out.txt", &xs, &ys);
                 ::polygon::run_poly_raw(xs, ys, width, height, ctx)
             }
             &NodeGroup::Polygon(ref poly) => eval_polygon(poly),

@@ -1,5 +1,5 @@
 float position(float x, float y, float x1, float y1, float x2, float y2) {
-    return sign((x2 - x1) * (y - y1) - (y2 - y1) * (x - x1));
+    return (x2 - x1) * (y - y1) - (y2 - y1) * (x - x1);
 }
 
 float dist_to_line(float x, float y, float x1, float y1, float x2, float y2) {
@@ -70,7 +70,7 @@ __kernel void apply(__global float* buffer, ulong width, __global float* xs, __g
         }
 
         float new = dist_to_line(x_s, y_s, x1, y1, x2, y2);
-        float pos = position(x_s, y_s, x1, y1, x2, y2);
+        float pos = sign(position(x_s, y_s, x1, y1, x2, y2));
 
         float new_abs = fabs(new);
         float min_abs = fabs(minimum);

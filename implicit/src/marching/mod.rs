@@ -91,7 +91,6 @@ fn basic() {
 
     let ctx = OpenClContext::default();
 
-    assert_close(test_this(1.0, 0.0, 1.0, 1.0, &ctx), ((1.0, 0.0), (1.0, 0.0)));
     assert_close(test_this(0.5, -0.5, -0.5, 0.5, &ctx), ((0.5, 1.0), (0.5, 0.0)));
     assert_close(test_this(-0.5, -0.5, -0.5, 0.5, &ctx), ((0.5, 1.0), (0.0, 0.5)));
     assert_close(test_this(-0.5, 0.5, 0.5, -0.5, &ctx), ((0.5, 0.0), (0.5, 1.0)));

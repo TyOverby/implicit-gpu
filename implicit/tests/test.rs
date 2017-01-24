@@ -9,7 +9,7 @@ use implicit::nodes::{Node, PolyGroup};
 #[test]
 fn single_circle() {
     let node = create_node!(a, {
-        a(Node::Circle{ x: 50.0, y: 50.0, r: 50.0 })
+        a(Node::Circle{ x: 50.0, y: 50.0, r: 48.5 })
     });
 
     util::run_test("circles", node.node(), 100, 100);
@@ -56,6 +56,15 @@ fn simple_polygon() {
     });
 
     util::run_test("simple_polygon", node.node(), 300, 250);
+}
+
+#[test]
+fn simple_frozen_polygon() {
+    let node = create_node!(a, {
+        a(Node::Freeze(a(Node::Polygon(poly()))))
+    });
+
+    util::run_test("simple_frozen_polygon", node.node(), 300, 250);
 }
 
 #[test]
