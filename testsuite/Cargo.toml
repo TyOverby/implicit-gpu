@@ -3,4 +3,15 @@ name = "testsuite"
 version = "0.1.0"
 authors = ["Ty Overby <ty@pre-alpha.com>"]
 
+[[bin]]
+name = "testsuite"
+path = "src/main.rs"
+
 [dependencies]
+walkdir = "1.0.7"
+
+[dependencies.implicit]
+path = "../implicit"
+
+[dependencies.implicit-language]
+path = "../language"
