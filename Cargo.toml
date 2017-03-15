@@ -1,2 +1,2 @@
 [workspace]
-members = ["./implicit", "./util"]
+members = ["./implicit", "./util", "./language", "testsuite"]
