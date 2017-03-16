@@ -24,6 +24,21 @@ pub struct ParseResult {
     pub errors: Vec<Error<StrTendril>>,
 }
 
+impl ParseResult {
+    pub fn unwrap(self) -> StaticNode {
+        use std::fmt::Write;
+
+        if !self.errors.is_empty() {
+            let mut buff = String::new();
+            for error in self.errors {
+                write!(buff, "{}", error).unwrap();
+            }
+            panic!("{}", buff);
+        }
+        self.root.unwrap()
+    }
+}
+
 pub fn parse<'b, I: Into<StrTendril>>(input: I, filename: &'b str) -> ParseResult {
     let input: StrTendril = input.into();
 
