@@ -9,6 +9,8 @@ use walkdir::{WalkDir, DirEntry};
 
 fn run_test(script: PathBuf) {
     use implicit::debug::image;
+    let mut image = script.clone();
+    image.set_extension("png");
 
     let source = latin::file::read(&script).unwrap();
     let source = String::from_utf8(source).unwrap();
@@ -21,7 +23,7 @@ fn run_test(script: PathBuf) {
 
     image::save_field_buffer(
         &result,
-        &format!("{}.png", script_name),
+        image.to_str().unwrap(),
         image::ColorMode::BlackAndWhite);
 }
 
