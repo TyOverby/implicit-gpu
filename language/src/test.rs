@@ -1,17 +1,9 @@
 use implicit::nodes::StaticNode;
 use super::*;
-use std::fmt::Write;
 
 fn parse_ok(text: &str) -> StaticNode {
-    let ParseResult { root, errors } = parse(text, "");
-    if !errors.is_empty() {
-        let mut buffer = String::new();
-        for error in errors {
-            writeln!(buffer, "{}", error).unwrap();
-        }
-        panic!("{}", buffer);
-    }
-
+    let ParseResult { root, diagnostics } = parse(text, "");
+    diagnostics.assert_empty();
     return root.unwrap();
 }
 

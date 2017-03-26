@@ -12,8 +12,9 @@ mod test;
 use tendril::StrTendril;
 use implicit::nodes::Node;
 use implicit::nodes::StaticNode;
-use snoot::error::{Error, ErrorBuilder};
-use snoot::parse::{Sexpr, Span};
+use snoot::diagnostic::{DiagnosticBuilder, DiagnosticBag};
+use snoot::parse::Span;
+use snoot::Sexpr;
 use snoot::simple_parse;
 
 use self::errors::*;
@@ -21,38 +22,22 @@ use self::properties::*;
 
 pub struct ParseResult {
     pub root: Option<StaticNode>,
-    pub errors: Vec<Error<StrTendril>>,
-}
-
-impl ParseResult {
-    pub fn unwrap(self) -> StaticNode {
-        use std::fmt::Write;
-
-        if !self.errors.is_empty() {
-            let mut buff = String::new();
-            for error in self.errors {
-                write!(buff, "{}", error).unwrap();
-            }
-            panic!("{}", buff);
-        }
-        self.root.unwrap()
-    }
+    pub diagnostics: DiagnosticBag,
 }
 
 pub fn parse<'b, I: Into<StrTendril>>(input: I, filename: &'b str) -> ParseResult {
     let input: StrTendril = input.into();
 
-    let snoot::parse::ParseResult { roots, diagnostics } = simple_parse(input, &[":"]);
-    let mut errors: Vec<_> =
-        diagnostics.into_iter().map(|d| d.into_error(Some(filename.into()))).collect();
+    let snoot::Result { roots, mut diagnostics } = simple_parse(input, &[":"]);
+    diagnostics.set_filename(filename);
     let mut error_builders = vec![];
 
     let root = match roots.len() {
         0 => {
-            error_builders.push(ErrorBuilder::new("completely empty programs are not allowed", &Span::empty()));
+            error_builders.push(DiagnosticBuilder::new("completely empty programs are not allowed", &Span::empty()));
             return ParseResult {
                 root: None,
-                errors: errors,
+                diagnostics: diagnostics,
             };
         }
         1 => roots.into_iter().next().unwrap(),
@@ -63,7 +48,7 @@ pub fn parse<'b, I: Into<StrTendril>>(input: I, filename: &'b str) -> ParseResul
 
             let span = Span::from_spans(first.span(), last.span());
 
-            error_builders.push(ErrorBuilder::new(format!("a program must only have one root, found {}", n), &span));
+            error_builders.push(DiagnosticBuilder::new(format!("a program must only have one root, found {}", n), &span));
             first
         }
     };
@@ -73,18 +58,18 @@ pub fn parse<'b, I: Into<StrTendril>>(input: I, filename: &'b str) -> ParseResul
     });
 
     for eb in error_builders {
-        errors.push(eb.with_file_name(filename).build());
+        diagnostics.add(eb.with_file_name(filename).build());
     }
 
     ParseResult {
         root: Some(node),
-        errors: errors,
+        diagnostics: diagnostics,
     }
 }
 
-fn parse_shape<'o, F>(expr: &Sexpr<StrTendril>,
+fn parse_shape<'o, F>(expr: &Sexpr,
                       a: &F,
-                      errors: &mut Vec<ErrorBuilder<StrTendril>>)
+                      errors: &mut Vec<DiagnosticBuilder>)
                       -> Option<&'o Node<'o>>
     where F: Fn(Node<'o>) -> &'o Node<'o>
 {
@@ -103,8 +88,8 @@ fn parse_shape<'o, F>(expr: &Sexpr<StrTendril>,
                         errors.push(invalid_shape_name(span));
                         None
                     }
-                    &Sexpr::Terminal(ref token, ref namespan) => {
-                        match token.string.as_ref() {
+                    &Sexpr::Terminal(_, ref namespan) => {
+                        match namespan.text().as_ref() {
                             "circle" => {
                                 parse_circle(&children[1..], span, errors).map(a)
                             },
@@ -141,7 +126,7 @@ fn parse_shape<'o, F>(expr: &Sexpr<StrTendril>,
     }
 }
 
-fn make_combinator<'o, F, A>(children: &[Sexpr<StrTendril>], f: F, span: &Span<StrTendril>, a: &A, errors: &mut Vec<ErrorBuilder<StrTendril>>) -> Option<&'o Node<'o>>
+fn make_combinator<'o, F, A>(children: &[Sexpr], f: F, span: &Span, a: &A, errors: &mut Vec<DiagnosticBuilder>) -> Option<&'o Node<'o>>
 where A: Fn(Node<'o>) -> &'o Node<'o>, F: Fn(Vec<&'o Node<'o>>) -> Node<'o>
 {
     if children.len() == 0 {
@@ -153,7 +138,7 @@ where A: Fn(Node<'o>) -> &'o Node<'o>, F: Fn(Vec<&'o Node<'o>>) -> Node<'o>
     }
 }
 
-fn make_singular<'o, F, A>(children: &[Sexpr<StrTendril>], f: F, span: &Span<StrTendril>, a: &A, errors: &mut Vec<ErrorBuilder<StrTendril>>) -> Option<&'o Node<'o>>
+fn make_singular<'o, F, A>(children: &[Sexpr], f: F, span: &Span, a: &A, errors: &mut Vec<DiagnosticBuilder>) -> Option<&'o Node<'o>>
 where A: Fn(Node<'o>) -> &'o Node<'o>, F: Fn(&'o Node<'o>) -> Node<'o>
 {
     if children.len() == 0 {
@@ -169,7 +154,7 @@ where A: Fn(Node<'o>) -> &'o Node<'o>, F: Fn(&'o Node<'o>) -> Node<'o>
     }
 }
 
-fn parse_circle(children: &[Sexpr<StrTendril>], span: &Span<StrTendril>, errors: &mut Vec<ErrorBuilder<StrTendril>>) -> Option<Node<'static>> {
+fn parse_circle(children: &[Sexpr], span: &Span, errors: &mut Vec<DiagnosticBuilder>) -> Option<Node<'static>> {
     macro_rules! attempt {
         ($v: expr, $default: expr) => {
             match $v {
