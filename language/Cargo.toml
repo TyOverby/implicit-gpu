@@ -3,6 +3,14 @@ name = "implicit-language"
 version = "0.1.0"
 authors = ["Ty Overby <ty@pre-alpha.com>"]
 
+#[[bin]]
+#name = "impl-validator"
+#path = "./src/validate.rs"
+
+[lib]
+name = "implicit_language"
+path = "./src/lib.rs"
+
 [dependencies]
 tendril = "0.2.3"
 typed-arena = "1.2.0"

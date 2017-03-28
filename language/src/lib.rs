@@ -25,16 +25,22 @@ pub struct ParseResult {
     pub diagnostics: DiagnosticBag,
 }
 
+impl ParseResult {
+    pub fn unwrap(self) -> StaticNode {
+        self.diagnostics.assert_empty();
+        self.root.unwrap()
+    }
+}
+
 pub fn parse<'b, I: Into<StrTendril>>(input: I, filename: &'b str) -> ParseResult {
     let input: StrTendril = input.into();
 
     let snoot::Result { roots, mut diagnostics } = simple_parse(input, &[":"]);
-    diagnostics.set_filename(filename);
-    let mut error_builders = vec![];
 
     let root = match roots.len() {
         0 => {
-            error_builders.push(DiagnosticBuilder::new("completely empty programs are not allowed", &Span::empty()));
+            diagnostics.add(DiagnosticBuilder::new("completely empty programs are not allowed", &Span::empty()).build());
+            diagnostics.set_filename(filename);
             return ParseResult {
                 root: None,
                 diagnostics: diagnostics,
@@ -48,19 +54,16 @@ pub fn parse<'b, I: Into<StrTendril>>(input: I, filename: &'b str) -> ParseResul
 
             let span = Span::from_spans(first.span(), last.span());
 
-            error_builders.push(DiagnosticBuilder::new(format!("a program must only have one root, found {}", n), &span));
+            diagnostics.add(DiagnosticBuilder::new(format!("a program must only have one root, found {}", n), &span).build());
             first
         }
     };
 
     let node = create_node!(a, {
-        parse_shape(&root, &a, &mut error_builders)
+        parse_shape(&root, &a, &mut diagnostics)
     });
 
-    for eb in error_builders {
-        diagnostics.add(eb.with_file_name(filename).build());
-    }
-
+    diagnostics.set_filename(filename);
     ParseResult {
         root: Some(node),
         diagnostics: diagnostics,
@@ -69,7 +72,7 @@ pub fn parse<'b, I: Into<StrTendril>>(input: I, filename: &'b str) -> ParseResul
 
 fn parse_shape<'o, F>(expr: &Sexpr,
                       a: &F,
-                      errors: &mut Vec<DiagnosticBuilder>)
+                      errors: &mut DiagnosticBag)
                       -> Option<&'o Node<'o>>
     where F: Fn(Node<'o>) -> &'o Node<'o>
 {
@@ -78,14 +81,14 @@ fn parse_shape<'o, F>(expr: &Sexpr,
     match expr {
         &Sexpr::List { ref children, ref span, .. } => {
             if children.len() == 0 {
-                errors.push(invalid_syntax(span));
+                errors.add(invalid_syntax(span));
                 None
             } else {
                 match &children[0] {
                     &Sexpr::List { ref span, .. } |
                     &Sexpr::UnaryOperator { ref span, .. } |
                     &Sexpr::String(_, ref span) => {
-                        errors.push(invalid_shape_name(span));
+                        errors.add(invalid_shape_name(span));
                         None
                     }
                     &Sexpr::Terminal(_, ref namespan) => {
@@ -110,7 +113,7 @@ fn parse_shape<'o, F>(expr: &Sexpr,
                             }
 
                             other => {
-                                errors.push(unrecognized_shape(namespan, other));
+                                errors.add(unrecognized_shape(namespan, other));
                                 None
                             }
                         }
@@ -120,17 +123,17 @@ fn parse_shape<'o, F>(expr: &Sexpr,
         }
 
         other => {
-            errors.push(not_a_shape(other.span(), other.kind()));
+            errors.add(not_a_shape(other.span(), other.kind()));
             None
         }
     }
 }
 
-fn make_combinator<'o, F, A>(children: &[Sexpr], f: F, span: &Span, a: &A, errors: &mut Vec<DiagnosticBuilder>) -> Option<&'o Node<'o>>
+fn make_combinator<'o, F, A>(children: &[Sexpr], f: F, span: &Span, a: &A, errors: &mut DiagnosticBag) -> Option<&'o Node<'o>>
 where A: Fn(Node<'o>) -> &'o Node<'o>, F: Fn(Vec<&'o Node<'o>>) -> Node<'o>
 {
     if children.len() == 0 {
-        errors.push(expected_children(span));
+        errors.add(expected_children(span));
         None
     } else {
         let children = children.iter().filter_map(|c| parse_shape(c, a, errors));
@@ -138,14 +141,14 @@ where A: Fn(Node<'o>) -> &'o Node<'o>, F: Fn(Vec<&'o Node<'o>>) -> Node<'o>
     }
 }
 
-fn make_singular<'o, F, A>(children: &[Sexpr], f: F, span: &Span, a: &A, errors: &mut Vec<DiagnosticBuilder>) -> Option<&'o Node<'o>>
+fn make_singular<'o, F, A>(children: &[Sexpr], f: F, span: &Span, a: &A, errors: &mut DiagnosticBag) -> Option<&'o Node<'o>>
 where A: Fn(Node<'o>) -> &'o Node<'o>, F: Fn(&'o Node<'o>) -> Node<'o>
 {
     if children.len() == 0 {
-        errors.push(expected_children(span));
+        errors.add(expected_children(span));
         return None;
     } else if children.len() > 1 {
-        errors.push(expected_one_child(span, children.len()));
+        errors.add(expected_one_child(span, children.len()));
     }
     let first = &children[0];
     match parse_shape(first, a, errors) {
@@ -154,13 +157,19 @@ where A: Fn(Node<'o>) -> &'o Node<'o>, F: Fn(&'o Node<'o>) -> Node<'o>
     }
 }
 
-fn parse_circle(children: &[Sexpr], span: &Span, errors: &mut Vec<DiagnosticBuilder>) -> Option<Node<'static>> {
+/*
+fn parse_polygon(children: &[Sexpr], span: &Span, errors: &mut Vec<DiagnosticBag>) -> Option<Node<'static>> {
+    unimplemented!()
+}
+*/
+
+fn parse_circle(children: &[Sexpr], span: &Span, errors: &mut DiagnosticBag) -> Option<Node<'static>> {
     macro_rules! attempt {
         ($v: expr, $default: expr) => {
             match $v {
                 Ok(v) => v,
                 Err(e) => {
-                    errors.push(e);
+                    errors.add(e);
                     $default
                 }
             }
@@ -177,7 +186,7 @@ fn parse_circle(children: &[Sexpr], span: &Span, errors: &mut Vec<DiagnosticBuil
         let y = attempt!(proplist.get_number("y", span), 10.0);
         Some(Node::Circle{r: radius, x: x, y: y})
     } else {
-        errors.push(expected_property_list_exists(span));
+        errors.add(expected_property_list_exists(span));
         None
     }
 }
