@@ -65,3 +65,31 @@ fn correct_freeze() {
     assert_eq!(actual, parse_ok("(freeze (circle {x:10 y:10 r:10}))"));
 }
 
+#[test]
+fn basic_polygon() {
+    let actual = create_node!(a, {
+        a(Node::Polygon(PolyGroup::single_additive(vec![5.0, 5.0], vec![10.0, 10.0])))
+    });
+
+    assert_eq!(actual, parse_ok("(polygon {x: 5 y: 10})"));
+}
+
+#[test]
+fn more_complexicated_polygon() {
+        let actual = create_node!(a, {
+        a(Node::Polygon(PolyGroup::single_additive(vec![5.0, 15.0,  15.0, 5.0], vec![10.0, 20.0,  20.0, 10.0])))
+    });
+
+    assert_eq!(actual, parse_ok("(polygon {x: 5 y: 10} {x: 15.0 y: 20.0})"));
+}
+
+#[test]
+fn even_more_complexicated_polygon() {
+        let actual = create_node!(a, {
+        a(Node::Polygon(PolyGroup::single_additive(
+            vec![5.0, 15.0,  15.0, 30.0,  30.0, 5.0],
+            vec![10.0, 20.0,  20.0, 50.0,  50.0, 10.0])))
+    });
+
+    assert_eq!(actual, parse_ok("(polygon {x: 5 y: 10} {x: 15 y: 20} {x: 30 y: 50})"));
+}

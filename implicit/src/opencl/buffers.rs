@@ -7,6 +7,12 @@ pub struct FieldBuffer {
 }
 
 #[derive(Debug, Clone)]
+pub struct MaskBuffer {
+    pub(crate) size: usize,
+    pub(crate) internal: Buffer<u32>,
+}
+
+#[derive(Debug, Clone)]
 pub struct LineBuffer {
     pub(crate) size: usize,
     pub(crate) internal: Buffer<f32>,
@@ -47,6 +53,22 @@ impl LineBuffer {
     }
 
     pub fn buffer(&self) -> &Buffer<f32> {
+        &self.internal
+    }
+}
+
+impl MaskBuffer {
+    pub fn size(&self) -> usize {
+        self.size
+    }
+
+    pub fn values(&self) -> Vec<u32> {
+        let mut out = vec![0; self.size()];
+        self.internal.read(&mut out).enq().unwrap();
+        out
+    }
+
+    pub fn buffer(&self) -> &Buffer<u32> {
         &self.internal
     }
 }

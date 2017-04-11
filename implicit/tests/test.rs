@@ -63,6 +63,8 @@ fn simple_frozen_polygon() {
     let node = create_node!(a, {
         a(Node::Freeze(a(Node::Polygon(poly()))))
     });
+    println!("{:?}", node);
+    panic!();
 
     util::run_test("simple_frozen_polygon", node.node(), 300, 250);
 }
@@ -87,3 +89,5 @@ fn frozen_circle() {
 
     util::run_test("frozen_circle", node.node(), 110, 110);
 }
+
+

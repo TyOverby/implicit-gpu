@@ -2,6 +2,7 @@
 name = "testsuite"
 version = "0.1.0"
 authors = ["Ty Overby <ty@pre-alpha.com>"]
+workspace = "../"
 
 [[bin]]
 name = "testsuite"
@@ -13,6 +14,10 @@ latin = "0.1.5"
 
 [dependencies.implicit]
 path = "../implicit"
+
+[dependencies.flame]
+version = "0.1.11"
+
 
 [dependencies.implicit-language]
 path = "../language"

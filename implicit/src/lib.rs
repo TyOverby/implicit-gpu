@@ -1,5 +1,6 @@
 #![feature(pub_restricted)]
 
+extern crate rand;
 extern crate lazy_static;
 extern crate latin;
 extern crate typed_arena;
@@ -44,6 +45,7 @@ pub mod debug;
 pub mod polygon;
 pub mod marching;
 pub mod evaluator;
+pub mod nan_filter;
 
 pub fn run_single(node: &nodes::Node, width: usize, height: usize) -> ::opencl::FieldBuffer {
     use compiler::Nest;

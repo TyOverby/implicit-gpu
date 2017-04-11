@@ -4,12 +4,8 @@ version = "0.1.0"
 authors = ["Ty Overby <ty@pre-alpha.com>"]
 workspace = "../"
 
-[[bin]]
-name = "implicit-gpu-bin"
-path = "./src/main.rs"
-
 [dependencies]
-ocl = "0.11.*"
+ocl = "0.12.*"
 flame = "0.1.11"
 lazy_static = "0.2.*"
 image = "0.10.*"
@@ -18,6 +14,7 @@ vecmath = "*"
 fnv = "*"
 typed-arena = "1.2.0"
 latin = "0.1.5"
+rand = "0.3.15"
 
 [dependencies.snoot]
 path = "../../snoot"

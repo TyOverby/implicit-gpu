@@ -19,8 +19,10 @@ pub struct OpenClContext {
 pub fn all_devices() -> Vec<(Platform, Device)> {
     let mut out = vec![];
     for plat in Platform::list() {
-        for dev in Device::list(&plat, None) {
-            out.push((plat.clone(), dev));
+        if let Ok(all_devices) = Device::list_all(&plat) {
+            for dev in all_devices {
+                out.push((plat.clone(), dev));
+            }
         }
     }
 
@@ -86,9 +88,9 @@ impl OpenClContext {
         let _guard = ::flame::start_guard("OpenClContext::field_buffer");
         let buffer = if let Some(fill) = fill {
             assert_eq!(fill.len(), width * height);
-            Buffer::new(&self.queue, Some(MEM_COPY_HOST_PTR | MEM_READ_WRITE), &[width, height], Some(fill)).unwrap()
+            Buffer::new(self.queue.clone(), Some(MEM_COPY_HOST_PTR | MEM_READ_WRITE), &[width, height], Some(fill)).unwrap()
         } else {
-            Buffer::new(&self.queue, Some(MEM_READ_WRITE), &[width, height], None).unwrap()
+            Buffer::new(self.queue.clone(), Some(MEM_READ_WRITE), &[width, height], None).unwrap()
         };
 
         FieldBuffer {
@@ -101,7 +103,15 @@ impl OpenClContext {
         let _guard = ::flame::start_guard("OpenClContext::line_buffer");
         LineBuffer {
             size: fill.len(),
-            internal: Buffer::new(&self.queue, Some(MEM_COPY_HOST_PTR), &[fill.len()], Some(fill)).unwrap()
+            internal: Buffer::new(self.queue.clone(), Some(MEM_COPY_HOST_PTR), &[fill.len()], Some(fill)).unwrap()
+        }
+    }
+
+    pub fn mask_buffer(&self, size: usize) -> MaskBuffer {
+        let _guard = ::flame::start_guard("OpenClContext::mask_buffer");
+        MaskBuffer {
+            size,
+            internal: Buffer::new(self.queue.clone(), Some(MEM_READ_WRITE), &[size], None).unwrap()
         }
     }
 

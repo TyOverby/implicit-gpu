@@ -10,6 +10,10 @@ pub fn invalid_shape_name(span: &Span) -> Diagnostic {
     DiagnosticBuilder::new("invalid shape name", span).build()
 }
 
+pub fn polygons_need_a_point(span: &Span) -> Diagnostic {
+    DiagnosticBuilder::new("Polygons require at least one point", span).build()
+}
+
 pub fn not_a_shape(span: &Span, kind: SexprKind) -> Diagnostic {
     DiagnosticBuilder::new(format!("expected shape, found {:?}", kind), span).build()
 }
