@@ -5,9 +5,9 @@ use opencl::OpenClContext;
 use compiler::*;
 use opencl::FieldBuffer;
 use polygon::run_poly;
+use nan_filter::filter_nans;
 use nodes::{Node, StaticNode, PolyGroup};
 use debug::image::{save_field_buffer, ColorMode};
-
 
 #[derive(Debug)]
 pub struct Evaluator {
@@ -123,12 +123,11 @@ impl Evaluator {
             &NodeGroup::Basic(ref root) => eval_basic_group(root),
             &NodeGroup::Freeze(ref root) => {
                 let field_buf = eval_basic_group(root);
-                save_field_buffer(&field_buf, "eval_basic.png", ColorMode::Debug);
                 let (width, height) = field_buf.size();
                 let (xs, ys) = ::marching::run_marching(field_buf, ctx);
+                let xs = filter_nans(ctx, &xs);
+                let ys = filter_nans(ctx, &ys);
                 let res = ::polygon::run_poly_raw(xs, ys, width, height, ctx);
-                println!("{:?}", res.values());
-                save_field_buffer(&res, "after_marching.png", ColorMode::Debug);
                 res
             }
             &NodeGroup::Polygon(ref poly) => eval_polygon(poly),

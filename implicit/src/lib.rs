@@ -1,5 +1,3 @@
-#![feature(pub_restricted)]
-
 extern crate rand;
 extern crate lazy_static;
 extern crate latin;
@@ -59,5 +57,6 @@ pub fn run_single(node: &nodes::Node, width: usize, height: usize) -> ::opencl::
     // Create a new Execution Context
     let evaluator = Evaluator::new(nest, width, height, None);
     let result = evaluator.evaluate(target, &ctx);
+    ctx.empty_queue();
     result
 }

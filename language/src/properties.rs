@@ -85,7 +85,7 @@ mod prop_test {
     use snoot::parse::Span;
 
     fn props_ok(input: &str) -> (PropList, Span) {
-        let ParseResult { roots, mut diagnostics } = simple_parse(input, &[":"]);
+        let ParseResult { roots, mut diagnostics } = simple_parse(input, &[":"], None);
         assert!(diagnostics.is_empty());
         assert!(roots.len() == 1);
 

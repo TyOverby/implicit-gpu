@@ -43,13 +43,12 @@ pub fn run_test(name: &str, node: &Node, width: usize, height: usize) {
 fn pretty_close(a: &FieldBuffer, b: &FieldBuffer) -> bool {
     let av = a.values();
     let bv = b.values();
-    let width = a.width();
 
     assert_eq!(av.len(), bv.len());
     assert_eq!(a.width(), b.width());
     assert_eq!(a.height(), b.height());
 
-    for (i, (a, b)) in av.into_iter().zip(bv.into_iter()).enumerate() {
+    for (_, (a, b)) in av.into_iter().zip(bv.into_iter()).enumerate() {
         let asig = a.signum();
         let bsig = b.signum();
 

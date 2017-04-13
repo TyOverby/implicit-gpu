@@ -1,12 +1,13 @@
 #[macro_use]
 extern crate implicit;
 extern crate typed_arena;
+extern crate flame;
 
 mod util;
 
 use implicit::nodes::{Node, PolyGroup};
 
-#[test]
+//#[test]
 fn single_circle() {
     let node = create_node!(a, {
         a(Node::Circle{ x: 50.0, y: 50.0, r: 48.5 })
@@ -15,7 +16,7 @@ fn single_circle() {
     util::run_test("circles", node.node(), 100, 100);
 }
 
-#[test]
+//#[test]
 fn circles_or() {
     let node = create_node!(a, {
         a(Node::Or(vec![
@@ -27,7 +28,7 @@ fn circles_or() {
     util::run_test("circles_or", node.node(), 150, 150)
 }
 
-#[test]
+//#[test]
 fn circles_and() {
     let node = create_node!(a, {
         a(Node::And(vec![
@@ -49,7 +50,7 @@ fn poly() -> PolyGroup {
     }
 }
 
-#[test]
+//#[test]
 fn simple_polygon() {
     let node = create_node!(a, {
         a(Node::Polygon(poly()))
@@ -58,13 +59,11 @@ fn simple_polygon() {
     util::run_test("simple_polygon", node.node(), 300, 250);
 }
 
-#[test]
+//#[test]
 fn simple_frozen_polygon() {
     let node = create_node!(a, {
         a(Node::Freeze(a(Node::Polygon(poly()))))
     });
-    println!("{:?}", node);
-    panic!();
 
     util::run_test("simple_frozen_polygon", node.node(), 300, 250);
 }
@@ -77,11 +76,13 @@ fn poly_ops() {
             a(Node::Polygon(poly()))
         ]))
     });
-
+    flame::clear();
     util::run_test("poly_ops", node.node(), 300, 250);
+    flame::dump_stdout();
+    panic!();
 }
 
-#[test]
+//#[test]
 fn frozen_circle() {
     let node = create_node!(a, {
         a(Node::Freeze(a(Node::Circle{x: 55.0, y: 55.0, r: 50.0})))
@@ -89,5 +90,3 @@ fn frozen_circle() {
 
     util::run_test("frozen_circle", node.node(), 110, 110);
 }
-
-
