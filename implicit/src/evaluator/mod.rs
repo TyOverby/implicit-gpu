@@ -1,13 +1,14 @@
 use std::collections::HashMap;
 use std::sync::Mutex;
 
+use itertools::Itertools;
+
 use opencl::OpenClContext;
 use compiler::*;
 use opencl::FieldBuffer;
 use polygon::run_poly;
 use nan_filter::filter_nans;
 use nodes::{Node, StaticNode, PolyGroup};
-use debug::image::{save_field_buffer, ColorMode};
 
 #[derive(Debug)]
 pub struct Evaluator {
@@ -124,7 +125,7 @@ impl Evaluator {
             &NodeGroup::Freeze(ref root) => {
                 let field_buf = eval_basic_group(root);
                 let (width, height) = field_buf.size();
-                let (xs, ys) = ::marching::run_marching(field_buf, ctx);
+                let (xs, ys) = ::marching::run_marching(&field_buf, ctx);
                 let xs = filter_nans(ctx, &xs);
                 let ys = filter_nans(ctx, &ys);
                 let res = ::polygon::run_poly_raw(xs, ys, width, height, ctx);
@@ -139,6 +140,15 @@ impl Evaluator {
         }
 
         out
+    }
+
+    pub fn get_polylines(&self, buffer: &FieldBuffer, ctx: &OpenClContext) -> Vec<((f32, f32), (f32, f32))> {
+        let (xs, ys) = ::marching::run_marching(buffer, ctx);
+        let points = xs.values().into_iter().zip(ys.values().into_iter());
+        let lines = points.tuples();
+        lines.filter(|&((x1, y1), (x2, y2))|
+            !(x1.is_nan() || x2.is_nan() || y1.is_nan() || y2.is_nan())
+        ).collect()
     }
 }
 

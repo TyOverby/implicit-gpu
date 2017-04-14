@@ -2,6 +2,7 @@ use image_crate::{ImageBuffer, Rgb, PNG, ImageRgb8};
 use std::f32::{INFINITY, NEG_INFINITY};
 use std::fs::File;
 use std::io::BufWriter;
+use std::path::Path;
 
 use ::opencl::FieldBuffer;
 
@@ -11,13 +12,13 @@ pub enum ColorMode {
     Debug
 }
 
-pub fn save_field_buffer(buffer: &FieldBuffer, name: &str, color_mode: ColorMode) {
+pub fn save_field_buffer<P: AsRef<Path>>(buffer: &FieldBuffer, name: P, color_mode: ColorMode) {
     let _guard = ::flame::start_guard("save_field_buffer");
     let samples = ::flame::span_of("fetch values", || buffer.values());
     save_image(&samples, buffer.width(), name, color_mode);
 }
 
-pub fn save_image(samples: &[f32], width: usize, file_name: &str, color_mode: ColorMode) {
+pub fn save_image<P: AsRef<Path>>(samples: &[f32], width: usize, file_name: P, color_mode: ColorMode) {
     let _guard = ::flame::start_guard("save_image");
     let mut min = INFINITY;
     let mut max = NEG_INFINITY;
@@ -57,6 +58,11 @@ pub fn save_image(samples: &[f32], width: usize, file_name: &str, color_mode: Co
         *pixel = Rgb(color);
     }
 
+    ::std::fs::create_dir_all({
+        let mut dir = file_name.as_ref().to_path_buf();
+        dir.pop();
+        dir
+    }).unwrap();
     let fout = File::create(file_name).unwrap();
     let mut fout = BufWriter::new(fout);
     ImageRgb8(buf).save(&mut fout, PNG).unwrap();

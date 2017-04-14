@@ -11,13 +11,13 @@ path = "src/main.rs"
 [dependencies]
 walkdir = "1.0.7"
 latin = "0.1.5"
+flame = "0.1.11"
 
 [dependencies.implicit]
 path = "../implicit"
 
-[dependencies.flame]
-version = "0.1.11"
-
+[dependencies.snoot]
+path = "../../snoot"
 
 [dependencies.implicit-language]
 path = "../language"

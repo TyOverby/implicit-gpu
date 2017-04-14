@@ -8,7 +8,7 @@ use ::nodes::Polygon;
 
 const PROGRAM: &'static str = include_str!("marching.c");
 
-pub fn run_marching(input: FieldBuffer, ctx: &OpenClContext) -> (LineBuffer, LineBuffer) {
+pub fn run_marching(input: &FieldBuffer, ctx: &OpenClContext) -> (LineBuffer, LineBuffer) {
     let _guard = ::flame::start_guard("opencl marching [run_marching]");
 
     let (width, height) = (input.width(), input.height());
@@ -29,7 +29,7 @@ pub fn run_marching(input: FieldBuffer, ctx: &OpenClContext) -> (LineBuffer, Lin
     (out_xs, out_ys)
 }
 
-pub fn march(input: FieldBuffer, simplify: bool, ctx: &OpenClContext) -> Vec<Polygon> {
+pub fn march(input: &FieldBuffer, simplify: bool, ctx: &OpenClContext) -> Vec<Polygon> {
     let _guard = ::flame::start_guard("march");
 
     let (out_xs, out_ys) = run_marching(input, ctx);
