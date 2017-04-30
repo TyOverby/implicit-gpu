@@ -2,6 +2,7 @@
 extern crate implicit;
 extern crate tendril;
 extern crate typed_arena;
+#[macro_use]
 extern crate snoot;
 
 mod errors;
@@ -97,7 +98,7 @@ fn parse_shape<'o, F>(expr: &Sexpr,
                     &Sexpr::List { ref span, .. } |
                     &Sexpr::UnaryOperator { ref span, .. } |
                     &Sexpr::String(_, ref span) => {
-                        errors.add(invalid_shape_name(span));
+                        errors.add(invalid_shape_name(span, span.text().as_ref()));
                         None
                     }
                     &Sexpr::Terminal(_, ref namespan) => {

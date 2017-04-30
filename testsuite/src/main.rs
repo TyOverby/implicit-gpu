@@ -3,13 +3,16 @@ extern crate latin;
 extern crate implicit_language;
 extern crate walkdir;
 extern crate flame;
+#[macro_use]
 extern crate snoot;
+#[macro_use]
+extern crate serde_derive;
 
 use std::path::PathBuf;
 use walkdir::{WalkDir, DirEntry};
 use implicit::opencl::OpenClContext;
 
-mod formats;
+pub mod formats;
 
 struct Paths {
     script: PathBuf,
@@ -38,12 +41,12 @@ fn run_test(paths: &Paths, ctx: &OpenClContext) {
     let target = nest.group(tree.node());
     let evaluator = implicit::evaluator::Evaluator::new(nest, 500, 500, None);
     let result = evaluator.evaluate(target, &ctx);
-    let lines = evaluator.get_polylines(&result, &ctx);
+    let lines = evaluator.get_polylines(&result, &ctx).into_iter().map(|((x1, y1), (x2, y2))| formats::lines::Line(x1, y1, x2, y2));
     ctx.empty_queue();
 
     image::save_field_buffer(&result, &paths.actual_image, image::ColorMode::Debug);
     latin::file::write(&paths.actual_values, formats::field::field_to_text(&result)).unwrap();
-    latin::file::write(&paths.actual_lines, formats::lines::lines_to_text(&lines)).unwrap();
+    latin::file::write(&paths.actual_lines, formats::lines::lines_to_text(lines)).unwrap();
 }
 
 fn main() {

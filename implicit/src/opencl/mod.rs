@@ -112,12 +112,12 @@ impl OpenClContext {
         if let Some(fill) = fill {
             debug_assert!(size == fill.len());
             MaskBuffer {
-                size,
+                size: size,
                 internal: Buffer::new(self.queue.clone(), Some(MEM_COPY_HOST_PTR | MEM_READ_WRITE), &[size], Some(fill)).unwrap()
             }
         } else {
             MaskBuffer {
-                size,
+                size: size,
                 internal: Buffer::new(self.queue.clone(), Some(MEM_READ_WRITE), &[size], None).unwrap()
             }
         }

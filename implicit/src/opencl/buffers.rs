@@ -2,20 +2,20 @@ use ocl::Buffer;
 
 #[derive(Debug, Clone)]
 pub struct FieldBuffer {
-    pub(crate) dims: (usize, usize),
-    pub(crate) internal: Buffer<f32>,
+    pub dims: (usize, usize),
+    pub internal: Buffer<f32>,
 }
 
 #[derive(Debug, Clone)]
 pub struct MaskBuffer {
-    pub(crate) size: usize,
-    pub(crate) internal: Buffer<u32>,
+    pub size: usize,
+    pub internal: Buffer<u32>,
 }
 
 #[derive(Debug, Clone)]
 pub struct LineBuffer {
-    pub(crate) size: usize,
-    pub(crate) internal: Buffer<f32>,
+    pub size: usize,
+    pub internal: Buffer<f32>,
 }
 
 impl FieldBuffer {

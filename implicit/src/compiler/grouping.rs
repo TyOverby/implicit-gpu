@@ -8,7 +8,7 @@ pub enum NodeGroup {
 }
 
 #[derive(Debug, Eq, PartialEq, Hash, Clone, Copy)]
-pub struct GroupId(pub(crate) usize);
+pub struct GroupId(pub usize);
 
 #[derive(Debug)]
 pub struct Nest {

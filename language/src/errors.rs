@@ -1,63 +1,63 @@
 use tendril::StrTendril;
 use snoot::parse::{Span, SexprKind};
-use snoot::diagnostic::{Diagnostic, DiagnosticBuilder};
+use snoot::diagnostic::{Diagnostic};
 
 pub fn invalid_syntax(span: &Span) -> Diagnostic {
-    DiagnosticBuilder::new("invalid syntax", span).build()
+    diagnostic!(span, "invalid syntax")
 }
 
-pub fn invalid_shape_name(span: &Span) -> Diagnostic {
-    DiagnosticBuilder::new("invalid shape name", span).build()
+pub fn invalid_shape_name(span: &Span, name: &str) -> Diagnostic {
+    diagnostic!(span, "invalid shape name {}", name)
 }
 
 pub fn polygons_need_a_point(span: &Span) -> Diagnostic {
-    DiagnosticBuilder::new("Polygons require at least one point", span).build()
+    diagnostic!(span, "Polygons require at least one point")
 }
 
 pub fn not_a_shape(span: &Span, kind: SexprKind) -> Diagnostic {
-    DiagnosticBuilder::new(format!("expected shape, found {:?}", kind), span).build()
+    diagnostic!(span, "expected shape, found {:?}", kind)
 }
 
 pub fn unrecognized_shape(span: &Span, name: &str) -> Diagnostic {
-    DiagnosticBuilder::new(format!("unrecognized shape name: {}", name), span).build()
+    diagnostic!(span, "unrecognized shape name: {}", name)
 }
 
 pub fn expected_number(span: &Span, actual: StrTendril) -> Diagnostic {
-    DiagnosticBuilder::new(format!("expected number, found {}", actual), span).build()
+    diagnostic!(span, "expected number, found {}", actual)
 }
 
 pub fn required_property(span: &Span, name: &str, typ: SexprKind) -> Diagnostic {
-    DiagnosticBuilder::new(format!("required property \"{}\" of type {:?}", name, typ), span).build()
+    diagnostic!(span, "required property \"{}\" of type {:?}", name, typ)
 }
 
 pub fn bad_value_kind(span: &Span, expected: SexprKind, actual: SexprKind) -> Diagnostic {
-    DiagnosticBuilder::new(format!("bad value kind, expected: {:?} but got {:?}", expected, actual), span).build()
+    diagnostic!(span, "bad value kind, expected: {:?} but got {:?}", expected, actual)
 }
 
 pub fn invalid_property_name(span: &Span) -> Diagnostic {
-    DiagnosticBuilder::new("invalid property name", span).build()
+    diagnostic!(span, "invalid property name")
 }
 
 pub fn missing_colon(span: &Span) -> Diagnostic {
-    DiagnosticBuilder::new("missing colon in property list", span).build()
+    diagnostic!(span, "missing colon in property list")
 }
 
 pub fn missing_value(span: &Span) -> Diagnostic {
-    DiagnosticBuilder::new("missing vlaue in property list", span).build()
+    diagnostic!(span, "missing value in property list")
 }
 
 pub fn expected_property_list_exists(span: &Span) -> Diagnostic {
-    DiagnosticBuilder::new(format!("expected property list"), span).build()
+    diagnostic!(span, "expected property list")
 }
 
 pub fn expected_children(span: &Span) -> Diagnostic {
-    DiagnosticBuilder::new(format!("expected children"), span).build()
+    diagnostic!(span, "expected children")
 }
 
 pub fn expected_one_child(span: &Span, actual: usize) -> Diagnostic {
-    DiagnosticBuilder::new(format!("expected exactly one child, found {}", actual), span).build()
+    diagnostic!(span, "expected exactly one child, found {}", actual)
 }
 
 pub fn expected_property_list(span: &Span, typ: SexprKind) -> Diagnostic {
-    DiagnosticBuilder::new(format!("expected property list, found {:?}", typ), span).build()
+    diagnostic!(span, "expected property list, found {:?}", typ)
 }
