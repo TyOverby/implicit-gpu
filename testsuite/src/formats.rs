@@ -4,6 +4,21 @@ pub mod field {
     use snoot::{simple_parse, Result as ParseResult, Sexpr};
     use snoot::diagnostic::{DiagnosticBag};
 
+    pub fn compare(expected: &str, expected_filename: &str, actual: ((usize, usize), Vec<f32>)) -> Result<(), String> {
+        let expected = text_to_vec(expected, expected_filename);
+        if expected.0 != actual.0 {
+            return Err(format!("size of field differs: {:?} vs {:?}", expected.0, actual.0));
+        }
+
+        for (i, (exv, acv)) in expected.1.into_iter().zip(actual.1.into_iter()).enumerate() {
+            if exv != acv {
+                return Err(format!("value at index {} differs: {} vs {}", i, exv, acv));
+            }
+        }
+
+        Ok(())
+    }
+
     pub fn field_to_text(field: &FieldBuffer) -> String {
         let (width, height) = field.size();
         let values = field.values();
@@ -25,7 +40,7 @@ pub mod field {
         buff
     }
 
-    pub fn _text_to_vec(text: &str, filename: &str) -> ((usize, usize), Vec<f32>) {
+    pub fn text_to_vec(text: &str, filename: &str) -> ((usize, usize), Vec<f32>) {
         fn parse_size(sexpr: &Sexpr, bag: &mut DiagnosticBag) -> (usize, usize) {
             let children = sexpr.expect_list_with_symbol("size", bag).unwrap_or_default();
             if children.len() != 2 {
@@ -67,9 +82,25 @@ pub mod lines {
     use snoot::{simple_parse, Result as ParseResult};
     use ::snoot::serde_serialization::{deserialize, DeserializeResult};
 
-    #[derive(Deserialize, Debug, PartialEq)]
+    #[derive(Deserialize, Debug, PartialEq, Copy, Clone)]
     #[serde(rename="line")]
     pub struct Line(pub f32, pub f32, pub f32, pub f32);
+
+    pub fn compare(expected: &str, expected_filename: &str, actual: &[Line]) -> Result<(), String> {
+        let ex = text_to_vec(expected, expected_filename);
+
+        if ex.len() != actual.len() {
+            return Err(format!("Number of lines differ, {} vs {}", ex.len(), actual.len()));
+        }
+
+        for (i, (exl, acl)) in ex.into_iter().zip(actual.into_iter().map(|&l|l)).enumerate() {
+            if exl != acl {
+                return Err(format!("Contents of line {} differ, {:?} vs {:?}", i, exl, acl))
+            }
+        }
+
+        Ok(())
+    }
 
     pub fn lines_to_text<I: Iterator<Item=Line>>(lines: I) -> String {
         let mut buff = String::new();
@@ -79,7 +110,7 @@ pub mod lines {
         buff
     }
 
-    pub fn _text_to_vec(text: &str, filename: &str) -> Vec<Line> {
+    pub fn text_to_vec(text: &str, filename: &str) -> Vec<Line> {
 
         let ParseResult{roots, diagnostics} = simple_parse(text, &[], Some(filename));
         diagnostics.assert_empty();
@@ -95,6 +126,6 @@ pub mod lines {
     #[test]
     fn test_text_to_vec() {
         let s = "(line 1 2 3 4) (line 5 6 7 8)";
-        assert_eq!(_text_to_vec(s, "foo"), vec![Line(1.0, 2.0, 3.0, 4.0), Line(5.0, 6.0, 7.0, 8.0)])
+        assert_eq!(text_to_vec(s, "foo"), vec![Line(1.0, 2.0, 3.0, 4.0), Line(5.0, 6.0, 7.0, 8.0)])
     }
 }

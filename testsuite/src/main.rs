@@ -22,16 +22,15 @@ struct Paths {
     actual_lines: PathBuf,
 
     _expected_image: PathBuf,
-    _expected_values: PathBuf,
-    _expected_lines: PathBuf,
+    expected_values: PathBuf,
+    expected_lines: PathBuf,
 }
 
-fn run_test(paths: &Paths, ctx: &OpenClContext) {
+fn run_test(paths: &Paths, ctx: &OpenClContext) -> Result<(), String> {
     let _guard = flame::start_guard(format!("running {:?}", paths.script));
     use implicit::debug::image;
 
-    let source = latin::file::read(&paths.script).unwrap();
-    let source = String::from_utf8(source).unwrap();
+    let source = latin::file::read_string_utf8(&paths.script).unwrap();
 
     let script_name = paths.script.to_str().unwrap_or("<unknown source file>");
     let tree = implicit_language::parse(&source[..], script_name).unwrap();
@@ -41,12 +40,28 @@ fn run_test(paths: &Paths, ctx: &OpenClContext) {
     let target = nest.group(tree.node());
     let evaluator = implicit::evaluator::Evaluator::new(nest, 500, 500, None);
     let result = evaluator.evaluate(target, &ctx);
-    let lines = evaluator.get_polylines(&result, &ctx).into_iter().map(|((x1, y1), (x2, y2))| formats::lines::Line(x1, y1, x2, y2));
+    let lines = evaluator
+                    .get_polylines(&result, &ctx)
+                    .into_iter()
+                    .map(|((x1, y1), (x2, y2))| formats::lines::Line(x1, y1, x2, y2))
+                    .collect::<Vec<_>>();
     ctx.empty_queue();
 
     image::save_field_buffer(&result, &paths.actual_image, image::ColorMode::Debug);
     latin::file::write(&paths.actual_values, formats::field::field_to_text(&result)).unwrap();
-    latin::file::write(&paths.actual_lines, formats::lines::lines_to_text(lines)).unwrap();
+    latin::file::write(&paths.actual_lines, formats::lines::lines_to_text(lines.iter().cloned())).unwrap();
+
+    formats::field::compare(
+        &latin::file::read_string_utf8(&paths.expected_values).unwrap(),
+        &paths.expected_values.to_str().unwrap(),
+        (result.size(), result.values()))?;
+
+    formats::lines::compare(
+        &latin::file::read_string_utf8(&paths.expected_lines).unwrap(),
+        &paths.expected_lines.to_str().unwrap(),
+        &lines)?;
+
+    Ok(())
 }
 
 fn main() {
@@ -80,12 +95,12 @@ fn main() {
             actual_lines: root_dir.join("actual").join(script_name.with_extension("lines")),
 
             _expected_image: root_dir.join("expected").join(script_name.with_extension("png")),
-            _expected_values: root_dir.join("expected").join(script_name.with_extension("values")),
-            _expected_lines: root_dir.join("expected").join(script_name.with_extension("lines")),
+            expected_values: root_dir.join("expected").join(script_name.with_extension("values")),
+            expected_lines: root_dir.join("expected").join(script_name.with_extension("lines")),
         };
 
         if !paths.script.ends_with("frozen_poly.impl") {
-            run_test(&paths, &ctx);
+            run_test(&paths, &ctx).unwrap();
         }
     }
 }

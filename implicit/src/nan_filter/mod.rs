@@ -38,7 +38,6 @@ fn sum_mask(ctx: &OpenClContext, mask: &MaskBuffer) {
     let aux_temp: Buffer<u32> = Buffer::new(ctx.queue().clone(), None, &[num_workgroups], None).unwrap();
 
     let kernel = ctx.compile("sum", SUM_PROG);
-    let kernel2 = kernel.clone();
     kernel.gws([launch_size])
         .lws([WORKGROUP_SIZE])
         .arg_buf(mask.buffer())
@@ -49,7 +48,8 @@ fn sum_mask(ctx: &OpenClContext, mask: &MaskBuffer) {
         .enq()
         .unwrap();
 
-    kernel2.gws([launch_size])
+    let kernel = ctx.compile("sum", SUM_PROG);
+    kernel.gws([launch_size])
         .lws([WORKGROUP_SIZE])
         .arg_buf(mask.buffer())
         .arg_scl(array_size)
