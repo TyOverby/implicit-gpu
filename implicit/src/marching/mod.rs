@@ -73,7 +73,7 @@ fn basic() {
     fn test_this(a: f32, b: f32, c: f32, d: f32, ctx: &OpenClContext) -> ((f32, f32), (f32, f32)) {
         let buf = ctx.field_buffer(2, 2, Some(&[a, b, d, c]));
 
-        let (out_xs, out_ys) = run_marching(buf, &ctx);
+        let (out_xs, out_ys) = run_marching(&buf, &ctx);
         let (out_xs, out_ys) = (out_xs.values(), out_ys.values());
 
         return ((out_xs[0], out_ys[0]), (out_xs[1], out_ys[1]))
