@@ -12,7 +12,7 @@ mod test;
 
 use tendril::StrTendril;
 use implicit::nodes::{Node, StaticNode, PolyGroup};
-use snoot::diagnostic::{DiagnosticBuilder, DiagnosticBag};
+use snoot::diagnostic::{DiagnosticBag};
 use snoot::parse::Span;
 use snoot::Sexpr;
 use snoot::simple_parse;
@@ -51,7 +51,7 @@ pub fn parse<'b, I: Into<StrTendril>>(input: I, filename: &'b str) -> ParseResul
 
     let root = match roots.len() {
         0 => {
-            diagnostics.add(DiagnosticBuilder::new("completely empty programs are not allowed", &Span::empty()).build());
+            diagnostics.add(diagnostic!(&Span::empty(), "completely empty programs are not allowed"));
             return ParseResult {
                 root: None,
                 diagnostics: diagnostics,
@@ -65,7 +65,7 @@ pub fn parse<'b, I: Into<StrTendril>>(input: I, filename: &'b str) -> ParseResul
 
             let span = Span::from_spans(first.span(), last.span());
 
-            diagnostics.add(DiagnosticBuilder::new(format!("a program must only have one root, found {}", n), &span).build());
+            diagnostics.add(diagnostic!(&span, "a program must only have one root, found {}", n));
             first
         }
     };
