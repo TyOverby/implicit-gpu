@@ -57,7 +57,7 @@ fn run_test(paths: &Paths, ctx: &OpenClContext) -> Result<(), String> {
             &paths.expected_values.to_str().unwrap(),
             (result.size(), result.values()))?;
     } else {
-        return Err(format!(""));
+        return Err(format!("could not find expected values file at {}", paths.expected_values.to_str().unwrap()));
     }
 
     if latin::file::exists(&paths.expected_lines) {
@@ -65,6 +65,8 @@ fn run_test(paths: &Paths, ctx: &OpenClContext) -> Result<(), String> {
             &latin::file::read_string_utf8(&paths.expected_lines).unwrap(),
             &paths.expected_lines.to_str().unwrap(),
             &lines)?;
+    } else {
+        return Err(format!("could not find expected lines file at {}", paths.expected_lines.to_str().unwrap()));
     }
 
     Ok(())
@@ -118,10 +120,10 @@ fn main() {
         print!("{}: {}", script_name.to_str().unwrap(), running);
         stdout().flush().unwrap();
         clear(running.len());
+
         if let Err(e) = run_test(&paths, &ctx) {
             println!("{}", "ERROR!".red());
-            println!("{}", e.red());
-            panic!();
+            println!("  {}", e.red());
         } else {
             println!("{}", "OK!".green());
         }
