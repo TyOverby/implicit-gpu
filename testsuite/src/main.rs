@@ -1,4 +1,5 @@
 extern crate implicit;
+extern crate colored;
 extern crate latin;
 extern crate implicit_language;
 extern crate walkdir;
@@ -11,6 +12,7 @@ extern crate serde_derive;
 use std::path::PathBuf;
 use walkdir::{WalkDir, DirEntry};
 use implicit::opencl::OpenClContext;
+use colored::Colorize;
 
 pub mod formats;
 
@@ -21,7 +23,6 @@ struct Paths {
     actual_values: PathBuf,
     actual_lines: PathBuf,
 
-    _expected_image: PathBuf,
     expected_values: PathBuf,
     expected_lines: PathBuf,
 }
@@ -34,7 +35,6 @@ fn run_test(paths: &Paths, ctx: &OpenClContext) -> Result<(), String> {
 
     let script_name = paths.script.to_str().unwrap_or("<unknown source file>");
     let tree = implicit_language::parse(&source[..], script_name).unwrap();
-    println!("{:?}", tree);
 
     let mut nest = implicit::compiler::Nest::new();
     let target = nest.group(tree.node());
@@ -51,25 +51,38 @@ fn run_test(paths: &Paths, ctx: &OpenClContext) -> Result<(), String> {
     latin::file::write(&paths.actual_values, formats::field::field_to_text(&result)).unwrap();
     latin::file::write(&paths.actual_lines, formats::lines::lines_to_text(lines.iter().cloned())).unwrap();
 
-    formats::field::compare(
-        &latin::file::read_string_utf8(&paths.expected_values).unwrap(),
-        &paths.expected_values.to_str().unwrap(),
-        (result.size(), result.values()))?;
+    if latin::file::exists(&paths.expected_values) {
+        formats::field::compare(
+            &latin::file::read_string_utf8(&paths.expected_values).unwrap(),
+            &paths.expected_values.to_str().unwrap(),
+            (result.size(), result.values()))?;
+    } else {
+        return Err(format!(""));
+    }
 
-    formats::lines::compare(
-        &latin::file::read_string_utf8(&paths.expected_lines).unwrap(),
-        &paths.expected_lines.to_str().unwrap(),
-        &lines)?;
+    if latin::file::exists(&paths.expected_lines) {
+        formats::lines::compare(
+            &latin::file::read_string_utf8(&paths.expected_lines).unwrap(),
+            &paths.expected_lines.to_str().unwrap(),
+            &lines)?;
+    }
 
     Ok(())
 }
 
 fn main() {
+    use std::io::{Write, stdout};
     fn ends_with_impl(e: &DirEntry) -> bool {
         e.path()
             .extension()
             .map(|e| e == "impl")
             .unwrap_or(false)
+    }
+    fn clear(size: usize) {
+        print!("{}{}{}",
+            ::std::iter::repeat(8 as char).take(size).collect::<String>(),
+            ::std::iter::repeat(' ').take(size).collect::<String>(),
+            ::std::iter::repeat(8 as char).take(size).collect::<String>());
     }
 
     let root_dir = ::std::env::current_dir().unwrap();
@@ -87,6 +100,9 @@ fn main() {
     for entry in iter {
         let script = entry;
         let script_name: PathBuf = script.strip_prefix(&test_dir).unwrap().into();
+        if script_name.to_str().unwrap().contains("frozen_poly") {
+            continue;
+        }
 
         let paths = Paths {
             script: script,
@@ -94,14 +110,20 @@ fn main() {
             actual_values: root_dir.join("actual").join(script_name.with_extension("values")),
             actual_lines: root_dir.join("actual").join(script_name.with_extension("lines")),
 
-            _expected_image: root_dir.join("expected").join(script_name.with_extension("png")),
             expected_values: root_dir.join("expected").join(script_name.with_extension("values")),
             expected_lines: root_dir.join("expected").join(script_name.with_extension("lines")),
         };
 
-        if !paths.script.ends_with("frozen_poly.impl") {
-            run_test(&paths, &ctx).unwrap();
+        let running = "running".yellow();
+        print!("{}: {}", script_name.to_str().unwrap(), running);
+        stdout().flush().unwrap();
+        clear(running.len());
+        if let Err(e) = run_test(&paths, &ctx) {
+            println!("{}", "ERROR!".red());
+            println!("{}", e.red());
+            panic!();
+        } else {
+            println!("{}", "OK!".green());
         }
     }
 }
-
