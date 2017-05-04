@@ -11,7 +11,7 @@ pub mod field {
         }
 
         for (i, (exv, acv)) in expected.1.into_iter().zip(actual.1.into_iter()).enumerate() {
-            if exv != acv {
+            if (exv - acv).abs() > 0.0001 {
                 return Err(format!("value at index {} differs: {} vs {}", i, exv, acv));
             }
         }
@@ -32,7 +32,7 @@ pub mod field {
 
             write!(&mut buff, "(row").unwrap();
             for v in row {
-                write!(&mut buff, " {}", v).unwrap();
+                write!(&mut buff, " {:.6}", v).unwrap();
             }
             writeln!(&mut buff, ")").unwrap();
         }
@@ -94,7 +94,16 @@ pub mod lines {
         }
 
         for (i, (exl, acl)) in ex.into_iter().zip(actual.into_iter().map(|&l|l)).enumerate() {
-            if exl != acl {
+            if (exl.0 - acl.0).abs() > 0.0001 {
+                return Err(format!("Contents of line {} differ, {:?} vs {:?}", i, exl, acl))
+            }
+            if (exl.1 - acl.1).abs() > 0.0001 {
+                return Err(format!("Contents of line {} differ, {:?} vs {:?}", i, exl, acl))
+            }
+            if (exl.2 - acl.2).abs() > 0.0001 {
+                return Err(format!("Contents of line {} differ, {:?} vs {:?}", i, exl, acl))
+            }
+            if (exl.3 - acl.3).abs() > 0.0001 {
                 return Err(format!("Contents of line {} differ, {:?} vs {:?}", i, exl, acl))
             }
         }
@@ -105,7 +114,7 @@ pub mod lines {
     pub fn lines_to_text<I: Iterator<Item=Line>>(lines: I) -> String {
         let mut buff = String::new();
         for Line(x1, y1, x2, y2) in lines {
-            writeln!(&mut buff, "(line {} {} {} {})", x1, y1, x2, y2).unwrap();
+            writeln!(&mut buff, "(line {:.6} {:.6} {:.6} {:.6})", x1, y1, x2, y2).unwrap();
         }
         buff
     }
