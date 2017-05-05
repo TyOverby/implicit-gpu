@@ -31,14 +31,14 @@ fn run_test(paths: &Paths, ctx: &OpenClContext) -> Result<(), String> {
     let _guard = flame::start_guard(format!("running {:?}", paths.script));
     use implicit::debug::image;
 
-    let source = latin::file::read_string_utf8(&paths.script).unwrap();
-
     let script_name = paths.script.to_str().unwrap_or("<unknown source file>");
+    let source = latin::file::read_string_utf8(&paths.script).unwrap();
     let tree = implicit_language::parse(&source[..], script_name).unwrap();
 
     let mut nest = implicit::compiler::Nest::new();
     let target = nest.group(tree.node());
     let evaluator = implicit::evaluator::Evaluator::new(nest, 500, 500, None);
+
     let result = evaluator.evaluate(target, &ctx);
     let lines = evaluator
                     .get_polylines(&result, &ctx)
@@ -99,6 +99,7 @@ fn main() {
 
     let ctx = implicit::opencl::OpenClContext::default();
 
+    let mut any_failures = false;
     for entry in iter {
         let script = entry;
         let script_name: PathBuf = script.strip_prefix(&test_dir).unwrap().into();
@@ -121,8 +122,13 @@ fn main() {
         if let Err(e) = run_test(&paths, &ctx) {
             println!("{}", "ERROR!".red());
             println!("  {}", e.red());
+            any_failures = true;
         } else {
             println!("{}", "OK!".green());
         }
+    }
+
+    if any_failures {
+        std::process::exit(1);
     }
 }
