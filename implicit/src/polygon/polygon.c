@@ -74,14 +74,16 @@ __kernel void apply(__global float *buffer, ulong width, __global float *xs, __g
         float x2 = xs[i + 1];
         float y2 = ys[i + 1];
 
-        if ((x1 == x2 && y1 == y2) ||
-            isnan(x1) ||
-            isnan(x2) ||
-            isnan(y1) ||
-            isnan(y2))
-        {
+        if (x1 == x2 && y1 == y2) {
             continue;
         }
+        if (isnan(x1) ||
+            isnan(x2) ||
+            isnan(y1) ||
+            isnan(y2)) {
+            break;
+        }
+
 
         float new = dist_to_line(x_s, y_s, x1, y1, x2, y2);
         float pos = sign(position(x_s, y_s, x1, y1, x2, y2));
@@ -102,8 +104,4 @@ __kernel void apply(__global float *buffer, ulong width, __global float *xs, __g
     }
 
     buffer[pos] = -minimum;
-    if (pos == 0)
-    {
-        //printf("OPENCL: value: %f ", -minimum);
-    }
 }

@@ -102,9 +102,6 @@ fn main() {
     for entry in iter {
         let script = entry;
         let script_name: PathBuf = script.strip_prefix(&test_dir).unwrap().into();
-        if script_name.to_str().unwrap().contains("frozen_poly") {
-            continue;
-        }
 
         let paths = Paths {
             script: script,

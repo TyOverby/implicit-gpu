@@ -18,6 +18,9 @@ pub fn run_poly(xs: &[f32], ys: &[f32], width: usize, height: usize, ctx: &OpenC
 }
 
 pub fn run_poly_raw(xs: LineBuffer, ys: LineBuffer, width: usize, height: usize, ctx: &OpenClContext) -> FieldBuffer {
+    debug_assert!(xs.non_nans_at_front());
+    debug_assert!(ys.non_nans_at_front());
+
     let _guard = ::flame::start_guard("run_poly_raw");
     let out = ctx.field_buffer(width, height, None);
     let kernel = ctx.compile("apply", PROGRAM);

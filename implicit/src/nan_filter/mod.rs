@@ -142,3 +142,12 @@ fn test_sum_mask() {
     test_size(15625 * 512 - 1);
     test_size(15625 * 512 + 1);
 }
+
+#[test]
+fn test_filter() {
+    let ctx = OpenClContext::default();
+    let (_, input) = get_rand_array(&ctx, 8_000_000);
+    let filtered = filter_nans(&ctx, &input);
+    let mut seen_nan = false;
+    assert!(filtered.non_nans_at_front());
+}

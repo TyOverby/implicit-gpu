@@ -52,6 +52,18 @@ impl LineBuffer {
         out
     }
 
+    pub fn non_nans_at_front(&self) -> bool {
+        let mut seen_nan = false;
+        for v in self.values() {
+            if v.is_nan() {
+                seen_nan = true;
+            } else if seen_nan {
+                return false;
+            }
+        }
+        return true;
+    }
+
     pub fn buffer(&self) -> &Buffer<f32> {
         &self.internal
     }
