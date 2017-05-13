@@ -36,15 +36,13 @@ pub fn compile(node: &Node) -> (String, CompilationContext) {
 fn comp(node: &Node, cc: &mut CompilationContext, buff: &mut String) -> String {
     match *node {
         Node::Rect{x, y, w, h} => {
-            let (res, dx, dy, out) = (cc.get_id("rect"), cc.get_id("dx"), cc.get_id("dy"), cc.get_id("out"));
+            let (res, _dx, _dy, _out) = (cc.get_id("rect"), cc.get_id("dx"), cc.get_id("dy"), cc.get_id("out"));
 
             buff.push('\n');
             writeln!(buff, "  float {result};", result = res).unwrap();
             writeln!(buff, "  {{").unwrap();
-            writeln!(buff, "    float {dx} = abs({px} - {cx}) - {w} / 2.0;" , dx = dx, px = x, cx = x + w / 2.0, w = w).unwrap();
-            writeln!(buff, "    float {dy} = abs({py} - {cy}) - {h} / 2.0;" , dy = dy, py = y, cy = y + h / 2.0, h = h).unwrap();
-            writeln!(buff, "    float {out} = {dx} * {dx} + {dy} * {dy};", out = out, dx = dx, dy = dy).unwrap();
-            writeln!(buff, "    {result} = {out};", result = res, out = out).unwrap();
+            writeln!(buff, "    {result} = ({x}-{a}) * ({x} - {c}) * ({y} - {b}) * ({y} - {d});",
+                                result = res, x = cc.get_x(), y = cc.get_y(), a = x, b = y, c = x + w, d = y + h);
             writeln!(buff, "  }}").unwrap();
 
             res
