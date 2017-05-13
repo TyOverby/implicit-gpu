@@ -21,6 +21,20 @@ fn correct_circle() {
 }
 
 #[test]
+fn correct_rect() {
+    let actual = create_node!(a, {
+        a(Node::Rect {
+              x: 50.0,
+              y: 20.0,
+              w: 10.0,
+              h: 30.0,
+          })
+    });
+
+    assert_eq!(actual, parse_ok("(rect {x:50 y:20 w:10 h:30})"));
+}
+
+#[test]
 fn correct_or() {
     let actual = create_node!(a, {
         a(Node::Or(vec![a(Node::Circle {

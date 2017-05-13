@@ -106,6 +106,9 @@ fn parse_shape<'o, F>(expr: &Sexpr,
                             "circle" => {
                                 parse_circle(&children[1..], span, errors).map(a)
                             },
+                            "rect" => {
+                                parse_rect(&children[1..], span, errors).map(a)
+                            },
                             "polygon" => {
                                 parse_polygon(&children[1..], span, errors).map(a)
                             },
@@ -218,6 +221,23 @@ fn parse_circle(children: &[Sexpr], span: &Span, errors: &mut DiagnosticBag) -> 
         let x = attempt!(proplist.get_number("x", span), 10.0, errors);
         let y = attempt!(proplist.get_number("y", span), 10.0, errors);
         Some(Node::Circle{r: radius, x: x, y: y})
+    } else {
+        errors.add(expected_property_list_exists(span));
+        None
+    }
+}
+
+fn parse_rect(children: &[Sexpr], span: &Span, errors: &mut DiagnosticBag) -> Option<Node<'static>> {
+
+    if let Some(proplist) = children.get(0) {
+        let (ok, proplist) = parse_properties(proplist, errors);
+        if !ok { return None }
+        let x = attempt!(proplist.get_number("x", span), 10.0, errors);
+        let y = attempt!(proplist.get_number("y", span), 10.0, errors);
+        let w = attempt!(proplist.get_number("w", span), 10.0, errors);
+        let h = attempt!(proplist.get_number("h", span), 10.0, errors);
+
+        Some(Node::Rect{x, y, w, h})
     } else {
         errors.add(expected_property_list_exists(span));
         None

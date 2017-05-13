@@ -148,6 +148,5 @@ fn test_filter() {
     let ctx = OpenClContext::default();
     let (_, input) = get_rand_array(&ctx, 8_000_000);
     let filtered = filter_nans(&ctx, &input);
-    let mut seen_nan = false;
     assert!(filtered.non_nans_at_front());
 }

@@ -9,6 +9,7 @@ pub use self::poly::*;
 #[derive(Debug, PartialEq)]
 pub enum Node<'a> {
     Circle { x: f32, y: f32, r: f32 },
+    Rect { x: f32, y: f32, w: f32, h: f32},
     And(Vec<&'a Node<'a>>),
     Or(Vec<&'a Node<'a>>),
     Not(&'a Node<'a>),
@@ -74,7 +75,8 @@ impl Clone for StaticNode {
         fn clone_node<'i, 'o, F>(input: &'i Node<'i>, a: &F) -> &'o Node<'o>
         where F: Fn(Node<'o>) -> &'o Node<'o> {
             match input {
-                &Node::Circle {x, y, r} => a(Node::Circle{x:x, y:y, r:r}),
+                &Node::Circle {x, y, r} => a(Node::Circle{x, y, r}),
+                &Node::Rect {x, y, w, h} => a(Node::Rect{x, y, w, h}),
                 &Node::And(ref ch) => a(Node::And(ch.iter().map(|c| clone_node(c, a)).collect())),
                 &Node::Or(ref ch) => a(Node::Or(ch.iter().map(|c| clone_node(c, a)).collect())),
                 &Node::Not(c) => a(Node::Not(clone_node(c, a))),
