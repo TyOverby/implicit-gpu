@@ -237,7 +237,16 @@ fn parse_rect(children: &[Sexpr], span: &Span, errors: &mut DiagnosticBag) -> Op
         let w = attempt!(proplist.get_number("w", span), 10.0, errors);
         let h = attempt!(proplist.get_number("h", span), 10.0, errors);
 
-        Some(Node::Rect{x, y, w, h})
+        // THIS IS A GIAN HACK.  REMOVE ASAP
+
+        let input = format!(
+            "{{x: {a} y: {b}}} {{x: {c} y: {b}}} {{x: {c} y: {d}}} {{x: {a} y: {d}}}",
+            a = x, b = y, c = x + w, d = x + h);
+
+        let snoot::Result { roots, diagnostics: diag } = simple_parse(input, &[":"], None);
+        errors.append(diag);
+
+        parse_polygon(&roots[..], &Span::empty(), errors)
     } else {
         errors.add(expected_property_list_exists(span));
         None

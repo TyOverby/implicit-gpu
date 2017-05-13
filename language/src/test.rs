@@ -20,6 +20,7 @@ fn correct_circle() {
     assert_eq!(actual, parse_ok("(circle {r: 10 x: 50 y: 20})"));
 }
 
+/*
 #[test]
 fn correct_rect() {
     let actual = create_node!(a, {
@@ -32,7 +33,7 @@ fn correct_rect() {
     });
 
     assert_eq!(actual, parse_ok("(rect {x:50 y:20 w:10 h:30})"));
-}
+}*/
 
 #[test]
 fn correct_or() {

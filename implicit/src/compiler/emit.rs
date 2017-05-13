@@ -42,7 +42,7 @@ fn comp(node: &Node, cc: &mut CompilationContext, buff: &mut String) -> String {
             writeln!(buff, "  float {result};", result = res).unwrap();
             writeln!(buff, "  {{").unwrap();
             writeln!(buff, "    {result} = ({x}-{a}) * ({x} - {c}) * ({y} - {b}) * ({y} - {d});",
-                                result = res, x = cc.get_x(), y = cc.get_y(), a = x, b = y, c = x + w, d = y + h);
+                                result = res, x = cc.get_x(), y = cc.get_y(), a = x, b = y, c = x + w, d = y + h).unwrap();
             writeln!(buff, "  }}").unwrap();
 
             res
