@@ -91,16 +91,25 @@ fn main() {
     let mut test_dir = root_dir.clone();
     test_dir.push("tests");
 
-    let iter = WalkDir::new(&test_dir)
+    let test_files = WalkDir::new(&test_dir)
         .into_iter()
         .filter_map(Result::ok)
         .filter(ends_with_impl)
-        .map(|e| e.path().to_path_buf());
+        .map(|e| e.path().to_path_buf())
+        .collect::<Vec<_>>();;
+
+    let max_path_size = test_files
+        .iter()
+        .map(|p| p.strip_prefix(&test_dir))
+        .filter_map(Result::ok)
+        .filter_map(|p| p.to_str().map(str::len))
+        .max()
+        .unwrap_or(0);
 
     let ctx = implicit::opencl::OpenClContext::default();
 
     let mut any_failures = false;
-    for entry in iter {
+    for entry in test_files {
         let script = entry;
         let script_name: PathBuf = script.strip_prefix(&test_dir).unwrap().into();
 
@@ -115,7 +124,10 @@ fn main() {
         };
 
         let running = "running".yellow();
-        print!("{}: {}", script_name.to_str().unwrap(), running);
+        print!("{}:{} {}",
+            script_name.to_str().unwrap(),
+            std::iter::repeat(' ').take(max_path_size - script_name.to_str().unwrap().len()).collect::<String>(),
+            running);
         stdout().flush().unwrap();
         clear(running.len());
 

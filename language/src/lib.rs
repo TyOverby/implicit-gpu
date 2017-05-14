@@ -103,31 +103,16 @@ fn parse_shape<'o, F>(expr: &Sexpr,
                     }
                     &Sexpr::Terminal(_, ref namespan) => {
                         match namespan.text().as_ref() {
-                            "circle" => {
-                                parse_circle(&children[1..], span, errors).map(a)
-                            },
-                            "rect" => {
-                                parse_rect(&children[1..], span, errors).map(a)
-                            },
-                            "polygon" => {
-                                parse_polygon(&children[1..], span, errors).map(a)
-                            },
-                            "or" => {
-                                make_combinator(&children[1..], Node::Or, span, a, errors)
-                            }
-                            "and" => {
-                                make_combinator(&children[1..], Node::And, span, a, errors)
-                            }
-                            "not" => {
-                                make_singular(&children[1..], Node::Not, span, a, errors)
-                            }
-                            "break" => {
-                                make_singular(&children[1..], Node::Break, span, a, errors)
-                            }
-                            "freeze" => {
-                                make_singular(&children[1..], Node::Freeze, span, a, errors)
-                            }
-
+                            "circle" => parse_circle(&children[1..], span, errors).map(a),
+                            "rect" => parse_rect(&children[1..], span, errors).map(a),
+                            "polygon" => parse_polygon(&children[1..], span, errors).map(a),
+                            "or" => make_combinator(&children[1..], Node::Or, span, a, errors),
+                            "and" => make_combinator(&children[1..], Node::And, span, a, errors),
+                            "not" => make_singular(&children[1..], Node::Not, span, a, errors),
+                            "break" => make_singular(&children[1..], Node::Break, span, a, errors),
+                            "freeze" => make_singular(&children[1..], Node::Freeze, span, a, errors),
+                            "grow" => parse_modulate(&children[1..], span, true, a, errors).map(a),
+                            "shrink" => parse_modulate(&children[1..], span, false, a, errors).map(a),
                             other => {
                                 errors.add(unrecognized_shape(namespan, other));
                                 None
@@ -228,7 +213,6 @@ fn parse_circle(children: &[Sexpr], span: &Span, errors: &mut DiagnosticBag) -> 
 }
 
 fn parse_rect(children: &[Sexpr], span: &Span, errors: &mut DiagnosticBag) -> Option<Node<'static>> {
-
     if let Some(proplist) = children.get(0) {
         let (ok, proplist) = parse_properties(proplist, errors);
         if !ok { return None }
@@ -250,5 +234,26 @@ fn parse_rect(children: &[Sexpr], span: &Span, errors: &mut DiagnosticBag) -> Op
     } else {
         errors.add(expected_property_list_exists(span));
         None
+    }
+}
+
+fn parse_modulate<'o, F>(children: &[Sexpr], span: &Span, grow: bool, a: &F, errors: &mut DiagnosticBag) -> Option<Node<'o>>
+where F: Fn(Node<'o>) -> &'o Node<'o>
+{
+    if children.len() != 2 {
+        errors.add(expected_children(span));
+        return None;
+    }
+
+    let how_much = if let Some(n) = children[0].expect_float(errors) {
+        n * (if grow { -1.0 } else { 1.0 })
+    } else {
+        return None;
+    };
+
+
+    match parse_shape(&children[1], a, errors) {
+        Some(shape) => Some(Node::Modulate(how_much as f32, shape)),
+        None => None
     }
 }

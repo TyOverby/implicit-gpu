@@ -91,7 +91,7 @@ fn basic_polygon() {
 
 #[test]
 fn more_complexicated_polygon() {
-        let actual = create_node!(a, {
+    let actual = create_node!(a, {
         a(Node::Polygon(PolyGroup::single_additive(vec![5.0, 15.0,  15.0, 5.0], vec![10.0, 20.0,  20.0, 10.0])))
     });
 
@@ -100,11 +100,30 @@ fn more_complexicated_polygon() {
 
 #[test]
 fn even_more_complexicated_polygon() {
-        let actual = create_node!(a, {
+    let actual = create_node!(a, {
         a(Node::Polygon(PolyGroup::single_additive(
             vec![5.0, 15.0,  15.0, 30.0,  30.0, 5.0],
             vec![10.0, 20.0,  20.0, 50.0,  50.0, 10.0])))
     });
 
     assert_eq!(actual, parse_ok("(polygon {x: 5 y: 10} {x: 15 y: 20} {x: 30 y: 50})"));
+}
+
+#[test]
+fn test_grow_shrink() {
+    let actual = create_node!(a, {
+        a(Node::Modulate(13.0,
+            a(Node::Polygon(PolyGroup::single_additive(
+                vec![5.0, 15.0,  15.0, 30.0,  30.0, 5.0],
+                vec![10.0, 20.0,  20.0, 50.0,  50.0, 10.0])))))
+    });
+    assert_eq!(actual, parse_ok("(grow 13 (polygon {x: 5 y: 10} {x: 15 y: 20} {x: 30 y: 50}))"));
+
+    let actual = create_node!(a, {
+        a(Node::Modulate(-13.0,
+            a(Node::Polygon(PolyGroup::single_additive(
+                vec![5.0, 15.0,  15.0, 30.0,  30.0, 5.0],
+                vec![10.0, 20.0,  20.0, 50.0,  50.0, 10.0])))))
+    });
+    assert_eq!(actual, parse_ok("(shrink 13 (polygon {x: 5 y: 10} {x: 15 y: 20} {x: 30 y: 50}))"));
 }
