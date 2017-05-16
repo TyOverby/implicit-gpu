@@ -133,7 +133,10 @@ fn main() {
 
         let old_hook = ::std::panic::take_hook();
         ::std::panic::set_hook(Box::new(|_| ()));
-        match ::std::panic::catch_unwind(|| run_test(&paths, &ctx)).map_err(|e| e.downcast::<String>()) {
+        let result = ::std::panic::catch_unwind(|| run_test(&paths, &ctx)).map_err(|e| e.downcast::<String>());
+        ::std::panic::set_hook(old_hook);
+
+        match result {
             Ok(Ok(())) => println!("{}", "OK!".green()),
             Ok(Err(e)) => {
                 any_failures = true;
@@ -142,7 +145,7 @@ fn main() {
             }
             Err(Ok(panic_string)) => {
                 any_failures = true;
-                ctx =  implicit::opencl::OpenClContext::default();
+                ctx = implicit::opencl::OpenClContext::default();
 
                 println!("{}", "PANIC!".red());
                 println!("  {}", panic_string.trim().blue());
@@ -151,7 +154,6 @@ fn main() {
                 ctx =  implicit::opencl::OpenClContext::default();
             }
         }
-        ::std::panic::set_hook(old_hook);
     }
 
     if any_failures {
