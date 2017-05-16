@@ -112,7 +112,7 @@ fn even_more_complexicated_polygon() {
 #[test]
 fn test_grow_shrink() {
     let actual = create_node!(a, {
-        a(Node::Modulate(13.0,
+        a(Node::Modulate(-13.0,
             a(Node::Polygon(PolyGroup::single_additive(
                 vec![5.0, 15.0,  15.0, 30.0,  30.0, 5.0],
                 vec![10.0, 20.0,  20.0, 50.0,  50.0, 10.0])))))
@@ -120,10 +120,33 @@ fn test_grow_shrink() {
     assert_eq!(actual, parse_ok("(grow 13 (polygon {x: 5 y: 10} {x: 15 y: 20} {x: 30 y: 50}))"));
 
     let actual = create_node!(a, {
-        a(Node::Modulate(-13.0,
+        a(Node::Modulate(13.0,
             a(Node::Polygon(PolyGroup::single_additive(
                 vec![5.0, 15.0,  15.0, 30.0,  30.0, 5.0],
                 vec![10.0, 20.0,  20.0, 50.0,  50.0, 10.0])))))
     });
     assert_eq!(actual, parse_ok("(shrink 13 (polygon {x: 5 y: 10} {x: 15 y: 20} {x: 30 y: 50}))"));
+}
+
+#[test]
+fn subtraction() {
+    let actual = create_node!(a, {
+        a(Node::Circle{x: 0.0, y: 0.0, r: 30.0})
+    });
+    assert_eq!(actual, parse_ok("(subtract (circle {x:0 y:0 r:30}))"));
+
+    let actual = create_node!(a, {
+        a(Node::And(vec![
+            a(Node::Circle{x: 0.0, y: 0.0, r: 30.0}),
+            a(Node::Not(a(Node::Circle{x: 0.0, y: 0.0, r: 10.0})))]))
+    });
+    assert_eq!(actual, parse_ok("(subtract (circle {x:0 y:0 r:30}) (circle {x:0 y:0 r:10}))"));
+}
+
+#[test]
+fn not() {
+    let actual = create_node!(a, {
+        a(Node::Not(a(Node::Circle{x: 0.0, y: 0.0, r: 30.0})))
+    });
+    assert_eq!(actual, parse_ok("(not (circle {x:0 y:0 r:30}))"));
 }

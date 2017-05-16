@@ -107,6 +107,7 @@ fn parse_shape<'o, F>(expr: &Sexpr,
                             "rect" => parse_rect(&children[1..], span, errors).map(a),
                             "polygon" => parse_polygon(&children[1..], span, errors).map(a),
                             "or" => make_combinator(&children[1..], Node::Or, span, a, errors),
+                            "subtract" => parse_subtraction(&children[1..], span, a, errors),
                             "and" => make_combinator(&children[1..], Node::And, span, a, errors),
                             "not" => make_singular(&children[1..], Node::Not, span, a, errors),
                             "break" => make_singular(&children[1..], Node::Break, span, a, errors),
@@ -126,6 +127,29 @@ fn parse_shape<'o, F>(expr: &Sexpr,
         other => {
             errors.add(not_a_shape(other.span(), other.kind()));
             None
+        }
+    }
+}
+
+fn parse_subtraction<'o, F>(children: &[Sexpr], span: &Span, a: &F, errors: &mut DiagnosticBag) -> Option<&'o Node<'o>>
+where F: Fn(Node<'o>) -> &'o Node<'o> {
+    match children.len() {
+        0 => {
+            errors.add(expected_two_children(span, 0));
+            None
+        }
+        1 => parse_shape(&children[0], a, errors),
+        2 => {
+            let additive = parse_shape(&children[0], a, errors);
+            let subtractive = parse_shape(&children[1], a, errors);
+            match (additive, subtractive) {
+                (Some(add), Some(sub)) => Some(a(Node::And(vec![add, a(Node::Not(sub))]))),
+                _ => None
+            }
+        }
+        n => {
+            errors.add(expected_two_children(span, n));
+            parse_shape(&children[0], a, errors)
         }
     }
 }

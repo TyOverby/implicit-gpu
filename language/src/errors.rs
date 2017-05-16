@@ -58,6 +58,10 @@ pub fn expected_one_child(span: &Span, actual: usize) -> Diagnostic {
     diagnostic!(span, "expected exactly one child, found {}", actual)
 }
 
+pub fn expected_two_children(span: &Span, actual: usize) -> Diagnostic {
+    diagnostic!(span, "expected exactly two children, found {}", actual)
+}
+
 pub fn expected_property_list(span: &Span, typ: SexprKind) -> Diagnostic {
     diagnostic!(span, "expected property list, found {:?}", typ)
 }

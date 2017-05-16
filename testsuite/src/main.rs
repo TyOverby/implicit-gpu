@@ -106,7 +106,7 @@ fn main() {
         .max()
         .unwrap_or(0);
 
-    let ctx = implicit::opencl::OpenClContext::default();
+    let mut ctx = implicit::opencl::OpenClContext::default();
 
     let mut any_failures = false;
     for entry in test_files {
@@ -131,13 +131,27 @@ fn main() {
         stdout().flush().unwrap();
         clear(running.len());
 
-        if let Err(e) = run_test(&paths, &ctx) {
-            println!("{}", "ERROR!".red());
-            println!("  {}", e.red());
-            any_failures = true;
-        } else {
-            println!("{}", "OK!".green());
+        let old_hook = ::std::panic::take_hook();
+        ::std::panic::set_hook(Box::new(|_| ()));
+        match ::std::panic::catch_unwind(|| run_test(&paths, &ctx)).map_err(|e| e.downcast::<String>()) {
+            Ok(Ok(())) => println!("{}", "OK!".green()),
+            Ok(Err(e)) => {
+                any_failures = true;
+                println!("{}", "ERROR!".red());
+                println!("  {}", e.red());
+            }
+            Err(Ok(panic_string)) => {
+                any_failures = true;
+                ctx =  implicit::opencl::OpenClContext::default();
+
+                println!("{}", "PANIC!".red());
+                println!("  {}", panic_string.trim().blue());
+            }
+            Err(Err(_)) => {
+                ctx =  implicit::opencl::OpenClContext::default();
+            }
         }
+        ::std::panic::set_hook(old_hook);
     }
 
     if any_failures {

@@ -104,7 +104,7 @@ fn comp(node: &Node, cc: &mut CompilationContext, buff: &mut String) -> String {
             let child_result = comp(child, cc, buff);
             let res = cc.get_id("not");
             buff.push('\n');
-            writeln!(buff, "  float {result} = - {val};", result = res, val = child_result).unwrap();
+            writeln!(buff, "  float {result} = -{val};", result = res, val = child_result).unwrap();
             res
         }
 
