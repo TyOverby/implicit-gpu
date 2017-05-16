@@ -1,7 +1,8 @@
-use std::cmp::{PartialOrd, Ordering};
 
-use super::util::geom::{Point, Line, Rect};
+
+use super::util::geom::{Line, Point, Rect};
 use super::util::quadtree::QuadTree;
+use std::cmp::{Ordering, PartialOrd};
 
 const EPSILON: f32 = 0.001;
 const OPT_EPSILON: f32 = 0.05;
@@ -9,7 +10,7 @@ const OPT_EPSILON: f32 = 0.05;
 #[derive(Debug)]
 pub enum LineType {
     Joined(Vec<Point>),
-    Unjoined(Vec<Point>)
+    Unjoined(Vec<Point>),
 }
 
 pub fn connect_lines(lines: Vec<Line>) -> (Vec<Vec<Point>>, QuadTree<Line>) {
@@ -30,17 +31,23 @@ pub fn connect_lines(lines: Vec<Line>) -> (Vec<Vec<Point>>, QuadTree<Line>) {
         }
     }
 
-    joined.retain(|lt| {
-        match lt {
-            &LineType::Joined(ref r) | &LineType::Unjoined(ref r) => r.len() > 1
-        }
-    });
+    joined.retain(
+        |lt| match lt {
+            &LineType::Joined(ref r) |
+            &LineType::Unjoined(ref r) => r.len() > 1,
+        },
+    );
 
-    (joined.into_iter().map(|lt| {
-        match lt {
-            LineType::Joined(r) | LineType::Unjoined(r) => r
-        }
-    }).collect(), qt)
+    (joined
+         .into_iter()
+         .map(
+        |lt| match lt {
+            LineType::Joined(r) |
+            LineType::Unjoined(r) => r,
+        },
+    )
+         .collect(),
+     qt)
 }
 
 pub fn simplify_line(pts: Vec<Point>) -> Vec<Point> {
@@ -74,18 +81,17 @@ fn connect_linetypes(mut lines: Vec<LineType>) -> (Vec<LineType>, bool) {
     fn overlap(a: Option<&Point>, b: Option<&Point>) -> bool {
         match (a, b) {
             (Some(a), Some(b)) => a.close_to(b, EPSILON),
-            _ => false
+            _ => false,
         }
     }
 
     let mut made_progress = false;
     loop {
         let mut remove_this = None;
-        'do_remove: for i in 0 .. lines.len() {
-            for k in (i + 1) .. lines.len() {
+        'do_remove: for i in 0..lines.len() {
+            for k in (i + 1)..lines.len() {
                 let (part_a, part_b) = lines.split_at_mut(i + 1);
-                if let (&mut LineType::Unjoined(ref mut a),
-                        &mut LineType::Unjoined(ref mut b)) = (&mut part_a[i], &mut part_b[k - i - 1]) {
+                if let (&mut LineType::Unjoined(ref mut a), &mut LineType::Unjoined(ref mut b)) = (&mut part_a[i], &mut part_b[k - i - 1]) {
 
                     // Aaaaaaaaaaa
                     // Bbbbbb
@@ -128,7 +134,7 @@ fn connect_linetypes(mut lines: Vec<LineType>) -> (Vec<LineType>, bool) {
                         b.reverse();
                         a.append(b);
                         remove_this = Some(k);
-                        break 'do_remove
+                        break 'do_remove;
                     }
                 }
             }
@@ -170,7 +176,7 @@ fn fuse_ends(lines: Vec<LineType>) -> (Vec<LineType>, bool) {
                 if post_len != 0 {
                     out.push(LineType::Joined(points));
                 }
-            },
+            }
             LineType::Unjoined(mut points) => {
                 let prev_len = points.len();
                 remove_dup(&mut points);
@@ -204,7 +210,7 @@ fn join_lines(lines: Vec<Line>) -> (Vec<LineType>, QuadTree<Line>) {
 
     let aabb = match aabb {
         Some(aabb) => aabb,
-        None => return (vec![], QuadTree::new(Rect::null(), false, 4, 16, 4))
+        None => return (vec![], QuadTree::new(Rect::null(), false, 4, 16, 4)),
     };
 
     let mut tree = QuadTree::new(aabb, false, 4, 16, 4);
@@ -225,22 +231,22 @@ fn join_lines(lines: Vec<Line>) -> (Vec<LineType>, QuadTree<Line>) {
             let closest = {
                 let query = Rect::centered_with_radius(&last, resolution / 2.0);
                 let mut near_last = tree.query(query);
-                near_last.sort_by(|&(l1, _, _), &(l2, _, _)| {
-                    let d1a = l1.0.distance_2(&last);
-                    let d1b = l1.1.distance_2(&last);
+                near_last.sort_by(
+                    |&(l1, _, _), &(l2, _, _)| {
+                        let d1a = l1.0.distance_2(&last);
+                        let d1b = l1.1.distance_2(&last);
 
-                    let d2a = l2.0.distance_2(&last);
-                    let d2b = l2.1.distance_2(&last);
+                        let d2a = l2.0.distance_2(&last);
+                        let d2b = l2.1.distance_2(&last);
 
-                    let l1_min = d1a.min(d1b);
-                    let l2_min = d2a.min(d2b);
-                    l1_min.partial_cmp(&l2_min).unwrap_or(Ordering::Equal)
-                });
+                        let l1_min = d1a.min(d1b);
+                        let l2_min = d2a.min(d2b);
+                        l1_min.partial_cmp(&l2_min).unwrap_or(Ordering::Equal)
+                    },
+                );
 
                 let closest_line_opt = near_last.into_iter().next();
-                closest_line_opt.map(|(a, b, c)| {
-                    (a.clone(), b.clone(), c.clone())
-                })
+                closest_line_opt.map(|(a, b, c)| (a.clone(), b.clone(), c.clone()))
             };
 
             if let Some((line, _, id)) = closest {

@@ -1,30 +1,22 @@
 use super::errors::*;
+use snoot::Sexpr;
+use snoot::diagnostic::{Diagnostic, DiagnosticBag};
+use snoot::parse::{SexprKind, Span};
 
 use std::collections::HashMap;
 use tendril::StrTendril;
-use snoot::diagnostic::{Diagnostic, DiagnosticBag};
-use snoot::parse::{SexprKind, Span};
-use snoot::Sexpr;
 
 pub struct PropList {
     map: HashMap<StrTendril, (SexprKind, Span, StrTendril)>,
 }
 
 impl PropList {
-    pub fn get_number<'a, T: Into<StrTendril>>(&'a self,
-                                               key: T,
-                                               prop_span: &Span)
-                                               -> Result<f32, Diagnostic> {
-        self.get(key, SexprKind::Terminal, prop_span).and_then(|(text, span)| {
-            text.parse().map_err(|_| expected_number(span, text))
-        })
+    pub fn get_number<'a, T: Into<StrTendril>>(&'a self, key: T, prop_span: &Span) -> Result<f32, Diagnostic> {
+        self.get(key, SexprKind::Terminal, prop_span)
+            .and_then(|(text, span)| text.parse().map_err(|_| expected_number(span, text)))
     }
 
-    pub fn get<'a, T: Into<StrTendril>>(&'a self,
-                                        key: T,
-                                        typ: SexprKind,
-                                        prop_span: &Span)
-                                        -> Result<(StrTendril, &Span), Diagnostic> {
+    pub fn get<'a, T: Into<StrTendril>>(&'a self, key: T, typ: SexprKind, prop_span: &Span) -> Result<(StrTendril, &Span), Diagnostic> {
         let key = key.into();
         match self.map.get(&key) {
             Some(&(kind, ref span, ref string)) if kind == typ => Ok((string.clone(), span)),
@@ -35,9 +27,7 @@ impl PropList {
 }
 
 
-pub fn parse_properties<'a>(proplist: &'a Sexpr,
-                            errors: &mut DiagnosticBag)
-                            -> (bool, PropList) {
+pub fn parse_properties<'a>(proplist: &'a Sexpr, errors: &mut DiagnosticBag) -> (bool, PropList) {
     if let &Sexpr::List { ref children, .. } = proplist {
         let mut iter = children.iter();
         let mut map = HashMap::new();
@@ -60,8 +50,7 @@ pub fn parse_properties<'a>(proplist: &'a Sexpr,
 
                 let key = span.text().clone();
                 if let Some(value) = iter.next() {
-                    map.insert(key,
-                               (value.kind(), value.span().clone(), value.text().clone()));
+                    map.insert(key, (value.kind(), value.span().clone(), value.text().clone()));
                 } else {
                     all_ok = false;
                     errors.add(missing_value(span));
@@ -80,8 +69,8 @@ pub fn parse_properties<'a>(proplist: &'a Sexpr,
 
 #[cfg(test)]
 mod prop_test {
-    use super::{parse_properties, PropList};
-    use snoot::{simple_parse, Result as ParseResult};
+    use super::{PropList, parse_properties};
+    use snoot::{Result as ParseResult, simple_parse};
     use snoot::parse::Span;
 
     fn props_ok(input: &str) -> (PropList, Span) {
@@ -106,4 +95,3 @@ mod prop_test {
         assert_eq!(props.get_number("b", &span).unwrap(), 10.0);
     }
 }
-

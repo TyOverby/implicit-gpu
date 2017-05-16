@@ -10,15 +10,15 @@ mod properties;
 #[cfg(test)]
 mod test;
 
-use tendril::StrTendril;
-use implicit::nodes::{Node, StaticNode, PolyGroup};
-use snoot::diagnostic::{DiagnosticBag};
-use snoot::parse::Span;
-use snoot::Sexpr;
-use snoot::simple_parse;
 
 use self::errors::*;
 use self::properties::*;
+use implicit::nodes::{Node, PolyGroup, StaticNode};
+use snoot::Sexpr;
+use snoot::diagnostic::DiagnosticBag;
+use snoot::parse::Span;
+use snoot::simple_parse;
+use tendril::StrTendril;
 
 macro_rules! attempt {
     ($v: expr, $default: expr, $errors: expr) => {
@@ -53,9 +53,9 @@ pub fn parse<'b, I: Into<StrTendril>>(input: I, filename: &'b str) -> ParseResul
         0 => {
             diagnostics.add(diagnostic!(&Span::empty(), "completely empty programs are not allowed"));
             return ParseResult {
-                root: None,
-                diagnostics: diagnostics,
-            };
+                       root: None,
+                       diagnostics: diagnostics,
+                   };
         }
         1 => roots.into_iter().next().unwrap(),
         n => {
@@ -70,9 +70,11 @@ pub fn parse<'b, I: Into<StrTendril>>(input: I, filename: &'b str) -> ParseResul
         }
     };
 
-    let node = create_node!(a, {
-        parse_shape(&root, &a, &mut diagnostics)
-    });
+    let node = create_node!(
+        a, {
+            parse_shape(&root, &a, &mut diagnostics)
+        }
+    );
 
     ParseResult {
         root: Some(node),
@@ -80,12 +82,7 @@ pub fn parse<'b, I: Into<StrTendril>>(input: I, filename: &'b str) -> ParseResul
     }
 }
 
-fn parse_shape<'o, F>(expr: &Sexpr,
-                      a: &F,
-                      errors: &mut DiagnosticBag)
-                      -> Option<&'o Node<'o>>
-    where F: Fn(Node<'o>) -> &'o Node<'o>
-{
+fn parse_shape<'o, F>(expr: &Sexpr, a: &F, errors: &mut DiagnosticBag) -> Option<&'o Node<'o>> where F: Fn(Node<'o>) -> &'o Node<'o> {
 
 
     match expr {
@@ -132,7 +129,8 @@ fn parse_shape<'o, F>(expr: &Sexpr,
 }
 
 fn parse_subtraction<'o, F>(children: &[Sexpr], span: &Span, a: &F, errors: &mut DiagnosticBag) -> Option<&'o Node<'o>>
-where F: Fn(Node<'o>) -> &'o Node<'o> {
+    where F: Fn(Node<'o>) -> &'o Node<'o>
+{
     match children.len() {
         0 => {
             errors.add(expected_two_children(span, 0));
@@ -144,7 +142,7 @@ where F: Fn(Node<'o>) -> &'o Node<'o> {
             let subtractive = parse_shape(&children[1], a, errors);
             match (additive, subtractive) {
                 (Some(add), Some(sub)) => Some(a(Node::And(vec![add, a(Node::Not(sub))]))),
-                _ => None
+                _ => None,
             }
         }
         n => {
@@ -155,7 +153,7 @@ where F: Fn(Node<'o>) -> &'o Node<'o> {
 }
 
 fn make_combinator<'o, F, A>(children: &[Sexpr], f: F, span: &Span, a: &A, errors: &mut DiagnosticBag) -> Option<&'o Node<'o>>
-where A: Fn(Node<'o>) -> &'o Node<'o>, F: Fn(Vec<&'o Node<'o>>) -> Node<'o>
+    where A: Fn(Node<'o>) -> &'o Node<'o>, F: Fn(Vec<&'o Node<'o>>) -> Node<'o>
 {
     if children.len() == 0 {
         errors.add(expected_children(span));
@@ -167,7 +165,7 @@ where A: Fn(Node<'o>) -> &'o Node<'o>, F: Fn(Vec<&'o Node<'o>>) -> Node<'o>
 }
 
 fn make_singular<'o, F, A>(children: &[Sexpr], f: F, span: &Span, a: &A, errors: &mut DiagnosticBag) -> Option<&'o Node<'o>>
-where A: Fn(Node<'o>) -> &'o Node<'o>, F: Fn(&'o Node<'o>) -> Node<'o>
+    where A: Fn(Node<'o>) -> &'o Node<'o>, F: Fn(&'o Node<'o>) -> Node<'o>
 {
     if children.len() == 0 {
         errors.add(expected_children(span));
@@ -178,7 +176,7 @@ where A: Fn(Node<'o>) -> &'o Node<'o>, F: Fn(&'o Node<'o>) -> Node<'o>
     let first = &children[0];
     match parse_shape(first, a, errors) {
         Some(c) => Some(a(f(c))),
-        None => None
+        None => None,
     }
 }
 
@@ -187,7 +185,9 @@ fn parse_polygon(children: &[Sexpr], span: &Span, errors: &mut DiagnosticBag) ->
 
     for child in children {
         let (ok, proplist) = parse_properties(child, errors);
-        if !ok { return None }
+        if !ok {
+            return None;
+        }
         let x = attempt!(proplist.get_number("x", child.span()), 0.0, errors);
         let y = attempt!(proplist.get_number("y", child.span()), 0.0, errors);
         parsed.push((x, y));
@@ -203,8 +203,10 @@ fn parse_polygon(children: &[Sexpr], span: &Span, errors: &mut DiagnosticBag) ->
             out_ys.push(y);
             first = false;
         } else {
-            out_xs.push(x); out_xs.push(x);
-            out_ys.push(y); out_ys.push(y);
+            out_xs.push(x);
+            out_xs.push(x);
+            out_ys.push(y);
+            out_ys.push(y);
         }
     }
 
@@ -223,13 +225,15 @@ fn parse_circle(children: &[Sexpr], span: &Span, errors: &mut DiagnosticBag) -> 
 
     if let Some(proplist) = children.get(0) {
         let (ok, proplist) = parse_properties(proplist, errors);
-        if !ok { return None }
+        if !ok {
+            return None;
+        }
         let radius = proplist.get_number("radius", span);
         let radius = radius.or_else(|_| proplist.get_number("r", span));
         let radius = attempt!(radius, 10.0, errors);
         let x = attempt!(proplist.get_number("x", span), 10.0, errors);
         let y = attempt!(proplist.get_number("y", span), 10.0, errors);
-        Some(Node::Circle{r: radius, x: x, y: y})
+        Some(Node::Circle { r: radius, x: x, y: y })
     } else {
         errors.add(expected_property_list_exists(span));
         None
@@ -239,7 +243,9 @@ fn parse_circle(children: &[Sexpr], span: &Span, errors: &mut DiagnosticBag) -> 
 fn parse_rect(children: &[Sexpr], span: &Span, errors: &mut DiagnosticBag) -> Option<Node<'static>> {
     if let Some(proplist) = children.get(0) {
         let (ok, proplist) = parse_properties(proplist, errors);
-        if !ok { return None }
+        if !ok {
+            return None;
+        }
         let x = attempt!(proplist.get_number("x", span), 10.0, errors);
         let y = attempt!(proplist.get_number("y", span), 10.0, errors);
         let w = attempt!(proplist.get_number("w", span), 10.0, errors);
@@ -249,7 +255,11 @@ fn parse_rect(children: &[Sexpr], span: &Span, errors: &mut DiagnosticBag) -> Op
 
         let input = format!(
             "{{x: {a} y: {b}}} {{x: {c} y: {b}}} {{x: {c} y: {d}}} {{x: {a} y: {d}}}",
-            a = x, b = y, c = x + w, d = x + h);
+            a = x,
+            b = y,
+            c = x + w,
+            d = x + h,
+        );
 
         let snoot::Result { roots, diagnostics: diag } = simple_parse(input, &[":"], None);
         errors.append(diag);
@@ -262,7 +272,7 @@ fn parse_rect(children: &[Sexpr], span: &Span, errors: &mut DiagnosticBag) -> Op
 }
 
 fn parse_modulate<'o, F>(children: &[Sexpr], span: &Span, grow: bool, a: &F, errors: &mut DiagnosticBag) -> Option<Node<'o>>
-where F: Fn(Node<'o>) -> &'o Node<'o>
+    where F: Fn(Node<'o>) -> &'o Node<'o>
 {
     if children.len() != 2 {
         errors.add(expected_children(span));
@@ -278,6 +288,6 @@ where F: Fn(Node<'o>) -> &'o Node<'o>
 
     match parse_shape(&children[1], a, errors) {
         Some(shape) => Some(Node::Modulate(how_much as f32, shape)),
-        None => None
+        None => None,
     }
 }

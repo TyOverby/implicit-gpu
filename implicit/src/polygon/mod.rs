@@ -1,4 +1,4 @@
-use ::opencl::{OpenClContext, FieldBuffer, LineBuffer};
+use opencl::{FieldBuffer, LineBuffer, OpenClContext};
 use std::f32::INFINITY;
 
 const PROGRAM: &'static str = include_str!("./polygon.c");
@@ -32,6 +32,7 @@ pub fn run_poly_raw(xs: LineBuffer, ys: LineBuffer, width: usize, height: usize,
         .arg_buf(xs.buffer())
         .arg_buf(ys.buffer())
         .arg_scl(xs.size())
-        .enq().unwrap();
+        .enq()
+        .unwrap();
     out
 }

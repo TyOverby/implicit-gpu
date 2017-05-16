@@ -1,4 +1,4 @@
-use ocl::{Platform, Device, Context, Queue, Program, Kernel, Buffer};
+use ocl::{Buffer, Context, Device, Kernel, Platform, Program, Queue};
 use ocl::enums::{DeviceInfo, DeviceInfoResult};
 use ocl::flags::{MEM_COPY_HOST_PTR, MEM_READ_WRITE};
 use std::sync::Mutex;
@@ -27,15 +27,17 @@ pub fn all_devices() -> Vec<(Platform, Device)> {
     }
 
     // Prefer GPU
-    out.sort_by(|&(_, ref a), &(_, ref b)| {
-        let a_type = a.info(DeviceInfo::Type);
-        let b_type = b.info(DeviceInfo::Type);
-        if let (DeviceInfoResult::Type(a_type), DeviceInfoResult::Type(b_type)) = (a_type, b_type) {
-            b_type.cmp(&a_type)
-        } else {
-            (0).cmp(&0)
-        }
-    });
+    out.sort_by(
+        |&(_, ref a), &(_, ref b)| {
+            let a_type = a.info(DeviceInfo::Type);
+            let b_type = b.info(DeviceInfo::Type);
+            if let (DeviceInfoResult::Type(a_type), DeviceInfoResult::Type(b_type)) = (a_type, b_type) {
+                b_type.cmp(&a_type)
+            } else {
+                (0).cmp(&0)
+            }
+        },
+    );
 
     out
 }
@@ -59,7 +61,8 @@ impl OpenClContext {
         OpenClContext::new(pt, dv)
     }
 
-    // TODO(tyoverby): You should use a Kernel Cache instead of Program Cache once Kernels
+    // TODO(tyoverby): You should use a Kernel Cache instead of
+    // Program Cache once Kernels
     // implement Clone.
     pub fn compile<S2: Into<String>, S1: Into<String>>(&self, name: S1, source: S2) -> Kernel {
         let _guard = ::flame::start_guard("OpenClContext::compile");
@@ -88,7 +91,13 @@ impl OpenClContext {
         let _guard = ::flame::start_guard("OpenClContext::field_buffer");
         let buffer = if let Some(fill) = fill {
             assert_eq!(fill.len(), width * height);
-            Buffer::new(self.queue.clone(), Some(MEM_COPY_HOST_PTR | MEM_READ_WRITE), &[width, height], Some(fill)).unwrap()
+            Buffer::new(
+                self.queue.clone(),
+                Some(MEM_COPY_HOST_PTR | MEM_READ_WRITE),
+                &[width, height],
+                Some(fill),
+            )
+                    .unwrap()
         } else {
             Buffer::new(self.queue.clone(), Some(MEM_READ_WRITE), &[width, height], None).unwrap()
         };
@@ -103,7 +112,7 @@ impl OpenClContext {
         let _guard = ::flame::start_guard("OpenClContext::line_buffer");
         LineBuffer {
             size: fill.len(),
-            internal: Buffer::new(self.queue.clone(), Some(MEM_COPY_HOST_PTR), &[fill.len()], Some(fill)).unwrap()
+            internal: Buffer::new(self.queue.clone(), Some(MEM_COPY_HOST_PTR), &[fill.len()], Some(fill)).unwrap(),
         }
     }
 
@@ -113,33 +122,29 @@ impl OpenClContext {
             debug_assert!(size == fill.len());
             MaskBuffer {
                 size: size,
-                internal: Buffer::new(self.queue.clone(), Some(MEM_COPY_HOST_PTR | MEM_READ_WRITE), &[size], Some(fill)).unwrap()
+                internal: Buffer::new(
+                    self.queue.clone(),
+                    Some(MEM_COPY_HOST_PTR | MEM_READ_WRITE),
+                    &[size],
+                    Some(fill),
+                )
+                        .unwrap(),
             }
         } else {
             MaskBuffer {
                 size: size,
-                internal: Buffer::new(self.queue.clone(), Some(MEM_READ_WRITE), &[size], None).unwrap()
+                internal: Buffer::new(self.queue.clone(), Some(MEM_READ_WRITE), &[size], None).unwrap(),
             }
         }
     }
 
-    pub fn empty_queue(&self) {
-        self.queue.finish();
-    }
+    pub fn empty_queue(&self) { self.queue.finish(); }
 
-    pub fn platform(&self) -> &Platform {
-        &self.platform
-    }
+    pub fn platform(&self) -> &Platform { &self.platform }
 
-    pub fn device(&self) -> &Device {
-        &self.device
-    }
+    pub fn device(&self) -> &Device { &self.device }
 
-    pub fn context(&self) -> &Context {
-        &self.context
-    }
+    pub fn context(&self) -> &Context { &self.context }
 
-    pub fn queue(&self) -> &Queue {
-        &self.queue
-    }
+    pub fn queue(&self) -> &Queue { &self.queue }
 }

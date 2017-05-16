@@ -11,8 +11,7 @@ pub struct PolyGroup {
 }
 
 impl ::std::iter::FromIterator<(f32, f32)> for Polygon {
-    fn from_iter<T>(iterator: T) -> Polygon
-    where T: IntoIterator<Item=(f32, f32)> {
+    fn from_iter<T>(iterator: T) -> Polygon where T: IntoIterator<Item = (f32, f32)> {
         let mut iterator = iterator.into_iter();
         let mut xs = vec![];
         let mut ys = vec![];
@@ -37,14 +36,14 @@ impl ::std::iter::FromIterator<(f32, f32)> for Polygon {
         xs.push(fx);
         ys.push(fy);
 
-        Polygon {xs: xs, ys: ys}
+        Polygon { xs: xs, ys: ys }
     }
 }
 
 impl PolyGroup {
     pub fn single_additive(xs: Vec<f32>, ys: Vec<f32>) -> PolyGroup {
         PolyGroup {
-            additive: vec![ Polygon{ xs: xs, ys: ys } ],
+            additive: vec![Polygon { xs: xs, ys: ys }],
             subtractive: vec![],
         }
     }

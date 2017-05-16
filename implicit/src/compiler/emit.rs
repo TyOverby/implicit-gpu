@@ -1,5 +1,6 @@
-use ::nodes::{Node};
-use ::compiler::GroupId;
+
+use compiler::GroupId;
+use nodes::Node;
 use std::fmt::Write;
 
 pub struct CompilationContext {
@@ -11,7 +12,7 @@ pub struct CompilationContext {
 pub fn compile(node: &Node) -> (String, CompilationContext) {
     let mut cc = CompilationContext::new();
 
-    let mut buffer = "".into(); //preamble.into();
+    let mut buffer = "".into(); // preamble.into();
     let final_result = comp(node, &mut cc, &mut buffer);
     buffer.push('\n');
     writeln!(&mut buffer, "  buffer[pos] = {}; \n}}", final_result).unwrap();
@@ -20,14 +21,16 @@ pub fn compile(node: &Node) -> (String, CompilationContext) {
     for b in &cc.dep_strings {
         preamble.push_str(&format!(", __global float* {}", b));
     }
-    preamble.push_str( r#") {
+    preamble.push_str(
+        r#") {
   size_t x = get_global_id(0);
   size_t y = get_global_id(1);
   size_t pos = x + y * width;
 
   float x_s = (float) x;
   float y_s = (float) y;
-"#);
+"#,
+    );
 
 
     (format!("{}{}", preamble, buffer), cc)
@@ -35,19 +38,29 @@ pub fn compile(node: &Node) -> (String, CompilationContext) {
 
 fn comp(node: &Node, cc: &mut CompilationContext, buff: &mut String) -> String {
     match *node {
-        Node::Rect{x, y, w, h} => {
+        Node::Rect { x, y, w, h } => {
             let (res, _dx, _dy, _out) = (cc.get_id("rect"), cc.get_id("dx"), cc.get_id("dy"), cc.get_id("out"));
 
             buff.push('\n');
             writeln!(buff, "  float {result};", result = res).unwrap();
             writeln!(buff, "  {{").unwrap();
-            writeln!(buff, "    {result} = ({x}-{a}) * ({x} - {c}) * ({y} - {b}) * ({y} - {d});",
-                                result = res, x = cc.get_x(), y = cc.get_y(), a = x, b = y, c = x + w, d = y + h).unwrap();
+            writeln!(
+                buff,
+                "    {result} = ({x}-{a}) * ({x} - {c}) * ({y} - {b}) * ({y} - {d});",
+                result = res,
+                x = cc.get_x(),
+                y = cc.get_y(),
+                a = x,
+                b = y,
+                c = x + w,
+                d = y + h,
+            )
+                    .unwrap();
             writeln!(buff, "  }}").unwrap();
 
             res
         }
-        Node::Circle{x, y, r} => {
+        Node::Circle { x, y, r } => {
             let (res, dx, dy) = (cc.get_id("circle"), cc.get_id("dx"), cc.get_id("dy"));
 
             buff.push('\n');
@@ -55,7 +68,15 @@ fn comp(node: &Node, cc: &mut CompilationContext, buff: &mut String) -> String {
             writeln!(buff, "  {{").unwrap();
             writeln!(buff, "    float {dx} = {x} - {cx};", dx = dx, x = cc.get_x(), cx = x).unwrap();
             writeln!(buff, "    float {dy} = {y} - {cy};", dy = dy, y = cc.get_y(), cy = y).unwrap();
-            writeln!(buff, "    {result} = sqrt({dx} * {dx} + {dy} * {dy}) - {radius};", result = res, dx = dx, dy = dy, radius = r).unwrap();
+            writeln!(
+                buff,
+                "    {result} = sqrt({dx} * {dx} + {dy} * {dy}) - {radius};",
+                result = res,
+                dx = dx,
+                dy = dy,
+                radius = r,
+            )
+                    .unwrap();
             writeln!(buff, "  }}").unwrap();
 
             res
@@ -74,7 +95,14 @@ fn comp(node: &Node, cc: &mut CompilationContext, buff: &mut String) -> String {
                     let res = cc.get_id("and");
 
                     buff.push('\n');
-                    writeln!(buff, "  float {result} = max({a}, {b});", result = res, a = res_left, b = res_right).unwrap();
+                    writeln!(
+                        buff,
+                        "  float {result} = max({a}, {b});",
+                        result = res,
+                        a = res_left,
+                        b = res_right,
+                    )
+                            .unwrap();
 
                     res
                 }
@@ -94,7 +122,14 @@ fn comp(node: &Node, cc: &mut CompilationContext, buff: &mut String) -> String {
                     let res = cc.get_id("or");
 
                     buff.push('\n');
-                    writeln!(buff, "  float {result} = min({a}, {b});", result = res, a = res_left, b = res_right).unwrap();
+                    writeln!(
+                        buff,
+                        "  float {result} = min({a}, {b});",
+                        result = res,
+                        a = res_left,
+                        b = res_right,
+                    )
+                            .unwrap();
 
                     res
                 }
@@ -112,7 +147,14 @@ fn comp(node: &Node, cc: &mut CompilationContext, buff: &mut String) -> String {
             let child_result = comp(child, cc, buff);
             let res = cc.get_id("modulate");
             buff.push('\n');
-            writeln!(buff, "  float {result} = {other} + {value};", result = res, other = child_result, value = v).unwrap();
+            writeln!(
+                buff,
+                "  float {result} = {other} + {value};",
+                result = res,
+                other = child_result,
+                value = v,
+            )
+                    .unwrap();
             res
         }
 
@@ -120,7 +162,13 @@ fn comp(node: &Node, cc: &mut CompilationContext, buff: &mut String) -> String {
             let buffer_ref = cc.buffer_ref(group_id);
             let res = cc.get_id("other_group");
 
-            writeln!(buff, "float {result} = {buffer_ref}[pos];", result = res, buffer_ref = buffer_ref).unwrap();
+            writeln!(
+                buff,
+                "float {result} = {buffer_ref}[pos];",
+                result = res,
+                buffer_ref = buffer_ref,
+            )
+                    .unwrap();
             res
         }
 
@@ -157,7 +205,5 @@ impl CompilationContext {
         r
     }
 
-    pub fn deps(&self) -> &[GroupId] {
-        &self.dependencies
-    }
+    pub fn deps(&self) -> &[GroupId] { &self.dependencies }
 }

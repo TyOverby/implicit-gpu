@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use std::ops::{Neg, Add, Sub, Mul, Div};
+use std::ops::{Add, Div, Mul, Neg, Sub};
 use vecmath::*;
 
 #[derive(PartialOrd, PartialEq, Copy, Clone, Debug)]
@@ -12,17 +12,16 @@ pub struct Point {
 #[derive(PartialOrd, PartialEq, Copy, Clone, Debug)]
 pub struct Vector {
     pub x: f32,
-    pub y: f32
+    pub y: f32,
 }
 
 #[derive(PartialOrd, PartialEq, Copy, Clone, Debug)]
 pub struct Line(pub Point, pub Point);
 
 #[derive(PartialOrd, PartialEq, Copy, Clone, Debug)]
-pub struct Rect
-{
+pub struct Rect {
     pub top_left: Point,
-    pub bottom_right: Point
+    pub bottom_right: Point,
 }
 
 #[derive(PartialOrd, PartialEq, Copy, Clone, Debug)]
@@ -38,17 +37,12 @@ pub struct Polygon {
 
 #[derive(PartialOrd, PartialEq, Copy, Clone, Debug)]
 pub struct Matrix {
-    m: [[f32; 3]; 3]
+    m: [[f32; 3]; 3],
 }
 
 impl Neg for Vector {
     type Output = Vector;
-    fn neg(self) -> Vector {
-        Vector {
-            x: -self.x,
-            y: -self.y
-        }
-    }
+    fn neg(self) -> Vector { Vector { x: -self.x, y: -self.y } }
 }
 
 impl Sub<Vector> for Point {
@@ -56,7 +50,7 @@ impl Sub<Vector> for Point {
     fn sub(self, rhs: Vector) -> Point {
         Point {
             x: self.x - rhs.x,
-            y: self.y - rhs.y
+            y: self.y - rhs.y,
         }
     }
 }
@@ -66,7 +60,7 @@ impl Sub<Point> for Vector {
     fn sub(self, rhs: Point) -> Point {
         Point {
             x: self.x - rhs.x,
-            y: self.y - rhs.y
+            y: self.y - rhs.y,
         }
     }
 }
@@ -76,7 +70,7 @@ impl Add<Vector> for Point {
     fn add(self, rhs: Vector) -> Point {
         Point {
             x: self.x + rhs.x,
-            y: self.y + rhs.y
+            y: self.y + rhs.y,
         }
     }
 }
@@ -86,7 +80,7 @@ impl Add<Point> for Vector {
     fn add(self, rhs: Point) -> Point {
         Point {
             x: self.x + rhs.x,
-            y: self.y + rhs.y
+            y: self.y + rhs.y,
         }
     }
 }
@@ -96,7 +90,7 @@ impl Sub<Point> for Point {
     fn sub(self, rhs: Point) -> Vector {
         Vector {
             x: self.x - rhs.x,
-            y: self.y - rhs.y
+            y: self.y - rhs.y,
         }
     }
 }
@@ -106,7 +100,7 @@ impl Add<Vector> for Vector {
     fn add(self, rhs: Vector) -> Vector {
         Vector {
             x: self.x + rhs.x,
-            y: self.y + rhs.y
+            y: self.y + rhs.y,
         }
     }
 }
@@ -132,21 +126,18 @@ impl Div<f32> for Vector {
 }
 
 impl Line {
-    pub fn bounding_box(&self) -> Rect {
-        Rect::from_points(&self.0, &self.1)
-    }
+    pub fn bounding_box(&self) -> Rect { Rect::from_points(&self.0, &self.1) }
 
     pub fn dist_to_point_2(&self, p: Point) -> f32 {
         #[inline(always)]
         fn sqr(x: f32) -> f32 { x * x }
         #[inline(always)]
-        fn dist2(v: Point, w: Point) -> f32 {
-            sqr(v.x - w.x) + sqr(v.y - w.y)
-        }
+        fn dist2(v: Point, w: Point) -> f32 { sqr(v.x - w.x) + sqr(v.y - w.y) }
         #[inline(always)]
         fn dist_to_segment_squared(p: Point, v: Point, w: Point) -> f32 {
             let l2 = dist2(v, w);
-            if l2 == 0.0 { //  TODO: epsilon
+            if l2 == 0.0 {
+                //  TODO: epsilon
                 return dist2(p, v);
             }
             let t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2;
@@ -155,19 +146,20 @@ impl Line {
             } else if t > 1.0 {
                 dist2(p, w)
             } else {
-                dist2(p, Point {
-                    x: v.x + t * (w.x - v.x),
-                    y: v.y + t * (w.y - v.y)
-                })
+                dist2(
+                    p,
+                    Point {
+                        x: v.x + t * (w.x - v.x),
+                        y: v.y + t * (w.y - v.y),
+                    },
+                )
             }
         }
 
         dist_to_segment_squared(p, self.0, self.1)
     }
 
-    pub fn dist_to_point(&self, p: Point) -> f32 {
-        self.dist_to_point_2(p).sqrt()
-    }
+    pub fn dist_to_point(&self, p: Point) -> f32 { self.dist_to_point_2(p).sqrt() }
 }
 
 impl Rect {
@@ -187,15 +179,15 @@ impl Rect {
         assert!(size.y > 0.0);
         Rect {
             top_left: *point,
-            bottom_right: *point + *size
+            bottom_right: *point + *size,
         }
     }
 
     pub fn null() -> Rect {
         let nan = ::std::f32::NAN;
         Rect {
-            top_left: Point {x: nan, y: nan},
-            bottom_right: Point {x: nan, y: nan}
+            top_left: Point { x: nan, y: nan },
+            bottom_right: Point { x: nan, y: nan },
         }
     }
 
@@ -215,63 +207,47 @@ impl Rect {
         }
     }
 
-    pub fn width(&self) -> f32 {
-        self.bottom_right.x - self.top_left.x
-    }
+    pub fn width(&self) -> f32 { self.bottom_right.x - self.top_left.x }
 
-    pub fn height(&self) -> f32 {
-        self.bottom_right.y - self.top_left.y
-    }
+    pub fn height(&self) -> f32 { self.bottom_right.y - self.top_left.y }
 
-    pub fn left(&self) -> f32 {
-        self.top_left.x
-    }
+    pub fn left(&self) -> f32 { self.top_left.x }
 
-    pub fn right(&self) -> f32 {
-        self.bottom_right.x
-    }
+    pub fn right(&self) -> f32 { self.bottom_right.x }
 
-    pub fn top(&self) -> f32 {
-        self.top_left.y
-    }
+    pub fn top(&self) -> f32 { self.top_left.y }
 
-    pub fn bottom(&self) -> f32 {
-        self.bottom_right.y
-    }
+    pub fn bottom(&self) -> f32 { self.bottom_right.y }
 
-    pub fn top_left(&self) -> Point {
-        self.top_left
-    }
+    pub fn top_left(&self) -> Point { self.top_left }
 
-    pub fn bottom_right(&self) -> Point {
-        self.bottom_right
-    }
+    pub fn bottom_right(&self) -> Point { self.bottom_right }
 
     pub fn bottom_left(&self) -> Point {
         Point {
             x: self.top_left().x,
-            y: self.bottom_right().y
+            y: self.bottom_right().y,
         }
     }
 
     pub fn top_right(&self) -> Point {
         Point {
             x: self.bottom_right().x,
-            y: self.top_left().y
+            y: self.top_left().y,
         }
     }
 
     pub fn north(&self) -> Point {
         Point {
             x: self.left() + self.width() / 2.0,
-            y: self.top()
+            y: self.top(),
         }
     }
 
     pub fn south(&self) -> Point {
         Point {
             x: self.left() + self.width() / 2.0,
-            y: self.bottom()
+            y: self.bottom(),
         }
     }
 
@@ -297,10 +273,7 @@ impl Rect {
     }
 
     pub fn is_null(&self) -> bool {
-        self.top_left.x.is_nan() ||
-        self.top_left.y.is_nan() ||
-        self.bottom_right.x.is_nan() ||
-        self.bottom_right.y.is_nan()
+        self.top_left.x.is_nan() || self.top_left.y.is_nan() || self.bottom_right.x.is_nan() || self.bottom_right.y.is_nan()
     }
 
     pub fn expand_to_include(&mut self, point: &Point) {
@@ -327,22 +300,16 @@ impl Rect {
     }
 
     pub fn contains(&self, p: &Point) -> bool {
-        p.x >= self.top_left.x &&
-        p.x < self.bottom_right.x &&
-        p.y >= self.top_left.y &&
-        p.y < self.bottom_right.y
+        p.x >= self.top_left.x && p.x < self.bottom_right.x && p.y >= self.top_left.y && p.y < self.bottom_right.y
     }
 
-    pub fn does_intersect(&self, other: &Rect) -> bool{
+    pub fn does_intersect(&self, other: &Rect) -> bool {
         let r1 = self;
         let r2 = other;
 
         // From stack overflow:
         // http://gamedev.stackexchange.com/a/913
-        !( r2.left() > r1.right()
-        || r2.right() < r1.left()
-        || r2.top() > r1.bottom()
-        || r2.bottom() < r1.top())
+        !(r2.left() > r1.right() || r2.right() < r1.left() || r2.top() > r1.bottom() || r2.bottom() < r1.top())
     }
 
     pub fn intersect_with(&self, other: &Rect) -> Rect {
@@ -378,72 +345,82 @@ impl Rect {
     }
 
     pub fn midpoint(&self) -> Point {
-        let half = Vector { x: self.width() / 2.0, y: self.height() / 2.0 };
+        let half = Vector {
+            x: self.width() / 2.0,
+            y: self.height() / 2.0,
+        };
         self.top_left() + half
     }
 
     pub fn split_vert(&self) -> (Rect, Rect) {
-        let half_size = Vector { x: self.width() / 2.0, y: self.height()};
-        let half_offset = Vector { x: self.width() / 2.0, y: 0.0};
-        (
-            Rect::from_point_and_size(&self.top_left, &half_size),
-            Rect::from_point_and_size(&(self.top_left + half_offset), &half_size),
-        )
+        let half_size = Vector {
+            x: self.width() / 2.0,
+            y: self.height(),
+        };
+        let half_offset = Vector { x: self.width() / 2.0, y: 0.0 };
+        (Rect::from_point_and_size(&self.top_left, &half_size), Rect::from_point_and_size(&(self.top_left + half_offset), &half_size))
     }
 
     pub fn split_hori(&self) -> (Rect, Rect) {
-        let half_size = Vector { x: self.width(), y: self.height() / 2.0};
-        let half_offset = Vector { x: 0.0, y: self.height() / 2.0};
-        (
-            Rect::from_point_and_size(&self.top_left, &half_size),
-            Rect::from_point_and_size(&(self.top_left + half_offset), &half_size),
-        )
+        let half_size = Vector {
+            x: self.width(),
+            y: self.height() / 2.0,
+        };
+        let half_offset = Vector { x: 0.0, y: self.height() / 2.0 };
+        (Rect::from_point_and_size(&self.top_left, &half_size), Rect::from_point_and_size(&(self.top_left + half_offset), &half_size))
     }
 
     pub fn split_quad(&self) -> [Rect; 4] {
-        let half = Vector { x: self.width() / 2.0, y: self.height() / 2.0 };
+        let half = Vector {
+            x: self.width() / 2.0,
+            y: self.height() / 2.0,
+        };
         [
             // x _
             // _ _
-            Rect::from_point_and_size(
-                &self.top_left,
-                &half),
+            Rect::from_point_and_size(&self.top_left, &half),
             // _ x
             // _ _
             Rect::from_point_and_size(
-                &Point { x: self.top_left.x + half.x, .. self.top_left},
-                &half),
+                &Point {
+                     x: self.top_left.x + half.x,
+                     ..self.top_left
+                 },
+                &half,
+            ),
             // _ _
             // x _
             Rect::from_point_and_size(
-                &Point { y: self.top_left.y + half.y, .. self.top_left },
-                &half),
+                &Point {
+                     y: self.top_left.y + half.y,
+                     ..self.top_left
+                 },
+                &half,
+            ),
             // _ _
             // _ x
-            Rect::from_point_and_size(
-                &(self.top_left + half),
-                &half)
+            Rect::from_point_and_size(&(self.top_left + half), &half),
         ]
     }
 
     pub fn close_to(&self, other: &Rect, epsilon: f32) -> bool {
-        self.top_left.close_to(&other.top_left, epsilon) &&
-        self.bottom_right.close_to(&other.bottom_right, epsilon)
+        self.top_left.close_to(&other.top_left, epsilon) && self.bottom_right.close_to(&other.bottom_right, epsilon)
     }
 }
 
 impl Polygon {
-    pub fn new<I: Iterator<Item=Point>>(i: I) -> Polygon {
+    pub fn new<I: Iterator<Item = Point>>(i: I) -> Polygon {
         let points: Vec<_> = i.collect();
-        let lines  = Polygon::compute_lines(&points[..]);
+        let lines = Polygon::compute_lines(&points[..]);
 
         let segments: Vec<_> = {
-            let left_xs = lines.iter().map(|p| p.0.x);
-            let left_ys = lines.iter().map(|p| p.0.y);
-            let right_xs = lines.iter().map(|p| p.1.x);
-            let right_ys = lines.iter().map(|p| p.1.y);
-            left_xs.chain(left_ys).chain(right_xs).chain(right_ys)
-        }.collect();
+                let left_xs = lines.iter().map(|p| p.0.x);
+                let left_ys = lines.iter().map(|p| p.0.y);
+                let right_xs = lines.iter().map(|p| p.1.x);
+                let right_ys = lines.iter().map(|p| p.1.y);
+                left_xs.chain(left_ys).chain(right_xs).chain(right_ys)
+            }
+            .collect();
         let seg_len = segments.len() / 4;
 
         Polygon {
@@ -454,21 +431,13 @@ impl Polygon {
         }
     }
 
-    pub fn left_xs(&self) -> &[f32] {
-        &self.segments[0 * self.seg_len .. 1 * self.seg_len]
-    }
+    pub fn left_xs(&self) -> &[f32] { &self.segments[0 * self.seg_len..1 * self.seg_len] }
 
-    pub fn left_ys(&self) -> &[f32] {
-        &self.segments[1 * self.seg_len .. 2 * self.seg_len]
-    }
+    pub fn left_ys(&self) -> &[f32] { &self.segments[1 * self.seg_len..2 * self.seg_len] }
 
-    pub fn right_xs(&self) -> &[f32] {
-        &self.segments[2 * self.seg_len .. 3 * self.seg_len]
-    }
+    pub fn right_xs(&self) -> &[f32] { &self.segments[2 * self.seg_len..3 * self.seg_len] }
 
-    pub fn right_ys(&self) -> &[f32] {
-        &self.segments[3 * self.seg_len .. 4 * self.seg_len]
-    }
+    pub fn right_ys(&self) -> &[f32] { &self.segments[3 * self.seg_len..4 * self.seg_len] }
 
     // TODO: make this a lazy iterator.
     fn compute_lines(from: &[Point]) -> Vec<Line> {
@@ -482,42 +451,30 @@ impl Polygon {
         out
     }
 
-    pub fn lines(&self) -> &[Line] {
-        &self.lines
-    }
-    pub fn points(&self) -> &[Point] {
-        &self.points
-    }
+    pub fn lines(&self) -> &[Line] { &self.lines }
+    pub fn points(&self) -> &[Point] { &self.points }
 }
 
 impl Vector {
-    pub fn magnitude(&self) -> f32 {
-        (self.x * self.x + self.y * self.y).sqrt()
-    }
+    pub fn magnitude(&self) -> f32 { (self.x * self.x + self.y * self.y).sqrt() }
 
     pub fn normalized(&self) -> Vector {
         let m = self.magnitude();
-        Vector {
-            x: self.x / m,
-            y: self.y / m,
-        }
+        Vector { x: self.x / m, y: self.y / m }
     }
 
     pub fn mul_e(&self, other: &Vector) -> Vector {
-        Vector { x: self.x * other.x, y: self.y * other.y }
+        Vector {
+            x: self.x * other.x,
+            y: self.y * other.y,
+        }
     }
 
-    pub fn scale_e(&self, sx: f32, sy: f32) -> Vector {
-        Vector { x: self.x * sx, y: self.y * sy }
-    }
+    pub fn scale_e(&self, sx: f32, sy: f32) -> Vector { Vector { x: self.x * sx, y: self.y * sy } }
 
-    pub fn cross(&self, other: &Vector) -> f32 {
-        self.x * other.y - self.y * other.x
-    }
+    pub fn cross(&self, other: &Vector) -> f32 { self.x * other.y - self.y * other.x }
 
-    pub fn dot(&self, other: &Vector) -> f32 {
-        self.x * other.x + self.y * other.y
-    }
+    pub fn dot(&self, other: &Vector) -> f32 { self.x * other.x + self.y * other.y }
 }
 
 impl Ray {
@@ -530,7 +487,10 @@ impl Ray {
 
         let v1 = ray_origin - point_1;
         let v2 = point_2 - point_1;
-        let v3 = Vector {x: -ray_direction.y, y: ray_direction.x};
+        let v3 = Vector {
+            x: -ray_direction.y,
+            y: ray_direction.x,
+        };
 
         let t1 = v2.cross(&v1) / v2.dot(&v3);
         let t2 = v1.dot(&v3) / v2.dot(&v3);
@@ -550,7 +510,10 @@ impl Ray {
 
         let v1 = ray_origin - point_1;
         let v2 = point_2 - point_1;
-        let v3 = Vector {x: -ray_direction.y, y: ray_direction.x};
+        let v3 = Vector {
+            x: -ray_direction.y,
+            y: ray_direction.x,
+        };
 
         let t1 = v2.cross(&v1) / v2.dot(&v3);
         let t2 = v1.dot(&v3) / v2.dot(&v3);
@@ -565,9 +528,7 @@ impl Ray {
 }
 
 impl Matrix {
-    pub fn new() -> Matrix {
-        Matrix { m: mat3_id() }
-    }
+    pub fn new() -> Matrix { Matrix { m: mat3_id() } }
 
     pub fn transform_point(&self, point: &Point) -> Point {
         let p = [point.x, point.y];
@@ -624,23 +585,15 @@ impl Matrix {
         self.apply_matrix(prod)
     }
 
-    pub fn mirror_horizontal(self, x: f32) -> Self {
-        self.translate(x, 0.0)
-            .scale(-1.0, 1.0)
-            .translate(-x, 0.0)
-    }
+    pub fn mirror_horizontal(self, x: f32) -> Self { self.translate(x, 0.0).scale(-1.0, 1.0).translate(-x, 0.0) }
 }
 
 impl Point {
     pub fn into_tuple(self) -> (f32, f32) { (self.x, self.y) }
 
-    pub fn close_to(&self, other: &Point, epsilon: f32) -> bool {
-        self.distance_2(other) < epsilon * epsilon
-    }
+    pub fn close_to(&self, other: &Point, epsilon: f32) -> bool { self.distance_2(other) < epsilon * epsilon }
 
-    pub fn distance(&self, other: &Point) -> f32 {
-        self.distance_2(other).sqrt()
-    }
+    pub fn distance(&self, other: &Point) -> f32 { self.distance_2(other).sqrt() }
 
     pub fn distance_2(&self, other: &Point) -> f32 {
         let dx = self.x - other.x;

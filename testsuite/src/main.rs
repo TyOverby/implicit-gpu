@@ -9,10 +9,10 @@ extern crate snoot;
 #[macro_use]
 extern crate serde_derive;
 
-use std::path::PathBuf;
-use walkdir::{WalkDir, DirEntry};
-use implicit::opencl::OpenClContext;
 use colored::Colorize;
+use implicit::opencl::OpenClContext;
+use std::path::PathBuf;
+use walkdir::{DirEntry, WalkDir};
 
 pub mod formats;
 
@@ -41,10 +41,10 @@ fn run_test(paths: &Paths, ctx: &OpenClContext) -> Result<(), String> {
 
     let result = evaluator.evaluate(target, &ctx);
     let lines = evaluator
-                    .get_polylines(&result, &ctx)
-                    .into_iter()
-                    .map(|((x1, y1), (x2, y2))| formats::lines::Line(x1, y1, x2, y2))
-                    .collect::<Vec<_>>();
+        .get_polylines(&result, &ctx)
+        .into_iter()
+        .map(|((x1, y1), (x2, y2))| formats::lines::Line(x1, y1, x2, y2))
+        .collect::<Vec<_>>();
     ctx.empty_queue();
 
     image::save_field_buffer(&result, &paths.actual_image, image::ColorMode::Debug);
@@ -55,18 +55,30 @@ fn run_test(paths: &Paths, ctx: &OpenClContext) -> Result<(), String> {
         formats::field::compare(
             &latin::file::read_string_utf8(&paths.expected_values).unwrap(),
             &paths.expected_values.to_str().unwrap(),
-            (result.size(), result.values()))?;
+            (result.size(), result.values()),
+        )?;
     } else {
-        return Err(format!("could not find expected values file at {}", paths.expected_values.to_str().unwrap()));
+        return Err(
+            format!(
+                "could not find expected values file at {}",
+                paths.expected_values.to_str().unwrap(),
+            ),
+        );
     }
 
     if latin::file::exists(&paths.expected_lines) {
         formats::lines::compare(
             &latin::file::read_string_utf8(&paths.expected_lines).unwrap(),
             &paths.expected_lines.to_str().unwrap(),
-            &lines)?;
+            &lines,
+        )?;
     } else {
-        return Err(format!("could not find expected lines file at {}", paths.expected_lines.to_str().unwrap()));
+        return Err(
+            format!(
+                "could not find expected lines file at {}",
+                paths.expected_lines.to_str().unwrap(),
+            ),
+        );
     }
 
     Ok(())
@@ -74,17 +86,14 @@ fn run_test(paths: &Paths, ctx: &OpenClContext) -> Result<(), String> {
 
 fn main() {
     use std::io::{Write, stdout};
-    fn ends_with_impl(e: &DirEntry) -> bool {
-        e.path()
-            .extension()
-            .map(|e| e == "impl")
-            .unwrap_or(false)
-    }
+    fn ends_with_impl(e: &DirEntry) -> bool { e.path().extension().map(|e| e == "impl").unwrap_or(false) }
     fn clear(size: usize) {
-        print!("{}{}{}",
+        print!(
+            "{}{}{}",
             ::std::iter::repeat(8 as char).take(size).collect::<String>(),
             ::std::iter::repeat(' ').take(size).collect::<String>(),
-            ::std::iter::repeat(8 as char).take(size).collect::<String>());
+            ::std::iter::repeat(8 as char).take(size).collect::<String>(),
+        );
     }
 
     let root_dir = ::std::env::current_dir().unwrap();
@@ -96,7 +105,7 @@ fn main() {
         .filter_map(Result::ok)
         .filter(ends_with_impl)
         .map(|e| e.path().to_path_buf())
-        .collect::<Vec<_>>();;
+        .collect::<Vec<_>>();
 
     let max_path_size = test_files
         .iter()
@@ -124,10 +133,14 @@ fn main() {
         };
 
         let running = "running".yellow();
-        print!("{}:{} {}",
+        print!(
+            "{}:{} {}",
             script_name.to_str().unwrap(),
-            std::iter::repeat(' ').take(max_path_size - script_name.to_str().unwrap().len()).collect::<String>(),
-            running);
+            std::iter::repeat(' ')
+                .take(max_path_size - script_name.to_str().unwrap().len())
+                .collect::<String>(),
+            running,
+        );
         stdout().flush().unwrap();
         clear(running.len());
 
@@ -151,7 +164,7 @@ fn main() {
                 println!("  {}", panic_string.trim().blue());
             }
             Err(Err(_)) => {
-                ctx =  implicit::opencl::OpenClContext::default();
+                ctx = implicit::opencl::OpenClContext::default();
             }
         }
     }

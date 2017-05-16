@@ -1,15 +1,15 @@
-use image_crate::{ImageBuffer, Rgb, PNG, ImageRgb8};
+use image_crate::{ImageBuffer, ImageRgb8, PNG, Rgb};
+
+use opencl::FieldBuffer;
 use std::f32::{INFINITY, NEG_INFINITY};
 use std::fs::File;
 use std::io::BufWriter;
 use std::path::Path;
 
-use ::opencl::FieldBuffer;
-
 #[derive(Copy, Clone)]
 pub enum ColorMode {
     BlackAndWhite,
-    Debug
+    Debug,
 }
 
 pub fn save_field_buffer<P: AsRef<Path>>(buffer: &FieldBuffer, name: P, color_mode: ColorMode) {
@@ -58,11 +58,14 @@ pub fn save_image<P: AsRef<Path>>(samples: &[f32], width: usize, file_name: P, c
         *pixel = Rgb(color);
     }
 
-    ::std::fs::create_dir_all({
-        let mut dir = file_name.as_ref().to_path_buf();
-        dir.pop();
-        dir
-    }).unwrap();
+    ::std::fs::create_dir_all(
+        {
+            let mut dir = file_name.as_ref().to_path_buf();
+            dir.pop();
+            dir
+        },
+    )
+            .unwrap();
     let fout = File::create(file_name).unwrap();
     let mut fout = BufWriter::new(fout);
     ImageRgb8(buf).save(&mut fout, PNG).unwrap();

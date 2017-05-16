@@ -1,8 +1,8 @@
 pub mod field {
     use implicit::opencl::FieldBuffer;
+    use snoot::{Result as ParseResult, Sexpr, simple_parse};
+    use snoot::diagnostic::DiagnosticBag;
     use std::fmt::Write;
-    use snoot::{simple_parse, Result as ParseResult, Sexpr};
-    use snoot::diagnostic::{DiagnosticBag};
 
     pub fn compare(expected: &str, expected_filename: &str, actual: ((usize, usize), Vec<f32>)) -> Result<(), String> {
         let expected = text_to_vec(expected, expected_filename);
@@ -58,7 +58,7 @@ pub mod field {
             children.iter().map(|c| c.expect_float(bag).unwrap_or_default() as f32).collect()
         }
 
-        let ParseResult{roots, mut diagnostics} = simple_parse(text, &[], Some(filename));
+        let ParseResult { roots, mut diagnostics } = simple_parse(text, &[], Some(filename));
 
         assert!(roots.len() != 0);
         let (width, height) = parse_size(&roots[0], &mut diagnostics);
@@ -73,14 +73,14 @@ pub mod field {
         assert_eq!(rows.len(), height);
         diagnostics.assert_no_errors();
 
-        ((width, height), rows.into_iter().flat_map(|a|a).collect())
+        ((width, height), rows.into_iter().flat_map(|a| a).collect())
     }
 }
 
 pub mod lines {
+    use snoot::{Result as ParseResult, simple_parse};
+    use snoot::serde_serialization::{DeserializeResult, deserialize};
     use std::fmt::Write;
-    use snoot::{simple_parse, Result as ParseResult};
-    use ::snoot::serde_serialization::{deserialize, DeserializeResult};
 
     #[derive(Deserialize, Debug, PartialEq, Copy, Clone)]
     #[serde(rename="line")]
@@ -93,25 +93,25 @@ pub mod lines {
             return Err(format!("Number of lines differ, {} vs {}", ex.len(), actual.len()));
         }
 
-        for (i, (exl, acl)) in ex.into_iter().zip(actual.into_iter().map(|&l|l)).enumerate() {
+        for (i, (exl, acl)) in ex.into_iter().zip(actual.into_iter().map(|&l| l)).enumerate() {
             if (exl.0 - acl.0).abs() > 0.0001 {
-                return Err(format!("Contents of line {} differ, {:?} vs {:?}", i, exl, acl))
+                return Err(format!("Contents of line {} differ, {:?} vs {:?}", i, exl, acl));
             }
             if (exl.1 - acl.1).abs() > 0.0001 {
-                return Err(format!("Contents of line {} differ, {:?} vs {:?}", i, exl, acl))
+                return Err(format!("Contents of line {} differ, {:?} vs {:?}", i, exl, acl));
             }
             if (exl.2 - acl.2).abs() > 0.0001 {
-                return Err(format!("Contents of line {} differ, {:?} vs {:?}", i, exl, acl))
+                return Err(format!("Contents of line {} differ, {:?} vs {:?}", i, exl, acl));
             }
             if (exl.3 - acl.3).abs() > 0.0001 {
-                return Err(format!("Contents of line {} differ, {:?} vs {:?}", i, exl, acl))
+                return Err(format!("Contents of line {} differ, {:?} vs {:?}", i, exl, acl));
             }
         }
 
         Ok(())
     }
 
-    pub fn lines_to_text<I: Iterator<Item=Line>>(lines: I) -> String {
+    pub fn lines_to_text<I: Iterator<Item = Line>>(lines: I) -> String {
         let mut buff = String::new();
         for Line(x1, y1, x2, y2) in lines {
             writeln!(&mut buff, "(line {:.6} {:.6} {:.6} {:.6})", x1, y1, x2, y2).unwrap();
@@ -121,15 +121,16 @@ pub mod lines {
 
     pub fn text_to_vec(text: &str, filename: &str) -> Vec<Line> {
 
-        let ParseResult{roots, diagnostics} = simple_parse(text, &[], Some(filename));
+        let ParseResult { roots, diagnostics } = simple_parse(text, &[], Some(filename));
         diagnostics.assert_empty();
 
-        roots.iter()
-             .map(|sexpr| deserialize::<Line>(sexpr))
-             .collect::<DeserializeResult<Vec<Line>>>()
-             .unwrap()
-             .into_iter()
-             .collect::<Vec<_>>()
+        roots
+            .iter()
+            .map(|sexpr| deserialize::<Line>(sexpr))
+            .collect::<DeserializeResult<Vec<Line>>>()
+            .unwrap()
+            .into_iter()
+            .collect::<Vec<_>>()
     }
 
     #[test]

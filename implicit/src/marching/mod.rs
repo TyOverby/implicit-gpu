@@ -1,10 +1,10 @@
 mod polygonize;
 mod util;
 
+use self::util::geom::{Line, Point};
 use itertools::Itertools;
-use opencl::{OpenClContext, FieldBuffer, LineBuffer};
-use self::util::geom::{Point, Line};
-use ::nodes::Polygon;
+use nodes::Polygon;
+use opencl::{FieldBuffer, LineBuffer, OpenClContext};
 
 const PROGRAM: &'static str = include_str!("marching.c");
 
@@ -24,7 +24,8 @@ pub fn run_marching(input: &FieldBuffer, ctx: &OpenClContext) -> (LineBuffer, Li
         .arg_scl(height as u64)
         .arg_buf(out_xs.buffer())
         .arg_buf(out_ys.buffer())
-        .enq().unwrap();
+        .enq()
+        .unwrap();
 
     (out_xs, out_ys)
 }
@@ -34,16 +35,15 @@ pub fn march(input: &FieldBuffer, simplify: bool, ctx: &OpenClContext) -> Vec<Po
 
     let (out_xs, out_ys) = run_marching(input, ctx);
 
-    let lines = ::flame::span_of("point filtering", || {
-        Iterator::zip(
-            out_xs.values().into_iter(),
-            out_ys.values().into_iter(),
-        )
-           .tuples()
-           .filter(|&((a, b), (c, d))| !(a.is_nan() && b.is_nan() && c.is_nan() && d.is_nan()))
-           .map(|((a, b), (c, d))| Line(Point{x: a, y: b}, Point{x: c, y: d}))
-            .collect::<Vec<_>>()
-    });
+    let lines = ::flame::span_of(
+        "point filtering", || {
+            Iterator::zip(out_xs.values().into_iter(), out_ys.values().into_iter())
+                .tuples()
+                .filter(|&((a, b), (c, d))| !(a.is_nan() && b.is_nan() && c.is_nan() && d.is_nan()))
+                .map(|((a, b), (c, d))| Line(Point { x: a, y: b }, Point { x: c, y: d }))
+                .collect::<Vec<_>>()
+        }
+    );
 
     ::flame::start("line connecting");
     let (lns, _) = polygonize::connect_lines(lines);
@@ -51,7 +51,9 @@ pub fn march(input: &FieldBuffer, simplify: bool, ctx: &OpenClContext) -> Vec<Po
     for polygon in lns.into_iter() {
         let polygon = if simplify {
             polygonize::simplify_line(polygon)
-        } else { polygon};
+        } else {
+            polygon
+        };
 
         let mut xs = Vec::with_capacity(polygon.len());
         let mut ys = Vec::with_capacity(polygon.len());
@@ -61,7 +63,7 @@ pub fn march(input: &FieldBuffer, simplify: bool, ctx: &OpenClContext) -> Vec<Po
             ys.push(pt.y);
         }
 
-        polygons.push(Polygon{ xs: xs, ys: ys });
+        polygons.push(Polygon { xs: xs, ys: ys });
     }
     ::flame::end("line connecting");
 
@@ -76,7 +78,7 @@ fn basic() {
         let (out_xs, out_ys) = run_marching(&buf, &ctx);
         let (out_xs, out_ys) = (out_xs.values(), out_ys.values());
 
-        return ((out_xs[0], out_ys[0]), (out_xs[1], out_ys[1]))
+        return ((out_xs[0], out_ys[0]), (out_xs[1], out_ys[1]));
     }
 
     fn assert_close(a: ((f32, f32), (f32, f32)), b: ((f32, f32), (f32, f32))) {

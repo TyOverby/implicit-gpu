@@ -1,4 +1,4 @@
-use ::nodes::{StaticNode, Node, PolyGroup};
+use nodes::{Node, PolyGroup, StaticNode};
 
 #[derive(Debug, PartialEq)]
 pub enum NodeGroup {
@@ -12,7 +12,7 @@ pub struct GroupId(pub usize);
 
 #[derive(Debug)]
 pub struct Nest {
-    groups: Vec<NodeGroup>
+    groups: Vec<NodeGroup>,
 }
 
 impl GroupId {
@@ -23,11 +23,7 @@ impl GroupId {
 }
 
 impl Nest {
-    pub fn new() -> Nest {
-        Nest {
-            groups: vec![],
-        }
-    }
+    pub fn new() -> Nest { Nest { groups: vec![] } }
 
     fn add(&mut self, group: NodeGroup) -> GroupId {
         if let Some(pos) = self.groups.iter().position(|g| g == &group) {
@@ -43,17 +39,21 @@ impl Nest {
         let group = match node {
             &Node::Polygon(ref poly) => NodeGroup::Polygon((*poly).clone()),
             &Node::Freeze(ref ch) => {
-                let s_node: StaticNode = create_node!(a, {
-                    let node: &Node = do_group(ch, self, &a);
-                    node
-                });
+                let s_node: StaticNode = create_node!(
+                    a, {
+                        let node: &Node = do_group(ch, self, &a);
+                        node
+                    }
+                );
                 NodeGroup::Freeze(s_node)
             }
             other => {
-                let s_node: StaticNode = create_node!(a, {
-                    let node: &Node = do_group(other, self, &a);
-                    node
-                });
+                let s_node: StaticNode = create_node!(
+                    a, {
+                        let node: &Node = do_group(other, self, &a);
+                        node
+                    }
+                );
                 NodeGroup::Basic(s_node)
             }
         };
@@ -67,8 +67,7 @@ impl Nest {
     }
 }
 
-fn do_group<'a, 'b, F>(node: &'a Node<'a>, nest: &mut Nest, a: &F) -> &'b Node<'b>
-where F: Fn(Node<'b>) -> &'b Node<'b> {
+fn do_group<'a, 'b, F>(node: &'a Node<'a>, nest: &mut Nest, a: &F) -> &'b Node<'b> where F: Fn(Node<'b>) -> &'b Node<'b> {
     match node {
         &Node::Polygon(_) => {
             let og = nest.group(node);
@@ -82,8 +81,8 @@ where F: Fn(Node<'b>) -> &'b Node<'b> {
             let og = nest.group(node);
             a(Node::OtherGroup(og))
         }
-        &Node::Circle {x, y, r} => a(Node::Circle{x, y, r}),
-        &Node::Rect {x, y, w, h} => a(Node::Rect{x, y, w, h}),
+        &Node::Circle { x, y, r } => a(Node::Circle { x, y, r }),
+        &Node::Rect { x, y, w, h } => a(Node::Rect { x, y, w, h }),
         &Node::And(ref ch) => a(Node::And(ch.iter().map(|c| do_group(c, nest, a)).collect())),
         &Node::Or(ref ch) => a(Node::Or(ch.iter().map(|c| do_group(c, nest, a)).collect())),
         &Node::Not(ref ch) => a(Node::Not(do_group(ch, nest, a))),

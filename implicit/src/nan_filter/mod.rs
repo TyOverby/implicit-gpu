@@ -1,4 +1,4 @@
-use super::opencl::{MaskBuffer, OpenClContext, LineBuffer};
+use super::opencl::{LineBuffer, MaskBuffer, OpenClContext};
 use ocl::Buffer;
 
 const MASK_PROG: &'static str = include_str!("./mask.c");
@@ -18,18 +18,13 @@ fn create_mask(ctx: &OpenClContext, line: &LineBuffer) -> MaskBuffer {
     let out = ctx.mask_buffer(size, None);
     let kernel = ctx.compile("apply", MASK_PROG);
 
-    kernel.gws([size])
-        .arg_buf(line.buffer())
-        .arg_buf(out.buffer())
-        .arg_scl(size)
-        .enq()
-        .unwrap();
+    kernel.gws([size]).arg_buf(line.buffer()).arg_buf(out.buffer()).arg_scl(size).enq().unwrap();
 
     out
 }
 
 fn sum_mask(ctx: &OpenClContext, mask: &MaskBuffer) {
-    const WORKGROUP_SIZE:usize = 512;
+    const WORKGROUP_SIZE: usize = 512;
 
     let array_size = mask.size();
     let num_workgroups = ((array_size + 1) / 2 + WORKGROUP_SIZE - 1) / WORKGROUP_SIZE;
@@ -38,7 +33,8 @@ fn sum_mask(ctx: &OpenClContext, mask: &MaskBuffer) {
     let aux_temp: Buffer<u32> = Buffer::new(ctx.queue().clone(), None, &[num_workgroups], None).unwrap();
 
     let kernel = ctx.compile("sum", SUM_PROG);
-    kernel.gws([launch_size])
+    kernel
+        .gws([launch_size])
         .lws([WORKGROUP_SIZE])
         .arg_buf(mask.buffer())
         .arg_scl(array_size)
@@ -49,7 +45,8 @@ fn sum_mask(ctx: &OpenClContext, mask: &MaskBuffer) {
         .unwrap();
 
     let kernel = ctx.compile("sum", SUM_PROG);
-    kernel.gws([launch_size])
+    kernel
+        .gws([launch_size])
         .lws([WORKGROUP_SIZE])
         .arg_buf(mask.buffer())
         .arg_scl(array_size)
@@ -73,7 +70,8 @@ fn reorder(ctx: &OpenClContext, sum: &MaskBuffer, input: &LineBuffer) -> LineBuf
         .arg_buf(sum.buffer())
         .arg_buf(out.buffer())
         .arg_scl(size)
-        .enq().unwrap();
+        .enq()
+        .unwrap();
     out
 }
 
@@ -82,7 +80,7 @@ fn reorder(ctx: &OpenClContext, sum: &MaskBuffer, input: &LineBuffer) -> LineBuf
 fn get_rand_array(ctx: &OpenClContext, size: usize) -> (Vec<f32>, LineBuffer) {
     let mut input_cpu = vec![0.0f32; size];
 
-    for _ in 0 .. (size / 2) {
+    for _ in 0..(size / 2) {
         let idx: usize = ::rand::random::<usize>() % size;
         input_cpu[idx] = ::std::f32::NAN;
     }
@@ -116,18 +114,21 @@ fn test_sum_mask() {
 
         let masked = create_mask(&ctx, &input);
 
-        let masked_expected: Vec<u32> = input_cpu.into_iter().map(|a| {
-            if a.is_nan() { 0 } else { 1 }
-        }).collect();
+        let masked_expected: Vec<u32> = input_cpu.into_iter().map(|a| if a.is_nan() { 0 } else { 1 }).collect();
 
         sum_mask(&ctx, &masked);
 
-        let summed_expected: Vec<u32> = masked_expected.into_iter().scan(0u32, |a: &mut u32, b: u32| {
-            let r: u32 = *a;
-            *a = r + b;
-            let r: Option<u32> = Some(r);
-            r
-        }).collect();
+        let summed_expected: Vec<u32> = masked_expected
+            .into_iter()
+            .scan(
+                0u32, |a: &mut u32, b: u32| {
+                    let r: u32 = *a;
+                    *a = r + b;
+                    let r: Option<u32> = Some(r);
+                    r
+                }
+            )
+            .collect();
 
         assert!(masked.values() == summed_expected);
     };
