@@ -36,7 +36,7 @@ pub fn all_devices() -> Vec<(Platform, Device)> {
             } else {
                 (0).cmp(&0)
             }
-        },
+        }
     );
 
     out

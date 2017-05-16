@@ -35,7 +35,7 @@ pub fn connect_lines(lines: Vec<Line>) -> (Vec<Vec<Point>>, QuadTree<Line>) {
         |lt| match lt {
             &LineType::Joined(ref r) |
             &LineType::Unjoined(ref r) => r.len() > 1,
-        },
+        }
     );
 
     (joined
@@ -44,7 +44,7 @@ pub fn connect_lines(lines: Vec<Line>) -> (Vec<Vec<Point>>, QuadTree<Line>) {
         |lt| match lt {
             LineType::Joined(r) |
             LineType::Unjoined(r) => r,
-        },
+        }
     )
          .collect(),
      qt)
@@ -242,7 +242,7 @@ fn join_lines(lines: Vec<Line>) -> (Vec<LineType>, QuadTree<Line>) {
                         let l1_min = d1a.min(d1b);
                         let l2_min = d2a.min(d2b);
                         l1_min.partial_cmp(&l2_min).unwrap_or(Ordering::Equal)
-                    },
+                    }
                 );
 
                 let closest_line_opt = near_last.into_iter().next();

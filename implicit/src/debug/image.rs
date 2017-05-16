@@ -63,7 +63,7 @@ pub fn save_image<P: AsRef<Path>>(samples: &[f32], width: usize, file_name: P, c
             let mut dir = file_name.as_ref().to_path_buf();
             dir.pop();
             dir
-        },
+        }
     )
             .unwrap();
     let fout = File::create(file_name).unwrap();

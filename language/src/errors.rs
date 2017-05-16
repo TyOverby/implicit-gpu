@@ -1,4 +1,3 @@
-
 use snoot::diagnostic::Diagnostic;
 use snoot::parse::{SexprKind, Span};
 use tendril::StrTendril;

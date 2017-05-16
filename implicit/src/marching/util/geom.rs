@@ -383,18 +383,18 @@ impl Rect {
             // _ _
             Rect::from_point_and_size(
                 &Point {
-                     x: self.top_left.x + half.x,
-                     ..self.top_left
-                 },
+                    x: self.top_left.x + half.x,
+                    ..self.top_left
+                },
                 &half,
             ),
             // _ _
             // x _
             Rect::from_point_and_size(
                 &Point {
-                     y: self.top_left.y + half.y,
-                     ..self.top_left
-                 },
+                    y: self.top_left.y + half.y,
+                    ..self.top_left
+                },
                 &half,
             ),
             // _ _

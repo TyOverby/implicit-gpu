@@ -53,13 +53,18 @@ impl Clone for QuadNode {
     fn clone(&self) -> QuadNode {
         match self {
             &QuadNode::Branch {
-                 ref aabb,
-                 ref children,
-                 ref in_all,
-                 ref element_count,
-                 ref depth,
-             } => {
-                let children = [children[0].clone(), children[1].clone(), children[2].clone(), children[3].clone()];
+                ref aabb,
+                ref children,
+                ref in_all,
+                ref element_count,
+                ref depth,
+            } => {
+                let children = [
+                    children[0].clone(),
+                    children[1].clone(),
+                    children[2].clone(),
+                    children[3].clone(),
+                ];
                 QuadNode::Branch {
                     aabb: aabb.clone(),
                     children: children,
@@ -69,10 +74,10 @@ impl Clone for QuadNode {
                 }
             }
             &QuadNode::Leaf {
-                 ref aabb,
-                 ref elements,
-                 ref depth,
-             } => {
+                ref aabb,
+                ref elements,
+                ref depth,
+            } => {
                 QuadNode::Leaf {
                     aabb: aabb.clone(),
                     elements: elements.clone(),
@@ -144,7 +149,7 @@ impl<T> QuadTree<T> {
                         }
                     };
                     (t, rect, id)
-                },
+                }
             )
             .collect()
     }
@@ -192,11 +197,11 @@ impl QuadNode {
     fn inspect<F: FnMut(&Rect, usize, bool)>(&self, f: &mut F) {
         match self {
             &QuadNode::Branch {
-                 ref depth,
-                 ref aabb,
-                 ref children,
-                 ..
-             } => {
+                ref depth,
+                ref aabb,
+                ref children,
+                ..
+            } => {
                 f(aabb, *depth, false);
                 for child in children {
                     child.1.inspect(f);
@@ -265,7 +270,7 @@ impl QuadNode {
                         ],
                              element_count: 0,
                              depth: *depth,
-                         }),
+                         })
                     );
                 } else {
                     if config.allow_duplicates || !elements.iter().any(|&(_, ref e_bb)| e_bb.close_to(&item_aabb, EPSILON)) {

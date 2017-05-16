@@ -62,7 +62,7 @@ fn run_test(paths: &Paths, ctx: &OpenClContext) -> Result<(), String> {
             format!(
                 "could not find expected values file at {}",
                 paths.expected_values.to_str().unwrap(),
-            ),
+            )
         );
     }
 
@@ -77,7 +77,7 @@ fn run_test(paths: &Paths, ctx: &OpenClContext) -> Result<(), String> {
             format!(
                 "could not find expected lines file at {}",
                 paths.expected_lines.to_str().unwrap(),
-            ),
+            )
         );
     }
 

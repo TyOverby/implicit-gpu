@@ -1,4 +1,3 @@
-
 use compiler::GroupId;
 use nodes::Node;
 use std::fmt::Write;
@@ -29,7 +28,7 @@ pub fn compile(node: &Node) -> (String, CompilationContext) {
 
   float x_s = (float) x;
   float y_s = (float) y;
-"#,
+"#
     );
 
 

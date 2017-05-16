@@ -1,4 +1,3 @@
-
 use compiler::*;
 
 use itertools::Itertools;
@@ -81,7 +80,14 @@ impl Evaluator {
             if let Some(subtractive_field) = subtractive_field {
                 let program = create_node!(
                     a, {
-                        a(Node::And(vec![a(Node::OtherGroup(GroupId(0))), a(Node::Not(a(Node::OtherGroup(GroupId(1)))))],),)
+                        a(
+                            Node::And(
+                                vec![
+                                    a(Node::OtherGroup(GroupId(0))),
+                                    a(Node::Not(a(Node::OtherGroup(GroupId(1))))),
+                                ]
+                            )
+                        )
                     }
                 );
 
@@ -133,7 +139,7 @@ impl Evaluator {
         let points = xs.values().into_iter().zip(ys.values().into_iter());
         let lines = points.tuples();
         lines
-            .filter(|&((x1, y1), (x2, y2))| !(x1.is_nan() || x2.is_nan() || y1.is_nan() || y2.is_nan()),)
+            .filter(|&((x1, y1), (x2, y2))| !(x1.is_nan() || x2.is_nan() || y1.is_nan() || y2.is_nan()))
             .collect()
     }
 }
