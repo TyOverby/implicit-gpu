@@ -1,4 +1,5 @@
 extern crate implicit;
+extern crate regex;
 extern crate colored;
 extern crate latin;
 extern crate implicit_language;
@@ -30,7 +31,9 @@ pub struct Paths {
 
 fn main() {
     use std::io::{Write, stdout};
-    fn ends_with_impl(e: &DirEntry) -> bool { e.path().extension().map(|e| e == "impl").unwrap_or(false) }
+    fn ends_with_impl(e: &DirEntry) -> bool {
+        e.path().extension().map(|e| e == "impl").unwrap_or(false)
+    }
     fn clear(size: usize) {
         print!(
             "{}{}{}",
@@ -40,15 +43,36 @@ fn main() {
         );
     }
 
+    let args = std::env::args().collect::<Vec<_>>();
+    let test_matcher = if args.len() == 0 {
+        ::regex::RegexSet::new(&["*"]).unwrap()
+    } else {
+        match ::regex::RegexSet::new(&args) {
+            Ok(set) => set,
+            Err(e) => {
+                println!("{:?}", e);
+                ::std::process::exit(2);
+            }
+        }
+    };
+
     let root_dir = ::std::env::current_dir().unwrap();
     let mut test_dir = root_dir.clone();
     test_dir.push("tests");
 
+    // Walk the tests directory
     let test_files = WalkDir::new(&test_dir)
         .into_iter()
+        // Taking only the ones that actually have paths
         .filter_map(Result::ok)
+        // With a filename that ends in ".impl"
         .filter(ends_with_impl)
+        // Converted to a PathBuf
         .map(|e| e.path().to_path_buf())
+        // Where the path can be converted to a string
+        .filter(|p| p.to_str().is_some())
+        // And the path is accepted by the matcher
+        .filter(|p| test_matcher.is_match(p.to_str().unwrap()))
         .collect::<Vec<_>>();
 
     let max_path_size = test_files

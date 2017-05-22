@@ -15,6 +15,7 @@ flame = "0.1.11"
 serde = "1.*.*"
 serde_derive = "1.*.*"
 colored = "1.5.0"
+regex = "*"
 
 [dependencies.implicit]
 path = "../implicit"

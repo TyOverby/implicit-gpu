@@ -7,6 +7,9 @@ use std::fmt::Write;
 pub struct Line(pub f32, pub f32, pub f32, pub f32);
 
 pub fn compare(expected: &str, expected_filename: &str, actual: &[Line]) -> Result<(), String> {
+    fn close(a: f32, b: f32) -> bool {
+        (a - b).abs() < 0.0001
+    }
     let ex = text_to_vec(expected, expected_filename);
 
     if ex.len() != actual.len() {
@@ -14,16 +17,16 @@ pub fn compare(expected: &str, expected_filename: &str, actual: &[Line]) -> Resu
     }
 
     for (i, (exl, acl)) in ex.into_iter().zip(actual.into_iter().map(|&l| l)).enumerate() {
-        if (exl.0 - acl.0).abs() > 0.0001 {
+        if !close(exl.0, acl.0) {
             return Err(format!("Contents of line {} differ, {:?} vs {:?}", i, exl, acl));
         }
-        if (exl.1 - acl.1).abs() > 0.0001 {
+        if !close(exl.1, acl.1) {
             return Err(format!("Contents of line {} differ, {:?} vs {:?}", i, exl, acl));
         }
-        if (exl.2 - acl.2).abs() > 0.0001 {
+        if !close(exl.2, acl.2) {
             return Err(format!("Contents of line {} differ, {:?} vs {:?}", i, exl, acl));
         }
-        if (exl.3 - acl.3).abs() > 0.0001 {
+        if !close(exl.3, acl.3) {
             return Err(format!("Contents of line {} differ, {:?} vs {:?}", i, exl, acl));
         }
     }
