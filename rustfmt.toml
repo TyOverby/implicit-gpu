@@ -1,5 +1,5 @@
 array_layout = "Block"
-chain_one_line_max = 100
+chain_one_line_max = 70
 closure_block_indent_threshold = -1
 comment_width = 60
 error_on_line_overflow = false

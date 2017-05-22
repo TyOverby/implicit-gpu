@@ -31,9 +31,7 @@ pub struct Paths {
 
 fn main() {
     use std::io::{Write, stdout};
-    fn ends_with_impl(e: &DirEntry) -> bool {
-        e.path().extension().map(|e| e == "impl").unwrap_or(false)
-    }
+    fn ends_with_impl(e: &DirEntry) -> bool { e.path().extension().map(|e| e == "impl").unwrap_or(false) }
     fn clear(size: usize) {
         print!(
             "{}{}{}",

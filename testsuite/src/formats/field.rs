@@ -54,7 +54,10 @@ pub fn text_to_vec(text: &str, filename: &str) -> ((usize, usize), Vec<f32>) {
 
     fn parse_row(sexpr: &Sexpr, bag: &mut DiagnosticBag) -> Vec<f32> {
         let children = sexpr.expect_list_with_symbol("row", bag).unwrap_or_default();
-        children.iter().map(|c| c.expect_float(bag).unwrap_or_default() as f32).collect()
+        children
+            .iter()
+            .map(|c| c.expect_float(bag).unwrap_or_default() as f32)
+            .collect()
     }
 
     let ParseResult { roots, mut diagnostics } = simple_parse(text, &[], Some(filename));

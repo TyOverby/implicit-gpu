@@ -7,9 +7,7 @@ use std::fmt::Write;
 pub struct Line(pub f32, pub f32, pub f32, pub f32);
 
 pub fn compare(expected: &str, expected_filename: &str, actual: &[Line]) -> Result<(), String> {
-    fn close(a: f32, b: f32) -> bool {
-        (a - b).abs() < 0.0001
-    }
+    fn close(a: f32, b: f32) -> bool { (a - b).abs() < 0.0001 }
     let ex = text_to_vec(expected, expected_filename);
 
     if ex.len() != actual.len() {
