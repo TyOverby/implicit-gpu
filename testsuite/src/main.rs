@@ -10,13 +10,13 @@ extern crate snoot;
 extern crate serde_derive;
 
 use colored::Colorize;
-use implicit::opencl::OpenClContext;
 use std::path::PathBuf;
 use walkdir::{DirEntry, WalkDir};
 
 pub mod formats;
+mod run_test;
 
-struct Paths {
+pub struct Paths {
     script: PathBuf,
 
     actual_image: PathBuf,
@@ -27,62 +27,6 @@ struct Paths {
     expected_lines: PathBuf,
 }
 
-fn run_test(paths: &Paths, ctx: &OpenClContext) -> Result<(), String> {
-    let _guard = flame::start_guard(format!("running {:?}", paths.script));
-    use implicit::debug::image;
-
-    let script_name = paths.script.to_str().unwrap_or("<unknown source file>");
-    let source = latin::file::read_string_utf8(&paths.script).unwrap();
-    let tree = implicit_language::parse(&source[..], script_name).unwrap();
-
-    let mut nest = implicit::compiler::Nest::new();
-    let target = nest.group(tree.node());
-    let evaluator = implicit::evaluator::Evaluator::new(nest, 500, 500, None);
-
-    let result = evaluator.evaluate(target, &ctx);
-    let lines = evaluator
-        .get_polylines(&result, &ctx)
-        .into_iter()
-        .map(|((x1, y1), (x2, y2))| formats::lines::Line(x1, y1, x2, y2))
-        .collect::<Vec<_>>();
-    ctx.empty_queue();
-
-    image::save_field_buffer(&result, &paths.actual_image, image::ColorMode::Debug);
-    latin::file::write(&paths.actual_values, formats::field::field_to_text(&result)).unwrap();
-    latin::file::write(&paths.actual_lines, formats::lines::lines_to_text(lines.iter().cloned())).unwrap();
-
-    if latin::file::exists(&paths.expected_values) {
-        formats::field::compare(
-            &latin::file::read_string_utf8(&paths.expected_values).unwrap(),
-            &paths.expected_values.to_str().unwrap(),
-            (result.size(), result.values()),
-        )?;
-    } else {
-        return Err(
-            format!(
-                "could not find expected values file at {}",
-                paths.expected_values.to_str().unwrap(),
-            )
-        );
-    }
-
-    if latin::file::exists(&paths.expected_lines) {
-        formats::lines::compare(
-            &latin::file::read_string_utf8(&paths.expected_lines).unwrap(),
-            &paths.expected_lines.to_str().unwrap(),
-            &lines,
-        )?;
-    } else {
-        return Err(
-            format!(
-                "could not find expected lines file at {}",
-                paths.expected_lines.to_str().unwrap(),
-            )
-        );
-    }
-
-    Ok(())
-}
 
 fn main() {
     use std::io::{Write, stdout};
@@ -146,7 +90,7 @@ fn main() {
 
         let old_hook = ::std::panic::take_hook();
         ::std::panic::set_hook(Box::new(|_| ()));
-        let result = ::std::panic::catch_unwind(|| run_test(&paths, &ctx)).map_err(|e| e.downcast::<String>());
+        let result = ::std::panic::catch_unwind(|| run_test::run_test(&paths, &ctx)).map_err(|e| e.downcast::<String>());
         ::std::panic::set_hook(old_hook);
 
         match result {
