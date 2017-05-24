@@ -32,7 +32,7 @@ pub fn save_image<P: AsRef<Path>>(samples: &[f32], width: usize, file_name: P, c
     for (x, y, pixel) in buf.enumerate_pixels_mut() {
         let sample = samples[x as usize + y as usize * width];
         let sample_abs = sample.abs();
-        let color = match (color_mode, sample > 0.0, sample_abs < 1.0) {
+        let color = match (color_mode, sample >= 0.0, sample_abs < 1.0) {
             (ColorMode::BlackAndWhite, true, true) => {
                 let v = 127 - (sample_abs * 127.0) as u8;
                 [v, v, v]
