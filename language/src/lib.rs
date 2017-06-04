@@ -251,7 +251,7 @@ fn parse_rect(children: &[Sexpr], span: &Span, errors: &mut DiagnosticBag) -> Op
         let w = attempt!(proplist.get_number("w", span), 10.0, errors);
         let h = attempt!(proplist.get_number("h", span), 10.0, errors);
 
-        // THIS IS A GIAN HACK.  REMOVE ASAP
+        // THIS IS A GIANT HACK.  REMOVE ASAP
 
         let input = format!(
             "{{x: {a} y: {b}}} {{x: {c} y: {b}}} {{x: {c} y: {d}}} {{x: {a} y: {d}}}",

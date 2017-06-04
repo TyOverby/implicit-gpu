@@ -5,7 +5,7 @@ const MASK_PROG: &'static str = include_str!("./mask.c");
 const SUM_PROG: &'static str = include_str!("./sum.c");
 const REORDER_PROG: &'static str = include_str!("./reorder.c");
 
-pub fn filter_nans(ctx: &OpenClContext, line: &LineBuffer) -> LineBuffer {
+pub fn filter_nans(line: &LineBuffer, ctx: &OpenClContext) -> LineBuffer {
     let mask = create_mask(ctx, line);
     sum_mask(ctx, &mask);
     let filtered = reorder(ctx, &mask, line);
@@ -148,6 +148,6 @@ fn test_sum_mask() {
 fn test_filter() {
     let ctx = OpenClContext::default();
     let (_, input) = get_rand_array(&ctx, 8_000_000);
-    let filtered = filter_nans(&ctx, &input);
+    let filtered = filter_nans(&input, &ctx);
     assert!(filtered.non_nans_at_front());
 }

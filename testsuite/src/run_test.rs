@@ -15,6 +15,26 @@ pub fn run_test(paths: &Paths, ctx: &OpenClContext) -> Result<(), String> {
     let target = nest.group(tree.node());
     let evaluator = implicit::evaluator::Evaluator::new(nest, 500, 500, None);
 
+    let output = implicit::run_scene(&implicit::scene::Scene{
+        x: 0,
+        y: 0,
+        width: 500,
+        height: 500,
+
+        unit: "px".into(),
+        simplify: false,
+
+        figures: vec![
+            implicit::scene::Figure {
+                shapes: vec![implicit::scene::Shape {
+                    color: (0, 0, 0),
+                    draw_mode: implicit::scene::DrawMode::Line(implicit::scene::LineMode::Solid),
+                    node: tree,
+                }]
+            }
+        ],
+    });
+
     let result = evaluator.evaluate(target, &ctx);
     let lines = evaluator
         .get_polylines(&result, &ctx)
@@ -24,8 +44,23 @@ pub fn run_test(paths: &Paths, ctx: &OpenClContext) -> Result<(), String> {
     ctx.empty_queue();
 
     image::save_field_buffer(&result, &paths.actual_image, image::ColorMode::Debug);
+    implicit::export::svg::write_out(&paths.actual_svg, output);
     latin::file::write(&paths.actual_values, formats::field::field_to_text(&result)).unwrap();
     latin::file::write(&paths.actual_lines, formats::lines::lines_to_text(lines.iter().cloned())).unwrap();
+
+    if latin::file::exists(&paths.expected_svg) {
+        let expected = latin::file::read(&paths.expected_svg).unwrap();
+        let actual = latin::file::read(&paths.actual_svg).unwrap();
+        if expected != actual {
+            return Err(format!("svg files not the same\n  {}\n  {}",
+                paths.expected_svg.to_str().unwrap(),
+                paths.actual_svg.to_str().unwrap(),
+            ));
+        }
+    } else {
+        return Err(
+            format!("could not find expected svg file at {}", paths.expected_svg.to_str().unwrap()))
+    }
 
     if latin::file::exists(&paths.expected_values) {
         formats::field::compare(

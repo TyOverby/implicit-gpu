@@ -7,7 +7,7 @@ pub enum NodeGroup {
     Polygon(PolyGroup),
 }
 
-#[derive(Debug, Eq, PartialEq, Hash, Clone, Copy)]
+#[derive(Debug, Eq, PartialEq, Hash, Clone, Copy, PartialOrd)]
 pub struct GroupId(pub usize);
 
 #[derive(Debug)]

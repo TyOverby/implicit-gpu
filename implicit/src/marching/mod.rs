@@ -1,5 +1,5 @@
 mod polygonize;
-mod util;
+pub mod util;
 
 use self::util::geom::{Line, Point};
 use itertools::Itertools;

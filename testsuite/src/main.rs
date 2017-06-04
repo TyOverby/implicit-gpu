@@ -23,9 +23,11 @@ pub struct Paths {
     actual_image: PathBuf,
     actual_values: PathBuf,
     actual_lines: PathBuf,
+    actual_svg: PathBuf,
 
     expected_values: PathBuf,
     expected_lines: PathBuf,
+    expected_svg: PathBuf,
 }
 
 
@@ -42,8 +44,9 @@ fn main() {
     }
 
     let args = std::env::args().collect::<Vec<_>>();
-    let test_matcher = if args.len() == 0 {
-        ::regex::RegexSet::new(&["*"]).unwrap()
+    println!("args {:?}", args);
+    let test_matcher = if args.len() == 1 {
+        ::regex::RegexSet::new(&["."]).unwrap()
     } else {
         match ::regex::RegexSet::new(&args) {
             Ok(set) => set,
@@ -91,11 +94,13 @@ fn main() {
         let paths = Paths {
             script: script,
             actual_image: root_dir.join("actual").join(script_name.with_extension("png")),
+            actual_svg: root_dir.join("actual").join(script_name.with_extension("svg")),
             actual_values: root_dir.join("actual").join(script_name.with_extension("values")),
             actual_lines: root_dir.join("actual").join(script_name.with_extension("lines")),
 
             expected_values: root_dir.join("expected").join(script_name.with_extension("values")),
             expected_lines: root_dir.join("expected").join(script_name.with_extension("lines")),
+            expected_svg: root_dir.join("expected").join(script_name.with_extension("svg")),
         };
 
         let running = "running".yellow();
@@ -111,8 +116,11 @@ fn main() {
         clear(running.len());
 
         let old_hook = ::std::panic::take_hook();
-        ::std::panic::set_hook(Box::new(|_| ()));
-        let result = ::std::panic::catch_unwind(|| run_test::run_test(&paths, &ctx)).map_err(|e| e.downcast::<String>());
+        //::std::panic::set_hook(Box::new(|_| ()));
+        let result =
+            ::std::panic::catch_unwind(|| run_test::run_test(&paths, &ctx))
+            .map_err(|e| e.downcast::<String>())
+            .map_err(|e| e.or_else(|e| e.downcast::<&'static str>().map(|s| Box::new(s.to_string()))));
         ::std::panic::set_hook(old_hook);
 
         match result {
@@ -130,7 +138,10 @@ fn main() {
                 println!("  {}", panic_string.trim().blue());
             }
             Err(Err(_)) => {
+                any_failures = true;
                 ctx = implicit::opencl::OpenClContext::default();
+
+                println!("{}", "PANIC!".red());
             }
         }
     }

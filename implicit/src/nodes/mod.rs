@@ -6,7 +6,7 @@ use std::mem::transmute;
 use typed_arena::Arena;
 
 // IF YOU ADD AN ENUM HERE, UPDATE `eq_ignore_group`
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, PartialOrd)]
 pub enum Node<'a> {
     Circle { x: f32, y: f32, r: f32 },
     Rect { x: f32, y: f32, w: f32, h: f32 },
@@ -57,6 +57,12 @@ impl ::std::fmt::Debug for StaticNode {
     fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> Result<(), ::std::fmt::Error> { self.node.fmt(formatter) }
 }
 
+impl ::std::cmp::PartialOrd for StaticNode {
+    fn partial_cmp(&self, other: &StaticNode) -> Option<::std::cmp::Ordering> {
+        self.node.partial_cmp(other.node)
+    }
+}
+impl ::std::cmp::Eq for StaticNode { }
 impl ::std::cmp::PartialEq for StaticNode {
     fn eq(&self, other: &StaticNode) -> bool { self.node == other.node }
 }
