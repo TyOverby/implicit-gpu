@@ -22,7 +22,7 @@ pub fn run_test(paths: &Paths, ctx: &OpenClContext) -> Result<(), String> {
         height: 500,
 
         unit: "px".into(),
-        simplify: false,
+        simplify: true,
 
         figures: vec![
             implicit::scene::Figure {
