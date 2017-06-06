@@ -1,7 +1,5 @@
 #![allow(unused_variables, dead_code)]
 
-extern crate latin;
-
 pub mod backend;
 mod util;
 pub mod svg;

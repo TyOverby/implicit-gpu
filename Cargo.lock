@@ -1,14 +1,4 @@
 [root]
 name = "draw2d"
 version = "0.1.0"
-dependencies = [
- "latin 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)",
-]
 
-[[package]]
-name = "latin"
-version = "0.1.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-
-[metadata]
-"checksum latin 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)" = "5d9e9db7794ca150a53eb7c4d49dbaf0de4c7c5e37752d3391dc433a33d1595f"
