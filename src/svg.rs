@@ -76,11 +76,11 @@ mod test {
     #[test]
     fn triangle_polygon() {
         assert_eq!(run_in_canvas(|canvas| {
-            canvas.draw_closed_polygon(&[(0.0, 0.0), (0.0, 5.0), (5.0, 0.0)], DrawOptions::default())?;
+            canvas.draw_closed_polygon(&[(0.0, 0.0), (0.0, 50.0), (50.0, 0.0)], DrawOptions::default())?;
             Ok(())
         }).trim(), r#"
 <svg xmlns="http://www.w3.org/2000/svg">
-    <path d="M0,0 L0,5 L5,0 z"/>
+    <path d="M0,0 L0,50 L50,0 z"/>
 </svg>
         "#.trim())
     }
@@ -88,11 +88,26 @@ mod test {
     #[test]
     fn triangle_polygon_reversed() {
         assert_eq!(run_in_canvas(|canvas| {
-            canvas.draw_closed_polygon(&[(5.0, 0.0), (0.0, 5.0), (0.0, 0.0)], DrawOptions::default())?;
+            canvas.draw_closed_polygon(&[(50.0, 0.0), (0.0, 50.0), (0.0, 0.0)], DrawOptions::default())?;
             Ok(())
         }).trim(), r#"
 <svg xmlns="http://www.w3.org/2000/svg">
-    <path d="M0,0 L0,5 L5,0 z"/>
+    <path d="M0,0 L0,50 L50,0 z"/>
+</svg>
+        "#.trim())
+    }
+
+    #[test]
+    fn triangle_polygon_reversed_with_holes() {
+        assert_eq!(run_in_canvas(|canvas| {
+            canvas.draw_holy_polygon(
+                vec![&[(50.0, 0.0), (0.0, 50.0), (0.0, 0.0)] as &[_]],
+                vec![&[(30.0, 10.0), (10.0, 30.0), (10.0, 10.0)] as &[_]],
+                DrawOptions::default()
+            )
+        }).trim(), r#"
+<svg xmlns="http://www.w3.org/2000/svg">
+    <path d="M50,0 L0,0 L0,50 L50,0 M30,10 L10,30 L10,10 L30,10 "/>
 </svg>
         "#.trim())
     }
