@@ -1,7 +1,6 @@
-mod polygonize;
+//mod polygonize;
 pub mod util;
 
-use self::util::geom::{Line, Point};
 use itertools::Itertools;
 use nodes::Polygon;
 use opencl::{FieldBuffer, LineBuffer, OpenClContext};
@@ -40,27 +39,20 @@ pub fn march(input: &FieldBuffer, simplify: bool, ctx: &OpenClContext) -> Vec<Po
             Iterator::zip(out_xs.values().into_iter(), out_ys.values().into_iter())
                 .tuples()
                 .filter(|&((a, b), (c, d))| !(a.is_nan() && b.is_nan() && c.is_nan() && d.is_nan()))
-                .map(|((a, b), (c, d))| Line(Point { x: a, y: b }, Point { x: c, y: d }))
                 .collect::<Vec<_>>()
         }
     );
 
     ::flame::start("line connecting");
-    let (lns, _) = polygonize::connect_lines(lines);
+    let (lns, _) = super::lines::connect_lines(lines, simplify);
     let mut polygons = vec![];
     for polygon in lns.into_iter() {
-        let polygon = if simplify {
-            polygonize::simplify_line(polygon)
-        } else {
-            polygon
-        };
-
         let mut xs = Vec::with_capacity(polygon.len());
         let mut ys = Vec::with_capacity(polygon.len());
 
         for pt in polygon {
-            xs.push(pt.x);
-            ys.push(pt.y);
+            xs.push(pt.0);
+            ys.push(pt.0);
         }
 
         polygons.push(Polygon { xs: xs, ys: ys });

@@ -132,7 +132,7 @@ fn test_grow_shrink() {
     );
     assert_eq!(
         actual,
-        parse_ok("(shrink 13 (polygon {x: 5 y: 10} {x: 15 y: 20} {x: 30 y: 50}))"),
+        parse_ok("(shrink 13 (polygon {x: 5 y: 10} {x: 15 y: 20} {x: 30 y: 50}))")
     );
 }
 

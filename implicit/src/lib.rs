@@ -1,9 +1,9 @@
 extern crate rand;
-extern crate svg;
 extern crate lazy_static;
 extern crate latin;
 extern crate typed_arena;
 extern crate vecmath;
+extern crate vectordraw;
 extern crate ocl;
 extern crate flame;
 extern crate fnv;

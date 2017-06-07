@@ -21,10 +21,10 @@ pub enum LineType {
 type Point = (f32, f32);
 type Line = (Point, Point);
 
-pub fn connect_lines<I: Iterator<Item=Line>>(lines: I, simplify: bool) -> (Vec<Vec<Point>>, QuadTree<geom::Line>) {
+pub fn connect_lines<I: IntoIterator<Item=Line>>(lines: I, simplify: bool) -> (Vec<Vec<Point>>, QuadTree<geom::Line>) {
     let (mut joined, qt) =
         join::join_lines(
-            lines.map(|((x1, y1), (x2, y2))| geom::Line(geom::Point{x: x1, y: y1}, geom::Point{x: x2, y: y2})));
+            lines.into_iter().map(|((x1, y1), (x2, y2))| geom::Line(geom::Point{x: x1, y: y1}, geom::Point{x: x2, y: y2})));
 
     loop {
         let mut any_progress = false;

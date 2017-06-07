@@ -44,7 +44,7 @@ pub fn run_test(paths: &Paths, ctx: &OpenClContext) -> Result<(), String> {
     ctx.empty_queue();
 
     image::save_field_buffer(&result, &paths.actual_image, image::ColorMode::Debug);
-    implicit::export::svg::write_out(&paths.actual_svg, output);
+    implicit::export::svg::write_out(&paths.actual_svg, output).unwrap();
     latin::file::write(&paths.actual_values, formats::field::field_to_text(&result)).unwrap();
     latin::file::write(&paths.actual_lines, formats::lines::lines_to_text(lines.iter().cloned())).unwrap();
 
