@@ -1,8 +1,9 @@
-use ::marching::util::geom;
-use ::marching::util::quadtree::QuadTree;
+use self::util::geom;
+use self::util::quadtree::QuadTree;
 //use self::{fuse_ends, dash, join, simplify, connect};
 
 mod fuse_ends;
+mod util;
 pub mod dash;
 mod join;
 mod simplify;

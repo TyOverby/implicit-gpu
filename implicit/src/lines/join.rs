@@ -1,5 +1,3 @@
-use ::marching::util::geom;
-use ::marching::util::quadtree::QuadTree;
 use super::*;
 
 pub fn join_lines<I>(lines: I) -> (Vec<LineType>, QuadTree<geom::Line>)

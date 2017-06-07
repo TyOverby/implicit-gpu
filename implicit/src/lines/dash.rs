@@ -1,5 +1,4 @@
 use itertools::put_back;
-use ::marching::util::geom;
 use super::*;
 
 fn extend(start: geom::Point, end: geom::Point, dist: f32) -> geom::Point {

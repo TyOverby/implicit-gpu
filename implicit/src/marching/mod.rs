@@ -1,6 +1,3 @@
-//mod polygonize;
-pub mod util;
-
 use itertools::Itertools;
 use nodes::Polygon;
 use opencl::{FieldBuffer, LineBuffer, OpenClContext};
