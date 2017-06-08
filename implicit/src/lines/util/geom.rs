@@ -601,3 +601,21 @@ impl Point {
         dx * dx + dy * dy
     }
 }
+
+pub fn point_in_poly(polygon: &[(f32, f32)], p: (f32, f32)) -> bool {
+    let mut i = 0;
+    let mut j = polygon.len() - 1;
+    let mut c = false;
+
+    while i < polygon.len() {
+
+        if ((polygon[i].1 > p.1) != (polygon[j].1 > p.1)) &&
+           (p.0 < (polygon[j].0 - polygon[i].0) * (p.1 - polygon[i].1) / (polygon[j].1 - polygon[i].0 + polygon[i].0)) {
+                c = !c;
+           }
+
+        j = i;
+        i += 1;
+    }
+    return c;
+}

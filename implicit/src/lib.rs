@@ -81,7 +81,6 @@ pub fn run_scene(scene: &scene::Scene) -> output::OutputScene {
     let ctx = opencl::OpenClContext::default();
     let mut nest = Nest::new();
 
-
     let mut output = OutputScene {
         figures: vec![],
     };
@@ -112,14 +111,21 @@ pub fn run_scene(scene: &scene::Scene) -> output::OutputScene {
             let pts = pts.tuples::<(_, _)>();
 
             let (lines, _) = lines::connect_lines(pts, scene.simplify);
+            let (additive, subtractive) = lines::separate_polygons(lines);
             let output_shape = match shape.draw_mode {
-                DrawMode::Filled => unimplemented!(),
+                DrawMode::Filled => OutputShape {
+                    color: shape.color,
+                    lines: LineGroup::Polygon {
+                        filled: true,
+                        additive, subtractive
+                    }
+                },
                 DrawMode::Line(LineMode::Solid) => OutputShape {
                     color: shape.color,
                     lines: LineGroup::Polygon {
                         filled: false,
-                        additive: lines,
-                        subtractive: vec![],
+                        additive: additive,
+                        subtractive: subtractive,
                     }
                 }
             };

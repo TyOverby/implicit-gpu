@@ -44,7 +44,6 @@ fn main() {
     }
 
     let args = std::env::args().collect::<Vec<_>>();
-    println!("args {:?}", args);
     let test_matcher = if args.len() == 1 {
         ::regex::RegexSet::new(&["."]).unwrap()
     } else {
@@ -125,11 +124,13 @@ fn main() {
 
         match result {
             Ok(Ok(())) => println!("{}", "OK!".green()),
-            Ok(Err(e)) => {
+            Ok(Err(errors)) => {
                 any_failures = true;
                 println!("{}", "ERROR!".red());
-                println!("  {}", e.red());
-            }
+                for  e in errors {
+                    print!("{}", e.to_string().red());
+                }
+           }
             Err(Ok(panic_string)) => {
                 any_failures = true;
                 ctx = implicit::opencl::OpenClContext::default();

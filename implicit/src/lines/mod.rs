@@ -22,6 +22,40 @@ pub enum LineType {
 type Point = (f32, f32);
 type Line = (Point, Point);
 
+pub fn separate_polygons(bag: Vec<Vec<Point>>) -> (Vec<Vec<Point>>, Vec<Vec<Point>>) {
+    fn _compute_aabb(points: &[Point]) -> geom::Rect {
+        let mut start = geom::Rect::null();
+        for &(x, y) in points {
+            start.expand_to_include(&geom::Point{x, y});
+        }
+        start
+    }
+
+    fn contains(a: &[Point], b: &[Point]) -> bool {
+        geom::point_in_poly(a, b[0])
+    }
+
+    //let bag_with_aabb: Vec<_> = bag.into_iter().map(|shape| (compute_aabb(&shape), shape)).collect();
+
+    let mut additive_or_subtractive = vec![];
+    for (i, a) in bag.iter().enumerate() {
+        let mut inside_count = 0;
+        for (j, b) in bag.iter().enumerate() {
+            if i == j { continue; }
+            if contains(b, a) { inside_count += 1; }
+        }
+
+        additive_or_subtractive.push(inside_count % 2 == 0);
+    }
+
+    let (additive, subtractive): (Vec<_>, Vec<_>) =
+        bag.into_iter().zip(additive_or_subtractive.into_iter()).partition(|&(_, i)| i);
+    let additive = additive.into_iter().map(|(b, _)| b).collect();
+    let subtractive = subtractive.into_iter().map(|(b, _)| b).collect();
+
+    (additive, subtractive)
+}
+
 pub fn connect_lines<I: IntoIterator<Item=Line>>(lines: I, simplify: bool) -> (Vec<Vec<Point>>, QuadTree<geom::Line>) {
     let (mut joined, qt) =
         join::join_lines(
