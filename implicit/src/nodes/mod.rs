@@ -4,26 +4,85 @@ use std::sync::Arc;
 pub use self::poly::*;
 use compiler::GroupId;
 
-// IF YOU ADD AN ENUM HERE, UPDATE `eq_ignore_group`
 #[derive(Clone, Debug, PartialEq, PartialOrd)]
-pub enum Node {
-    Circle { x: f32, y: f32, r: f32 },
-    Rect { x: f32, y: f32, w: f32, h: f32 },
-    And(Vec<Arc<Node>>),
-    Or(Vec<Arc<Node>>),
-    Not(Arc<Node>),
-    Polygon(PolyGroup),
-    Modulate(f32, Arc<Node>),
-    Break(Arc<Node>),
-    OtherGroup(GroupId),
-    Freeze(Arc<Node>),
+pub struct NodeRef {
+    node: Arc<Node>
 }
 
-pub fn take_node(node: Arc<Node>) -> Node {
-    match Arc::try_unwrap(node) {
-        Ok(t) => t,
-        Err(n) => (*n).clone()
+unsafe impl Sync for NodeRef {}
+unsafe impl Send for NodeRef {}
+
+impl ::std::ops::Deref for NodeRef {
+    type Target = Node;
+    fn deref(&self) -> &Node {
+        &*self.node
     }
+}
+
+impl NodeRef {
+    pub fn new(node: Node) -> NodeRef {
+        NodeRef {
+            node: Arc::new(node),
+        }
+    }
+}
+
+impl <'de> ::serde::Deserialize<'de> for NodeRef {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where D: ::serde::Deserializer<'de> {
+        <Node as ::serde::Deserialize>::deserialize(deserializer).map(|res| {
+            NodeRef { node: Arc::new(res)}
+        })
+    }
+}
+
+impl <'de> ::serde::Serialize for NodeRef {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where S: ::serde::Serializer {
+        self.node.serialize(serializer)
+    }
+}
+
+// IF YOU ADD AN ENUM HERE, UPDATE `eq_ignore_group`
+#[derive(Clone, Debug, PartialEq, PartialOrd, Deserialize, Serialize)]
+#[serde(tag = "kind", rename_all="snake_case")]
+pub enum Node {
+    Circle {
+        x: f32,
+        y: f32,
+        r: f32
+    },
+    Rect {
+        x: f32,
+        y: f32,
+        w: f32,
+        h: f32
+    },
+    And {
+        children: Vec<NodeRef>,
+    },
+    Or {
+        children: Vec<NodeRef>,
+    },
+    Not {
+        target: NodeRef,
+    },
+    Polygon {
+        group: PolyGroup,
+    },
+    Modulate {
+        how_much: f32,
+        target: NodeRef,
+    },
+    Break {
+        target: NodeRef
+    },
+    OtherGroup {
+        group_id: GroupId
+    },
+    Freeze {
+        target: NodeRef
+    },
 }
 
 impl Node {
@@ -31,17 +90,17 @@ impl Node {
         match (self, other) {
             (&Node::Circle { x: mx, y: my, r: mr }, &Node::Circle { x: ox, y: oy, r: or }) =>
                 mx == ox && my == oy && mr == or,
-            (&Node::And(ref mch), &Node::And(ref och)) =>
+            (&Node::And{children: ref mch}, &Node::And{children: ref och}) =>
                 mch.iter().zip(och.iter()).all(|(a, b)| a.eq_ignore_group(&*b)),
-            (&Node::Or(ref mch), &Node::Or(ref och)) =>
+            (&Node::Or{children: ref mch}, &Node::Or{children: ref och}) =>
                 mch.iter().zip(och.iter()).all(|(a, b)| a.eq_ignore_group(&*b)),
-            (&Node::Not(ref mc), &Node::Not(ref oc)) => mc.eq_ignore_group(&*oc),
-            (&Node::Polygon(ref mpg), &Node::Polygon(ref opg)) => mpg == opg,
-            (&Node::Modulate(ref mhm, ref mc), &Node::Modulate(ref ohm, ref oc))
+            (&Node::Not{target: ref mc}, &Node::Not{target: ref oc}) => mc.eq_ignore_group(&*oc),
+            (&Node::Polygon{group: ref mpg}, &Node::Polygon{group: ref opg}) => mpg == opg,
+            (&Node::Modulate{how_much: ref mhm, target: ref mc}, &Node::Modulate{how_much: ref ohm, target: ref oc})
                 => mhm == ohm && mc.eq_ignore_group(&*oc),
-            (&Node::Break(ref mc), &Node::Break(ref oc)) => mc.eq_ignore_group(&*oc),
-            (&Node::Freeze(ref mc), &Node::Freeze(ref oc)) => mc.eq_ignore_group(&*oc),
-            (&Node::OtherGroup(_), &Node::OtherGroup(_)) => true,
+            (&Node::Break{target: ref mc}, &Node::Break{target: ref oc}) => mc.eq_ignore_group(&*oc),
+            (&Node::Freeze{target: ref mc}, &Node::Freeze{target: ref oc}) => mc.eq_ignore_group(&*oc),
+            (&Node::OtherGroup{..}, &Node::OtherGroup{..}) => true,
             (_, _) => false,
         }
     }
@@ -56,4 +115,18 @@ impl<'a, T: 'a> Anchor<'a, T> {
     pub fn new() -> Anchor<'a, T> { Anchor { _p: ::std::marker::PhantomData } }
 
     pub fn hold<'b: 'a>(&'a self, obj: &'b T) -> &'a T { obj }
+}
+
+#[test]
+fn ser_de() {
+    use serde_json::*;
+
+    let node = Node::Circle{x: 10.0, y: 30.0, r: 10.0};
+    let as_str = to_string_pretty(&node).unwrap();
+    assert_eq!(as_str, r#"{
+  "kind": "circle",
+  "x": 10.0,
+  "y": 30.0,
+  "r": 10.0
+}"#);
 }

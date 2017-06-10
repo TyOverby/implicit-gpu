@@ -1,4 +1,0 @@
-(subtract
-    (circle {x:50 y:50 r:50})
-    (or (circle {x:50 y:50 r:25})
-        (rect {x:50 y:50 w:50 h:50})))

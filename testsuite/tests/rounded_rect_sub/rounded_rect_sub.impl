@@ -1,6 +1,0 @@
-(subtract
-    (rect {x:20 y:20 w:200 h:200})
-    (grow 50
-        (freeze
-            (shrink 50
-                (rect {x:20 y:20 w:200 h:200})))))

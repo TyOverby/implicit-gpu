@@ -1,8 +1,8 @@
 use super::Paths;
 use super::formats;
-use {flame, implicit, implicit_language, latin};
+use {flame, implicit, latin};
 use implicit::opencl::OpenClContext;
-use std::sync::Arc;
+use implicit::nodes::NodeRef;
 
 pub enum Error {
     CouldNotFind {
@@ -52,12 +52,17 @@ impl ::std::fmt::Display for Error {
 }
 
 pub fn run_test(paths: &Paths, ctx: &OpenClContext) -> Result<(), Vec<Error>> {
-    let _guard = flame::start_guard(format!("running {:?}", paths.script));
+    let _guard = flame::start_guard(format!("running {:?}", paths.json));
     use implicit::debug::image;
 
-    let script_name = paths.script.to_str().unwrap_or("<unknown source file>");
-    let source = latin::file::read_string_utf8(&paths.script).unwrap();
-    let tree = Arc::new(implicit_language::parse(&source[..], script_name).unwrap());
+    let source = latin::file::read_string_utf8(&paths.json).unwrap();
+
+    let tree = NodeRef::new(::serde_json::from_str(&source).unwrap());
+    /*
+    let tree = NodeRef::new(implicit_language::parse(&source[..], script_name).unwrap());
+    let as_json = ::serde_json::to_string_pretty(&tree).unwrap();
+    latin::file::write(paths.script.with_extension("json"), as_json).unwrap();
+    */
 
     let mut nest = implicit::compiler::Nest::new();
     let target = nest.group(tree.clone());

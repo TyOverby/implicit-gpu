@@ -1,5 +1,0 @@
-(or
-    (subtract
-        (circle {x:50 y:50 r:50})
-        (circle {x:50 y:50 r:25}))
-    (circle {x: 50 y:50 r: 10}))

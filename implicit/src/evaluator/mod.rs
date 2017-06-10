@@ -1,9 +1,8 @@
 use compiler::*;
-use std::sync::Arc;
 
 use itertools::Itertools;
 use nan_filter::filter_nans;
-use nodes::{Node, PolyGroup};
+use nodes::{Node, PolyGroup, NodeRef};
 use opencl::FieldBuffer;
 
 use opencl::OpenClContext;
@@ -79,9 +78,15 @@ impl Evaluator {
             };
 
             if let Some(subtractive_field) = subtractive_field {
-                let program = Node::And(vec![
-                    Arc::new(Node::OtherGroup(GroupId(0))),
-                    Arc::new(Node::Not(Arc::new(Node::OtherGroup(GroupId(1)))))]);
+                let program = Node::And {
+                    children: vec![
+                        NodeRef::new(Node::OtherGroup{ group_id: GroupId(0) }),
+                        NodeRef::new(Node::Not {
+                            target: NodeRef::new(Node::OtherGroup{
+                                group_id: GroupId(1)
+                            })
+                        })]
+                };
 
                 let (program, _) = ::compiler::compile(&program);
                 let kernel = ctx.compile("apply", program);

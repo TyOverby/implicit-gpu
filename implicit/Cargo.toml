@@ -13,8 +13,11 @@ itertools = "0.5.*"
 vecmath = "*"
 fnv = "*"
 typed-arena = "1.2.0"
+serde = "1.*.*"
+serde_derive = "1.*.*"
 latin = "0.1.5"
 rand = "0.3.15"
+serde_json = "1.*.*"
 
 [dependencies.snoot]
 path = "../../snoot"

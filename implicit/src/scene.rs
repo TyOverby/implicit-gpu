@@ -1,5 +1,4 @@
-use super::nodes::Node;
-use std::sync::Arc;
+use super::nodes::NodeRef;
 
 #[derive(Debug, Eq, PartialEq, Hash, PartialOrd, Ord)]
 pub enum LineMode {
@@ -16,7 +15,7 @@ pub enum DrawMode {
 pub struct Shape {
     pub color: (u8, u8, u8),
     pub draw_mode: DrawMode,
-    pub node: Arc<Node>,
+    pub node: NodeRef,
 }
 
 

@@ -1,10 +1,10 @@
-#[derive(Debug, PartialEq, Clone, PartialOrd)]
+#[derive(Debug, PartialEq, Clone, PartialOrd, Deserialize, Serialize)]
 pub struct Polygon {
     pub xs: Vec<f32>,
     pub ys: Vec<f32>,
 }
 
-#[derive(Debug, PartialEq, Clone, PartialOrd)]
+#[derive(Debug, PartialEq, Clone, PartialOrd, Deserialize, Serialize)]
 pub struct PolyGroup {
     pub additive: Vec<Polygon>,
     pub subtractive: Vec<Polygon>,

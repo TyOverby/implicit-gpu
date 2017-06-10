@@ -80,7 +80,7 @@ fn comp(node: &Node, cc: &mut CompilationContext, buff: &mut String) -> String {
 
             res
         }
-        Node::And(ref children) => {
+        Node::And{ref children} => {
             match children.len() {
                 0 => panic!("And([])"),
                 1 => comp(&children[0], cc, buff),
@@ -88,8 +88,8 @@ fn comp(node: &Node, cc: &mut CompilationContext, buff: &mut String) -> String {
                     let mut left = children.clone();
                     let right = left.split_off(n / 2);
 
-                    let res_left = comp(&Node::And(left), cc, buff);
-                    let res_right = comp(&Node::And(right), cc, buff);
+                    let res_left = comp(&Node::And{children: left}, cc, buff);
+                    let res_right = comp(&Node::And{children: right}, cc, buff);
 
                     let res = cc.get_id("and");
 
@@ -107,7 +107,7 @@ fn comp(node: &Node, cc: &mut CompilationContext, buff: &mut String) -> String {
                 }
             }
         }
-        Node::Or(ref children) => {
+        Node::Or{ref children} => {
             match children.len() {
                 0 => panic!("Or([])"),
                 1 => comp(&children[0], cc, buff),
@@ -115,8 +115,8 @@ fn comp(node: &Node, cc: &mut CompilationContext, buff: &mut String) -> String {
                     let mut left = children.clone();
                     let right = left.split_off(n / 2);
 
-                    let res_left = comp(&Node::Or(left), cc, buff);
-                    let res_right = comp(&Node::Or(right), cc, buff);
+                    let res_left = comp(&Node::Or{children: left}, cc, buff);
+                    let res_right = comp(&Node::Or{children: right}, cc, buff);
 
                     let res = cc.get_id("or");
 
@@ -134,16 +134,16 @@ fn comp(node: &Node, cc: &mut CompilationContext, buff: &mut String) -> String {
                 }
             }
         }
-        Node::Not(ref child) => {
-            let child_result = comp(child, cc, buff);
+        Node::Not{ref target} => {
+            let child_result = comp(target, cc, buff);
             let res = cc.get_id("not");
             buff.push('\n');
             writeln!(buff, "  float {result} = -{val};", result = res, val = child_result).unwrap();
             res
         }
 
-        Node::Modulate(v, ref child) => {
-            let child_result = comp(child, cc, buff);
+        Node::Modulate{how_much, ref target} => {
+            let child_result = comp(target, cc, buff);
             let res = cc.get_id("modulate");
             buff.push('\n');
             writeln!(
@@ -151,13 +151,11 @@ fn comp(node: &Node, cc: &mut CompilationContext, buff: &mut String) -> String {
                 "  float {result} = {other} + {value};",
                 result = res,
                 other = child_result,
-                value = v,
-            )
-                    .unwrap();
+                value = how_much).unwrap();
             res
         }
 
-        Node::OtherGroup(group_id) => {
+        Node::OtherGroup{group_id} => {
             let buffer_ref = cc.buffer_ref(group_id);
             let res = cc.get_id("other_group");
 

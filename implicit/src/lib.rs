@@ -1,4 +1,9 @@
 extern crate rand;
+extern crate serde;
+#[cfg(test)]
+extern crate serde_json;
+#[macro_use]
+extern crate serde_derive;
 extern crate lazy_static;
 extern crate latin;
 extern crate typed_arena;
@@ -9,8 +14,6 @@ extern crate flame;
 extern crate fnv;
 extern crate itertools;
 extern crate image as image_crate;
-
-use std::sync::Arc;
 
 pub mod nodes;
 pub mod compiler;
@@ -25,7 +28,7 @@ pub mod scene;
 pub mod output;
 pub mod lines;
 
-pub fn run_single(node: Arc<nodes::Node>, width: usize, height: usize) -> ::opencl::FieldBuffer {
+pub fn run_single(node: nodes::NodeRef, width: usize, height: usize) -> ::opencl::FieldBuffer {
     use compiler::Nest;
     use evaluator::Evaluator;
 

@@ -1,0 +1,31 @@
+{
+  "kind": "or",
+  "children": [
+    {
+      "kind": "and",
+      "children": [
+        {
+          "kind": "circle",
+          "x": 50.0,
+          "y": 50.0,
+          "r": 50.0
+        },
+        {
+          "kind": "not",
+          "target": {
+            "kind": "circle",
+            "x": 50.0,
+            "y": 50.0,
+            "r": 25.0
+          }
+        }
+      ]
+    },
+    {
+      "kind": "circle",
+      "x": 50.0,
+      "y": 50.0,
+      "r": 10.0
+    }
+  ]
+}

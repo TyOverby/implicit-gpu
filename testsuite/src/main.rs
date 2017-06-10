@@ -2,13 +2,13 @@ extern crate implicit;
 extern crate regex;
 extern crate colored;
 extern crate latin;
-extern crate implicit_language;
 extern crate walkdir;
 extern crate flame;
 #[macro_use]
 extern crate snoot;
 #[macro_use]
 extern crate serde_derive;
+extern crate serde_json;
 
 use colored::Colorize;
 use std::path::PathBuf;
@@ -18,7 +18,7 @@ pub mod formats;
 mod run_test;
 
 pub struct Paths {
-    script: PathBuf,
+    json: PathBuf,
 
     actual_image: PathBuf,
     actual_values: PathBuf,
@@ -33,7 +33,7 @@ pub struct Paths {
 
 fn main() {
     use std::io::{Write, stdout};
-    fn ends_with_impl(e: &DirEntry) -> bool { e.path().extension().map(|e| e == "impl").unwrap_or(false) }
+    fn ends_with_json(e: &DirEntry) -> bool { e.path().extension().map(|e| e == "json").unwrap_or(false) }
     fn clear(size: usize) {
         print!(
             "{}{}{}",
@@ -66,7 +66,7 @@ fn main() {
         // Taking only the ones that actually have paths
         .filter_map(Result::ok)
         // With a filename that ends in ".impl"
-        .filter(ends_with_impl)
+        .filter(ends_with_json)
         // Converted to a PathBuf
         .map(|e| e.path().to_path_buf())
         // Where the path can be converted to a string
@@ -87,11 +87,11 @@ fn main() {
 
     let mut any_failures = false;
     for entry in test_files {
-        let script = entry;
-        let script_name: PathBuf = script.strip_prefix(&test_dir).unwrap().into();
+        let json = entry;
+        let script_name: PathBuf = json.strip_prefix(&test_dir).unwrap().into();
 
         let paths = Paths {
-            script: script,
+            json,
             actual_image: root_dir.join("actual").join(script_name.with_extension("png")),
             actual_svg: root_dir.join("actual").join(script_name.with_extension("svg")),
             actual_values: root_dir.join("actual").join(script_name.with_extension("values")),
