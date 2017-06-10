@@ -1,8 +1,9 @@
 use compiler::*;
+use std::sync::Arc;
 
 use itertools::Itertools;
 use nan_filter::filter_nans;
-use nodes::{Node, PolyGroup, StaticNode};
+use nodes::{Node, PolyGroup};
 use opencl::FieldBuffer;
 
 use opencl::OpenClContext;
@@ -38,9 +39,9 @@ impl Evaluator {
             }
         }
 
-        let eval_basic_group = |root: &StaticNode| -> FieldBuffer {
+        let eval_basic_group = |root: &Node| -> FieldBuffer {
             let _guard = ::flame::start_guard(format!("eval_basic_group"));
-            let (program, compilation) = ::compiler::compile(root.node());
+            let (program, compilation) = ::compiler::compile(root);
             let deps: Vec<FieldBuffer> = compilation.deps().iter().map(|&g| self.evaluate(g, ctx)).collect();
 
             let out = ctx.field_buffer(self.width, self.height, None);
@@ -78,20 +79,11 @@ impl Evaluator {
             };
 
             if let Some(subtractive_field) = subtractive_field {
-                let program = create_node!(
-                    a, {
-                        a(
-                            Node::And(
-                                vec![
-                                    a(Node::OtherGroup(GroupId(0))),
-                                    a(Node::Not(a(Node::OtherGroup(GroupId(1))))),
-                                ]
-                            )
-                        )
-                    }
-                );
+                let program = Node::And(vec![
+                    Arc::new(Node::OtherGroup(GroupId(0))),
+                    Arc::new(Node::Not(Arc::new(Node::OtherGroup(GroupId(1)))))]);
 
-                let (program, _) = ::compiler::compile(program.node());
+                let (program, _) = ::compiler::compile(&program);
                 let kernel = ctx.compile("apply", program);
 
                 let out = ctx.field_buffer(self.width, self.height, None);

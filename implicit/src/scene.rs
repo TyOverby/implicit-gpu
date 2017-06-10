@@ -1,4 +1,5 @@
-use super::nodes::StaticNode;
+use super::nodes::Node;
+use std::sync::Arc;
 
 #[derive(Debug, Eq, PartialEq, Hash, PartialOrd, Ord)]
 pub enum LineMode {
@@ -11,12 +12,15 @@ pub enum DrawMode {
     Line(LineMode),
 }
 
-#[derive(Debug, Eq, PartialEq, PartialOrd )]
+#[derive(Debug, PartialEq, PartialOrd )]
 pub struct Shape {
     pub color: (u8, u8, u8),
     pub draw_mode: DrawMode,
-    pub node: StaticNode,
+    pub node: Arc<Node>,
 }
+
+
+impl ::std::cmp::Eq for Shape { }
 impl ::std::cmp::Ord for Shape {
     fn cmp(&self, other: &Shape) -> ::std::cmp::Ordering {
         self.partial_cmp(other).unwrap_or(::std::cmp::Ordering::Less)

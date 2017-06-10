@@ -1,4 +1,3 @@
-#[macro_use]
 extern crate implicit;
 extern crate tendril;
 extern crate typed_arena;
@@ -11,9 +10,10 @@ mod properties;
 mod test;
 
 
+use std::sync::Arc;
 use self::errors::*;
 use self::properties::*;
-use implicit::nodes::{Node, PolyGroup, StaticNode};
+use implicit::nodes::{Node, PolyGroup};
 use snoot::Sexpr;
 use snoot::diagnostic::DiagnosticBag;
 use snoot::parse::Span;
@@ -33,12 +33,12 @@ macro_rules! attempt {
 }
 
 pub struct ParseResult {
-    pub root: Option<StaticNode>,
+    pub root: Option<Node>,
     pub diagnostics: DiagnosticBag,
 }
 
 impl ParseResult {
-    pub fn unwrap(self) -> StaticNode {
+    pub fn unwrap(self) -> Node {
         self.diagnostics.assert_empty();
         self.root.unwrap()
     }
@@ -70,21 +70,15 @@ pub fn parse<'b, I: Into<StrTendril>>(input: I, filename: &'b str) -> ParseResul
         }
     };
 
-    let node = create_node!(
-        a, {
-            parse_shape(&root, &a, &mut diagnostics)
-        }
-    );
+    let node = parse_shape(&root, &mut diagnostics);
 
     ParseResult {
-        root: Some(node),
+        root: node,
         diagnostics: diagnostics,
     }
 }
 
-fn parse_shape<'o, F>(expr: &Sexpr, a: &F, errors: &mut DiagnosticBag) -> Option<&'o Node<'o>> where F: Fn(Node<'o>) -> &'o Node<'o> {
-
-
+fn parse_shape(expr: &Sexpr, errors: &mut DiagnosticBag) -> Option<Node> {
     match expr {
         &Sexpr::List { ref children, ref span, .. } => {
             if children.len() == 0 {
@@ -100,17 +94,17 @@ fn parse_shape<'o, F>(expr: &Sexpr, a: &F, errors: &mut DiagnosticBag) -> Option
                     }
                     &Sexpr::Terminal(_, ref namespan) => {
                         match namespan.text().as_ref() {
-                            "circle" => parse_circle(&children[1..], span, errors).map(a),
-                            "rect" => parse_rect(&children[1..], span, errors).map(a),
-                            "polygon" => parse_polygon(&children[1..], span, errors).map(a),
-                            "or" => make_combinator(&children[1..], Node::Or, span, a, errors),
-                            "subtract" => parse_subtraction(&children[1..], span, a, errors),
-                            "and" => make_combinator(&children[1..], Node::And, span, a, errors),
-                            "not" => make_singular(&children[1..], Node::Not, span, a, errors),
-                            "break" => make_singular(&children[1..], Node::Break, span, a, errors),
-                            "freeze" => make_singular(&children[1..], Node::Freeze, span, a, errors),
-                            "grow" => parse_modulate(&children[1..], span, true, a, errors).map(a),
-                            "shrink" => parse_modulate(&children[1..], span, false, a, errors).map(a),
+                            "circle" => parse_circle(&children[1..], span, errors),
+                            "rect" => parse_rect(&children[1..], span, errors),
+                            "polygon" => parse_polygon(&children[1..], span, errors),
+                            "or" => make_combinator(&children[1..], Node::Or, span, errors),
+                            "subtract" => parse_subtraction(&children[1..], span, errors),
+                            "and" => make_combinator(&children[1..], Node::And, span, errors),
+                            "not" => make_singular(&children[1..], Node::Not, span, errors),
+                            "break" => make_singular(&children[1..], Node::Break, span, errors),
+                            "freeze" => make_singular(&children[1..], Node::Freeze, span, errors),
+                            "grow" => parse_modulate(&children[1..], span, true, errors),
+                            "shrink" => parse_modulate(&children[1..], span, false, errors),
                             other => {
                                 errors.add(unrecognized_shape(namespan, other));
                                 None
@@ -128,44 +122,43 @@ fn parse_shape<'o, F>(expr: &Sexpr, a: &F, errors: &mut DiagnosticBag) -> Option
     }
 }
 
-fn parse_subtraction<'o, F>(children: &[Sexpr], span: &Span, a: &F, errors: &mut DiagnosticBag) -> Option<&'o Node<'o>>
-    where F: Fn(Node<'o>) -> &'o Node<'o>
+fn parse_subtraction(children: &[Sexpr], span: &Span, errors: &mut DiagnosticBag) -> Option<Node>
 {
     match children.len() {
         0 => {
             errors.add(expected_two_children(span, 0));
             None
         }
-        1 => parse_shape(&children[0], a, errors),
+        1 => parse_shape(&children[0], errors),
         2 => {
-            let additive = parse_shape(&children[0], a, errors);
-            let subtractive = parse_shape(&children[1], a, errors);
+            let additive = parse_shape(&children[0], errors);
+            let subtractive = parse_shape(&children[1], errors);
             match (additive, subtractive) {
-                (Some(add), Some(sub)) => Some(a(Node::And(vec![add, a(Node::Not(sub))]))),
+                (Some(add), Some(sub)) => Some(Node::And(vec![Arc::new(add), Arc::new(Node::Not(Arc::new(sub)))])),
                 _ => None,
             }
         }
         n => {
             errors.add(expected_two_children(span, n));
-            parse_shape(&children[0], a, errors)
+            parse_shape(&children[0], errors)
         }
     }
 }
 
-fn make_combinator<'o, F, A>(children: &[Sexpr], f: F, span: &Span, a: &A, errors: &mut DiagnosticBag) -> Option<&'o Node<'o>>
-    where A: Fn(Node<'o>) -> &'o Node<'o>, F: Fn(Vec<&'o Node<'o>>) -> Node<'o>
+fn make_combinator<F>(children: &[Sexpr], f: F, span: &Span, errors: &mut DiagnosticBag) -> Option<Node>
+    where F: Fn(Vec<Arc<Node>>) -> Node
 {
     if children.len() == 0 {
         errors.add(expected_children(span));
         None
     } else {
-        let children = children.iter().filter_map(|c| parse_shape(c, a, errors));
-        Some(a(f(children.collect())))
+        let children = children.iter().filter_map(|c| parse_shape(c, errors));
+        Some(f(children.map(Arc::new).collect()))
     }
 }
 
-fn make_singular<'o, F, A>(children: &[Sexpr], f: F, span: &Span, a: &A, errors: &mut DiagnosticBag) -> Option<&'o Node<'o>>
-    where A: Fn(Node<'o>) -> &'o Node<'o>, F: Fn(&'o Node<'o>) -> Node<'o>
+fn make_singular<'o, F>(children: &[Sexpr], f: F, span: &Span, errors: &mut DiagnosticBag) -> Option<Node>
+    where F: Fn(Arc<Node>) -> Node
 {
     if children.len() == 0 {
         errors.add(expected_children(span));
@@ -174,13 +167,13 @@ fn make_singular<'o, F, A>(children: &[Sexpr], f: F, span: &Span, a: &A, errors:
         errors.add(expected_one_child(span, children.len()));
     }
     let first = &children[0];
-    match parse_shape(first, a, errors) {
-        Some(c) => Some(a(f(c))),
+    match parse_shape(first, errors) {
+        Some(c) => Some(f(Arc::new(c))),
         None => None,
     }
 }
 
-fn parse_polygon(children: &[Sexpr], span: &Span, errors: &mut DiagnosticBag) -> Option<Node<'static>> {
+fn parse_polygon(children: &[Sexpr], span: &Span, errors: &mut DiagnosticBag) -> Option<Node> {
     let mut parsed = Vec::with_capacity(children.len());
 
     for child in children {
@@ -221,7 +214,7 @@ fn parse_polygon(children: &[Sexpr], span: &Span, errors: &mut DiagnosticBag) ->
     Some(Node::Polygon(PolyGroup::single_additive(out_xs, out_ys)))
 }
 
-fn parse_circle(children: &[Sexpr], span: &Span, errors: &mut DiagnosticBag) -> Option<Node<'static>> {
+fn parse_circle(children: &[Sexpr], span: &Span, errors: &mut DiagnosticBag) -> Option<Node> {
 
     if let Some(proplist) = children.get(0) {
         let (ok, proplist) = parse_properties(proplist, errors);
@@ -240,7 +233,7 @@ fn parse_circle(children: &[Sexpr], span: &Span, errors: &mut DiagnosticBag) -> 
     }
 }
 
-fn parse_rect(children: &[Sexpr], span: &Span, errors: &mut DiagnosticBag) -> Option<Node<'static>> {
+fn parse_rect(children: &[Sexpr], span: &Span, errors: &mut DiagnosticBag) -> Option<Node> {
     if let Some(proplist) = children.get(0) {
         let (ok, proplist) = parse_properties(proplist, errors);
         if !ok {
@@ -271,8 +264,7 @@ fn parse_rect(children: &[Sexpr], span: &Span, errors: &mut DiagnosticBag) -> Op
     }
 }
 
-fn parse_modulate<'o, F>(children: &[Sexpr], span: &Span, grow: bool, a: &F, errors: &mut DiagnosticBag) -> Option<Node<'o>>
-    where F: Fn(Node<'o>) -> &'o Node<'o>
+fn parse_modulate(children: &[Sexpr], span: &Span, grow: bool, errors: &mut DiagnosticBag) -> Option<Node>
 {
     if children.len() != 2 {
         errors.add(expected_children(span));
@@ -286,8 +278,8 @@ fn parse_modulate<'o, F>(children: &[Sexpr], span: &Span, grow: bool, a: &F, err
     };
 
 
-    match parse_shape(&children[1], a, errors) {
-        Some(shape) => Some(Node::Modulate(how_much as f32, shape)),
+    match parse_shape(&children[1], errors) {
+        Some(shape) => Some(Node::Modulate(how_much as f32, Arc::new(shape))),
         None => None,
     }
 }

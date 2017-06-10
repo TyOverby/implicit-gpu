@@ -1,94 +1,49 @@
 mod poly;
 
+use std::sync::Arc;
 pub use self::poly::*;
 use compiler::GroupId;
-use std::mem::transmute;
-use typed_arena::Arena;
 
 // IF YOU ADD AN ENUM HERE, UPDATE `eq_ignore_group`
-#[derive(Debug, PartialEq, PartialOrd)]
-pub enum Node<'a> {
+#[derive(Clone, Debug, PartialEq, PartialOrd)]
+pub enum Node {
     Circle { x: f32, y: f32, r: f32 },
     Rect { x: f32, y: f32, w: f32, h: f32 },
-    And(Vec<&'a Node<'a>>),
-    Or(Vec<&'a Node<'a>>),
-    Not(&'a Node<'a>),
+    And(Vec<Arc<Node>>),
+    Or(Vec<Arc<Node>>),
+    Not(Arc<Node>),
     Polygon(PolyGroup),
-    Modulate(f32, &'a Node<'a>),
-    Break(&'a Node<'a>),
+    Modulate(f32, Arc<Node>),
+    Break(Arc<Node>),
     OtherGroup(GroupId),
-    Freeze(&'a Node<'a>),
+    Freeze(Arc<Node>),
 }
 
-pub struct StaticNode {
-    _arena: Arena<Node<'static>>,
-    node: &'static Node<'static>,
+pub fn take_node(node: Arc<Node>) -> Node {
+    match Arc::try_unwrap(node) {
+        Ok(t) => t,
+        Err(n) => (*n).clone()
+    }
 }
 
-impl<'a> Node<'a> {
-    pub fn eq_ignore_group<'o>(&self, other: &'o Node<'o>) -> bool {
+impl Node {
+    pub fn eq_ignore_group(&self, other: &Node) -> bool {
         match (self, other) {
-            (&Node::Circle { x: mx, y: my, r: mr }, &Node::Circle { x: ox, y: oy, r: or }) => mx == ox && my == oy && mr == or,
-            (&Node::And(ref mch), &Node::And(ref och)) => mch.iter().zip(och.iter()).all(|(&a, &b)| a.eq_ignore_group(b)),
-            (&Node::Or(ref mch), &Node::Or(ref och)) => mch.iter().zip(och.iter()).all(|(&a, &b)| a.eq_ignore_group(b)),
-            (&Node::Not(mc), &Node::Not(oc)) => mc.eq_ignore_group(oc),
+            (&Node::Circle { x: mx, y: my, r: mr }, &Node::Circle { x: ox, y: oy, r: or }) =>
+                mx == ox && my == oy && mr == or,
+            (&Node::And(ref mch), &Node::And(ref och)) =>
+                mch.iter().zip(och.iter()).all(|(a, b)| a.eq_ignore_group(&*b)),
+            (&Node::Or(ref mch), &Node::Or(ref och)) =>
+                mch.iter().zip(och.iter()).all(|(a, b)| a.eq_ignore_group(&*b)),
+            (&Node::Not(ref mc), &Node::Not(ref oc)) => mc.eq_ignore_group(&*oc),
             (&Node::Polygon(ref mpg), &Node::Polygon(ref opg)) => mpg == opg,
-            (&Node::Modulate(mhm, mc), &Node::Modulate(ohm, oc)) => mhm == ohm && mc.eq_ignore_group(oc),
-            (&Node::Break(mc), &Node::Break(oc)) => mc.eq_ignore_group(oc),
-            (&Node::Freeze(mc), &Node::Freeze(oc)) => mc.eq_ignore_group(oc),
+            (&Node::Modulate(ref mhm, ref mc), &Node::Modulate(ref ohm, ref oc))
+                => mhm == ohm && mc.eq_ignore_group(&*oc),
+            (&Node::Break(ref mc), &Node::Break(ref oc)) => mc.eq_ignore_group(&*oc),
+            (&Node::Freeze(ref mc), &Node::Freeze(ref oc)) => mc.eq_ignore_group(&*oc),
             (&Node::OtherGroup(_), &Node::OtherGroup(_)) => true,
             (_, _) => false,
         }
-    }
-}
-
-impl StaticNode {
-    pub unsafe fn new<'a>(arena: Arena<Node<'a>>, node: &'static Node<'static>) -> StaticNode {
-        StaticNode {
-            _arena: transmute(arena),
-            node: transmute(node),
-        }
-    }
-
-    pub fn node<'a>(&'a self) -> &'a Node<'a> { &self.node }
-}
-
-impl ::std::fmt::Debug for StaticNode {
-    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> Result<(), ::std::fmt::Error> { self.node.fmt(formatter) }
-}
-
-impl ::std::cmp::PartialOrd for StaticNode {
-    fn partial_cmp(&self, other: &StaticNode) -> Option<::std::cmp::Ordering> {
-        self.node.partial_cmp(other.node)
-    }
-}
-impl ::std::cmp::Eq for StaticNode { }
-impl ::std::cmp::PartialEq for StaticNode {
-    fn eq(&self, other: &StaticNode) -> bool { self.node == other.node }
-}
-
-impl Clone for StaticNode {
-    fn clone(&self) -> StaticNode {
-        fn clone_node<'i, 'o, F>(input: &'i Node<'i>, a: &F) -> &'o Node<'o> where F: Fn(Node<'o>) -> &'o Node<'o> {
-            match input {
-                &Node::Circle { x, y, r } => a(Node::Circle { x, y, r }),
-                &Node::Rect { x, y, w, h } => a(Node::Rect { x, y, w, h }),
-                &Node::And(ref ch) => a(Node::And(ch.iter().map(|c| clone_node(c, a)).collect())),
-                &Node::Or(ref ch) => a(Node::Or(ch.iter().map(|c| clone_node(c, a)).collect())),
-                &Node::Not(c) => a(Node::Not(clone_node(c, a))),
-                &Node::Polygon(ref pg) => a(Node::Polygon(pg.clone())),
-                &Node::Modulate(how_much, c) => a(Node::Modulate(how_much, clone_node(c, a))),
-                &Node::Break(c) => a(Node::Break(clone_node(c, a))),
-                &Node::Freeze(c) => a(Node::Freeze(clone_node(c, a))),
-                &Node::OtherGroup(gid) => a(Node::OtherGroup(gid.clone())),
-            }
-        }
-
-        create_node!(
-            a, {
-                clone_node(self.node(), &a)
-            }
-        )
     }
 }
 

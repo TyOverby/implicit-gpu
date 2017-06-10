@@ -2,6 +2,7 @@ use super::Paths;
 use super::formats;
 use {flame, implicit, implicit_language, latin};
 use implicit::opencl::OpenClContext;
+use std::sync::Arc;
 
 pub enum Error {
     CouldNotFind {
@@ -56,10 +57,10 @@ pub fn run_test(paths: &Paths, ctx: &OpenClContext) -> Result<(), Vec<Error>> {
 
     let script_name = paths.script.to_str().unwrap_or("<unknown source file>");
     let source = latin::file::read_string_utf8(&paths.script).unwrap();
-    let tree = implicit_language::parse(&source[..], script_name).unwrap();
+    let tree = Arc::new(implicit_language::parse(&source[..], script_name).unwrap());
 
     let mut nest = implicit::compiler::Nest::new();
-    let target = nest.group(tree.node());
+    let target = nest.group(tree.clone());
     let evaluator = implicit::evaluator::Evaluator::new(nest, 500, 500, None);
 
     let mut errors = vec![];
@@ -78,7 +79,7 @@ pub fn run_test(paths: &Paths, ctx: &OpenClContext) -> Result<(), Vec<Error>> {
                 shapes: vec![implicit::scene::Shape {
                     color: (0, 0, 0),
                     draw_mode: implicit::scene::DrawMode::Line(implicit::scene::LineMode::Solid),
-                    node: tree,
+                    node: tree.clone(),
                 }]
             }
         ],
