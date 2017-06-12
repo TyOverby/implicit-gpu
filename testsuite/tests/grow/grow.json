@@ -3,6 +3,8 @@
   "how_much": -20.0,
   "target": {
     "kind": "polygon",
+    "dx": 0.0,
+    "dy": 0.0,
     "group": {
       "additive": [
         {

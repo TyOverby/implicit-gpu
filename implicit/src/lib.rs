@@ -28,6 +28,8 @@ pub mod scene;
 pub mod output;
 pub mod lines;
 
+use lines::util::geom::Rect;
+
 pub fn run_single(node: nodes::NodeRef, width: usize, height: usize) -> ::opencl::FieldBuffer {
     use compiler::Nest;
     use evaluator::Evaluator;
@@ -51,8 +53,30 @@ pub fn run_scene(scene: &scene::Scene) -> output::OutputScene {
     use compiler::Nest;
     use evaluator::Evaluator;
 
-    if scene.x != 0 || scene.y != 0{
-        panic!("scenes not centered at the origin are unsupported");
+    fn compute_figure_size(figure: &scene::Figure) -> Option<lines::util::geom::Rect> {
+        let mut rect: Option<Option<Rect>> = None;
+        for shape in &figure.shapes {
+            rect = match (rect, shape.implicit.bounding_box()) {
+                (None, (a, _)) => Some(a),
+                (Some(None), _) | (_, (None, _)) => Some(None),
+                (Some(Some(a)), (Some(b), _)) => Some(Some(a.union_with(&b))),
+            }
+        }
+
+        rect.and_then(|a|a)
+    }
+    fn compute_scene_size(scene: &scene::Scene) -> Option<lines::util::geom::Rect> {
+        let mut rect: Option<Option<Rect>> = None;
+
+        for figure in &scene.figures {
+            rect = match (rect, compute_figure_size(figure)) {
+                (None, a) => Some(a),
+                (Some(None), _) | (_, None) => Some(None),
+                (Some(Some(a)), Some(b)) => Some(Some(a.union_with(&b))),
+            }
+        }
+
+        rect.and_then(|a| a)
     }
 
     // Setup
@@ -67,13 +91,24 @@ pub fn run_scene(scene: &scene::Scene) -> output::OutputScene {
     // This will allow for further optimization in the future.
     let mut treemap = ::std::collections::BTreeMap::new();
     for figure in &scene.figures {
+        let figure_bounds = compute_figure_size(figure).expect("can't handle null figure sizes");
         for shape in &figure.shapes {
-            let id = nest.group(shape.node.clone());
+            let id = nest.group(
+                nodes::NodeRef::new(nodes::Node::Translate {
+                    dx: -figure_bounds.left() + 1f32,
+                    dy: -figure_bounds.top() + 1f32,
+                    target: shape.implicit.clone()
+                }));
             treemap.insert(shape, id);
         }
     }
 
-    let evaluator = Evaluator::new(nest, scene.width as usize, scene.height as usize, None);
+    let bb = match compute_scene_size(scene) {
+        Some(bb) => bb,
+        None => panic!("can't deal with null scene size right now"),
+    };
+
+    let evaluator = Evaluator::new(nest, bb.width() as usize + 2, bb.height() as usize + 2, None);
 
     for figure in &scene.figures {
         let mut output_shapes = vec![];

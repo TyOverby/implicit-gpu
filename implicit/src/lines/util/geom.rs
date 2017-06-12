@@ -277,17 +277,17 @@ impl Rect {
     }
 
     pub fn expand_to_include(&mut self, point: &Point) {
-        if point.x < self.top_left.x || self.top_left.x.is_nan() {
+        if (point.x < self.top_left.x || self.top_left.x.is_nan()) && !point.x.is_nan() {
             self.top_left.x = point.x;
         }
-        if point.y < self.top_left.y || self.top_left.y.is_nan() {
+        if (point.y < self.top_left.y || self.top_left.y.is_nan()) && !point.y.is_nan() {
             self.top_left.y = point.y;
         }
 
-        if point.x > self.bottom_right.x || self.bottom_right.x.is_nan() {
+        if (point.x > self.bottom_right.x || self.bottom_right.x.is_nan()) && !point.x.is_nan() {
             self.bottom_right.x = point.x;
         }
-        if point.y > self.bottom_right.y || self.bottom_right.y.is_nan() {
+        if (point.y > self.bottom_right.y || self.bottom_right.y.is_nan()) && !point.y.is_nan() {
             self.bottom_right.y = point.y;
         }
     }
@@ -313,35 +313,16 @@ impl Rect {
     }
 
     pub fn intersect_with(&self, other: &Rect) -> Rect {
-        let mut r = Rect::null();
-        let mut added = 0;
-        if self.contains(&other.top_left) {
-            r.expand_to_include(&other.top_left);
-            added += 1;
+        if !self.does_intersect(other) {
+            return Rect::null();
         }
-        if self.contains(&other.bottom_right) {
-            r.expand_to_include(&other.bottom_right);
-            added += 1;
-        }
+        let left = self.left().max(other.left());
+        let right = self.right().min(other.right());
 
-        // Bail early if we've already found the intersection
-        if added == 2 {
-            return r;
-        }
+        let top = self.top().max(other.top());
+        let bottom = self.bottom().min(other.bottom());
 
-        if other.contains(&self.top_left) {
-            r.expand_to_include(&self.top_left);
-        }
-
-        // Bail early if we've already found the intersection
-        if added == 2 {
-            return r;
-        }
-
-        if other.contains(&self.bottom_right) {
-            r.expand_to_include(&self.bottom_right);
-        }
-        r
+        Rect::from_points(&Point{x: left, y: top}, &Point{x: right, y: bottom})
     }
 
     pub fn midpoint(&self) -> Point {

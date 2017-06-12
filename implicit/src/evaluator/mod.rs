@@ -40,8 +40,8 @@ impl Evaluator {
 
         let eval_basic_group = |root: &Node| -> FieldBuffer {
             let _guard = ::flame::start_guard(format!("eval_basic_group"));
-            let (program, compilation) = ::compiler::compile(root);
-            let deps: Vec<FieldBuffer> = compilation.deps().iter().map(|&g| self.evaluate(g, ctx)).collect();
+            let (program, compilation_info) = ::compiler::compile(root);
+            let deps: Vec<FieldBuffer> = compilation_info.dependencies.iter().map(|&g| self.evaluate(g, ctx)).collect();
 
             let out = ctx.field_buffer(self.width, self.height, None);
             let kernel = ctx.compile("apply", program);
@@ -57,13 +57,13 @@ impl Evaluator {
             out
         };
 
-        let eval_polygon = |poly: &PolyGroup| -> FieldBuffer {
+        let eval_polygon = |poly: &PolyGroup, dx: f32, dy: f32| -> FieldBuffer {
             let _guard = ::flame::start_guard(format!("eval_poylgon"));
             let additive_field = {
                 let _guard = ::flame::start_guard("additive field");
                 let xs_all: Vec<_> = poly.additive.iter().flat_map(|a| a.xs.iter().cloned()).collect();
                 let ys_all: Vec<_> = poly.additive.iter().flat_map(|a| a.ys.iter().cloned()).collect();
-                run_poly(&xs_all, &ys_all, self.width, self.height, ctx)
+                run_poly(&xs_all, &ys_all, self.width, self.height, Some((dx, dy)), ctx)
             };
 
             let subtractive_field = {
@@ -71,7 +71,7 @@ impl Evaluator {
                 let xs_all: Vec<_> = poly.subtractive.iter().flat_map(|a| a.xs.iter().cloned()).collect();
                 let ys_all: Vec<_> = poly.subtractive.iter().flat_map(|a| a.ys.iter().cloned()).collect();
                 if xs_all.len() != 0 {
-                    Some(run_poly(&xs_all, &ys_all, self.width, self.height, ctx))
+                    Some(run_poly(&xs_all, &ys_all, self.width, self.height, Some((dx, dy)),  ctx))
                 } else {
                     None
                 }
@@ -117,10 +117,10 @@ impl Evaluator {
                 let (xs, ys) = ::marching::run_marching(&field_buf, ctx);
                 let xs = filter_nans(&xs, ctx);
                 let ys = filter_nans(&ys, ctx);
-                let res = ::polygon::run_poly_raw(xs, ys, width, height, ctx);
+                let res = ::polygon::run_poly_raw(xs, ys, width, height, None, ctx);
                 res
             }
-            &NodeGroup::Polygon(ref poly) => eval_polygon(poly),
+            &NodeGroup::Polygon{ ref group, dx, dy } => eval_polygon(group, dx, dy),
         };
 
         {

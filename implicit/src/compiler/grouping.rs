@@ -4,7 +4,11 @@ use nodes::{NodeRef, Node, PolyGroup};
 pub enum NodeGroup {
     Basic(NodeRef),
     Freeze(NodeRef),
-    Polygon(PolyGroup),
+    Polygon {
+        group: PolyGroup,
+        dx: f32,
+        dy: f32,
+    },
 }
 
 #[derive(Debug, Eq, PartialEq, Hash, Clone, Copy, PartialOrd, Deserialize, Serialize)]
@@ -36,9 +40,18 @@ impl Nest {
     }
 
     pub fn group(&mut self, node: NodeRef) -> GroupId {
+        let node = if node.contains_break() {
+            NodeRef::new(node.take().propagate_translates(0.0, 0.0))
+        } else { node };
+
         let group = match &*node {
-            &Node::Polygon{ref group} => NodeGroup::Polygon(group.clone()),
+            &Node::Polygon{ref group, dx, dy} => NodeGroup::Polygon{
+                group: group.clone(),
+                dx,
+                dy
+            },
             &Node::Freeze{ref target} => {
+                // TODO: track dx and dy here too
                 NodeGroup::Freeze(do_group(target.clone(), self))
             }
             other => {
@@ -72,6 +85,8 @@ fn do_group(node: NodeRef, nest: &mut Nest) -> NodeRef {
         }
         &Node::Circle { .. } => n,
         &Node::Rect { .. } => n,
+        &Node::Translate{dx, dy, ref target} =>
+            NodeRef::new(Node::Translate{dx, dy, target: do_group(target.clone(), nest)}),
         &Node::And{ref children} => NodeRef::new(Node::And{children: children.iter().map(|c| do_group(c.clone(), nest)).collect()}),
         &Node::Or{ref children} => NodeRef::new(Node::Or{children: children.iter().map(|c| do_group(c.clone(), nest)).collect()}),
         &Node::Not{ref target} => NodeRef::new(Node::Not{target: do_group(target.clone(), nest)}),

@@ -1,5 +1,19 @@
 export type Implicit = Circle | Rect | And | Or | Not | Modulate | Break | Freeze;
 
+export interface Scene {
+    figures: Figure[],
+}
+
+export interface Figure {
+    shapes: Shape[]
+}
+
+export interface Shape {
+    implicit: Implicit,
+    color: [number, number, number],
+    draw_style: "filled" | "line"
+}
+
 export interface Circle {
     kind: "circle",
     x: number,

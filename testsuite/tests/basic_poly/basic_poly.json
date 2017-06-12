@@ -1,5 +1,7 @@
 {
   "kind": "polygon",
+  "dx": 0.0,
+  "dy": 0.0,
   "group": {
     "additive": [
       {

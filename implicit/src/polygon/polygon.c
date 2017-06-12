@@ -44,7 +44,7 @@ float dist_to_line(float x, float y, float x1, float y1, float x2, float y2)
     return sqrt(dx * dx + dy * dy);
 }
 
-__kernel void apply(__global float *buffer, ulong width, __global float *xs, __global float *ys, ulong count)
+__kernel void apply(__global float *buffer, ulong width, __global float *xs, __global float *ys, ulong count, float dx, float dy)
 {
     size_t x = get_global_id(0);
     size_t y = get_global_id(1);
@@ -55,8 +55,8 @@ __kernel void apply(__global float *buffer, ulong width, __global float *xs, __g
         //printf("OPENCL: pos: %d | width: %d | count: %d\n", pos, width, count);
     }
 
-    float x_s = (float)x;
-    float y_s = (float)y;
+    float x_s = (float)x - dx;
+    float y_s = (float)y - dy;
 
     if (count < 2)
     {

@@ -1,0 +1,11 @@
+{
+    "kind": "translate",
+    "dx": 10.0,
+    "dy": 10.0,
+    "target": {
+        "kind": "circle",
+        "x": 50.0,
+        "y": 50.0,
+        "r": 50.0
+    }
+}

@@ -3,6 +3,8 @@
   "children": [
     {
       "kind": "polygon",
+      "dx": 0.0,
+      "dy": 0.0,
       "group": {
         "additive": [
           {
@@ -43,6 +45,8 @@
             "how_much": 50.0,
             "target": {
               "kind": "polygon",
+              "dx": 0.0,
+              "dy": 0.0,
               "group": {
                 "additive": [
                   {

@@ -71,11 +71,6 @@ pub fn run_test(paths: &Paths, ctx: &OpenClContext) -> Result<(), Vec<Error>> {
     let mut errors = vec![];
 
     let output = implicit::run_scene(&implicit::scene::Scene{
-        x: 0,
-        y: 0,
-        width: 500,
-        height: 500,
-
         unit: "px".into(),
         simplify: true,
 
@@ -84,7 +79,7 @@ pub fn run_test(paths: &Paths, ctx: &OpenClContext) -> Result<(), Vec<Error>> {
                 shapes: vec![implicit::scene::Shape {
                     color: (0, 0, 0),
                     draw_mode: implicit::scene::DrawMode::Line(implicit::scene::LineMode::Solid),
-                    node: tree.clone(),
+                    implicit: tree.clone(),
                 }]
             }
         ],

@@ -1,21 +1,21 @@
 use super::nodes::NodeRef;
 
-#[derive(Debug, Eq, PartialEq, Hash, PartialOrd, Ord)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
 pub enum LineMode {
     Solid,
 }
 
-#[derive(Debug, Eq, PartialEq, Hash, PartialOrd, Ord)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
 pub enum DrawMode {
     Filled,
     Line(LineMode),
 }
 
-#[derive(Debug, PartialEq, PartialOrd )]
+#[derive(Clone, Debug, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub struct Shape {
     pub color: (u8, u8, u8),
     pub draw_mode: DrawMode,
-    pub node: NodeRef,
+    pub implicit: NodeRef,
 }
 
 
@@ -26,18 +26,13 @@ impl ::std::cmp::Ord for Shape {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub struct Figure {
     pub shapes: Vec<Shape>,
 }
 
-#[derive(Debug, Eq, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub struct Scene {
-    pub x: u32,
-    pub y: u32,
-    pub width: u32,
-    pub height: u32,
-
     pub unit: String,
     pub simplify: bool,
 
