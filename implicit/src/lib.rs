@@ -63,7 +63,7 @@ pub fn run_scene(scene: &scene::Scene) -> output::OutputScene {
             }
         }
 
-        rect.and_then(|a|a)
+        rect.and_then(|a| a)
     }
     fn compute_scene_size(scene: &scene::Scene) -> Option<lines::util::geom::Rect> {
         let mut rect: Option<Option<Rect>> = None;
@@ -83,9 +83,7 @@ pub fn run_scene(scene: &scene::Scene) -> output::OutputScene {
     let ctx = opencl::OpenClContext::default();
     let mut nest = Nest::new();
 
-    let mut output = OutputScene {
-        figures: vec![],
-    };
+    let mut output = OutputScene { figures: vec![] };
 
     // Build all the shapes first, then collect them later.
     // This will allow for further optimization in the future.
@@ -93,12 +91,11 @@ pub fn run_scene(scene: &scene::Scene) -> output::OutputScene {
     for figure in &scene.figures {
         let figure_bounds = compute_figure_size(figure).expect("can't handle null figure sizes");
         for shape in &figure.shapes {
-            let id = nest.group(
-                nodes::NodeRef::new(nodes::Node::Translate {
-                    dx: -figure_bounds.left() + 1f32,
-                    dy: -figure_bounds.top() + 1f32,
-                    target: shape.implicit.clone()
-                }));
+            let id = nest.group(nodes::NodeRef::new(nodes::Node::Translate {
+                dx: -figure_bounds.left() + 1f32,
+                dy: -figure_bounds.top() + 1f32,
+                target: shape.implicit.clone(),
+            }));
             treemap.insert(shape, id);
         }
     }
@@ -130,8 +127,9 @@ pub fn run_scene(scene: &scene::Scene) -> output::OutputScene {
                     color: shape.color,
                     lines: LineGroup::Polygon {
                         filled: true,
-                        additive, subtractive
-                    }
+                        additive,
+                        subtractive,
+                    },
                 },
                 DrawMode::Line(LineMode::Solid) => OutputShape {
                     color: shape.color,
@@ -139,8 +137,8 @@ pub fn run_scene(scene: &scene::Scene) -> output::OutputScene {
                         filled: false,
                         additive: additive,
                         subtractive: subtractive,
-                    }
-                }
+                    },
+                },
             };
 
             output_shapes.push(output_shape);
@@ -148,7 +146,7 @@ pub fn run_scene(scene: &scene::Scene) -> output::OutputScene {
             ctx.empty_queue();
         }
 
-        output.figures.push(OutputFigure{ shapes: output_shapes});
+        output.figures.push(OutputFigure { shapes: output_shapes });
     }
 
     output

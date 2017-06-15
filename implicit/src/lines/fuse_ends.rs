@@ -1,4 +1,4 @@
-use super::{LineType, EPSILON};
+use super::{EPSILON, LineType};
 use super::geom::Point;
 
 // Takes linetypes and attempts to fuse their ends together.
@@ -27,7 +27,7 @@ pub fn fuse_ends(lines: Vec<LineType>) -> (Vec<LineType>, bool) {
                 if post_len != 0 {
                     out.push(LineType::Joined(points));
                 }
-            },
+            }
             LineType::Unjoined(mut points) => {
                 let prev_len = points.len();
                 remove_dup(&mut points);

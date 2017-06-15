@@ -19,11 +19,9 @@ pub struct Shape {
 }
 
 
-impl ::std::cmp::Eq for Shape { }
+impl ::std::cmp::Eq for Shape {}
 impl ::std::cmp::Ord for Shape {
-    fn cmp(&self, other: &Shape) -> ::std::cmp::Ordering {
-        self.partial_cmp(other).unwrap_or(::std::cmp::Ordering::Less)
-    }
+    fn cmp(&self, other: &Shape) -> ::std::cmp::Ordering { self.partial_cmp(other).unwrap_or(::std::cmp::Ordering::Less) }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Serialize, Deserialize)]

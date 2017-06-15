@@ -11,7 +11,10 @@ pub struct PolyGroup {
 }
 
 impl ::std::iter::FromIterator<(f32, f32)> for Polygon {
-    fn from_iter<T>(iterator: T) -> Polygon where T: IntoIterator<Item = (f32, f32)> {
+    fn from_iter<T>(iterator: T) -> Polygon
+    where
+        T: IntoIterator<Item = (f32, f32)>,
+    {
         let mut iterator = iterator.into_iter();
         let mut xs = vec![];
         let mut ys = vec![];

@@ -1,5 +1,5 @@
 pub struct OutputScene {
-    pub figures: Vec<OutputFigure>
+    pub figures: Vec<OutputFigure>,
 }
 
 pub struct OutputFigure {
@@ -8,7 +8,7 @@ pub struct OutputFigure {
 
 pub struct OutputShape {
     pub color: (u8, u8, u8),
-    pub lines: LineGroup
+    pub lines: LineGroup,
 }
 
 pub enum LineGroup {

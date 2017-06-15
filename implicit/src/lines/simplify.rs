@@ -1,7 +1,9 @@
-use super::geom::{Point, Line};
-use super::OPT_EPSILON;
 
-/// Takes a line of points and joins lines that are very similar to being
+use super::OPT_EPSILON;
+use super::geom::{Line, Point};
+
+/// Takes a line of points and joins lines that are very
+/// similar to being
 /// the same line.
 pub fn simplify_line(pts: Vec<Point>) -> Vec<Point> {
     if pts.len() <= 2 {

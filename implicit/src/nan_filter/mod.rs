@@ -18,7 +18,13 @@ fn create_mask(ctx: &OpenClContext, line: &LineBuffer) -> MaskBuffer {
     let out = ctx.mask_buffer(size, None);
     let kernel = ctx.compile("apply", MASK_PROG);
 
-    kernel.gws([size]).arg_buf(line.buffer()).arg_buf(out.buffer()).arg_scl(size).enq().unwrap();
+    kernel
+        .gws([size])
+        .arg_buf(line.buffer())
+        .arg_buf(out.buffer())
+        .arg_scl(size)
+        .enq()
+        .unwrap();
 
     out
 }
@@ -114,20 +120,21 @@ fn test_sum_mask() {
 
         let masked = create_mask(&ctx, &input);
 
-        let masked_expected: Vec<u32> = input_cpu.into_iter().map(|a| if a.is_nan() { 0 } else { 1 }).collect();
+        let masked_expected: Vec<u32> = input_cpu
+            .into_iter()
+            .map(|a| if a.is_nan() { 0 } else { 1 })
+            .collect();
 
         sum_mask(&ctx, &masked);
 
         let summed_expected: Vec<u32> = masked_expected
             .into_iter()
-            .scan(
-                0u32, |a: &mut u32, b: u32| {
-                    let r: u32 = *a;
-                    *a = r + b;
-                    let r: Option<u32> = Some(r);
-                    r
-                }
-            )
+            .scan(0u32, |a: &mut u32, b: u32| {
+                let r: u32 = *a;
+                *a = r + b;
+                let r: Option<u32> = Some(r);
+                r
+            })
             .collect();
 
         assert!(masked.values() == summed_expected);

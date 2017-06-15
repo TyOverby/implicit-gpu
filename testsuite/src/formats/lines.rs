@@ -3,7 +3,7 @@ use snoot::serde_serialization::{DeserializeResult, deserialize};
 use std::fmt::Write;
 
 #[derive(Deserialize, Debug, PartialEq, Copy, Clone)]
-#[serde(rename="line")]
+#[serde(rename = "line")]
 pub struct Line(pub f32, pub f32, pub f32, pub f32);
 
 pub fn compare(expected: &str, expected_filename: &str, actual: &[Line]) -> Result<(), String> {

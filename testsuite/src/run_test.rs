@@ -1,46 +1,47 @@
 use super::Paths;
 use super::formats;
 use {flame, implicit, latin};
-use implicit::opencl::OpenClContext;
 use implicit::nodes::NodeRef;
+use implicit::opencl::OpenClContext;
 
 pub enum Error {
-    CouldNotFind {
-        file: String
-    },
-    SvgMismatch {
-        expected: String,
-        actual: String
-    },
+    CouldNotFind { file: String },
+    SvgMismatch { expected: String, actual: String },
     LineMismatch {
         expected: String,
         actual: String,
         message: String,
     },
     FieldMismatch {
-        expected:String,
+        expected: String,
         actual: String,
         message: String,
-    }
+    },
 }
 
 impl ::std::fmt::Display for Error {
     fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> Result<(), ::std::fmt::Error> {
         match *self {
-            Error::CouldNotFind {ref file} => {
-                writeln!(formatter, "  • Could not find file {}", file)?
-            }
+            Error::CouldNotFind { ref file } => writeln!(formatter, "  • Could not find file {}", file)?,
             Error::SvgMismatch { ref expected, ref actual } => {
                 writeln!(formatter, "  • svg files are not the same")?;
                 writeln!(formatter, "    expected file : {}", expected)?;
                 writeln!(formatter, "    actual file   : {}", actual)?;
             }
-            Error::LineMismatch { ref expected, ref actual, ref message } => {
+            Error::LineMismatch {
+                ref expected,
+                ref actual,
+                ref message,
+            } => {
                 writeln!(formatter, "  • line files are not the same ({})", message)?;
                 writeln!(formatter, "    expected file : {}", expected)?;
                 writeln!(formatter, "    actual file   : {}", actual)?;
             }
-            Error::FieldMismatch { ref expected, ref actual, ref message } => {
+            Error::FieldMismatch {
+                ref expected,
+                ref actual,
+                ref message,
+            } => {
                 writeln!(formatter, "  • field files are not the same ({})", message)?;
                 writeln!(formatter, "    expected file : {}", expected)?;
                 writeln!(formatter, "    actual file   : {}", actual)?;
@@ -70,18 +71,20 @@ pub fn run_test(paths: &Paths, ctx: &OpenClContext) -> Result<(), Vec<Error>> {
 
     let mut errors = vec![];
 
-    let output = implicit::run_scene(&implicit::scene::Scene{
+    let output = implicit::run_scene(&implicit::scene::Scene {
         unit: "px".into(),
         simplify: true,
 
         figures: vec![
             implicit::scene::Figure {
-                shapes: vec![implicit::scene::Shape {
-                    color: (0, 0, 0),
-                    draw_mode: implicit::scene::DrawMode::Line(implicit::scene::LineMode::Solid),
-                    implicit: tree.clone(),
-                }]
-            }
+                shapes: vec![
+                    implicit::scene::Shape {
+                        color: (0, 0, 0),
+                        draw_mode: implicit::scene::DrawMode::Line(implicit::scene::LineMode::Solid),
+                        implicit: tree.clone(),
+                    },
+                ],
+            },
         ],
     });
 
@@ -102,15 +105,13 @@ pub fn run_test(paths: &Paths, ctx: &OpenClContext) -> Result<(), Vec<Error>> {
         let expected = latin::file::read(&paths.expected_svg).unwrap();
         let actual = latin::file::read(&paths.actual_svg).unwrap();
         if expected != actual {
-            errors.push(Error::SvgMismatch{
+            errors.push(Error::SvgMismatch {
                 expected: paths.expected_svg.to_str().unwrap().into(),
-                actual: paths.actual_svg.to_str().unwrap().into()
+                actual: paths.actual_svg.to_str().unwrap().into(),
             });
         }
     } else {
-        errors.push(Error::CouldNotFind{
-            file: paths.expected_svg.to_str().unwrap().into()
-        });
+        errors.push(Error::CouldNotFind { file: paths.expected_svg.to_str().unwrap().into() });
     }
 
     if latin::file::exists(&paths.expected_values) {
@@ -126,9 +127,7 @@ pub fn run_test(paths: &Paths, ctx: &OpenClContext) -> Result<(), Vec<Error>> {
             });
         }
     } else {
-        errors.push(Error::CouldNotFind {
-            file: paths.expected_values.to_str().unwrap().into()
-        });
+        errors.push(Error::CouldNotFind { file: paths.expected_values.to_str().unwrap().into() });
     }
 
     if latin::file::exists(&paths.expected_lines) {
@@ -136,17 +135,16 @@ pub fn run_test(paths: &Paths, ctx: &OpenClContext) -> Result<(), Vec<Error>> {
             &latin::file::read_string_utf8(&paths.expected_lines).unwrap(),
             &paths.expected_lines.to_str().unwrap(),
             &lines,
-        ) {
+        )
+        {
             errors.push(Error::LineMismatch {
                 expected: paths.expected_lines.to_str().unwrap().into(),
                 actual: paths.actual_lines.to_str().unwrap().into(),
-                message: message
+                message: message,
             });
         }
     } else {
-        errors.push(Error::CouldNotFind{
-            file: paths.expected_lines.to_str().unwrap().into()
-        });
+        errors.push(Error::CouldNotFind { file: paths.expected_lines.to_str().unwrap().into() });
     }
 
     if !errors.is_empty() {

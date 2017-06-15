@@ -1,23 +1,22 @@
-use super::{LineType, EPSILON};
-use super::geom::{Point};
+use super::{EPSILON, LineType};
+use super::geom::Point;
 
 // Takes unconnected linetypes and attempts to connect them.
 pub fn connect_linetypes(mut lines: Vec<LineType>) -> (Vec<LineType>, bool) {
     fn overlap(a: Option<&Point>, b: Option<&Point>) -> bool {
         match (a, b) {
             (Some(a), Some(b)) => a.close_to(b, EPSILON),
-            _ => false
+            _ => false,
         }
     }
 
     let mut made_progress = false;
     loop {
         let mut remove_this = None;
-        'do_remove: for i in 0 .. lines.len() {
-            for k in (i + 1) .. lines.len() {
+        'do_remove: for i in 0..lines.len() {
+            for k in (i + 1)..lines.len() {
                 let (part_a, part_b) = lines.split_at_mut(i + 1);
-                if let (&mut LineType::Unjoined(ref mut a),
-                        &mut LineType::Unjoined(ref mut b)) = (&mut part_a[i], &mut part_b[k - i - 1]) {
+                if let (&mut LineType::Unjoined(ref mut a), &mut LineType::Unjoined(ref mut b)) = (&mut part_a[i], &mut part_b[k - i - 1]) {
 
                     // Aaaaaaaaaaa
                     // Bbbbbb
@@ -60,7 +59,7 @@ pub fn connect_linetypes(mut lines: Vec<LineType>) -> (Vec<LineType>, bool) {
                         b.reverse();
                         a.append(b);
                         remove_this = Some(k);
-                        break 'do_remove
+                        break 'do_remove;
                     }
                 }
             }

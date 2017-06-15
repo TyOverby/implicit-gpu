@@ -1,14 +1,10 @@
-use nodes::{NodeRef, Node, PolyGroup};
+use nodes::{Node, NodeRef, PolyGroup};
 
 #[derive(Debug, PartialEq)]
 pub enum NodeGroup {
     Basic(NodeRef),
     Freeze(NodeRef),
-    Polygon {
-        group: PolyGroup,
-        dx: f32,
-        dy: f32,
-    },
+    Polygon { group: PolyGroup, dx: f32, dy: f32 },
 }
 
 #[derive(Debug, Eq, PartialEq, Hash, Clone, Copy, PartialOrd, Deserialize, Serialize)]
@@ -42,21 +38,17 @@ impl Nest {
     pub fn group(&mut self, node: NodeRef) -> GroupId {
         let node = if node.contains_break() {
             NodeRef::new(node.take().propagate_translates(0.0, 0.0))
-        } else { node };
+        } else {
+            node
+        };
 
         let group = match &*node {
-            &Node::Polygon{ref group, dx, dy} => NodeGroup::Polygon{
-                group: group.clone(),
-                dx,
-                dy
-            },
-            &Node::Freeze{ref target} => {
+            &Node::Polygon { ref group, dx, dy } => NodeGroup::Polygon { group: group.clone(), dx, dy },
+            &Node::Freeze { ref target } => {
                 // TODO: track dx and dy here too
                 NodeGroup::Freeze(do_group(target.clone(), self))
             }
-            other => {
-                NodeGroup::Basic(do_group(NodeRef::new(other.clone()), self))
-            }
+            other => NodeGroup::Basic(do_group(NodeRef::new(other.clone()), self)),
         };
 
         self.add(group)
@@ -71,26 +63,36 @@ impl Nest {
 fn do_group(node: NodeRef, nest: &mut Nest) -> NodeRef {
     let n = node.clone();
     match &*node {
-        &Node::Polygon{..} => {
+        &Node::Polygon { .. } => {
             let group_id = nest.group(n);
-            NodeRef::new(Node::OtherGroup{group_id})
+            NodeRef::new(Node::OtherGroup { group_id })
         }
-        &Node::Break{ref target} => {
+        &Node::Break { ref target } => {
             let group_id = nest.group(target.clone());
-            NodeRef::new(Node::OtherGroup{group_id})
+            NodeRef::new(Node::OtherGroup { group_id })
         }
-        &Node::Freeze{..} => {
+        &Node::Freeze { .. } => {
             let group_id = nest.group(n);
-            NodeRef::new(Node::OtherGroup{group_id})
+            NodeRef::new(Node::OtherGroup { group_id })
         }
         &Node::Circle { .. } => n,
         &Node::Rect { .. } => n,
-        &Node::Translate{dx, dy, ref target} =>
-            NodeRef::new(Node::Translate{dx, dy, target: do_group(target.clone(), nest)}),
-        &Node::And{ref children} => NodeRef::new(Node::And{children: children.iter().map(|c| do_group(c.clone(), nest)).collect()}),
-        &Node::Or{ref children} => NodeRef::new(Node::Or{children: children.iter().map(|c| do_group(c.clone(), nest)).collect()}),
-        &Node::Not{ref target} => NodeRef::new(Node::Not{target: do_group(target.clone(), nest)}),
-        &Node::Modulate{how_much, ref target} => NodeRef::new(Node::Modulate{how_much, target: do_group(target.clone(), nest)}),
-        &Node::OtherGroup{..} => panic!("OtherGroup found while grouping"),
+        &Node::Translate { dx, dy, ref target } => NodeRef::new(Node::Translate {
+            dx,
+            dy,
+            target: do_group(target.clone(), nest),
+        }),
+        &Node::And { ref children } => NodeRef::new(Node::And {
+            children: children.iter().map(|c| do_group(c.clone(), nest)).collect(),
+        }),
+        &Node::Or { ref children } => NodeRef::new(Node::Or {
+            children: children.iter().map(|c| do_group(c.clone(), nest)).collect(),
+        }),
+        &Node::Not { ref target } => NodeRef::new(Node::Not { target: do_group(target.clone(), nest) }),
+        &Node::Modulate { how_much, ref target } => NodeRef::new(Node::Modulate {
+            how_much,
+            target: do_group(target.clone(), nest),
+        }),
+        &Node::OtherGroup { .. } => panic!("OtherGroup found while grouping"),
     }
 }

@@ -27,17 +27,15 @@ pub fn all_devices() -> Vec<(Platform, Device)> {
     }
 
     // Prefer GPU
-    out.sort_by(
-        |&(_, ref a), &(_, ref b)| {
-            let a_type = a.info(DeviceInfo::Type);
-            let b_type = b.info(DeviceInfo::Type);
-            if let (DeviceInfoResult::Type(a_type), DeviceInfoResult::Type(b_type)) = (a_type, b_type) {
-                b_type.cmp(&a_type)
-            } else {
-                (0).cmp(&0)
-            }
+    out.sort_by(|&(_, ref a), &(_, ref b)| {
+        let a_type = a.info(DeviceInfo::Type);
+        let b_type = b.info(DeviceInfo::Type);
+        if let (DeviceInfoResult::Type(a_type), DeviceInfoResult::Type(b_type)) = (a_type, b_type) {
+            b_type.cmp(&a_type)
+        } else {
+            (0).cmp(&0)
         }
-    );
+    });
 
     out
 }
@@ -77,7 +75,11 @@ impl OpenClContext {
             }
         }
 
-        let program = Program::builder().src(source.clone()).devices(self.device).build(&self.context).unwrap();
+        let program = Program::builder()
+            .src(source.clone())
+            .devices(self.device)
+            .build(&self.context)
+            .unwrap();
 
         {
             let mut program_cache = self.program_cache.lock().unwrap();
@@ -96,8 +98,7 @@ impl OpenClContext {
                 Some(MEM_COPY_HOST_PTR | MEM_READ_WRITE),
                 &[width, height],
                 Some(fill),
-            )
-                    .unwrap()
+            ).unwrap()
         } else {
             Buffer::new(self.queue.clone(), Some(MEM_READ_WRITE), &[width, height], None).unwrap()
         };
@@ -127,8 +128,7 @@ impl OpenClContext {
                     Some(MEM_COPY_HOST_PTR | MEM_READ_WRITE),
                     &[size],
                     Some(fill),
-                )
-                        .unwrap(),
+                ).unwrap(),
             }
         } else {
             MaskBuffer {

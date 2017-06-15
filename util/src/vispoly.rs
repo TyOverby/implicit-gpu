@@ -2,10 +2,10 @@ extern crate latin;
 extern crate implicit;
 extern crate lux;
 
-use std::str::FromStr;
-use lux::prelude::*;
 use lux::color;
+use lux::prelude::*;
 use std::io::Write;
+use std::str::FromStr;
 
 fn main() {
     let mut args = std::env::args();
@@ -30,7 +30,7 @@ fn main() {
                 write!(io, "\r{}, {}            ", mx - dx, my - dy).unwrap();
                 io.flush().unwrap();
 
-                 match (last_down, window.is_mouse_down()) {
+                match (last_down, window.is_mouse_down()) {
                     (true, true) => {
                         dx += mx - last_x;
                         dy += my - last_y;
@@ -56,16 +56,18 @@ fn main() {
 }
 
 fn read_text(name: &str) -> Vec<((f32, f32), (f32, f32))> {
-    latin::file::read_lines(name).unwrap().map(|line| {
-        let line = line.unwrap();
-        let mut chunks =
-            line.split(", ")
-            .map(f32::from_str)
-            .map(|r| r.expect("could not parse float"));
-        let x1 = chunks.next().unwrap();
-        let y1 = chunks.next().unwrap();
-        let x2 = chunks.next().unwrap();
-        let y2 = chunks.next().unwrap();
-        ((x1, y1), (x2, y2))
-    }).collect()
+    latin::file::read_lines(name)
+        .unwrap()
+        .map(|line| {
+            let line = line.unwrap();
+            let mut chunks = line.split(", ").map(f32::from_str).map(|r| {
+                r.expect("could not parse float")
+            });
+            let x1 = chunks.next().unwrap();
+            let y1 = chunks.next().unwrap();
+            let x2 = chunks.next().unwrap();
+            let y2 = chunks.next().unwrap();
+            ((x1, y1), (x2, y2))
+        })
+        .collect()
 }

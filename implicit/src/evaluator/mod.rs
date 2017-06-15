@@ -2,7 +2,7 @@ use compiler::*;
 
 use itertools::Itertools;
 use nan_filter::filter_nans;
-use nodes::{Node, PolyGroup, NodeRef};
+use nodes::{Node, NodeRef, PolyGroup};
 use opencl::FieldBuffer;
 
 use opencl::OpenClContext;
@@ -41,12 +41,19 @@ impl Evaluator {
         let eval_basic_group = |root: &Node| -> FieldBuffer {
             let _guard = ::flame::start_guard(format!("eval_basic_group"));
             let (program, compilation_info) = ::compiler::compile(root);
-            let deps: Vec<FieldBuffer> = compilation_info.dependencies.iter().map(|&g| self.evaluate(g, ctx)).collect();
+            let deps: Vec<FieldBuffer> = compilation_info
+                .dependencies
+                .iter()
+                .map(|&g| self.evaluate(g, ctx))
+                .collect();
 
             let out = ctx.field_buffer(self.width, self.height, None);
             let kernel = ctx.compile("apply", program);
 
-            let mut kc = kernel.gws([self.width, self.height]).arg_buf(out.buffer()).arg_scl(self.width as u64);
+            let mut kc = kernel.gws([self.width, self.height]).arg_buf(out.buffer()).arg_scl(
+                self.width as
+                    u64,
+            );
 
             for dep in &deps {
                 kc = kc.arg_buf(dep.buffer());
@@ -71,7 +78,7 @@ impl Evaluator {
                 let xs_all: Vec<_> = poly.subtractive.iter().flat_map(|a| a.xs.iter().cloned()).collect();
                 let ys_all: Vec<_> = poly.subtractive.iter().flat_map(|a| a.ys.iter().cloned()).collect();
                 if xs_all.len() != 0 {
-                    Some(run_poly(&xs_all, &ys_all, self.width, self.height, Some((dx, dy)),  ctx))
+                    Some(run_poly(&xs_all, &ys_all, self.width, self.height, Some((dx, dy)), ctx))
                 } else {
                     None
                 }
@@ -80,12 +87,9 @@ impl Evaluator {
             if let Some(subtractive_field) = subtractive_field {
                 let program = Node::And {
                     children: vec![
-                        NodeRef::new(Node::OtherGroup{ group_id: GroupId(0) }),
-                        NodeRef::new(Node::Not {
-                            target: NodeRef::new(Node::OtherGroup{
-                                group_id: GroupId(1)
-                            })
-                        })]
+                        NodeRef::new(Node::OtherGroup { group_id: GroupId(0) }),
+                        NodeRef::new(Node::Not { target: NodeRef::new(Node::OtherGroup { group_id: GroupId(1) }) }),
+                    ],
                 };
 
                 let (program, _) = ::compiler::compile(&program);
@@ -120,7 +124,7 @@ impl Evaluator {
                 let res = ::polygon::run_poly_raw(xs, ys, width, height, None, ctx);
                 res
             }
-            &NodeGroup::Polygon{ ref group, dx, dy } => eval_polygon(group, dx, dy),
+            &NodeGroup::Polygon { ref group, dx, dy } => eval_polygon(group, dx, dy),
         };
 
         {
@@ -136,7 +140,9 @@ impl Evaluator {
         let points = xs.values().into_iter().zip(ys.values().into_iter());
         let lines = points.tuples();
         lines
-            .filter(|&((x1, y1), (x2, y2))| !(x1.is_nan() || x2.is_nan() || y1.is_nan() || y2.is_nan()))
+            .filter(|&((x1, y1), (x2, y2))| {
+                !(x1.is_nan() || x2.is_nan() || y1.is_nan() || y2.is_nan())
+            })
             .collect()
     }
 }

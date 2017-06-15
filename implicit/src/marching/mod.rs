@@ -31,14 +31,12 @@ pub fn march(input: &FieldBuffer, simplify: bool, ctx: &OpenClContext) -> Vec<Po
 
     let (out_xs, out_ys) = run_marching(input, ctx);
 
-    let lines = ::flame::span_of(
-        "point filtering", || {
-            Iterator::zip(out_xs.values().into_iter(), out_ys.values().into_iter())
-                .tuples()
-                .filter(|&((a, b), (c, d))| !(a.is_nan() && b.is_nan() && c.is_nan() && d.is_nan()))
-                .collect::<Vec<_>>()
-        }
-    );
+    let lines = ::flame::span_of("point filtering", || {
+        Iterator::zip(out_xs.values().into_iter(), out_ys.values().into_iter())
+            .tuples()
+            .filter(|&((a, b), (c, d))| !(a.is_nan() && b.is_nan() && c.is_nan() && d.is_nan()))
+            .collect::<Vec<_>>()
+    });
 
     ::flame::start("line connecting");
     let (lns, _) = super::lines::connect_lines(lines, simplify);

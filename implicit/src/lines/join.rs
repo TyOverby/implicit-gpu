@@ -1,11 +1,12 @@
 use super::*;
 
 pub fn join_lines<I>(lines: I) -> (Vec<LineType>, QuadTree<geom::Line>)
-where I: Iterator<Item=geom::Line> {
-    let lines = lines.map(|geom::Line(geom::Point{x: x1, y: y1}, geom::Point{x: x2, y: y2})|
-        geom::Line(
-            geom::Point{x: x1, y: y1},
-            geom::Point{x: x2, y: y2}));
+where
+    I: Iterator<Item = geom::Line>,
+{
+    let lines = lines.map(|geom::Line(geom::Point { x: x1, y: y1 }, geom::Point { x: x2, y: y2 })| {
+        geom::Line(geom::Point { x: x1, y: y1 }, geom::Point { x: x2, y: y2 })
+    });
 
     join_lines_internal(lines.collect())
 }
@@ -25,7 +26,7 @@ fn join_lines_internal(lines: Vec<geom::Line>) -> (Vec<LineType>, QuadTree<geom:
 
     let aabb = match aabb {
         Some(aabb) => aabb,
-        None => return (vec![], QuadTree::new(geom::Rect::null(), false, 4, 16, 4))
+        None => return (vec![], QuadTree::new(geom::Rect::null(), false, 4, 16, 4)),
     };
 
     let mut tree = QuadTree::new(aabb, false, 4, 16, 4);
@@ -59,9 +60,7 @@ fn join_lines_internal(lines: Vec<geom::Line>) -> (Vec<LineType>, QuadTree<geom:
                 });
 
                 let closest_line_opt = near_last.into_iter().next();
-                closest_line_opt.map(|(a, b, c)| {
-                    (a.clone(), b.clone(), c.clone())
-                })
+                closest_line_opt.map(|(a, b, c)| (a.clone(), b.clone(), c.clone()))
             };
 
             if let Some((line, _, id)) = closest {

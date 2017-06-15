@@ -58,14 +58,11 @@ pub fn save_image<P: AsRef<Path>>(samples: &[f32], width: usize, file_name: P, c
         *pixel = Rgb(color);
     }
 
-    ::std::fs::create_dir_all(
-        {
-            let mut dir = file_name.as_ref().to_path_buf();
-            dir.pop();
-            dir
-        }
-    )
-            .unwrap();
+    ::std::fs::create_dir_all({
+        let mut dir = file_name.as_ref().to_path_buf();
+        dir.pop();
+        dir
+    }).unwrap();
     let fout = File::create(file_name).unwrap();
     let mut fout = BufWriter::new(fout);
     ImageRgb8(buf).save(&mut fout, PNG).unwrap();

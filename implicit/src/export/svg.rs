@@ -1,7 +1,8 @@
-use std::path::Path;
+
+use output::*;
 use std::fs::File;
 use std::io::Result as IoResult;
-use output::*;
+use std::path::Path;
 use vectordraw::Canvas;
 use vectordraw::backend::DrawOptions;
 use vectordraw::svg::SvgBackend;
@@ -25,7 +26,8 @@ pub fn write_out<P: AsRef<Path>>(path: P, mut out: OutputScene) -> IoResult<()> 
                 canvas.draw_holy_polygon(
                     additive.iter().map(Vec::as_slice),
                     subtractive.iter().map(Vec::as_slice),
-                    options)?;
+                    options,
+                )?;
             }
             LineGroup::Lines(_lines) => {
                 unimplemented!();

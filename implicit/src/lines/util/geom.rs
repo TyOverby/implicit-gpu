@@ -322,7 +322,7 @@ impl Rect {
         let top = self.top().max(other.top());
         let bottom = self.bottom().min(other.bottom());
 
-        Rect::from_points(&Point{x: left, y: top}, &Point{x: right, y: bottom})
+        Rect::from_points(&Point { x: left, y: top }, &Point { x: right, y: bottom })
     }
 
     pub fn midpoint(&self) -> Point {
@@ -339,7 +339,10 @@ impl Rect {
             y: self.height(),
         };
         let half_offset = Vector { x: self.width() / 2.0, y: 0.0 };
-        (Rect::from_point_and_size(&self.top_left, &half_size), Rect::from_point_and_size(&(self.top_left + half_offset), &half_size))
+        (
+            Rect::from_point_and_size(&self.top_left, &half_size),
+            Rect::from_point_and_size(&(self.top_left + half_offset), &half_size),
+        )
     }
 
     pub fn split_hori(&self) -> (Rect, Rect) {
@@ -348,7 +351,10 @@ impl Rect {
             y: self.height() / 2.0,
         };
         let half_offset = Vector { x: 0.0, y: self.height() / 2.0 };
-        (Rect::from_point_and_size(&self.top_left, &half_size), Rect::from_point_and_size(&(self.top_left + half_offset), &half_size))
+        (
+            Rect::from_point_and_size(&self.top_left, &half_size),
+            Rect::from_point_and_size(&(self.top_left + half_offset), &half_size),
+        )
     }
 
     pub fn split_quad(&self) -> [Rect; 4] {
@@ -395,13 +401,12 @@ impl Polygon {
         let lines = Polygon::compute_lines(&points[..]);
 
         let segments: Vec<_> = {
-                let left_xs = lines.iter().map(|p| p.0.x);
-                let left_ys = lines.iter().map(|p| p.0.y);
-                let right_xs = lines.iter().map(|p| p.1.x);
-                let right_ys = lines.iter().map(|p| p.1.y);
-                left_xs.chain(left_ys).chain(right_xs).chain(right_ys)
-            }
-            .collect();
+            let left_xs = lines.iter().map(|p| p.0.x);
+            let left_ys = lines.iter().map(|p| p.0.y);
+            let right_xs = lines.iter().map(|p| p.1.x);
+            let right_ys = lines.iter().map(|p| p.1.y);
+            left_xs.chain(left_ys).chain(right_xs).chain(right_ys)
+        }.collect();
         let seg_len = segments.len() / 4;
 
         Polygon {
@@ -591,9 +596,10 @@ pub fn point_in_poly(polygon: &[(f32, f32)], p: (f32, f32)) -> bool {
     while i < polygon.len() {
 
         if ((polygon[i].1 > p.1) != (polygon[j].1 > p.1)) &&
-           (p.0 < (polygon[j].0 - polygon[i].0) * (p.1 - polygon[i].1) / (polygon[j].1 - polygon[i].0 + polygon[i].0)) {
-                c = !c;
-           }
+            (p.0 < (polygon[j].0 - polygon[i].0) * (p.1 - polygon[i].1) / (polygon[j].1 - polygon[i].0 + polygon[i].0))
+        {
+            c = !c;
+        }
 
         j = i;
         i += 1;

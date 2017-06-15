@@ -111,11 +111,11 @@ impl<T> QuadTree<T> {
 
     pub fn insert_with_box(&mut self, t: T, aabb: Rect) -> ItemId {
         let &mut QuadTree {
-                     ref mut root,
-                     ref config,
-                     ref mut id,
-                     ref mut elements,
-                 } = self;
+            ref mut root,
+            ref config,
+            ref mut id,
+            ref mut elements,
+        } = self;
 
         let item_id = ItemId(*id);
         *id += 1;
@@ -129,28 +129,32 @@ impl<T> QuadTree<T> {
 
     pub fn first(&self) -> Option<ItemId> { self.elements.iter().next().map(|(id, _)| *id) }
 
-    pub fn insert(&mut self, t: T) -> ItemId where T: Spatial {
+    pub fn insert(&mut self, t: T) -> ItemId
+    where
+        T: Spatial,
+    {
         let b = t.aabb();
         self.insert_with_box(t, b)
     }
 
-    pub fn query(&self, bounding_box: Rect) -> Vec<(&T, &Rect, ItemId)> where T: ::std::fmt::Debug {
+    pub fn query(&self, bounding_box: Rect) -> Vec<(&T, &Rect, ItemId)>
+    where
+        T: ::std::fmt::Debug,
+    {
         let mut ids = vec![];
         self.root.query(bounding_box, &mut ids);
         ids.sort_by(|&(id1, _), &(ref id2, _)| id1.cmp(id2));
         ids.dedup();
         ids.iter()
-            .map(
-                |&(id, _)| {
-                    let &(ref t, ref rect) = match self.elements.get(&id) {
-                        Some(e) => e,
-                        None => {
-                            panic!("looked for {:?}", id);
-                        }
-                    };
-                    (t, rect, id)
-                }
-            )
+            .map(|&(id, _)| {
+                let &(ref t, ref rect) = match self.elements.get(&id) {
+                    Some(e) => e,
+                    None => {
+                        panic!("looked for {:?}", id);
+                    }
+                };
+                (t, rect, id)
+            })
             .collect()
     }
 
@@ -172,7 +176,10 @@ impl<T> QuadTree<T> {
 
     pub fn is_empty(&self) -> bool { self.elements.is_empty() }
 
-    pub fn validate(&self) -> bool where T: ::std::fmt::Debug {
+    pub fn validate(&self) -> bool
+    where
+        T: ::std::fmt::Debug,
+    {
         self.query(self.root.bounding_box());
         true
     }
@@ -218,12 +225,12 @@ impl QuadNode {
         let mut did_insert = false;
         match self {
             &mut QuadNode::Branch {
-                     ref aabb,
-                     ref mut in_all,
-                     ref mut children,
-                     ref mut element_count,
-                     ..
-                 } => {
+                ref aabb,
+                ref mut in_all,
+                ref mut children,
+                ref mut element_count,
+                ..
+            } => {
                 if item_aabb.contains(&aabb.midpoint()) {
                     // Only insert if there isn't another item with a very
                     // similar aabb.
@@ -245,10 +252,10 @@ impl QuadNode {
             }
 
             &mut QuadNode::Leaf {
-                     ref aabb,
-                     ref mut elements,
-                     ref depth,
-                 } => {
+                ref aabb,
+                ref mut elements,
+                ref depth,
+            } => {
                 if elements.len() == config.max_children && *depth != config.max_depth {
                     // STEAL ALL THE CHILDREN MUAHAHAHAHA
                     let mut extracted_children = Vec::new();
@@ -257,23 +264,27 @@ impl QuadNode {
                     did_insert = true;
 
                     let split = aabb.split_quad();
-                    into = Some(
-                        (extracted_children,
-                         QuadNode::Branch {
-                             aabb: *aabb,
-                             in_all: Vec::new(),
-                             children: [
-                            (split[0], Box::new(QuadNode::new_leaf(split[0], depth + 1, config))),
-                            (split[1], Box::new(QuadNode::new_leaf(split[1], depth + 1, config))),
-                            (split[2], Box::new(QuadNode::new_leaf(split[2], depth + 1, config))),
-                            (split[3], Box::new(QuadNode::new_leaf(split[3], depth + 1, config))),
-                        ],
-                             element_count: 0,
-                             depth: *depth,
-                         })
-                    );
+                    into = Some((
+                        extracted_children,
+                        QuadNode::Branch {
+                            aabb: *aabb,
+                            in_all: Vec::new(),
+                            children: [
+                                (split[0], Box::new(QuadNode::new_leaf(split[0], depth + 1, config))),
+                                (split[1], Box::new(QuadNode::new_leaf(split[1], depth + 1, config))),
+                                (split[2], Box::new(QuadNode::new_leaf(split[2], depth + 1, config))),
+                                (split[3], Box::new(QuadNode::new_leaf(split[3], depth + 1, config))),
+                            ],
+                            element_count: 0,
+                            depth: *depth,
+                        },
+                    ));
                 } else {
-                    if config.allow_duplicates || !elements.iter().any(|&(_, ref e_bb)| e_bb.close_to(&item_aabb, EPSILON)) {
+                    if config.allow_duplicates ||
+                        !elements.iter().any(
+                            |&(_, ref e_bb)| e_bb.close_to(&item_aabb, EPSILON),
+                        )
+                    {
                         elements.push((item_id, item_aabb));
                         did_insert = true;
                     }
@@ -308,13 +319,13 @@ impl QuadNode {
         let mut compact = None;
         let removed = match self {
             &mut QuadNode::Branch {
-                     ref depth,
-                     ref aabb,
-                     ref mut in_all,
-                     ref mut children,
-                     ref mut element_count,
-                     ..
-                 } => {
+                ref depth,
+                ref aabb,
+                ref mut in_all,
+                ref mut children,
+                ref mut element_count,
+                ..
+            } => {
                 let mut did_remove = false;
 
                 if item_aabb.contains(&aabb.midpoint()) {

@@ -1,9 +1,9 @@
 use compiler::GroupId;
 use nodes::Node;
-use std::fmt::Write;
 use std::borrow::Cow;
-use std::rc::Rc;
 use std::cell::RefCell;
+use std::fmt::Write;
+use std::rc::Rc;
 
 #[derive(Clone)]
 pub struct SharedInfo {
@@ -18,8 +18,8 @@ enum CompilationContext {
     PositionMod {
         x: String,
         y: String,
-        shared: Rc<RefCell<SharedInfo>>
-    }
+        shared: Rc<RefCell<SharedInfo>>,
+    },
 }
 
 pub fn compile(node: &Node) -> (String, SharedInfo) {
@@ -44,7 +44,7 @@ pub fn compile(node: &Node) -> (String, SharedInfo) {
 
   float x_s = (float) x;
   float y_s = (float) y;
-"#
+"#,
     );
 
     let shared_ref = shared.deref().borrow();
@@ -69,8 +69,7 @@ fn comp(node: &Node, mut cc: CompilationContext, buff: &mut String) -> String {
                 b = y,
                 c = x + w,
                 d = y + h,
-            )
-                    .unwrap();
+            ).unwrap();
             writeln!(buff, "  }}").unwrap();
 
             res
@@ -90,13 +89,12 @@ fn comp(node: &Node, mut cc: CompilationContext, buff: &mut String) -> String {
                 dx = dx,
                 dy = dy,
                 radius = r,
-            )
-                    .unwrap();
+            ).unwrap();
             writeln!(buff, "  }}").unwrap();
 
             res
         }
-        Node::And{ref children} => {
+        Node::And { ref children } => {
             match children.len() {
                 0 => panic!("And([])"),
                 1 => comp(&children[0], cc, buff),
@@ -104,8 +102,8 @@ fn comp(node: &Node, mut cc: CompilationContext, buff: &mut String) -> String {
                     let mut left = children.clone();
                     let right = left.split_off(n / 2);
 
-                    let res_left = comp(&Node::And{children: left}, cc.clone(), buff);
-                    let res_right = comp(&Node::And{children: right}, cc.clone(), buff);
+                    let res_left = comp(&Node::And { children: left }, cc.clone(), buff);
+                    let res_right = comp(&Node::And { children: right }, cc.clone(), buff);
 
                     let res = cc.get_id("and");
 
@@ -116,14 +114,13 @@ fn comp(node: &Node, mut cc: CompilationContext, buff: &mut String) -> String {
                         result = res,
                         a = res_left,
                         b = res_right,
-                    )
-                            .unwrap();
+                    ).unwrap();
 
                     res
                 }
             }
         }
-        Node::Or{ref children} => {
+        Node::Or { ref children } => {
             match children.len() {
                 0 => panic!("Or([])"),
                 1 => comp(&children[0], cc, buff),
@@ -131,8 +128,8 @@ fn comp(node: &Node, mut cc: CompilationContext, buff: &mut String) -> String {
                     let mut left = children.clone();
                     let right = left.split_off(n / 2);
 
-                    let res_left = comp(&Node::Or{children: left}, cc.clone(), buff);
-                    let res_right = comp(&Node::Or{children: right}, cc.clone(), buff);
+                    let res_left = comp(&Node::Or { children: left }, cc.clone(), buff);
+                    let res_right = comp(&Node::Or { children: right }, cc.clone(), buff);
 
                     let res = cc.get_id("or");
 
@@ -143,14 +140,13 @@ fn comp(node: &Node, mut cc: CompilationContext, buff: &mut String) -> String {
                         result = res,
                         a = res_left,
                         b = res_right,
-                    )
-                            .unwrap();
+                    ).unwrap();
 
                     res
                 }
             }
         }
-        Node::Not{ref target} => {
+        Node::Not { ref target } => {
             let child_result = comp(target, cc.clone(), buff);
             let res = cc.get_id("not");
             buff.push('\n');
@@ -158,17 +154,27 @@ fn comp(node: &Node, mut cc: CompilationContext, buff: &mut String) -> String {
             res
         }
 
-        Node::Translate{dx, dy, ref target} => {
+        Node::Translate { dx, dy, ref target } => {
             let (new_x, new_y) = (cc.get_id("x"), cc.get_id("y"));
             buff.push('\n');
-            writeln!(buff, "  float {new_x} = {old_x} - {dx};",
-                    new_x = new_x, old_x = cc.get_x(),  dx = dx).unwrap();
-            writeln!(buff, "  float {new_y} = {old_y} - {dy};",
-                    new_y = new_y, old_y = cc.get_y(),  dy = dy).unwrap();
+            writeln!(
+                buff,
+                "  float {new_x} = {old_x} - {dx};",
+                new_x = new_x,
+                old_x = cc.get_x(),
+                dx = dx
+            ).unwrap();
+            writeln!(
+                buff,
+                "  float {new_y} = {old_y} - {dy};",
+                new_y = new_y,
+                old_y = cc.get_y(),
+                dy = dy
+            ).unwrap();
 
-            comp(target, cc.with_xy(new_x, new_y ), buff)
+            comp(target, cc.with_xy(new_x, new_y), buff)
         }
-        Node::Modulate{how_much, ref target} => {
+        Node::Modulate { how_much, ref target } => {
             let child_result = comp(target, cc.clone(), buff);
             let res = cc.get_id("modulate");
             buff.push('\n');
@@ -177,11 +183,12 @@ fn comp(node: &Node, mut cc: CompilationContext, buff: &mut String) -> String {
                 "  float {result} = {other} + {value};",
                 result = res,
                 other = child_result,
-                value = how_much).unwrap();
+                value = how_much
+            ).unwrap();
             res
         }
 
-        Node::OtherGroup{group_id} => {
+        Node::OtherGroup { group_id } => {
             let buffer_ref = cc.buffer_ref(group_id);
             let res = cc.get_id("other_group");
 
@@ -190,8 +197,7 @@ fn comp(node: &Node, mut cc: CompilationContext, buff: &mut String) -> String {
                 "float {result} = {buffer_ref}[pos];",
                 result = res,
                 buffer_ref = buffer_ref,
-            )
-                    .unwrap();
+            ).unwrap();
             res
         }
 
@@ -215,20 +221,20 @@ impl CompilationContext {
     fn shared(&self) -> Rc<RefCell<SharedInfo>> {
         match self {
             &CompilationContext::Base(ref shared) => shared.clone(),
-            &CompilationContext::PositionMod{ ref shared, .. } => shared.clone(),
+            &CompilationContext::PositionMod { ref shared, .. } => shared.clone(),
         }
     }
 
-    pub fn with_xy(&self, x: String, y: String) -> CompilationContext {
-        CompilationContext::PositionMod {
-            x, y, shared: self.shared()
-        }
-    }
+    pub fn with_xy(&self, x: String, y: String) -> CompilationContext { CompilationContext::PositionMod { x, y, shared: self.shared() } }
 
     pub fn buffer_ref(&mut self, group_id: GroupId) -> String {
         let shared = self.shared();
         let mut shared = shared.borrow_mut();
-        let &mut SharedInfo { ref mut dependencies, ref mut dep_strings, .. } = &mut *shared;
+        let &mut SharedInfo {
+            ref mut dependencies,
+            ref mut dep_strings,
+            ..
+        } = &mut *shared;
 
         if !dependencies.contains(&group_id) {
             dependencies.push(group_id);
@@ -242,20 +248,16 @@ impl CompilationContext {
     pub fn get_x(&self) -> Cow<'static, str> {
         use self::CompilationContext::*;
         match self {
-            &Base{..} => {
-                Cow::Borrowed("x_s")
-            }
-            &PositionMod{ ref x, ..} => Cow::Owned(x.clone())
+            &Base { .. } => Cow::Borrowed("x_s"),
+            &PositionMod { ref x, .. } => Cow::Owned(x.clone()),
         }
     }
 
     pub fn get_y(&self) -> Cow<'static, str> {
         use self::CompilationContext::*;
         match self {
-            &Base{..} => {
-                Cow::Borrowed("y_s")
-            }
-            &PositionMod{ ref y, ..} => Cow::Owned(y.clone())
+            &Base { .. } => Cow::Borrowed("y_s"),
+            &PositionMod { ref y, .. } => Cow::Owned(y.clone()),
         }
     }
 
