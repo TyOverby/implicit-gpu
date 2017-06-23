@@ -3,9 +3,9 @@ use output::*;
 use std::fs::File;
 use std::io::Result as IoResult;
 use std::path::Path;
-use vectordraw::Canvas;
-use vectordraw::backend::DrawOptions;
-use vectordraw::svg::SvgBackend;
+use vectorphile::Canvas;
+use vectorphile::backend::DrawOptions;
+use vectorphile::svg::SvgBackend;
 
 
 pub fn write_out<P: AsRef<Path>>(path: P, mut out: OutputScene) -> IoResult<()> {
