@@ -30,35 +30,35 @@ fn create_mask(ctx: &OpenClContext, line: &LineBuffer) -> MaskBuffer {
 }
 
 fn sum_mask(ctx: &OpenClContext, mask: &MaskBuffer) {
-    const WORKGROUP_SIZE: usize = 512;
+    let workgroup_size = ctx.max_workgroup_size();
 
     let array_size = mask.size();
-    let num_workgroups = ((array_size + 1) / 2 + WORKGROUP_SIZE - 1) / WORKGROUP_SIZE;
-    let launch_size = num_workgroups * WORKGROUP_SIZE;
+    let num_workgroups = ((array_size + 1) / 2 + workgroup_size - 1) / workgroup_size;
+    let launch_size = num_workgroups * workgroup_size;
 
     let aux_temp: Buffer<u32> = Buffer::new(ctx.queue().clone(), None, &[num_workgroups], None).unwrap();
 
     let kernel = ctx.compile("sum", SUM_PROG);
     kernel
         .gws([launch_size])
-        .lws([WORKGROUP_SIZE])
+        .lws([workgroup_size])
         .arg_buf(mask.buffer())
         .arg_scl(array_size)
         .arg_buf(&aux_temp)
         .arg_scl(0i32)
-        .arg_loc::<u32>(WORKGROUP_SIZE * 2)
+        .arg_loc::<u32>(workgroup_size * 2)
         .enq()
         .unwrap();
 
     let kernel = ctx.compile("sum", SUM_PROG);
     kernel
         .gws([launch_size])
-        .lws([WORKGROUP_SIZE])
+        .lws([workgroup_size])
         .arg_buf(mask.buffer())
         .arg_scl(array_size)
         .arg_buf(&aux_temp)
         .arg_scl(1i32)
-        .arg_loc::<u32>(WORKGROUP_SIZE * 2)
+        .arg_loc::<u32>(workgroup_size * 2)
         .enq()
         .unwrap();
 }

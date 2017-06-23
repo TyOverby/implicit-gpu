@@ -54,6 +54,10 @@ impl OpenClContext {
         }
     }
 
+    pub fn max_workgroup_size(&self) -> usize {
+        self.device.max_wg_size().unwrap()
+    }
+
     pub fn default() -> OpenClContext {
         let (pt, dv) = all_devices().into_iter().nth(0).unwrap();
         OpenClContext::new(pt, dv)
