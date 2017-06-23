@@ -21,7 +21,7 @@ impl <W: Write> DrawBackend for SvgBackend<W> {
         use super::backend::Command::*;
 
         match command {
-            StartShape(options) => write!(&mut self.out, r#"    <path d=""#),
+            StartShape(options) => write!(&mut self.out, r#"    <path fill-rule="evenodd" d=""#),
             MoveTo { x , y } => write!(&mut self.out, "M{},{} ", x, y),
             LineTo { x, y } => write!(&mut self.out, "L{},{} ", x, y),
             CubicCurveTo { cx1, cy1, cx2, cy2, x, y, } => unimplemented!(),
@@ -80,7 +80,7 @@ mod test {
             Ok(())
         }).trim(), r#"
 <svg xmlns="http://www.w3.org/2000/svg">
-    <path d="M0,0 L0,50 L50,0 z"/>
+    <path fill-rule="evenodd" d="M0,0 L0,50 L50,0 z"/>
 </svg>
         "#.trim())
     }
@@ -92,7 +92,7 @@ mod test {
             Ok(())
         }).trim(), r#"
 <svg xmlns="http://www.w3.org/2000/svg">
-    <path d="M0,0 L0,50 L50,0 z"/>
+    <path fill-rule="evenodd" d="M0,0 L0,50 L50,0 z"/>
 </svg>
         "#.trim())
     }
@@ -107,7 +107,7 @@ mod test {
             )
         }).trim(), r#"
 <svg xmlns="http://www.w3.org/2000/svg">
-    <path d="M50,0 L0,0 L0,50 L50,0 M30,10 L10,30 L10,10 L30,10 "/>
+    <path fill-rule="evenodd" d="M50,0 L0,0 L0,50 L50,0 M30,10 L10,30 L10,10 L30,10 "/>
 </svg>
         "#.trim())
     }

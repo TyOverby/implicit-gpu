@@ -17,12 +17,15 @@ impl <T: backend::DrawBackend> Canvas<T> {
         }
     }
 
-    fn write_closed_polygon<I>(&mut self, mut i: I) -> Result<(), T::Error>
-    where I: Iterator<Item=(f64, f64)>{
+    fn write_closed_polygon<I, F>(&mut self, mut i: I) -> Result<(), T::Error>
+    where
+        I: Iterator<Item=(F, F)>,
+        F: Into<f64>
+    {
         if let Some((x, y)) = i.next() {
-            self.backend.apply(Command::MoveTo{x, y})?;
+            self.backend.apply(Command::MoveTo{x: x.into(), y: y.into()})?;
             for (x, y) in i {
-                self.backend.apply(Command::LineTo{x, y})?;
+                self.backend.apply(Command::LineTo{x: x.into(), y: y.into()})?;
             }
         }
         Ok(())
@@ -40,8 +43,11 @@ impl <T: backend::DrawBackend> Canvas<T> {
         self.backend.apply(Command::CloseShape)
     }
 
-    pub fn draw_holy_polygon<'a, I1, I2>(&mut self, additive: I1, subtractive: I2, options: DrawOptions) -> Result<(), T::Error>
-    where I1: IntoIterator<Item=&'a[(f64, f64)]>, I2: IntoIterator<Item=&'a[(f64, f64)]> {
+    pub fn draw_holy_polygon<'a, F: 'static, I1, I2>(&mut self, additive: I1, subtractive: I2, options: DrawOptions) -> Result<(), T::Error>
+    where
+        I1: IntoIterator<Item=&'a[(F, F)]>,
+        I2: IntoIterator<Item=&'a[(F, F)]>,
+        F: Into<f64> + Clone + Copy {
         self.backend.apply(Command::StartShape(options))?;
         for outline in additive {
             let iter = outline.iter().cloned().chain(Some(outline[0]));
