@@ -1,0 +1,10 @@
+language: rust
+rust:
+    - stable
+    - beta
+    - nightly
+script:
+    - cargo test --all
+    - cargo test --all --release
+    - cd testsuite && cargo run 
+    - cd testsuite && cargo run --release
