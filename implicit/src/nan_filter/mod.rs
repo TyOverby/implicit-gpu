@@ -36,6 +36,13 @@ fn sum_mask(ctx: &OpenClContext, mask: &MaskBuffer) {
     let num_workgroups = ((array_size + 1) / 2 + workgroup_size - 1) / workgroup_size;
     let launch_size = num_workgroups * workgroup_size;
 
+    if cfg!(test) {
+        println!("array_size:     {}", array_size);
+        println!("num_workgroups: {}", num_workgroups);
+        println!("workgroup_size: {}", workgroup_size);
+        println!("launch_size:    {}", launch_size);
+    }
+
     let aux_temp: Buffer<u32> = Buffer::new(ctx.queue().clone(), None, &[num_workgroups], None).unwrap();
 
     let kernel = ctx.compile("sum", SUM_PROG);
