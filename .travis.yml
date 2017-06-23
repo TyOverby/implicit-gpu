@@ -6,6 +6,7 @@ rust:
     - beta
     - nightly
 cache: cargo
+os: osx
 script:
     - cargo test --all
     - cargo test --all --release
