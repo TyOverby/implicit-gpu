@@ -1,7 +1,7 @@
 use itertools::Itertools;
-use opencl::LineBuffer;
+use opencl::LinearBuffer;
 
-pub fn dump_poly_lines(file: &str, xs: &LineBuffer, ys: &LineBuffer) {
+pub fn dump_poly_lines(file: &str, xs: &LinearBuffer, ys: &LinearBuffer) {
     let lines = xs.values().into_iter().zip(ys.values().into_iter());
     let lines = lines
         .tuples()

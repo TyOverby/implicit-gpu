@@ -113,9 +113,9 @@ impl OpenClContext {
         }
     }
 
-    pub fn line_buffer(&self, fill: &[f32]) -> LineBuffer {
-        let _guard = ::flame::start_guard("OpenClContext::line_buffer");
-        LineBuffer {
+    pub fn linear_buffer(&self, fill: &[f32]) -> LinearBuffer {
+        let _guard = ::flame::start_guard("OpenClContext::linear_buffer");
+        LinearBuffer {
             size: fill.len(),
             internal: Buffer::new(self.queue.clone(), Some(MEM_COPY_HOST_PTR), &[fill.len()], Some(fill)).unwrap(),
         }

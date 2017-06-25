@@ -1,17 +1,17 @@
 use itertools::Itertools;
 use nodes::Polygon;
-use opencl::{FieldBuffer, LineBuffer, OpenClContext};
+use opencl::{FieldBuffer, LinearBuffer, OpenClContext};
 
 const PROGRAM: &'static str = include_str!("marching.c");
 
-pub fn run_marching(input: &FieldBuffer, ctx: &OpenClContext) -> (LineBuffer, LineBuffer) {
+pub fn run_marching(input: &FieldBuffer, ctx: &OpenClContext) -> (LinearBuffer, LinearBuffer) {
     let _guard = ::flame::start_guard("opencl marching [run_marching]");
 
     let (width, height) = (input.width(), input.height());
     let kernel = ctx.compile("apply", PROGRAM);
     let from = vec![::std::f32::NAN; width * height * 2];
-    let out_xs = ctx.line_buffer(&from);
-    let out_ys = ctx.line_buffer(&from);
+    let out_xs = ctx.linear_buffer(&from);
+    let out_ys = ctx.linear_buffer(&from);
 
     let sync_buffer = ctx.sync_buffer();
 

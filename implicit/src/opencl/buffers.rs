@@ -13,7 +13,7 @@ pub struct MaskBuffer {
 }
 
 #[derive(Debug, Clone)]
-pub struct LineBuffer {
+pub struct LinearBuffer {
     pub size: usize,
     pub internal: Buffer<f32>,
 }
@@ -42,7 +42,7 @@ impl FieldBuffer {
     pub fn buffer(&self) -> &Buffer<f32> { &self.internal }
 }
 
-impl LineBuffer {
+impl LinearBuffer {
     pub fn size(&self) -> usize { self.size }
 
     pub fn values(&self) -> Vec<f32> {

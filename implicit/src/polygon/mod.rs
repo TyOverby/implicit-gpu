@@ -1,4 +1,4 @@
-use opencl::{FieldBuffer, LineBuffer, OpenClContext};
+use opencl::{FieldBuffer, LinearBuffer, OpenClContext};
 use std::f32::INFINITY;
 
 const PROGRAM: &'static str = include_str!("./polygon.c");
@@ -11,13 +11,13 @@ pub fn run_poly(xs: &[f32], ys: &[f32], width: usize, height: usize, pos_mod: Op
         return ctx.field_buffer(width, height, Some(&vec![INFINITY; width * height]));
     }
 
-    let xs_buf = ctx.line_buffer(xs);
-    let ys_buf = ctx.line_buffer(ys);
+    let xs_buf = ctx.linear_buffer(xs);
+    let ys_buf = ctx.linear_buffer(ys);
 
     run_poly_raw(xs_buf, ys_buf, width, height, pos_mod, ctx)
 }
 
-pub fn run_poly_raw(xs: LineBuffer, ys: LineBuffer, width: usize, height: usize, pos_mod: Option<(f32, f32)>, ctx: &OpenClContext) -> FieldBuffer {
+pub fn run_poly_raw(xs: LinearBuffer, ys: LinearBuffer, width: usize, height: usize, pos_mod: Option<(f32, f32)>, ctx: &OpenClContext) -> FieldBuffer {
     debug_assert!(xs.non_nans_at_front());
     debug_assert!(ys.non_nans_at_front());
 
