@@ -18,6 +18,15 @@ pub struct LineBuffer {
     pub internal: Buffer<f32>,
 }
 
+#[derive(Debug, Clone)]
+pub struct SyncBuffer {
+    pub internal : Buffer<u32>,
+}
+
+impl SyncBuffer {
+    pub fn buffer(&self) -> &Buffer<u32> { &self.internal }
+}
+
 impl FieldBuffer {
     pub fn size(&self) -> (usize, usize) { (self.width(), self.height()) }
     pub fn width(&self) -> usize { self.dims.0 }

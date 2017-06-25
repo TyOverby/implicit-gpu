@@ -1,6 +1,5 @@
 use self::util::geom;
 use self::util::quadtree::QuadTree;
-// use self::{fuse_ends, dash, join, simplify, connect};
 
 mod fuse_ends;
 pub mod util;
@@ -60,7 +59,21 @@ pub fn separate_polygons(bag: Vec<Vec<Point>>) -> (Vec<Vec<Point>>, Vec<Vec<Poin
     (additive, subtractive)
 }
 
-pub fn connect_lines<I: IntoIterator<Item = Line>>(lines: I, simplify: bool) -> (Vec<Vec<Point>>, QuadTree<geom::Line>) {
+pub fn connect_lines(mut lines: Vec<Line>, simplify: bool) -> (Vec<Vec<Point>>, QuadTree<geom::Line>) {
+    use std::cmp::{PartialOrd, Ordering};
+
+    fn rotate<T>(slice: &mut [T], at: usize) {
+        {
+            let (a, b) = slice.split_at_mut(at);
+            a.reverse();
+            b.reverse();
+        }
+
+        slice.reverse();
+    }
+
+    lines.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal));
+
     let (mut joined, qt) = join::join_lines(lines.into_iter().map(|((x1, y1), (x2, y2))| {
         geom::Line(geom::Point { x: x1, y: y1 }, geom::Point { x: x2, y: y2 })
     }));
@@ -95,8 +108,14 @@ pub fn connect_lines<I: IntoIterator<Item = Line>>(lines: I, simplify: bool) -> 
             LineType::Joined(r) | LineType::Unjoined(r) => r
         // Convert geom::Point back to (f32, f32)
         }).map(|v|
-            v.into_iter().map(|geom::Point{x, y}| (x, y)).collect()
-        );
+            v.into_iter().map(|geom::Point{x, y}| (x, y)).collect::<Vec<_>>()
+        // Rotate the vectors to start at the smallest point.
+        // This can be removed later if it's a perf issue
+        ).map(|mut v| {
+            let (smallest_idx, _) = v.iter().enumerate().min_by(|&(_, a), &(_, b)| a.partial_cmp(&b).unwrap_or(Ordering::Equal)).unwrap();
+            rotate(&mut v, smallest_idx);
+            v
+        });
 
     (joined.collect(), qt)
 }

@@ -47,7 +47,9 @@ static void march(
     float sra, float srb, float src, float srd,
     float2 p,
     float dist,
-    __global float* out_xs, __global float* out_ys, size_t out_pos) {
+    __global float* out_xs, __global float* out_ys,
+    volatile __global unsigned int* atomic,
+    size_t out_pos) {
 
     size_t a_on = sra < 0.0f;
     size_t b_on = srb < 0.0f;
@@ -191,11 +193,16 @@ static void march(
     }
 
     if(!isnan(o1.x)) {
-        write_line(o1, o2, out_xs, out_ys, out_pos);
+        int p = atomic_inc(atomic);
+        write_line(o1, o2, out_xs, out_ys, p * 2);
     }
 }
 
-__kernel void apply(__global float* buffer, ulong width, ulong height, __global float* out_xs, __global float* out_ys) {
+__kernel void apply(
+    __global float* buffer,
+    ulong width, ulong height,
+    __global float* out_xs, __global float* out_ys,
+    volatile __global unsigned int* atomic) {
     size_t x = get_global_id(0);
     size_t y = get_global_id(1);
 
@@ -222,5 +229,5 @@ __kernel void apply(__global float* buffer, ulong width, ulong height, __global 
         sra, srb, src, srd,
         p,
         1.0f,
-        out_xs, out_ys, out_pos);
+        out_xs, out_ys, atomic, out_pos);
 }

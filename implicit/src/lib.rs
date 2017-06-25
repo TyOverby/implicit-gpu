@@ -22,7 +22,6 @@ pub mod debug;
 pub mod polygon;
 pub mod marching;
 pub mod evaluator;
-pub mod nan_filter;
 pub mod export;
 pub mod scene;
 pub mod output;
@@ -120,7 +119,7 @@ pub fn run_scene(scene: &scene::Scene) -> output::OutputScene {
             let pts = pts.filter(|&(x, y)| !(x.is_nan() || y.is_nan()));
             let pts = pts.tuples::<(_, _)>();
 
-            let (lines, _) = lines::connect_lines(pts, scene.simplify);
+            let (lines, _) = lines::connect_lines(pts.collect(), scene.simplify);
             let (additive, subtractive) = lines::separate_polygons(lines);
             let output_shape = match shape.draw_mode {
                 DrawMode::Filled => OutputShape {

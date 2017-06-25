@@ -13,6 +13,8 @@ pub fn run_marching(input: &FieldBuffer, ctx: &OpenClContext) -> (LineBuffer, Li
     let out_xs = ctx.line_buffer(&from);
     let out_ys = ctx.line_buffer(&from);
 
+    let sync_buffer = ctx.sync_buffer();
+
     kernel
         .gws([width, height])
         .arg_buf(input.buffer())
@@ -20,6 +22,7 @@ pub fn run_marching(input: &FieldBuffer, ctx: &OpenClContext) -> (LineBuffer, Li
         .arg_scl(height as u64)
         .arg_buf(out_xs.buffer())
         .arg_buf(out_ys.buffer())
+        .arg_buf(sync_buffer.buffer())
         .enq()
         .unwrap();
 

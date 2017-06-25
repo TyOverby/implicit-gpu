@@ -1,7 +1,6 @@
 use compiler::*;
 
 use itertools::Itertools;
-use nan_filter::filter_nans;
 use nodes::{Node, NodeRef, PolyGroup};
 use opencl::FieldBuffer;
 
@@ -119,8 +118,6 @@ impl Evaluator {
                 let field_buf = eval_basic_group(root);
                 let (width, height) = field_buf.size();
                 let (xs, ys) = ::marching::run_marching(&field_buf, ctx);
-                let xs = filter_nans(&xs, ctx);
-                let ys = filter_nans(&ys, ctx);
                 let res = ::polygon::run_poly_raw(xs, ys, width, height, None, ctx);
                 res
             }

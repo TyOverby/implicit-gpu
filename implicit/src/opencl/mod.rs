@@ -121,6 +121,13 @@ impl OpenClContext {
         }
     }
 
+    pub fn sync_buffer(&self) -> SyncBuffer {
+        let _guard = ::flame::start_guard("OpenClContext::sync_buffer");
+        SyncBuffer {
+            internal: Buffer::new(self.queue.clone(), Some(MEM_COPY_HOST_PTR), &[1], Some(&[0])).unwrap()
+        }
+    }
+
     pub fn mask_buffer(&self, size: usize, fill: Option<&[u32]>) -> MaskBuffer {
         let _guard = ::flame::start_guard("OpenClContext::mask_buffer");
         if let Some(fill) = fill {

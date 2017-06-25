@@ -89,11 +89,12 @@ pub fn run_test(paths: &Paths, ctx: &OpenClContext) -> Result<(), Vec<Error>> {
     });
 
     let result = evaluator.evaluate(target, &ctx);
-    let lines = evaluator
+    let mut lines = evaluator
         .get_polylines(&result, &ctx)
         .into_iter()
         .map(|((x1, y1), (x2, y2))| formats::lines::Line(x1, y1, x2, y2))
         .collect::<Vec<_>>();
+    lines.sort();
     ctx.empty_queue();
 
     image::save_field_buffer(&result, &paths.actual_image, image::ColorMode::Debug);

@@ -1,14 +1,22 @@
 use snoot::{Result as ParseResult, simple_parse};
 use snoot::serde_serialization::{DeserializeResult, deserialize};
+use std::cmp::{Ord, Ordering};
 use std::fmt::Write;
 
-#[derive(Deserialize, Debug, PartialEq, Copy, Clone)]
+#[derive(Deserialize, Debug, PartialEq, Copy, Clone, PartialOrd)]
 #[serde(rename = "line")]
 pub struct Line(pub f32, pub f32, pub f32, pub f32);
 
+impl Eq for Line {}
+impl Ord for Line {
+    fn cmp(&self, other: &Line) -> Ordering { self.partial_cmp(other).unwrap_or(Ordering::Equal) }
+}
+
 pub fn compare(expected: &str, expected_filename: &str, actual: &[Line]) -> Result<(), String> {
     fn close(a: f32, b: f32) -> bool { (a - b).abs() < 0.0001 }
-    let ex = text_to_vec(expected, expected_filename);
+    let mut ex = text_to_vec(expected, expected_filename);
+    ex.sort();
+    let ex = ex;
 
     if ex.len() != actual.len() {
         return Err(format!("Number of lines differ, {} vs {}", ex.len(), actual.len()));
