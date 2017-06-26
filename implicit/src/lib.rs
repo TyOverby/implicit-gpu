@@ -111,15 +111,14 @@ pub fn run_scene(scene: &scene::Scene) -> output::OutputScene {
         for shape in &figure.shapes {
             let id = treemap.get(&shape).unwrap();
             let result = evaluator.evaluate(*id, &ctx);
-            let (pts_xs, pts_ys) = ::marching::run_marching(&result, &ctx);
+            let lines = ::marching::run_marching(&result, &ctx).values();
 
-            let pts_xs = pts_xs.values().into_iter();
-            let pts_ys = pts_ys.values().into_iter();
-            let pts = pts_xs.zip(pts_ys);
-            let pts = pts.filter(|&(x, y)| !(x.is_nan() || y.is_nan()));
-            let pts = pts.tuples::<(_, _)>();
+            let lines = lines.into_iter()
+                             .tuples::<(_, _, _, _)>()
+                             .filter(|&(a, b, c, d)| !(a.is_nan() || b.is_nan() || c.is_nan() || d.is_nan()))
+                             .map(|(a, b, c, d)| ((a, b), (c, d)));
 
-            let (lines, _) = lines::connect_lines(pts.collect(), scene.simplify);
+            let (lines, _) = lines::connect_lines(lines.collect(), scene.simplify);
             let (additive, subtractive) = lines::separate_polygons(lines);
             let output_shape = match shape.draw_mode {
                 DrawMode::Filled => OutputShape {

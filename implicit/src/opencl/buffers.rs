@@ -19,6 +19,12 @@ pub struct LinearBuffer {
 }
 
 #[derive(Debug, Clone)]
+pub struct LineBuffer {
+    pub size: usize,
+    pub internal: Buffer<f32>,
+}
+
+#[derive(Debug, Clone)]
 pub struct SyncBuffer {
     pub internal : Buffer<u32>,
 }
@@ -43,6 +49,30 @@ impl FieldBuffer {
 }
 
 impl LinearBuffer {
+    pub fn size(&self) -> usize { self.size }
+
+    pub fn values(&self) -> Vec<f32> {
+        let mut out = vec![0.0; self.size()];
+        self.internal.read(&mut out).enq().unwrap();
+        out
+    }
+
+    pub fn non_nans_at_front(&self) -> bool {
+        let mut seen_nan = false;
+        for v in self.values() {
+            if v.is_nan() {
+                seen_nan = true;
+            } else if seen_nan {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    pub fn buffer(&self) -> &Buffer<f32> { &self.internal }
+}
+
+impl LineBuffer {
     pub fn size(&self) -> usize { self.size }
 
     pub fn values(&self) -> Vec<f32> {

@@ -36,20 +36,19 @@ static float2 w(float distance, float2 point, float how_much) {
     return result;
 }
 
-static void write_line(float2 o1, float2 o2, __global float* out_xs, __global float* out_ys, size_t out_pos) {
-    out_xs[out_pos + 0] = o1.x;
-    out_ys[out_pos + 0] = o1.y;
-    out_xs[out_pos + 1] = o2.x;
-    out_ys[out_pos + 1] = o2.y;
+static void write_line(float2 o1, float2 o2, __global float* out, size_t out_pos) {
+    out[out_pos + 0] = o1.x;
+    out[out_pos + 1] = o1.y;
+    out[out_pos + 2] = o2.x;
+    out[out_pos + 3] = o2.y;
 }
 
 static void march(
     float sra, float srb, float src, float srd,
     float2 p,
     float dist,
-    __global float* out_xs, __global float* out_ys,
-    volatile __global unsigned int* atomic,
-    size_t out_pos) {
+    __global float* out,
+    volatile __global unsigned int* atomic) {
 
     size_t a_on = sra < 0.0f;
     size_t b_on = srb < 0.0f;
@@ -194,20 +193,19 @@ static void march(
 
     if(!isnan(o1.x)) {
         int p = atomic_inc(atomic);
-        write_line(o1, o2, out_xs, out_ys, p * 2);
+        write_line(o1, o2, out, p * 4);
     }
 }
 
 __kernel void apply(
     __global float* buffer,
     ulong width, ulong height,
-    __global float* out_xs, __global float* out_ys,
+    __global float* out,
     volatile __global unsigned int* atomic) {
     size_t x = get_global_id(0);
     size_t y = get_global_id(1);
 
     size_t pos = x + y * width;
-    size_t out_pos = pos * 2;
 
 
     if (x == width - 1 || y == height - 1) {
@@ -225,9 +223,5 @@ __kernel void apply(
     float srd = buffer[d];
 
     float2 p = (float2) (x + 0.5f, y + 0.5f);
-    march(
-        sra, srb, src, srd,
-        p,
-        1.0f,
-        out_xs, out_ys, atomic, out_pos);
+    march(sra, srb, src, srd, p, 1.0f, out, atomic);
 }

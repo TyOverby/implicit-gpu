@@ -1,18 +1,17 @@
 use itertools::Itertools;
 use nodes::Polygon;
-use opencl::{FieldBuffer, LinearBuffer, OpenClContext};
+use opencl::{FieldBuffer, LineBuffer, OpenClContext};
 
 const PROGRAM: &'static str = include_str!("marching.c");
 
-pub fn run_marching(input: &FieldBuffer, ctx: &OpenClContext) -> (LinearBuffer, LinearBuffer) {
+pub fn run_marching(input: &FieldBuffer, ctx: &OpenClContext) -> LineBuffer {
     let _guard = ::flame::start_guard("opencl marching [run_marching]");
 
     let (width, height) = (input.width(), input.height());
     let kernel = ctx.compile("apply", PROGRAM);
-    let from = vec![::std::f32::NAN; width * height * 2];
-    let out_xs = ctx.linear_buffer(&from);
-    let out_ys = ctx.linear_buffer(&from);
+    let from = vec![::std::f32::NAN; width * height * 4];
 
+    let line_buffer = ctx.line_buffer(&from);
     let sync_buffer = ctx.sync_buffer();
 
     kernel
@@ -20,25 +19,25 @@ pub fn run_marching(input: &FieldBuffer, ctx: &OpenClContext) -> (LinearBuffer, 
         .arg_buf(input.buffer())
         .arg_scl(width as u64)
         .arg_scl(height as u64)
-        .arg_buf(out_xs.buffer())
-        .arg_buf(out_ys.buffer())
+        .arg_buf(line_buffer.buffer())
         .arg_buf(sync_buffer.buffer())
         .enq()
         .unwrap();
 
-    (out_xs, out_ys)
+    line_buffer
 }
 
 pub fn march(input: &FieldBuffer, simplify: bool, ctx: &OpenClContext) -> Vec<Polygon> {
     let _guard = ::flame::start_guard("march");
 
-    let (out_xs, out_ys) = run_marching(input, ctx);
+    let lines = run_marching(input, ctx);
 
     let lines = ::flame::span_of("point filtering", || {
-        Iterator::zip(out_xs.values().into_iter(), out_ys.values().into_iter())
-            .tuples()
-            .filter(|&((a, b), (c, d))| !(a.is_nan() && b.is_nan() && c.is_nan() && d.is_nan()))
-            .collect::<Vec<_>>()
+        lines.values().into_iter()
+             .tuples::<(_, _, _, _)>()
+             .map(|(a, b, c, d)| ((a, b), (c, d)))
+             .filter(|&((a, b), (c, d))| !(a.is_nan() && b.is_nan() && c.is_nan() && d.is_nan()))
+             .collect::<Vec<_>>()
     });
 
     ::flame::start("line connecting");
@@ -65,10 +64,9 @@ fn basic() {
     fn test_this(a: f32, b: f32, c: f32, d: f32, ctx: &OpenClContext) -> ((f32, f32), (f32, f32)) {
         let buf = ctx.field_buffer(2, 2, Some(&[a, b, d, c]));
 
-        let (out_xs, out_ys) = run_marching(&buf, &ctx);
-        let (out_xs, out_ys) = (out_xs.values(), out_ys.values());
+        let lines = run_marching(&buf, &ctx).values();
 
-        return ((out_xs[0], out_ys[0]), (out_xs[1], out_ys[1]));
+        return ((lines[0], lines[1]), (lines[2], lines[3]));
     }
 
     fn assert_close(a: ((f32, f32), (f32, f32)), b: ((f32, f32), (f32, f32))) {

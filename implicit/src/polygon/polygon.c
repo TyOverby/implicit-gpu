@@ -44,7 +44,7 @@ float dist_to_line(float x, float y, float x1, float y1, float x2, float y2)
     return sqrt(dx * dx + dy * dy);
 }
 
-__kernel void apply(__global float *buffer, ulong width, __global float *xs, __global float *ys, ulong count, float dx, float dy)
+__kernel void apply(__global float *buffer, ulong width, __global float *lines, ulong count, float dx, float dy)
 {
     size_t x = get_global_id(0);
     size_t y = get_global_id(1);
@@ -67,12 +67,12 @@ __kernel void apply(__global float *buffer, ulong width, __global float *xs, __g
     float minimum = INFINITY;
     float sign_of_min = 0.0;
 
-    for (size_t i = 0; i < count; i += 2)
+    for (size_t i = 0; i < count; i += 4)
     {
-        float x1 = xs[i];
-        float y1 = ys[i];
-        float x2 = xs[i + 1];
-        float y2 = ys[i + 1];
+        float x1 = lines[i + 0];
+        float y1 = lines[i + 1];
+        float x2 = lines[i + 2];
+        float y2 = lines[i + 3];
 
         if (x1 == x2 && y1 == y2) {
             continue;

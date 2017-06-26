@@ -117,8 +117,8 @@ impl Evaluator {
             &NodeGroup::Freeze(ref root) => {
                 let field_buf = eval_basic_group(root);
                 let (width, height) = field_buf.size();
-                let (xs, ys) = ::marching::run_marching(&field_buf, ctx);
-                let res = ::polygon::run_poly_raw(xs, ys, width, height, None, ctx);
+                let lines = ::marching::run_marching(&field_buf, ctx);
+                let res = ::polygon::run_poly_raw(lines, width, height, None, ctx);
                 res
             }
             &NodeGroup::Polygon { ref group, dx, dy } => eval_polygon(group, dx, dy),
@@ -133,10 +133,10 @@ impl Evaluator {
     }
 
     pub fn get_polylines(&self, buffer: &FieldBuffer, ctx: &OpenClContext) -> Vec<((f32, f32), (f32, f32))> {
-        let (xs, ys) = ::marching::run_marching(buffer, ctx);
-        let points = xs.values().into_iter().zip(ys.values().into_iter());
-        let lines = points.tuples();
+        let lines = ::marching::run_marching(buffer, ctx);
+        let lines = lines.values().into_iter().tuples::<(_, _, _, _)>();
         lines
+            .map(|(a, b, c, d)| ((a, b), (c, d)))
             .filter(|&((x1, y1), (x2, y2))| {
                 !(x1.is_nan() || x2.is_nan() || y1.is_nan() || y2.is_nan())
             })
