@@ -67,18 +67,14 @@ impl Evaluator {
             let _guard = ::flame::start_guard(format!("eval_poylgon"));
             let additive_field = {
                 let _guard = ::flame::start_guard("additive field");
-                let points_all = poly.additive.iter().flat_map(|a| a.points.iter().cloned()).collect::<Vec<_>>();
-                run_poly(&points_all, self.width, self.height, Some((dx, dy)), ctx)
+                let points_all = poly.additive.iter().flat_map(|a| a.points.iter().cloned());
+                run_poly(points_all, self.width, self.height, Some((dx, dy)), ctx).unwrap()
             };
 
             let subtractive_field = {
                 let _guard = ::flame::start_guard("subtractive field");
-                let points_all = poly.subtractive.iter().flat_map(|a| a.points.iter().cloned()).collect::<Vec<_>>();
-                if points_all.len() != 0 {
-                    Some(run_poly(&points_all, self.width, self.height, Some((dx, dy)), ctx))
-                } else {
-                    None
-                }
+                let points_all = poly.subtractive.iter().flat_map(|a| a.points.iter().cloned());
+                run_poly(points_all, self.width, self.height, Some((dx, dy)), ctx)
             };
 
             if let Some(subtractive_field) = subtractive_field {

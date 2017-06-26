@@ -1,25 +1,23 @@
 use opencl::{FieldBuffer, LineBuffer, OpenClContext};
-use std::f32::INFINITY;
 
 const PROGRAM: &'static str = include_str!("./polygon.c");
 
 // TODO: rewrite this function so that it just takes &[f32]
-pub fn run_poly(points: &[(f32, f32)], width: usize, height: usize, pos_mod: Option<(f32, f32)>, ctx: &OpenClContext) -> FieldBuffer {
+pub fn run_poly<I>(points: I, width: usize, height: usize, pos_mod: Option<(f32, f32)>, ctx: &OpenClContext) -> Option<FieldBuffer>
+where I: IntoIterator<Item=(f32, f32)> {
     let _guard = ::flame::start_guard("run_poly");
 
-    if points.len() == 0 {
-        return ctx.field_buffer(width, height, Some(&vec![INFINITY; width * height]));
-    }
-
-    let mut buffer = Vec::with_capacity(points.len());
-    for &(xs, ys) in points {
+    let mut buffer = vec![];
+    for (xs, ys) in points {
         buffer.push(xs);
         buffer.push(ys);
     }
 
+    if buffer.len() == 0 { return None; }
+
     let buffer = ctx.line_buffer(&buffer[..]);
 
-    run_poly_raw(buffer, width, height, pos_mod, ctx)
+    Some(run_poly_raw(buffer, width, height, pos_mod, ctx))
 }
 
 pub fn run_poly_raw(lines: LineBuffer, width: usize, height: usize, pos_mod: Option<(f32, f32)>, ctx: &OpenClContext) -> FieldBuffer {
