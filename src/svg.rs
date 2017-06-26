@@ -2,14 +2,16 @@ use super::backend::*;
 use std::io::{Error, Write};
 
 pub struct SvgBackend<W> {
-    out: W,
+    pub out: W,
+    pub float_precision: usize
 }
 
 impl <W: Write> SvgBackend<W> {
     pub fn new(mut out: W) -> Result<SvgBackend<W>, Error> {
         write!(out, "<svg xmlns=\"http://www.w3.org/2000/svg\">\n")?;
         Ok(SvgBackend {
-            out: out
+            out: out,
+            float_precision: 2,
         })
     }
 }
@@ -22,8 +24,8 @@ impl <W: Write> DrawBackend for SvgBackend<W> {
 
         match command {
             StartShape(options) => write!(&mut self.out, r#"    <path fill-rule="evenodd" d=""#),
-            MoveTo { x , y } => write!(&mut self.out, "M{},{} ", x, y),
-            LineTo { x, y } => write!(&mut self.out, "L{},{} ", x, y),
+            MoveTo { x , y } => write!(&mut self.out, "M{:.p$},{:.p$} ", x, y, p=self.float_precision),
+            LineTo { x, y } => write!(&mut self.out, "L{:.p$},{:.p$} ", x, y, p=self.float_precision),
             CubicCurveTo { cx1, cy1, cx2, cy2, x, y, } => unimplemented!(),
             QuadraticCurveTo { cx, cy, x, y, } => unimplemented!(),
             ArcTo { rx, ry, rotation, large_arc, sweep, x, y, } => unimplemented!(),
