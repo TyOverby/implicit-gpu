@@ -8,7 +8,12 @@ where
         geom::Line(geom::Point { x: x1, y: y1 }, geom::Point { x: x2, y: y2 })
     });
 
-    join_lines_internal(lines.collect())
+    let lines = lines.collect::<Vec<_>>();
+    if lines.len() == 0 {
+        return (Vec::new(), QuadTree::default(geom::Rect::null()));
+    }
+
+    join_lines_internal(lines)
 }
 
 fn join_lines_internal(lines: Vec<geom::Line>) -> (Vec<LineType>, QuadTree<geom::Line>) {

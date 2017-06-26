@@ -4,16 +4,15 @@ use std::f32::INFINITY;
 const PROGRAM: &'static str = include_str!("./polygon.c");
 
 // TODO: rewrite this function so that it just takes &[f32]
-pub fn run_poly(xs: &[f32], ys: &[f32], width: usize, height: usize, pos_mod: Option<(f32, f32)>, ctx: &OpenClContext) -> FieldBuffer {
+pub fn run_poly(points: &[(f32, f32)], width: usize, height: usize, pos_mod: Option<(f32, f32)>, ctx: &OpenClContext) -> FieldBuffer {
     let _guard = ::flame::start_guard("run_poly");
-    assert_eq!(xs.len(), ys.len());
 
-    if xs.len() == 0 {
+    if points.len() == 0 {
         return ctx.field_buffer(width, height, Some(&vec![INFINITY; width * height]));
     }
 
-    let mut buffer = Vec::with_capacity(xs.len() + ys.len());
-    for (&xs, &ys) in xs.iter().zip(ys) {
+    let mut buffer = Vec::with_capacity(points.len());
+    for &(xs, ys) in points {
         buffer.push(xs);
         buffer.push(ys);
     }

@@ -1,5 +1,3 @@
-use itertools::Itertools;
-use nodes::Polygon;
 use opencl::{FieldBuffer, LineBuffer, OpenClContext};
 
 const PROGRAM: &'static str = include_str!("marching.c");
@@ -25,38 +23,6 @@ pub fn run_marching(input: &FieldBuffer, ctx: &OpenClContext) -> LineBuffer {
         .unwrap();
 
     line_buffer
-}
-
-pub fn march(input: &FieldBuffer, simplify: bool, ctx: &OpenClContext) -> Vec<Polygon> {
-    let _guard = ::flame::start_guard("march");
-
-    let lines = run_marching(input, ctx);
-
-    let lines = ::flame::span_of("point filtering", || {
-        lines.values().into_iter()
-             .tuples::<(_, _, _, _)>()
-             .map(|(a, b, c, d)| ((a, b), (c, d)))
-             .filter(|&((a, b), (c, d))| !(a.is_nan() && b.is_nan() && c.is_nan() && d.is_nan()))
-             .collect::<Vec<_>>()
-    });
-
-    ::flame::start("line connecting");
-    let (lns, _) = super::lines::connect_lines(lines, simplify);
-    let mut polygons = vec![];
-    for polygon in lns.into_iter() {
-        let mut xs = Vec::with_capacity(polygon.len());
-        let mut ys = Vec::with_capacity(polygon.len());
-
-        for pt in polygon {
-            xs.push(pt.0);
-            ys.push(pt.0);
-        }
-
-        polygons.push(Polygon { xs: xs, ys: ys });
-    }
-    ::flame::end("line connecting");
-
-    polygons
 }
 
 #[test]

@@ -194,7 +194,7 @@ impl Node {
             &Node::Polygon { dx, dy, ref group } => {
                 let mut rect = Rect::null();
                 for polygon in &group.additive {
-                    for (&x, &y) in polygon.xs.iter().zip(polygon.ys.iter()) {
+                    for &(x, y) in polygon.points.iter() {
                         rect.expand_to_include(&Point { x: x + dx, y: y + dy });
                     }
                 }

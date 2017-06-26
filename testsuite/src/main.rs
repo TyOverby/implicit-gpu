@@ -115,7 +115,7 @@ fn main() {
         clear(running.len());
 
         let old_hook = ::std::panic::take_hook();
-        ::std::panic::set_hook(Box::new(|_| ()));
+        //::std::panic::set_hook(Box::new(|_| ()));
         let result = ::std::panic::catch_unwind(|| run_test::run_test(&paths, &ctx))
             .map_err(|e| e.downcast::<String>())
             .map_err(|e| e.or_else(|e| e.downcast::<&'static str>().map(|s| Box::new(s.to_string()))));

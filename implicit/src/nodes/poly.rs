@@ -1,7 +1,6 @@
 #[derive(Debug, PartialEq, Clone, PartialOrd, Deserialize, Serialize)]
 pub struct Polygon {
-    pub xs: Vec<f32>,
-    pub ys: Vec<f32>,
+    pub points: Vec<(f32, f32)>,
 }
 
 #[derive(Debug, PartialEq, Clone, PartialOrd, Deserialize, Serialize)]
@@ -16,37 +15,31 @@ impl ::std::iter::FromIterator<(f32, f32)> for Polygon {
         T: IntoIterator<Item = (f32, f32)>,
     {
         let mut iterator = iterator.into_iter();
-        let mut xs = vec![];
-        let mut ys = vec![];
+        let mut out = vec![];
 
-        let (fx, fy) = if let Some(first) = iterator.next() {
+        let first = if let Some(first) = iterator.next() {
             first
         } else {
-            return Polygon { xs: xs, ys: ys };
+            return Polygon { points: vec![] };
         };
 
-        xs.push(fx);
-        ys.push(fy);
+        out.push(first);
 
-        for (x, y) in iterator {
-            xs.push(x);
-            xs.push(x);
-
-            ys.push(y);
-            ys.push(y);
+        for pt in iterator {
+            out.push(pt);
+            out.push(pt);
         }
 
-        xs.push(fx);
-        ys.push(fy);
+        out.push(first);
 
-        Polygon { xs: xs, ys: ys }
+        Polygon { points: out }
     }
 }
 
 impl PolyGroup {
-    pub fn single_additive(xs: Vec<f32>, ys: Vec<f32>) -> PolyGroup {
+    pub fn single_additive(points: Vec<(f32, f32)>) -> PolyGroup {
         PolyGroup {
-            additive: vec![Polygon { xs: xs, ys: ys }],
+            additive: vec![Polygon { points }],
             subtractive: vec![],
         }
     }
