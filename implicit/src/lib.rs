@@ -26,6 +26,7 @@ pub mod export;
 pub mod scene;
 pub mod output;
 pub mod lines;
+pub mod telemetry;
 
 use lines::util::geom::Rect;
 
@@ -40,12 +41,12 @@ pub fn run_single(node: nodes::NodeRef, width: usize, height: usize) -> ::opencl
 
     // Create a new Execution Context
     let evaluator = Evaluator::new(nest, width, height, None);
-    let result = evaluator.evaluate(target, &ctx);
+    let result = evaluator.evaluate(target, &ctx, &mut telemetry::NullTelemetry);
     ctx.empty_queue();
     result
 }
 
-pub fn run_scene(scene: &scene::Scene) -> output::OutputScene {
+pub fn run_scene(scene: &scene::Scene, telemetry: &mut telemetry::Telemetry) -> output::OutputScene {
     use output::*;
     use scene::*;
     use itertools::Itertools;
@@ -110,15 +111,20 @@ pub fn run_scene(scene: &scene::Scene) -> output::OutputScene {
         let mut output_shapes = vec![];
         for shape in &figure.shapes {
             let id = treemap.get(&shape).unwrap();
-            let result = evaluator.evaluate(*id, &ctx);
+
+            let result = evaluator.evaluate(*id, &ctx, telemetry);
+
             let lines = ::marching::run_marching(&result, &ctx).values();
 
             let lines = lines.into_iter()
                              .tuples::<(_, _, _, _)>()
                              .filter(|&(a, b, c, d)| !(a.is_nan() || b.is_nan() || c.is_nan() || d.is_nan()))
-                             .map(|(a, b, c, d)| ((a, b), (c, d)));
+                             .map(|(a, b, c, d)| ((a, b), (c, d)))
+                             .collect::<Vec<_>>();
 
-            let (lines, _) = lines::connect_lines(lines.collect(), scene.simplify);
+            telemetry.shape_finished(&result, &lines);
+
+            let (lines, _) = lines::connect_lines(lines, scene.simplify);
             let (additive, subtractive) = lines::separate_polygons(lines);
             let output_shape = match shape.draw_mode {
                 DrawMode::Filled => OutputShape {
@@ -144,8 +150,9 @@ pub fn run_scene(scene: &scene::Scene) -> output::OutputScene {
             ctx.empty_queue();
         }
 
+        telemetry.figure_finished(&output_shapes);
         output.figures.push(OutputFigure { shapes: output_shapes });
     }
-
+    telemetry.scene_finished(&output);
     output
 }

@@ -3,6 +3,7 @@ use super::formats;
 use {flame, implicit, latin};
 use implicit::nodes::NodeRef;
 use implicit::opencl::OpenClContext;
+use implicit::telemetry;
 
 pub enum Error {
     CouldNotFind { file: String },
@@ -59,17 +60,24 @@ pub fn run_test(paths: &Paths, ctx: &OpenClContext) -> Result<(), Vec<Error>> {
     let source = latin::file::read_string_utf8(&paths.json).unwrap();
 
     let tree = NodeRef::new(::serde_json::from_str(&source).unwrap());
-    /*
-    let tree = NodeRef::new(implicit_language::parse(&source[..], script_name).unwrap());
-    let as_json = ::serde_json::to_string_pretty(&tree).unwrap();
-    latin::file::write(paths.script.with_extension("json"), as_json).unwrap();
-    */
 
     let mut nest = implicit::compiler::Nest::new();
     let target = nest.group(tree.clone());
     let evaluator = implicit::evaluator::Evaluator::new(nest, 500, 500, None);
 
     let mut errors = vec![];
+
+    let mut telemetry =
+        telemetry::DumpTelemetry::new(paths.actual_dump.clone())
+        .with_field_writer(|path, buffer| {
+            let actual_path = path.with_extension("values");
+            latin::file::write(&actual_path, formats::field::field_to_text(buffer)).unwrap();
+        })
+        .with_line_writer(|path, lines| {
+            let actual_path = path.with_extension("lines");
+            let lines = lines.iter().map(|&((x1, y1), (x2, y2))| formats::lines::Line(x1, y1, x2, y2));
+            latin::file::write(&actual_path, formats::lines::lines_to_text(lines)).unwrap();
+        });
 
     let output = implicit::run_scene(&implicit::scene::Scene {
         unit: "px".into(),
@@ -86,9 +94,9 @@ pub fn run_test(paths: &Paths, ctx: &OpenClContext) -> Result<(), Vec<Error>> {
                 ],
             },
         ],
-    });
+    }, &mut telemetry);
 
-    let result = evaluator.evaluate(target, &ctx);
+    let result = evaluator.evaluate(target, &ctx, &mut implicit::telemetry::NullTelemetry);
     let mut lines = evaluator
         .get_polylines(&result, &ctx)
         .into_iter()

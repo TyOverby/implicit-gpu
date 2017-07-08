@@ -24,7 +24,9 @@ pub struct Paths {
     actual_values: PathBuf,
     actual_lines: PathBuf,
     actual_svg: PathBuf,
+    actual_dump: PathBuf,
 
+    _expected_dump: PathBuf,
     expected_values: PathBuf,
     expected_lines: PathBuf,
     expected_svg: PathBuf,
@@ -89,6 +91,7 @@ fn main() {
     for entry in test_files {
         let json = entry;
         let script_name: PathBuf = json.strip_prefix(&test_dir).unwrap().into();
+        let folder = script_name.iter().nth(0).unwrap();
 
         let paths = Paths {
             json,
@@ -96,10 +99,12 @@ fn main() {
             actual_svg: root_dir.join("actual").join(script_name.with_extension("svg")),
             actual_values: root_dir.join("actual").join(script_name.with_extension("values")),
             actual_lines: root_dir.join("actual").join(script_name.with_extension("lines")),
+            actual_dump: root_dir.join("actual").join(folder).join("dump"),
 
             expected_values: root_dir.join("expected").join(script_name.with_extension("values")),
             expected_lines: root_dir.join("expected").join(script_name.with_extension("lines")),
             expected_svg: root_dir.join("expected").join(script_name.with_extension("svg")),
+            _expected_dump: root_dir.join("expected").join(script_name.clone()).join("dump"),
         };
 
         let running = "running".yellow();

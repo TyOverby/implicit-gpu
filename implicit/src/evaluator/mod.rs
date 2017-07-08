@@ -1,4 +1,5 @@
 use compiler::*;
+use telemetry::Telemetry;
 
 use itertools::Itertools;
 use nodes::{Node, NodeRef, PolyGroup};
@@ -28,7 +29,7 @@ impl Evaluator {
         }
     }
 
-    pub fn evaluate(&self, which: GroupId, ctx: &OpenClContext) -> FieldBuffer {
+    pub fn evaluate(&self, which: GroupId, ctx: &OpenClContext, telemetry: &mut Telemetry) -> FieldBuffer {
         let _guard = ::flame::start_guard(format!("evaluate {:?}", which));
         {
             let finished = self.finished.lock().unwrap();
@@ -37,17 +38,17 @@ impl Evaluator {
             }
         }
 
-        let eval_basic_group = |root: &Node| -> FieldBuffer {
+        let eval_basic_group = |root: &Node, telemetry: &mut Telemetry| -> FieldBuffer {
             let _guard = ::flame::start_guard(format!("eval_basic_group"));
             let (program, compilation_info) = ::compiler::compile(root);
             let deps: Vec<FieldBuffer> = compilation_info
                 .dependencies
                 .iter()
-                .map(|&g| self.evaluate(g, ctx))
+                .map(|&g| self.evaluate(g, ctx, telemetry))
                 .collect();
 
             let out = ctx.field_buffer(self.width, self.height, None);
-            let kernel = ctx.compile("apply", program);
+            let kernel = ctx.compile("apply", program.clone());
 
             let mut kc = kernel.gws([self.width, self.height]).arg_buf(out.buffer()).arg_scl(
                 self.width as
@@ -60,10 +61,11 @@ impl Evaluator {
 
             ::flame::span_of("eval", || kc.enq().unwrap());
 
+            telemetry.intermediate_eval_basic(&out, &program, root);
             out
         };
 
-        let eval_polygon = |poly: &PolyGroup, dx: f32, dy: f32| -> FieldBuffer {
+        let eval_polygon = |poly: &PolyGroup, dx: f32, dy: f32, telemetry: &mut Telemetry| -> FieldBuffer {
             let _guard = ::flame::start_guard(format!("eval_poylgon"));
             let additive_field = {
                 let _guard = ::flame::start_guard("additive field");
@@ -77,7 +79,7 @@ impl Evaluator {
                 run_poly(points_all, self.width, self.height, Some((dx, dy)), ctx)
             };
 
-            if let Some(subtractive_field) = subtractive_field {
+            let out = if let Some(subtractive_field) = subtractive_field {
                 let program = Node::And {
                     children: vec![
                         NodeRef::new(Node::OtherGroup { group_id: GroupId(0) }),
@@ -102,20 +104,23 @@ impl Evaluator {
                 out
             } else {
                 additive_field
-            }
+            };
+
+            telemetry.intermediate_eval_poly(&out);
+            out
         };
 
         let group = self.nest.get(which);
         let out = match group {
-            &NodeGroup::Basic(ref root) => eval_basic_group(root),
+            &NodeGroup::Basic(ref root) => eval_basic_group(root, telemetry),
             &NodeGroup::Freeze(ref root) => {
-                let field_buf = eval_basic_group(root);
+                let field_buf = eval_basic_group(root, telemetry);
                 let (width, height) = field_buf.size();
                 let lines = ::marching::run_marching(&field_buf, ctx);
                 let res = ::polygon::run_poly_raw(lines, width, height, None, ctx);
                 res
             }
-            &NodeGroup::Polygon { ref group, dx, dy } => eval_polygon(group, dx, dy),
+            &NodeGroup::Polygon { ref group, dx, dy } => eval_polygon(group, dx, dy, telemetry),
         };
 
         {
