@@ -19,17 +19,9 @@ mod run_test;
 
 pub struct Paths {
     json: PathBuf,
-
-    actual_image: PathBuf,
-    actual_values: PathBuf,
-    actual_lines: PathBuf,
-    actual_svg: PathBuf,
+    parent: PathBuf,
     actual_dump: PathBuf,
-
-    _expected_dump: PathBuf,
-    expected_values: PathBuf,
-    expected_lines: PathBuf,
-    expected_svg: PathBuf,
+    expected_dump: PathBuf,
 }
 
 
@@ -85,7 +77,6 @@ fn main() {
         .max()
         .unwrap_or(0);
 
-    let mut ctx = implicit::opencl::OpenClContext::default();
 
     let mut any_failures = false;
     for entry in test_files {
@@ -95,16 +86,9 @@ fn main() {
 
         let paths = Paths {
             json,
-            actual_image: root_dir.join("actual").join(script_name.with_extension("png")),
-            actual_svg: root_dir.join("actual").join(script_name.with_extension("svg")),
-            actual_values: root_dir.join("actual").join(script_name.with_extension("values")),
-            actual_lines: root_dir.join("actual").join(script_name.with_extension("lines")),
-            actual_dump: root_dir.join("actual").join(folder).join("dump"),
-
-            expected_values: root_dir.join("expected").join(script_name.with_extension("values")),
-            expected_lines: root_dir.join("expected").join(script_name.with_extension("lines")),
-            expected_svg: root_dir.join("expected").join(script_name.with_extension("svg")),
-            _expected_dump: root_dir.join("expected").join(script_name.clone()).join("dump"),
+            parent: root_dir.clone(),
+            actual_dump: root_dir.join("actual").join(folder),
+            expected_dump: root_dir.join("expected").join(folder),
         };
 
         let running = "running".yellow();
@@ -121,7 +105,7 @@ fn main() {
 
         let old_hook = ::std::panic::take_hook();
         //::std::panic::set_hook(Box::new(|_| ()));
-        let result = ::std::panic::catch_unwind(|| run_test::run_test(&paths, &ctx))
+        let result = ::std::panic::catch_unwind(|| run_test::run_test(&paths))
             .map_err(|e| e.downcast::<String>())
             .map_err(|e| e.or_else(|e| e.downcast::<&'static str>().map(|s| Box::new(s.to_string()))));
         ::std::panic::set_hook(old_hook);
@@ -137,15 +121,11 @@ fn main() {
             }
             Err(Ok(panic_string)) => {
                 any_failures = true;
-                ctx = implicit::opencl::OpenClContext::default();
-
                 println!("{}", "PANIC!".red());
                 println!("  {}", panic_string.trim().blue());
             }
             Err(Err(_)) => {
                 any_failures = true;
-                ctx = implicit::opencl::OpenClContext::default();
-
                 println!("{}", "PANIC!".red());
             }
         }

@@ -1,17 +1,30 @@
-use super::Paths;
-use super::formats;
-use {flame, implicit, latin};
 use implicit::nodes::NodeRef;
-use implicit::opencl::OpenClContext;
 use implicit::telemetry;
+use super::Paths;
+use std::path::PathBuf;
+use super::formats;
+use walkdir::{WalkDir};
+use {flame, implicit, latin};
 
 pub enum Error {
     CouldNotFind { file: String },
-    SvgMismatch { expected: String, actual: String },
+    UnexpectedFile { file: String },
+    SvgMismatch {
+        expected: String,
+        actual: String
+    },
     LineMismatch {
         expected: String,
         actual: String,
         message: String,
+    },
+    CMismatch {
+        expected: String,
+        actual: String,
+    },
+    NodesMismatch {
+        expected: String,
+        actual: String,
     },
     FieldMismatch {
         expected: String,
@@ -29,6 +42,17 @@ impl ::std::fmt::Display for Error {
                 writeln!(formatter, "    expected file : {}", expected)?;
                 writeln!(formatter, "    actual file   : {}", actual)?;
             }
+            Error::CMismatch { ref expected, ref actual } => {
+                writeln!(formatter, "  • c files are not the same")?;
+                writeln!(formatter, "    expected file : {}", expected)?;
+                writeln!(formatter, "    actual file   : {}", actual)?;
+            }
+            Error::NodesMismatch { ref expected, ref actual } => {
+                writeln!(formatter, "  • nodes files are not the same")?;
+                writeln!(formatter, "    expected file : {}", expected)?;
+                writeln!(formatter, "    actual file   : {}", actual)?;
+            }
+            Error::UnexpectedFile { ref file} => writeln!(formatter, "  • unexpected file {}", file)?,
             Error::LineMismatch {
                 ref expected,
                 ref actual,
@@ -53,17 +77,11 @@ impl ::std::fmt::Display for Error {
     }
 }
 
-pub fn run_test(paths: &Paths, ctx: &OpenClContext) -> Result<(), Vec<Error>> {
+pub fn run_test(paths: &Paths) -> Result<(), Vec<Error>> {
     let _guard = flame::start_guard(format!("running {:?}", paths.json));
-    use implicit::debug::image;
 
     let source = latin::file::read_string_utf8(&paths.json).unwrap();
-
     let tree = NodeRef::new(::serde_json::from_str(&source).unwrap());
-
-    let mut nest = implicit::compiler::Nest::new();
-    let target = nest.group(tree.clone());
-    let evaluator = implicit::evaluator::Evaluator::new(nest, 500, 500, None);
 
     let mut errors = vec![];
 
@@ -79,7 +97,7 @@ pub fn run_test(paths: &Paths, ctx: &OpenClContext) -> Result<(), Vec<Error>> {
             latin::file::write(&actual_path, formats::lines::lines_to_text(lines)).unwrap();
         });
 
-    let output = implicit::run_scene(&implicit::scene::Scene {
+    implicit::run_scene(&implicit::scene::Scene {
         unit: "px".into(),
         simplify: true,
 
@@ -96,69 +114,81 @@ pub fn run_test(paths: &Paths, ctx: &OpenClContext) -> Result<(), Vec<Error>> {
         ],
     }, &mut telemetry);
 
-    let result = evaluator.evaluate(target, &ctx, &mut implicit::telemetry::NullTelemetry);
-    let mut lines = evaluator
-        .get_polylines(&result, &ctx)
-        .into_iter()
-        .map(|((x1, y1), (x2, y2))| formats::lines::Line(x1, y1, x2, y2))
-        .collect::<Vec<_>>();
-    lines.sort();
-    ctx.empty_queue();
+    let expected_paths =
+        WalkDir::new(&paths.expected_dump)
+            .into_iter()
+            .filter_map(Result::ok)
+            .map(|e| e.path().to_owned());
 
-    image::save_field_buffer(&result, &paths.actual_image, image::ColorMode::Debug);
-    implicit::export::svg::write_out(&paths.actual_svg, output).unwrap();
-    latin::file::write(&paths.actual_values, formats::field::field_to_text(&result)).unwrap();
-    latin::file::write(&paths.actual_lines, formats::lines::lines_to_text(lines.iter().cloned())).unwrap();
+    for expected in expected_paths {
+        let unique = expected.strip_prefix(&paths.parent).unwrap().to_owned();
+        let unique: PathBuf = unique.components().skip(1).map(|c|c.as_os_str()).collect();
+        let actual = paths.parent.join("actual").join(unique);
 
-    if latin::file::exists(&paths.expected_svg) {
-        let expected = latin::file::read(&paths.expected_svg).unwrap();
-        let actual = latin::file::read(&paths.actual_svg).unwrap();
-        if expected != actual {
-            errors.push(Error::SvgMismatch {
-                expected: paths.expected_svg.to_str().unwrap().into(),
-                actual: paths.actual_svg.to_str().unwrap().into(),
-            });
+        if !actual.exists() {
+            errors.push(Error::CouldNotFind { file: actual.to_string_lossy().into_owned() });
+            continue;
         }
-    } else {
-        errors.push(Error::CouldNotFind { file: paths.expected_svg.to_str().unwrap().into() });
+
+        let extension = match expected.extension().and_then(|o| o.to_str()) {
+            Some(ex) => ex,
+            None => continue,
+        };
+        match extension {
+            "png" => { /* png is for debugging only */ }
+            "perf" => { /* perf data is for debugging only */ }
+            "values" => {
+                if let Err(e) = formats::field::compare(&expected, &actual) {
+                    errors.push(Error::FieldMismatch {
+                        expected: expected.to_string_lossy().into_owned(),
+                        actual: actual.to_string_lossy().into_owned(),
+                        message: e,
+                    });
+                }
+            },
+            "lines" => {
+                if let Err(e) = formats::lines::compare(&expected, &actual) {
+                    errors.push(Error::LineMismatch {
+                        expected: expected.to_string_lossy().into_owned(),
+                        actual: actual.to_string_lossy().into_owned(),
+                        message: e,
+                    });
+                }
+            }
+            "c" => {
+                if latin::file::read_string_utf8(&actual).unwrap() !=
+                   latin::file::read_string_utf8(&expected).unwrap() {
+                    errors.push(Error::CMismatch {
+                        expected: expected.to_string_lossy().into_owned(),
+                        actual: actual.to_string_lossy().into_owned(),
+                    })
+                }
+            }
+            "node" => {
+                if latin::file::read_string_utf8(&actual).unwrap() !=
+                   latin::file::read_string_utf8(&expected).unwrap() {
+                    errors.push(Error::NodesMismatch {
+                        expected: expected.to_string_lossy().into_owned(),
+                        actual: actual.to_string_lossy().into_owned(),
+                    })
+                }
+            }
+            "svg" => {
+                if latin::file::read_string_utf8(&actual).unwrap() !=
+                   latin::file::read_string_utf8(&expected).unwrap() {
+                    errors.push(Error::SvgMismatch {
+                        expected: expected.to_string_lossy().into_owned(),
+                        actual: actual.to_string_lossy().into_owned(),
+                    })
+                }
+            }
+            _ => errors.push(Error::UnexpectedFile{file: actual.to_str().unwrap().to_owned()}),
+        }
     }
 
-    if latin::file::exists(&paths.expected_values) {
-        if let Err(message) = formats::field::compare(
-            &latin::file::read_string_utf8(&paths.expected_values).unwrap(),
-            &paths.expected_values.to_str().unwrap(),
-            (result.size(), result.values()),
-        ) {
-            errors.push(Error::FieldMismatch{
-                expected: paths.expected_values.to_str().unwrap().into(),
-                actual: paths.actual_values.to_str().unwrap().into(),
-                message: message
-            });
-        }
-    } else {
-        errors.push(Error::CouldNotFind { file: paths.expected_values.to_str().unwrap().into() });
-    }
-
-    if latin::file::exists(&paths.expected_lines) {
-        if let Err(message) = formats::lines::compare(
-            &latin::file::read_string_utf8(&paths.expected_lines).unwrap(),
-            &paths.expected_lines.to_str().unwrap(),
-            &lines,
-        )
-        {
-            errors.push(Error::LineMismatch {
-                expected: paths.expected_lines.to_str().unwrap().into(),
-                actual: paths.actual_lines.to_str().unwrap().into(),
-                message: message,
-            });
-        }
-    } else {
-        errors.push(Error::CouldNotFind { file: paths.expected_lines.to_str().unwrap().into() });
-    }
-
-    if !errors.is_empty() {
-        Err(errors)
-    } else {
+    if errors.len() == 0 {
         Ok(())
+    } else {
+        Err(errors)
     }
 }

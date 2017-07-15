@@ -1,0 +1,10 @@
+Modulate {
+    how_much: -20,
+    target: NodeRef {
+        node: OtherGroup {
+            group_id: GroupId(
+                0
+            )
+        }
+    }
+}

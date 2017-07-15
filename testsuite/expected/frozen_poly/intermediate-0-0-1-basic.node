@@ -1,0 +1,5 @@
+OtherGroup {
+    group_id: GroupId(
+        0
+    )
+}

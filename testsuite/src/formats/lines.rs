@@ -2,6 +2,8 @@ use snoot::{Result as ParseResult, simple_parse};
 use snoot::serde_serialization::{DeserializeResult, deserialize};
 use std::cmp::{Ord, Ordering};
 use std::fmt::Write;
+use std::path::Path;
+use latin;
 
 #[derive(Deserialize, Debug, PartialEq, Copy, Clone, PartialOrd)]
 #[serde(rename = "line")]
@@ -12,17 +14,20 @@ impl Ord for Line {
     fn cmp(&self, other: &Line) -> Ordering { self.partial_cmp(other).unwrap_or(Ordering::Equal) }
 }
 
-pub fn compare(expected: &str, expected_filename: &str, actual: &[Line]) -> Result<(), String> {
+pub fn compare(expected: &Path, actual: &Path) -> Result<(), String> {
     fn close(a: f32, b: f32) -> bool { (a - b).abs() < 0.0001 }
-    let mut ex = text_to_vec(expected, expected_filename);
-    ex.sort();
-    let ex = ex;
 
-    if ex.len() != actual.len() {
-        return Err(format!("Number of lines differ, {} vs {}", ex.len(), actual.len()));
+    let mut expected = text_to_vec(&latin::file::read_string_utf8(expected).unwrap(), expected.to_string_lossy().as_ref());
+    let mut actual = text_to_vec(&latin::file::read_string_utf8(actual).unwrap(), actual.to_string_lossy().as_ref());
+
+    expected.sort();
+    actual.sort();
+
+    if expected.len() != actual.len() {
+        return Err(format!("Number of lines differ, {} vs {}", expected.len(), actual.len()));
     }
 
-    for (i, (exl, acl)) in ex.into_iter().zip(actual.into_iter().map(|&l| l)).enumerate() {
+    for (i, (exl, acl)) in expected.into_iter().zip(actual.into_iter()).enumerate() {
         if !close(exl.0, acl.0) {
             return Err(format!("Contents of line {} differ, {:?} vs {:?}", i, exl, acl));
         }

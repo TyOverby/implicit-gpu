@@ -2,9 +2,13 @@ use implicit::opencl::FieldBuffer;
 use snoot::{Result as ParseResult, Sexpr, simple_parse};
 use snoot::diagnostic::DiagnosticBag;
 use std::fmt::Write;
+use latin;
+use std::path::Path;
 
-pub fn compare(expected: &str, expected_filename: &str, actual: ((usize, usize), Vec<f32>)) -> Result<(), String> {
-    let expected = text_to_vec(expected, expected_filename);
+pub fn compare(expected: &Path, actual: &Path) -> Result<(), String> {
+    let expected = text_to_vec(&latin::file::read_string_utf8(expected).unwrap(), expected.to_string_lossy().as_ref());
+    let actual = text_to_vec(&latin::file::read_string_utf8(actual).unwrap(), actual.to_string_lossy().as_ref());
+
     if expected.0 != actual.0 {
         return Err(format!("size of field differs: {:?} vs {:?}", expected.0, actual.0));
     }

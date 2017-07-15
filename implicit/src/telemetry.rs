@@ -158,7 +158,7 @@ impl Telemetry for DumpTelemetry {
         let svg_path = self.path.join("scene").with_extension("svg");
         svg::write_out(svg_path, scene.clone()).unwrap();
 
-        let perf_file = File::create(self.path.join("perf").with_extension("txt")).unwrap();
+        let perf_file = File::create(self.path.join("scene").with_extension("perf")).unwrap();
         ::flame::dump_text_to_writer(perf_file).unwrap();
         ::flame::clear();
     }
