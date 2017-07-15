@@ -78,7 +78,7 @@ pub fn run_scene(scene: &scene::Scene, telemetry: &mut telemetry::Telemetry) -> 
 
         rect.and_then(|a| a)
     }
-
+    telemetry.scene_started();
     // Setup
     let ctx = opencl::OpenClContext::default();
     let mut nest = Nest::new();

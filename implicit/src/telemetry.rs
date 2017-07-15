@@ -9,6 +9,8 @@ pub trait Telemetry {
     fn intermediate_eval_basic(&mut self, buffer: &FieldBuffer, program: &str, node: &Node);
     fn intermediate_eval_poly(&mut self, buffer: &FieldBuffer);
     fn figure_finished(&mut self, figure: &[OutputShape]);
+
+    fn scene_started(&mut self);
     fn scene_finished(&mut self, scene: &OutputScene);
 }
 
@@ -19,6 +21,7 @@ impl Telemetry for NullTelemetry {
     fn intermediate_eval_basic(&mut self, _buffer: &FieldBuffer, _program: &str, _node: &Node) {}
     fn intermediate_eval_poly(&mut self, _buffer: &FieldBuffer) {}
     fn figure_finished(&mut self, _figure: &[OutputShape]) {}
+    fn scene_started(&mut self) {}
     fn scene_finished(&mut self, _scene: &OutputScene) {}
 }
 
@@ -86,21 +89,31 @@ impl DumpTelemetry {
 }
 
 impl Telemetry for DumpTelemetry {
+    fn scene_started(&mut self) {
+        ::flame::start("scene");
+    }
+
     fn shape_finished(&mut self, buffer: &FieldBuffer, lines: &[((f32, f32), (f32, f32))]) {
+        let _guard = ::flame::start_guard("telemetry shape_finished");
+
         create_dir_all(&self.path).unwrap();
         let path_base = self.path_for_shape();
         let image_location = path_base.with_extension("png");
 
         ::debug::image::save_field_buffer(buffer, image_location, ::debug::image::ColorMode::Debug);
+
         if let Some(field_writer) = self.field_writer.as_ref() {
             (field_writer)(&path_base, buffer);
         }
+
         if let Some(line_writer) = self.line_writer.as_ref() {
             (line_writer)(&path_base, lines);
         }
+
     }
 
     fn intermediate_eval_basic(&mut self, buffer: &FieldBuffer, program: &str, node: &Node) {
+        let _guard = ::flame::start_guard("telemetry intermediate_eval_basic");
         create_dir_all(&self.path).unwrap();
         let path_base = self.path_for_intermediate_basic();
         ::debug::image::save_field_buffer(buffer, path_base.with_extension("png"), ::debug::image::ColorMode::Debug);
@@ -112,6 +125,7 @@ impl Telemetry for DumpTelemetry {
     }
 
     fn intermediate_eval_poly(&mut self, buffer: &FieldBuffer) {
+        let _guard = ::flame::start_guard("telemetry intermediate_eval_poly");
         create_dir_all(&self.path).unwrap();
         let path_base = self.path_for_intermediate_polygon();
         ::debug::image::save_field_buffer(buffer, path_base.with_extension("png"), ::debug::image::ColorMode::Debug);
@@ -123,6 +137,7 @@ impl Telemetry for DumpTelemetry {
     fn figure_finished(&mut self, figure: &[OutputShape]) {
         use export::svg;
         use output::{OutputScene, OutputFigure};
+        let _guard = ::flame::start_guard("telemetry figure_finished");
 
         create_dir_all(&self.path).unwrap();
         let path_base = self.path_for_figure();
@@ -137,7 +152,14 @@ impl Telemetry for DumpTelemetry {
     }
     fn scene_finished(&mut self, scene: &OutputScene) {
         use export::svg;
+        use std::fs::File;
+
+        ::flame::end("scene");
         let svg_path = self.path.join("scene").with_extension("svg");
         svg::write_out(svg_path, scene.clone()).unwrap();
+
+        let perf_file = File::create(self.path.join("perf").with_extension("txt")).unwrap();
+        ::flame::dump_text_to_writer(perf_file).unwrap();
+        ::flame::clear();
     }
 }

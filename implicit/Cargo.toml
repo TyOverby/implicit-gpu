@@ -6,7 +6,7 @@ workspace = "../"
 
 [dependencies]
 ocl = "0.12.*"
-flame = "0.1.11"
+flame = "0.2.0"
 lazy_static = "0.2.*"
 image = "0.10.*"
 itertools = "0.5.*"
