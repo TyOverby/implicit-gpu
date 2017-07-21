@@ -1,4 +1,3 @@
-use implicit::nodes::NodeRef;
 use implicit::telemetry;
 use super::Paths;
 use std::path::PathBuf;
@@ -81,7 +80,7 @@ pub fn run_test(paths: &Paths) -> Result<(), Vec<Error>> {
     let _guard = flame::start_guard(format!("running {:?}", paths.json));
 
     let source = latin::file::read_string_utf8(&paths.json).unwrap();
-    let tree = NodeRef::new(::serde_json::from_str(&source).unwrap());
+    let scene = ::serde_json::from_str(&source).unwrap();
 
     let mut errors = vec![];
 
@@ -97,22 +96,9 @@ pub fn run_test(paths: &Paths) -> Result<(), Vec<Error>> {
             latin::file::write(&actual_path, formats::lines::lines_to_text(lines)).unwrap();
         });
 
-    implicit::run_scene(&implicit::scene::Scene {
-        unit: "px".into(),
-        simplify: true,
+    ::latin::file::write(&paths.json, ::serde_json::to_string_pretty(&scene).unwrap()).unwrap();
 
-        figures: vec![
-            implicit::scene::Figure {
-                shapes: vec![
-                    implicit::scene::Shape {
-                        color: (0, 0, 0),
-                        draw_mode: implicit::scene::DrawMode::Line(implicit::scene::LineMode::Solid),
-                        implicit: tree.clone(),
-                    },
-                ],
-            },
-        ],
-    }, &mut telemetry);
+    implicit::run_scene(&scene, &mut telemetry);
 
     let expected_paths =
         WalkDir::new(&paths.expected_dump)

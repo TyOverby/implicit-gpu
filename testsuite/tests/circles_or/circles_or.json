@@ -1,17 +1,37 @@
 {
-  "kind": "or",
-  "children": [
+  "unit": "px",
+  "simplify": true,
+  "figures": [
     {
-      "kind": "circle",
-      "x": 50.0,
-      "y": 50.0,
-      "r": 100.0
-    },
-    {
-      "kind": "circle",
-      "x": 100.0,
-      "y": 100.0,
-      "r": 100.0
+      "shapes": [
+        {
+          "color": [
+            0,
+            0,
+            0
+          ],
+          "draw_mode": {
+            "Line": "Solid"
+          },
+          "implicit": {
+            "kind": "or",
+            "children": [
+              {
+                "kind": "circle",
+                "x": 50.0,
+                "y": 50.0,
+                "r": 100.0
+              },
+              {
+                "kind": "circle",
+                "x": 100.0,
+                "y": 100.0,
+                "r": 100.0
+              }
+            ]
+          }
+        }
+      ]
     }
   ]
 }
