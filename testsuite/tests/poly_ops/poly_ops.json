@@ -11,7 +11,7 @@
             0
           ],
           "draw_mode": {
-            "Line": "Solid"
+            "line": "solid"
           },
           "implicit": {
             "kind": "and",

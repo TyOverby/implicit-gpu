@@ -1,12 +1,12 @@
-import { circle, or, rect} from './implicit';
+import { circle, or, rect, subtract, singleton_scene} from './implicit';
 
-console.log(circle(5.0, 10.0, 30.0))
+let sub =
+    subtract(
+        circle(5.0, 10.0, 30.0),
+        rect(5.0, 10.0, 30.0, 40.0));
 
-let circle_and_rect = [
-    circle(5.0, 10.0, 30.0),
-    rect(5.0, 10.0, 30.0, 40.0)
-];
 
-let twice_times = [...circle_and_rect, ...circle_and_rect]
+//let out = scene([figure(shape(sub))])
+let out = singleton_scene(sub);
 
-console.log(or(...twice_times, ...twice_times))
+console.log(JSON.stringify(out, null, 2))

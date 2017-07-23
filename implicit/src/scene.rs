@@ -1,11 +1,13 @@
 use super::nodes::NodeRef;
 
 #[derive(Clone, Debug, Eq, PartialEq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
 pub enum LineMode {
     Solid,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
 pub enum DrawMode {
     Filled,
     Line(LineMode),

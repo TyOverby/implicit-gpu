@@ -1,17 +1,21 @@
-export type Implicit = Circle | Rect | And | Or | Not | Modulate | Break | Freeze;
+export type Implicit = Circle | Rect | And | Or | Not | Modulate | Break | Freeze | Translate;
 
 export interface Scene {
     figures: Figure[],
+    unit: string,
+    simplify: boolean,
 }
 
 export interface Figure {
     shapes: Shape[]
 }
 
+export type DrawMode = "filled" | { "line": "solid" }
+
 export interface Shape {
     implicit: Implicit,
     color: [number, number, number],
-    draw_style: "filled" | "line"
+    draw_mode: DrawMode
 }
 
 export interface Circle {
@@ -39,6 +43,13 @@ export interface Or {
     children: Implicit[],
 }
 
+export interface Translate {
+    kind: "translate",
+    dx: number,
+    dy: number,
+    target: Implicit,
+}
+
 export interface Not {
     kind: "not",
     target: Implicit,
@@ -60,6 +71,64 @@ export interface Break {
 export interface Freeze {
     kind: "freeze",
     target: Implicit,
+}
+
+type shape_opts = {
+    color?: [number, number, number],
+    draw_mode?: DrawMode
+};
+
+export function shape(implicit: Implicit, opts?: shape_opts): Shape {
+    let default_opts: shape_opts = {
+        color: [0, 0, 0],
+        draw_mode: "filled",
+    };
+
+    if (opts === null || opts === undefined) {
+        opts = default_opts;
+    } else {
+        opts = extend(default_opts, opts)
+    }
+
+    return {
+        implicit: implicit,
+        color: opts.color,
+        draw_mode: opts.draw_mode,
+    };
+}
+
+export function figure(...shapes: Shape[]): Figure {
+    return {
+        shapes: shapes
+    }
+}
+
+type scene_opts = {
+    unit: "px",
+    simplify: boolean,
+};
+
+export function scene(figures: Figure[], opts?: scene_opts): Scene {
+    let default_opts: scene_opts = {
+        unit: "px",
+        simplify: true,
+    };
+
+    if (opts === null || opts === undefined) {
+        opts = default_opts;
+    } else {
+        opts = extend(default_opts, opts);
+    }
+
+    return {
+        figures: figures,
+        unit: opts.unit,
+        simplify: opts.simplify,
+    };
+}
+
+export function singleton_scene(implicit: Implicit) {
+    return scene([figure(shape(implicit))]);
 }
 
 export function circle(x: number, y: number, r: number): Circle {
@@ -102,12 +171,25 @@ export function not(target: Implicit): Not {
     };
 }
 
+export function subtract(a: Implicit, b: Implicit): And {
+    return and(a, not(b));
+}
+
 export function modulate(how_much: number, target: Implicit): Modulate {
     return {
         kind: "modulate",
         how_much: how_much,
         target: target,
     };
+}
+
+export function translate(dx: number, dy: number, target: Implicit): Translate {
+    return {
+        kind: "translate",
+        dx: dx,
+        dy: dy,
+        target: target,
+    }
 }
 
 export function break_here(target: Implicit): Break {
@@ -122,4 +204,28 @@ export function freeze(target: Implicit): Freeze {
         kind: "freeze",
         target: target,
     };
+}
+
+function extend<A, B>(a: A, b: B): A & B {
+    let is_object = typeof b === "object" && b !== null && !Array.isArray(b);
+
+    if (!is_object) {
+        return b as any;
+    }
+
+    let result = JSON.parse(JSON.stringify(a));
+
+    for (let key in b) {
+        let already = result[key];
+        if (already === null || already === undefined) {
+            result[key] = b[key];
+        } else {
+            result[key] = extend(result[key], b[key]);
+        }
+    }
+    return result;
+}
+
+export function write_scene(scene: Scene) {
+    console.log(JSON.stringify(scene, null, 2));
 }

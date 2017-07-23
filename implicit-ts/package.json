@@ -9,6 +9,6 @@
   "author": "Ty Overby",
   "license": "MIT",
   "devDependencies": {
-    "typescript": "^2.3.4"
+    "typescript": "^2.4.2"
   }
 }

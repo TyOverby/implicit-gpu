@@ -1,18 +1,8 @@
 {
-  "unit": "px",
-  "simplify": true,
   "figures": [
     {
       "shapes": [
         {
-          "color": [
-            0,
-            0,
-            0
-          ],
-          "draw_mode": {
-            "Line": "Solid"
-          },
           "implicit": {
             "kind": "or",
             "children": [
@@ -21,31 +11,39 @@
                 "children": [
                   {
                     "kind": "circle",
-                    "x": 50.0,
-                    "y": 50.0,
-                    "r": 50.0
+                    "x": 50,
+                    "y": 50,
+                    "r": 50
                   },
                   {
                     "kind": "not",
                     "target": {
                       "kind": "circle",
-                      "x": 50.0,
-                      "y": 50.0,
-                      "r": 25.0
+                      "x": 50,
+                      "y": 50,
+                      "r": 25
                     }
                   }
                 ]
               },
               {
                 "kind": "circle",
-                "x": 50.0,
-                "y": 50.0,
-                "r": 10.0
+                "x": 50,
+                "y": 50,
+                "r": 10
               }
             ]
-          }
+          },
+          "color": [
+            0,
+            0,
+            0
+          ],
+          "draw_mode": "filled"
         }
       ]
     }
-  ]
+  ],
+  "unit": "px",
+  "simplify": true
 }

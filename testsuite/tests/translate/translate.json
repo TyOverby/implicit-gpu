@@ -1,31 +1,29 @@
 {
-  "unit": "px",
-  "simplify": true,
   "figures": [
     {
       "shapes": [
         {
+          "implicit": {
+            "kind": "translate",
+            "dx": 10,
+            "dy": 10,
+            "target": {
+              "kind": "circle",
+              "x": 50,
+              "y": 50,
+              "r": 50
+            }
+          },
           "color": [
             0,
             0,
             0
           ],
-          "draw_mode": {
-            "Line": "Solid"
-          },
-          "implicit": {
-            "kind": "translate",
-            "dx": 10.0,
-            "dy": 10.0,
-            "target": {
-              "kind": "circle",
-              "x": 50.0,
-              "y": 50.0,
-              "r": 50.0
-            }
-          }
+          "draw_mode": "filled"
         }
       ]
     }
-  ]
+  ],
+  "unit": "px",
+  "simplify": true
 }
