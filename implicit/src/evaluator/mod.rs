@@ -1,14 +1,14 @@
-use std::collections::HashMap;
-use std::sync::Mutex;
+use compiler::*;
+use telemetry::Telemetry;
 
 use itertools::Itertools;
+use nodes::{Node, NodeRef, PolyGroup};
+use opencl::FieldBuffer;
 
 use opencl::OpenClContext;
-use compiler::*;
-use opencl::FieldBuffer;
 use polygon::run_poly;
-use nan_filter::filter_nans;
-use nodes::{Node, StaticNode, PolyGroup};
+use std::collections::HashMap;
+use std::sync::Mutex;
 
 #[derive(Debug)]
 pub struct Evaluator {
@@ -29,7 +29,7 @@ impl Evaluator {
         }
     }
 
-    pub fn evaluate(&self, which: GroupId, ctx: &OpenClContext) -> FieldBuffer {
+    pub fn evaluate(&self, which: GroupId, ctx: &OpenClContext, telemetry: &mut Telemetry) -> FieldBuffer {
         let _guard = ::flame::start_guard(format!("evaluate {:?}", which));
         {
             let finished = self.finished.lock().unwrap();
@@ -38,20 +38,22 @@ impl Evaluator {
             }
         }
 
-        let eval_basic_group = |root: &StaticNode| -> FieldBuffer {
+        let eval_basic_group = |root: &Node, telemetry: &mut Telemetry| -> FieldBuffer {
             let _guard = ::flame::start_guard(format!("eval_basic_group"));
-            let (program, compilation) = ::compiler::compile(root.node());
-            let deps: Vec<FieldBuffer> = compilation.deps()
+            let (program, compilation_info) = ::compiler::compile(root);
+            let deps: Vec<FieldBuffer> = compilation_info
+                .dependencies
                 .iter()
-                .map(|&g| self.evaluate(g, ctx))
+                .map(|&g| self.evaluate(g, ctx, telemetry))
                 .collect();
 
             let out = ctx.field_buffer(self.width, self.height, None);
-            let kernel = ctx.compile("apply", program);
+            let kernel = ctx.compile("apply", program.clone());
 
-            let mut kc = kernel.gws([self.width, self.height])
-                .arg_buf(out.buffer())
-                .arg_scl(self.width as u64);
+            let mut kc = kernel.gws([self.width, self.height]).arg_buf(out.buffer()).arg_scl(
+                self.width as
+                    u64,
+            );
 
             for dep in &deps {
                 kc = kc.arg_buf(dep.buffer());
@@ -59,53 +61,39 @@ impl Evaluator {
 
             ::flame::span_of("eval", || kc.enq().unwrap());
 
+            telemetry.intermediate_eval_basic(&out, &program, root);
             out
         };
 
-        let eval_polygon = |poly: &PolyGroup| -> FieldBuffer {
+        let eval_polygon = |poly: &PolyGroup, dx: f32, dy: f32, telemetry: &mut Telemetry| -> FieldBuffer {
             let _guard = ::flame::start_guard(format!("eval_poylgon"));
             let additive_field = {
                 let _guard = ::flame::start_guard("additive field");
-                let xs_all: Vec<_> = poly.additive
-                    .iter()
-                    .flat_map(|a| a.xs.iter().cloned())
-                    .collect();
-                let ys_all: Vec<_> = poly.additive
-                    .iter()
-                    .flat_map(|a| a.ys.iter().cloned())
-                    .collect();
-                run_poly(&xs_all, &ys_all, self.width, self.height, ctx)
+                let points_all = poly.additive.iter().flat_map(|a| a.points.iter().cloned());
+                run_poly(points_all, self.width, self.height, Some((dx, dy)), ctx).unwrap()
             };
 
             let subtractive_field = {
                 let _guard = ::flame::start_guard("subtractive field");
-                let xs_all: Vec<_> = poly.subtractive
-                    .iter()
-                    .flat_map(|a| a.xs.iter().cloned())
-                    .collect();
-                let ys_all: Vec<_> = poly.subtractive
-                    .iter()
-                    .flat_map(|a| a.ys.iter().cloned())
-                    .collect();
-                if xs_all.len() != 0 {
-                    Some(run_poly(&xs_all, &ys_all, self.width, self.height, ctx))
-                } else {
-                    None
-                }
+                let points_all = poly.subtractive.iter().flat_map(|a| a.points.iter().cloned());
+                run_poly(points_all, self.width, self.height, Some((dx, dy)), ctx)
             };
 
-            if let Some(subtractive_field) = subtractive_field {
-                let program = create_node!(a, {
-                    a(Node::And(vec![a(Node::OtherGroup(GroupId(0))),
-                                     a(Node::Not(a(Node::OtherGroup(GroupId(1)))))]))
-                });
+            let out = if let Some(subtractive_field) = subtractive_field {
+                let program = Node::And {
+                    children: vec![
+                        NodeRef::new(Node::OtherGroup { group_id: GroupId(0) }),
+                        NodeRef::new(Node::Not { target: NodeRef::new(Node::OtherGroup { group_id: GroupId(1) }) }),
+                    ],
+                };
 
-                let (program, _) = ::compiler::compile(program.node());
+                let (program, _) = ::compiler::compile(&program);
                 let kernel = ctx.compile("apply", program);
 
                 let out = ctx.field_buffer(self.width, self.height, None);
 
-                let kc = kernel.gws([self.width, self.height])
+                let kc = kernel
+                    .gws([self.width, self.height])
                     .arg_buf(out.buffer())
                     .arg_scl(self.width as u64)
                     .arg_buf(additive_field.buffer())
@@ -116,22 +104,23 @@ impl Evaluator {
                 out
             } else {
                 additive_field
-            }
+            };
+
+            telemetry.intermediate_eval_poly(&out);
+            out
         };
 
         let group = self.nest.get(which);
         let out = match group {
-            &NodeGroup::Basic(ref root) => eval_basic_group(root),
+            &NodeGroup::Basic(ref root) => eval_basic_group(root, telemetry),
             &NodeGroup::Freeze(ref root) => {
-                let field_buf = eval_basic_group(root);
+                let field_buf = eval_basic_group(root, telemetry);
                 let (width, height) = field_buf.size();
-                let (xs, ys) = ::marching::run_marching(&field_buf, ctx);
-                let xs = filter_nans(ctx, &xs);
-                let ys = filter_nans(ctx, &ys);
-                let res = ::polygon::run_poly_raw(xs, ys, width, height, ctx);
+                let lines = ::marching::run_marching(&field_buf, ctx);
+                let res = ::polygon::run_poly_raw(lines, width, height, None, ctx);
                 res
             }
-            &NodeGroup::Polygon(ref poly) => eval_polygon(poly),
+            &NodeGroup::Polygon { ref group, dx, dy } => eval_polygon(group, dx, dy, telemetry),
         };
 
         {
@@ -143,12 +132,13 @@ impl Evaluator {
     }
 
     pub fn get_polylines(&self, buffer: &FieldBuffer, ctx: &OpenClContext) -> Vec<((f32, f32), (f32, f32))> {
-        let (xs, ys) = ::marching::run_marching(buffer, ctx);
-        let points = xs.values().into_iter().zip(ys.values().into_iter());
-        let lines = points.tuples();
-        lines.filter(|&((x1, y1), (x2, y2))|
-            !(x1.is_nan() || x2.is_nan() || y1.is_nan() || y2.is_nan())
-        ).collect()
+        let lines = ::marching::run_marching(buffer, ctx);
+        let lines = lines.values().into_iter().tuples::<(_, _, _, _)>();
+        lines
+            .map(|(a, b, c, d)| ((a, b), (c, d)))
+            .filter(|&((x1, y1), (x2, y2))| {
+                !(x1.is_nan() || x2.is_nan() || y1.is_nan() || y2.is_nan())
+            })
+            .collect()
     }
 }
-

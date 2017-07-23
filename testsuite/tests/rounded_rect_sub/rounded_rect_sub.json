@@ -1,0 +1,131 @@
+{
+  "unit": "px",
+  "simplify": true,
+  "figures": [
+    {
+      "shapes": [
+        {
+          "color": [
+            0,
+            0,
+            0
+          ],
+          "draw_mode": {
+            "line": "solid"
+          },
+          "implicit": {
+            "kind": "and",
+            "children": [
+              {
+                "kind": "polygon",
+                "dx": 0.0,
+                "dy": 0.0,
+                "group": {
+                  "additive": [
+                    {
+                      "points": [
+                        [
+                          20.0,
+                          20.0
+                        ],
+                        [
+                          220.0,
+                          20.0
+                        ],
+                        [
+                          220.0,
+                          20.0
+                        ],
+                        [
+                          220.0,
+                          220.0
+                        ],
+                        [
+                          220.0,
+                          220.0
+                        ],
+                        [
+                          20.0,
+                          220.0
+                        ],
+                        [
+                          20.0,
+                          220.0
+                        ],
+                        [
+                          20.0,
+                          20.0
+                        ]
+                      ]
+                    }
+                  ],
+                  "subtractive": []
+                }
+              },
+              {
+                "kind": "not",
+                "target": {
+                  "kind": "modulate",
+                  "how_much": -50.0,
+                  "target": {
+                    "kind": "freeze",
+                    "target": {
+                      "kind": "modulate",
+                      "how_much": 50.0,
+                      "target": {
+                        "kind": "polygon",
+                        "dx": 0.0,
+                        "dy": 0.0,
+                        "group": {
+                          "additive": [
+                            {
+                              "points": [
+                                [
+                                  20.0,
+                                  20.0
+                                ],
+                                [
+                                  220.0,
+                                  20.0
+                                ],
+                                [
+                                  220.0,
+                                  20.0
+                                ],
+                                [
+                                  220.0,
+                                  220.0
+                                ],
+                                [
+                                  220.0,
+                                  220.0
+                                ],
+                                [
+                                  20.0,
+                                  220.0
+                                ],
+                                [
+                                  20.0,
+                                  220.0
+                                ],
+                                [
+                                  20.0,
+                                  20.0
+                                ]
+                              ]
+                            }
+                          ],
+                          "subtractive": []
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

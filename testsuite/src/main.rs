@@ -1,89 +1,137 @@
 extern crate implicit;
+extern crate regex;
+extern crate colored;
 extern crate latin;
-extern crate implicit_language;
 extern crate walkdir;
 extern crate flame;
+#[macro_use]
 extern crate snoot;
+#[macro_use]
+extern crate serde_derive;
+extern crate serde_json;
 
+use colored::Colorize;
 use std::path::PathBuf;
-use walkdir::{WalkDir, DirEntry};
-use implicit::opencl::OpenClContext;
+use walkdir::{DirEntry, WalkDir};
 
-mod formats;
+pub mod formats;
+mod run_test;
 
-struct Paths {
-    script: PathBuf,
-
-    actual_image: PathBuf,
-    actual_values: PathBuf,
-    actual_lines: PathBuf,
-
-    _expected_image: PathBuf,
-    _expected_values: PathBuf,
-    _expected_lines: PathBuf,
+pub struct Paths {
+    json: PathBuf,
+    parent: PathBuf,
+    actual_dump: PathBuf,
+    expected_dump: PathBuf,
 }
 
-fn run_test(paths: &Paths, ctx: &OpenClContext) {
-    let _guard = flame::start_guard(format!("running {:?}", paths.script));
-    use implicit::debug::image;
-
-    let source = latin::file::read(&paths.script).unwrap();
-    let source = String::from_utf8(source).unwrap();
-
-    let script_name = paths.script.to_str().unwrap_or("<unknown source file>");
-    let tree = implicit_language::parse(&source[..], script_name).unwrap();
-    println!("{:?}", tree);
-
-    let mut nest = implicit::compiler::Nest::new();
-    let target = nest.group(tree.node());
-    let evaluator = implicit::evaluator::Evaluator::new(nest, 500, 500, None);
-    let result = evaluator.evaluate(target, &ctx);
-    let lines = evaluator.get_polylines(&result, &ctx);
-    ctx.empty_queue();
-
-    image::save_field_buffer(&result, &paths.actual_image, image::ColorMode::Debug);
-    latin::file::write(&paths.actual_values, formats::field::field_to_text(&result)).unwrap();
-    latin::file::write(&paths.actual_lines, formats::lines::lines_to_text(&lines)).unwrap();
-}
 
 fn main() {
-    fn ends_with_impl(e: &DirEntry) -> bool {
-        e.path()
-            .extension()
-            .map(|e| e == "impl")
-            .unwrap_or(false)
+    use std::io::{Write, stdout};
+    fn ends_with_json(e: &DirEntry) -> bool { e.path().extension().map(|e| e == "json").unwrap_or(false) }
+    fn clear(size: usize) {
+        print!(
+            "{}{}{}",
+            ::std::iter::repeat(8 as char).take(size).collect::<String>(),
+            ::std::iter::repeat(' ').take(size).collect::<String>(),
+            ::std::iter::repeat(8 as char).take(size).collect::<String>(),
+        );
     }
+
+    let args = std::env::args().collect::<Vec<_>>();
+    let test_matcher = if args.len() == 1 {
+        ::regex::RegexSet::new(&["."]).unwrap()
+    } else {
+        match ::regex::RegexSet::new(&args) {
+            Ok(set) => set,
+            Err(e) => {
+                println!("{:?}", e);
+                ::std::process::exit(2);
+            }
+        }
+    };
 
     let root_dir = ::std::env::current_dir().unwrap();
     let mut test_dir = root_dir.clone();
     test_dir.push("tests");
 
-    let iter = WalkDir::new(&test_dir)
+    // Walk the tests directory
+    let test_files = WalkDir::new(&test_dir)
         .into_iter()
+        // Taking only the ones that actually have paths
         .filter_map(Result::ok)
-        .filter(ends_with_impl)
-        .map(|e| e.path().to_path_buf());
+        // With a filename that ends in ".impl"
+        .filter(ends_with_json)
+        // Converted to a PathBuf
+        .map(|e| e.path().to_path_buf())
+        // Where the path can be converted to a string
+        .filter(|p| p.to_str().is_some())
+        // And the path is accepted by the matcher
+        .filter(|p| test_matcher.is_match(p.to_str().unwrap()))
+        .collect::<Vec<_>>();
 
-    let ctx = implicit::opencl::OpenClContext::default();
+    let max_path_size = test_files
+        .iter()
+        .map(|p| p.strip_prefix(&test_dir))
+        .filter_map(Result::ok)
+        .filter_map(|p| p.to_str().map(str::len))
+        .max()
+        .unwrap_or(0);
 
-    for entry in iter {
-        let script = entry;
-        let script_name: PathBuf = script.strip_prefix(&test_dir).unwrap().into();
+
+    let mut any_failures = false;
+    for entry in test_files {
+        let json = entry;
+        let script_name: PathBuf = json.strip_prefix(&test_dir).unwrap().into();
+        let folder = script_name.iter().nth(0).unwrap();
 
         let paths = Paths {
-            script: script,
-            actual_image: root_dir.join("actual").join(script_name.with_extension("png")),
-            actual_values: root_dir.join("actual").join(script_name.with_extension("values")),
-            actual_lines: root_dir.join("actual").join(script_name.with_extension("lines")),
-
-            _expected_image: root_dir.join("expected").join(script_name.with_extension("png")),
-            _expected_values: root_dir.join("expected").join(script_name.with_extension("values")),
-            _expected_lines: root_dir.join("expected").join(script_name.with_extension("lines")),
+            json,
+            parent: root_dir.clone(),
+            actual_dump: root_dir.join("actual").join(folder),
+            expected_dump: root_dir.join("expected").join(folder),
         };
 
-        if !paths.script.ends_with("frozen_poly.impl") {
-            run_test(&paths, &ctx);
+        let running = "running".yellow();
+        print!(
+            "{}:{} {}",
+            script_name.to_str().unwrap(),
+            std::iter::repeat(' ')
+                .take(max_path_size - script_name.to_str().unwrap().len())
+                .collect::<String>(),
+            running,
+        );
+        stdout().flush().unwrap();
+        clear(running.len());
+
+        let old_hook = ::std::panic::take_hook();
+        //::std::panic::set_hook(Box::new(|_| ()));
+        let result = ::std::panic::catch_unwind(|| run_test::run_test(&paths))
+            .map_err(|e| e.downcast::<String>())
+            .map_err(|e| e.or_else(|e| e.downcast::<&'static str>().map(|s| Box::new(s.to_string()))));
+        ::std::panic::set_hook(old_hook);
+
+        match result {
+            Ok(Ok(())) => println!("{}", "OK!".green()),
+            Ok(Err(errors)) => {
+                any_failures = true;
+                println!("{}", "ERROR!".red());
+                for e in errors {
+                    print!("{}", e.to_string().red());
+                }
+            }
+            Err(Ok(panic_string)) => {
+                any_failures = true;
+                println!("{}", "PANIC!".red());
+                println!("  {}", panic_string.trim().blue());
+            }
+            Err(Err(_)) => {
+                any_failures = true;
+                println!("{}", "PANIC!".red());
+            }
         }
     }
-}
 
+    if any_failures {
+        std::process::exit(1);
+    }
+}

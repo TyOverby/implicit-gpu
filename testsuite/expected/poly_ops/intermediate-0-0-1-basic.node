@@ -1,0 +1,18 @@
+And {
+    children: [
+        NodeRef {
+            node: Circle {
+                x: 76,
+                y: 31,
+                r: 75
+            }
+        },
+        NodeRef {
+            node: OtherGroup {
+                group_id: GroupId(
+                    0
+                )
+            }
+        }
+    ]
+}

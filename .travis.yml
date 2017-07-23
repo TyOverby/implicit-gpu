@@ -1,0 +1,19 @@
+language: rust
+env: 
+    - RUST_BACKTRACE=1 RUST_TEST_THREADS=1
+rust:
+    - stable
+    - beta
+    - nightly
+cache: cargo
+os:
+    - osx
+    - linux
+matrix:
+  allow_failures:
+    - os: linux
+script:
+    - cargo test --all
+    - cargo test --all --release
+    - cd testsuite && cargo run 
+    - cd testsuite && cargo run --release
