@@ -15,45 +15,55 @@
     <script src="./node_modules/monaco-editor/min/vs/loader.js"></script>
     <script>
         require.config({ paths: { 'vs': './node_modules/monaco-editor/min/vs' } });
-        require(['vs/editor/editor.main'], function () {
-            fetch("./implicit.ts").then(v => v.text()).then(lib => {
-                monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
-                    target: monaco.languages.typescript.ScriptTarget.ES5,
-                    allowNonTsExtensions: true,
-                    diagnostics: true,
-                    strictNullChecks: true,
-                });
-                monaco.languages.typescript.typescriptDefaults.addExtraLib("declare module 'implicit' {" + lib + "}");
+        require(['vs/editor/editor.main'], function () { (async () => {
+            const libts = await fetch("./implicit.ts").then(r => r.text());
+            const libjs = await fetch("./out/implicit.js").then(r => r.text());
 
+            let exports = {};
+            eval(libjs);
+            const implicit_module = exports;
 
-                const editor = monaco.editor.create(document.getElementById('container'), {
-                    value: [
-                        'import * as implicit from "implicit"',
-                        'function x() {',
-                        '\tconsole.log("Hello world!',
-                        '5+5',
-                    ].join('\n'),
-                    language: 'typescript'
-                });
-
-                const model = editor.model;
-
-                editor.onDidChangeModelContent(() => {
-                    monaco.languages.typescript.getTypeScriptWorker()
-                        .then(function (worker) {
-                            worker(model.uri)
-                                .then(function (client) {
-                                    client.getSyntacticDiagnostics(model.uri.toString()).then(r => console.log(r));
-                                    client.getSemanticDiagnostics(model.uri.toString()).then(r => console.log(r));
-                                    client.getEmitOutput(model.uri.toString()).then(function (r) {
-                                        console.log(r);
-                                        console.log(r.outputFiles[0].text);
-                                    });
-                                });
-                        });
-                })
+            monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+                target: monaco.languages.typescript.ScriptTarget.ES5,
+                allowNonTsExtensions: true,
+                diagnostics: true,
+                strictNullChecks: true,
             });
-        });
+
+            monaco.languages.typescript.typescriptDefaults.addExtraLib("declare module 'implicit' {" + libts + "}");
+
+            const editor = monaco.editor.create(document.getElementById('container'), {
+                value: [
+                    'import * as implicit from "implicit"',
+                    'function x() {',
+                    '\tconsole.log("Hello world!',
+                    '5+5',
+                ].join('\n'),
+                language: 'typescript'
+            });
+
+            const model = editor.model;
+            const worker = await monaco.languages.typescript.getTypeScriptWorker();
+            const client = await worker(model.uri);
+            editor.onDidChangeModelContent(async () => {
+                const syntaxErrors = await client.getSyntacticDiagnostics(model.uri.toString());
+                const semanticErrors = await client.getSemanticDiagnostics(model.uri.toString());
+                const compilation = await client.getEmitOutput(model.uri.toString());
+                const text = compilation.outputFiles[0].text;
+                console.log(text);
+
+                if (semanticErrors.length === 0 && syntaxErrors.length === 0) {
+                    let exports = {};
+                    const require = () => implicit_module;
+                    try {
+                        eval(text);
+                    } catch (e) {
+                        console.error(e);
+                    }
+                    console.log(exports);
+                }
+            });
+          })()});
     </script>
 </body>
 
