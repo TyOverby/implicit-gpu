@@ -1,0 +1,11 @@
+[package]
+name = "twf"
+version = "0.1.0"
+authors = ["Ty Overby <ty@pre-alpha.com>"]
+
+[dependencies]
+serde = "*"
+serde_json = "*"
+futures = "*"
+hyper = "*"
+hyper-router = "*"
