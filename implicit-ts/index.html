@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+</head>
+
+<body>
+
+    <h2>Monaco Editor Sample</h2>
+    <div id="container" style="width:800px;height:600px;border:1px solid grey"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="./node_modules/monaco-editor/min/vs/loader.js"></script>
+    <script>
+        require.config({ paths: { 'vs': './node_modules/monaco-editor/min/vs' } });
+        require(['vs/editor/editor.main'], function () {
+            fetch("./implicit.ts").then(v => v.text()).then(lib => {
+                monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+                    target: monaco.languages.typescript.ScriptTarget.ES5,
+                    allowNonTsExtensions: true,
+                    diagnostics: true,
+                    strictNullChecks: true,
+                });
+                monaco.languages.typescript.typescriptDefaults.addExtraLib("declare module 'implicit' {" + lib + "}");
+
+
+                const editor = monaco.editor.create(document.getElementById('container'), {
+                    value: [
+                        'import * as implicit from "implicit"',
+                        'function x() {',
+                        '\tconsole.log("Hello world!',
+                        '5+5',
+                    ].join('\n'),
+                    language: 'typescript'
+                });
+
+                const model = editor.model;
+
+                editor.onDidChangeModelContent(() => {
+                    monaco.languages.typescript.getTypeScriptWorker()
+                        .then(function (worker) {
+                            worker(model.uri)
+                                .then(function (client) {
+                                    client.getSyntacticDiagnostics(model.uri.toString()).then(r => console.log(r));
+                                    client.getSemanticDiagnostics(model.uri.toString()).then(r => console.log(r));
+                                    client.getEmitOutput(model.uri.toString()).then(function (r) {
+                                        console.log(r);
+                                        console.log(r.outputFiles[0].text);
+                                    });
+                                });
+                        });
+                })
+            });
+        });
+    </script>
+</body>
+
+</html>
