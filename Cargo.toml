@@ -9,3 +9,9 @@ serde_json = "*"
 futures = "*"
 hyper = "*"
 hyper-router = "*"
+regex = "*"
+combine = "*"
+
+[dev-dependencies]
+serde_derive = "*"
+void = "*"
