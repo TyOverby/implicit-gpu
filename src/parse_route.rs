@@ -1,5 +1,6 @@
 use combine::{self, Parser}; 
 use combine::*;
+use regex;
 use hyper::Method;
 
 #[derive(Debug, Eq, PartialEq)]
@@ -18,6 +19,28 @@ enum SegmentPiece {
 struct Segment(Vec<SegmentPiece>);
 
 type StrParser<'a, R> = combine::Parser<Output=R, Input=&'a str>;
+
+impl ParseResult {
+    pub fn compile(self) -> (Option<Method>, String) {
+        use std::fmt::Write;
+        use self::SegmentPiece::*;
+
+        let mut out = String::new();
+        write!(out, "/?").unwrap();
+        for segment in self.segments {
+            for piece in segment.0 {
+                match piece {
+                    Literal(l) => write!(out, "{}", regex::escape(&l)),
+                    Pattern(p) => write!(out, "(?P<{}>[^/]+)", regex::escape(&p)),
+                }.unwrap()
+            }
+            write!(out, "/").unwrap();
+        }
+        write!(out, "?").unwrap();
+
+        return (self.method, out)
+    }
+}
 
 fn verb<'a>() -> Box<StrParser<'a, Option<Method>>> {
     use combine::char::string_cmp;
@@ -47,9 +70,10 @@ fn verb<'a>() -> Box<StrParser<'a, Option<Method>>> {
 }
 
 fn segment_piece<'a>() -> Box<StrParser<'a, SegmentPiece>> {
+    use combine::char::*;
     let literal = many1::<Vec<_>, _>(none_of("{}/".chars())).map(|r| r.into_iter().collect::<String>());
-    let literal_2 = many1::<Vec<_>, _>(none_of("{}/".chars())).map(|r| r.into_iter().collect::<String>());
-    let pattern = token('{').and(literal_2).and(token('}')).map(|((_, r), _)| SegmentPiece::Pattern(r));
+    let name = token('_').or(letter()).and(many(token('_').or(alpha_num()))).map(|(f, mut r): (char, String)| {r.insert(0, f); r});
+    let pattern = token('{').and(name).and(token('}')).map(|((_, r), _)| SegmentPiece::Pattern(r));
 
     literal.map(|r| SegmentPiece::Literal(r)).or(pattern).boxed()
 }
@@ -88,6 +112,20 @@ mod test {
 
     fn run_ok(input: &str) -> super::ParseResult {
         run(input).unwrap()
+    }
+
+    fn compile_ok(input: &str) -> String {
+        run(input).unwrap().compile().1
+    }
+
+    #[test]
+    fn compile_a_few() {
+        assert_eq!(compile_ok("abc"), r"/?abc/?");
+        assert_eq!(compile_ok("abc/def"), r"/?abc/def/?");
+        assert_eq!(compile_ok("{named}"), r"/?(?P<named>[^/]+)/?");
+        assert_eq!(compile_ok("{a}-{b}"), r"/?(?P<a>[^/]+)\-(?P<b>[^/]+)/?");
+        assert_eq!(compile_ok("a/{named}/b"), r"/?a/(?P<named>[^/]+)/b/?");
+        assert_eq!(compile_ok("{a}/{b}"), r"/?(?P<a>[^/]+)/(?P<b>[^/]+)/?");
     }
 
     #[test]
