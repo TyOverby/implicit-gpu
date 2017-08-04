@@ -15,6 +15,7 @@ fn multiply(_: twf::api::RequestInfo, problem: Problem) -> Result<f64, void::Voi
 }
 
 pub fn main() {
-    let mut builder = twf::api::ApiBuilder::new();
-    builder.add_api("api/divide", multiply);
+    let mut server = twf::api::Server::new();
+    server.add_api("api/multiply", multiply);
+    server.run();
 }

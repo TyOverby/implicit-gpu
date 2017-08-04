@@ -1,6 +1,7 @@
 use regex::{Regex, RegexSet, Captures};
 use hyper::Method;
 
+#[derive(Clone)]
 pub struct RouteBuilder<T> {
     set: RegexSet,
     regex_and_verbs: Vec<(Option<Method>, Regex)>,
@@ -8,12 +9,18 @@ pub struct RouteBuilder<T> {
 }
 
 impl <T> RouteBuilder<T> {
-    pub fn new<I: Clone + Iterator<Item=(Option<Method>, String, T)>>(routes: I) -> RouteBuilder<T> {
-        let routes_dup: Vec<_> = routes.clone().map(|(_, r, _)| r).collect();
+    pub fn new<I: Iterator<Item=(Option<Method>, String, T)>>(routes: I) -> RouteBuilder<T> {
+        let mut all_regex_strings = vec![];
+        let mut regex_and_verbs = vec![];
+        let mut values = vec![];
 
-        let (regexes, values): (Vec<_>, Vec<_>) = routes.map(|(a, b, c,)| ((a, b), c)).unzip();
-        let regex_and_verbs: Vec<_> = regexes.into_iter().map(|(verb, regex)| (verb, Regex::new(&regex[..]).unwrap())).collect();
-        let regex_set = RegexSet::new(routes_dup).unwrap();
+        for (method, regex, value) in routes {
+            all_regex_strings.push(regex.clone());
+            regex_and_verbs.push((method, Regex::new(&regex).unwrap()));
+            values.push(value);
+        }
+
+        let regex_set = RegexSet::new(all_regex_strings).unwrap();
 
         RouteBuilder {
             set: regex_set,
