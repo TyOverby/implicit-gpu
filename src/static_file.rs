@@ -6,7 +6,10 @@ use std::io::{Read, BufReader};
 
 pub fn serve_statically<'a, I>(roots: I, mut path: &str) -> Option<(Mime, Vec<u8>)> 
 where I: Iterator<Item=&'a str>{
-    println!("path is {}", path);
+    if path.starts_with("./") {
+        path = &path[2..];
+    }
+
     if path.contains("../") || path.contains("./") {
         return None;
     }

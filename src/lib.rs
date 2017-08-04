@@ -13,3 +13,5 @@ pub mod api;
 pub mod routes;
 pub mod parse_route;
 pub mod static_file;
+
+pub fn create() -> api::Server { api::Server::new() }

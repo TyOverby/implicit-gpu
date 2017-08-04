@@ -1,6 +1,6 @@
 #[macro_use]
 extern crate serde_derive;
-extern crate twf;
+extern crate happy;
 
 #[derive(Deserialize)]
 struct LeftPad {
@@ -8,13 +8,13 @@ struct LeftPad {
     padding: usize,
 }
 
-fn left_pad(_: twf::api::RequestInfo, problem: LeftPad) -> String {
+fn left_pad(_: happy::api::RequestInfo, problem: LeftPad) -> String {
     let LeftPad { string, padding } = problem;
     format!("{:width$}", string, width = padding)
 }
 
 pub fn main() {
-    happy::start()
+    happy::create()
         .static_dir("static")
         .api("api/left-pad", left_pad)
         .run();
