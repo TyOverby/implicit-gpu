@@ -11,6 +11,8 @@ hyper = "*"
 hyper-router = "*"
 regex = "*"
 combine = "*"
+mime = "*"
+mime_guess = "2.0.0-alpha.1"
 
 [dev-dependencies]
 serde_derive = "*"

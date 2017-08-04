@@ -15,7 +15,8 @@ fn multiply(_: twf::api::RequestInfo, problem: Problem) -> Result<f64, void::Voi
 }
 
 pub fn main() {
-    let mut server = twf::api::Server::new();
-    server.add_api("api/multiply", multiply);
-    server.run();
+    twf::api::Server::new()
+        .static_dir("static")
+        .api("api/multiply", multiply)
+        .run();
 }

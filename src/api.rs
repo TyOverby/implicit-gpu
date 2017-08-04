@@ -144,8 +144,18 @@ impl ::hyper::server::Service for RunningService {
         use futures::future::{ok, FutureResult};
         use futures::Future;
         use hyper::StatusCode;
+        use hyper::header::ContentType;
+        use super::static_file::serve_statically;
 
         let (method, uri, http_version, headers, body) = req.deconstruct();
+
+        let static_routes = self.static_route.iter().map(AsRef::as_ref);
+        if let Some((mime, content)) = serve_statically(static_routes, uri.path()) {
+            let response = Response::new()
+                .with_header(ContentType(mime))
+                .with_body(content);
+            return ok(response).boxed()
+        }
 
         if let Some((handler, _matches)) = self.routes.match_path(method.clone(), uri.clone().path()) {
             let handler = handler.clone();
