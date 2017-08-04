@@ -3,17 +3,19 @@ name = "happy"
 version = "0.1.0"
 authors = ["Ty Overby <ty@pre-alpha.com>"]
 
+description = "A simple web framework with a focus on serving static files and hosting APIs"
+license = "MIT/Apache-2.0"
+
 [dependencies]
-serde = "*"
-serde_json = "*"
-futures = "*"
-hyper = "*"
-hyper-router = "*"
-regex = "*"
-combine = "*"
-mime = "*"
+serde = "1.*.*"
+serde_json = "1.*.*"
+futures = "0.1.*"
+hyper = "0.11.*"
+regex = "0.2.*"
+combine = "2.4.*"
+mime = "0.3.*"
 mime_guess = "2.0.0-alpha.1"
-void = "*"
+void = "1.*.*"
 
 [dev-dependencies]
-serde_derive = "*"
+serde_derive = "1.*.*"
