@@ -1,4 +1,5 @@
 extern crate serde;
+extern crate void;
 extern crate mime;
 extern crate mime_guess;
 extern crate regex;

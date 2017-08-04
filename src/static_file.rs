@@ -11,6 +11,9 @@ where I: Iterator<Item=&'a str>{
         return None;
     }
 
+    // Remove trailing slashes so that the path isn't considered 
+    // "absolute"  This way PathBuf::push doesn't overwrite the 
+    // whole path.
     while path.starts_with("/") {
         path = &path[1..];
     }
@@ -20,19 +23,19 @@ where I: Iterator<Item=&'a str>{
         local_path.push(search_dir);
         local_path.push(path);
 
-        println!("considering: {:?} for {}", local_path, search_dir);
-
         if local_path.exists() && local_path.is_file() {
             let mime = guess_mime_type(&local_path);
             let file = match File::open(local_path) {
                 Ok(f) => f,
                 Err(_) => continue,
             };
+
             let mut file = BufReader::new(file);
             let mut out = Vec::new();
             if let Err(_) = file.read_to_end(&mut out) {
                 continue;
             }
+
             return Some((mime, out));
         }
     }

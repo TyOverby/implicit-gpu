@@ -3,6 +3,7 @@ use serde_json;
 use hyper;
 use serde::{Deserialize, Serialize};
 use futures::{BoxFuture, Future};
+use futures::future::result;
 use futures::Stream;
 use std::error::Error;
 use std::sync::Arc;
@@ -36,37 +37,25 @@ impl Server {
         }
     }
 
-    pub fn api<P, F, I, O, E>(mut self, path: P, f: F) -> Self
+    pub fn api<P, F, I, O>(self, path: P, f: F) -> Self
+    where F: Fn(RequestInfo, I) -> O + 'static + Send + Sync,
+          for <'de> I: Deserialize<'de> + 'static,
+          O: Serialize + Send + 'static,
+          P: Into<String>,
+    {
+        self.result_api(path, move |a, b| -> Result<O, ::void::Void> {
+            Ok(f(a, b))
+        })
+    }
+
+    pub fn result_api<P, F, I, O, E>(self, path: P, f: F) -> Self
     where F: Fn(RequestInfo, I) -> Result<O, E> + 'static + Send + Sync,
           for <'de> I: Deserialize<'de> + 'static,
-          O: Serialize + 'static,
+          O: Serialize + Send + 'static,
           E: Error + Send + 'static,
           P: Into<String>,
     {
-        use futures::Future;
-        
-        self.apis.push((path.into(), Arc::new(Box::new(move |_ri, in_body| {
-            let mut bytes = &in_body[..];
-            let value: I = match serde_json::from_reader(&mut bytes) {
-                Ok(v) => v,
-                Err(e) => return futures::future::err(Box::new(e) as BoxErr).boxed(),
-            };
-
-            let result = match f(RequestInfo, value) {
-                Ok(r) => r,
-                Err(e) => return futures::future::err(Box::new(e) as BoxErr).boxed(),
-            };
-
-            let out = if cfg!(debug) {
-                serde_json::to_string_pretty(&result)
-            } else {
-                serde_json::to_string(&result)
-            };
-
-            let out = out.unwrap();
-            futures::future::ok(out.into_bytes()).boxed()
-        }))));
-        self
+        self.async_api(path, move |a, b| result(f(a, b)))
     }
 
     pub fn async_api<P, FT, F, I, O, E>(mut self, path: P, f: F) -> Self
