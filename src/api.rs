@@ -9,9 +9,9 @@ use std::error::Error;
 use std::sync::Arc;
 use hyper::server::{Http, Request, Response};
 
-pub struct PathInfo;
-pub struct QueryInfo;
-pub struct FormInfo;
+pub struct _PathInfo;
+pub struct _QueryInfo;
+pub struct _FormInfo;
 
 pub struct RequestInfo;
 
@@ -26,12 +26,16 @@ type Handler = Box<Fn((
 #[derive(Clone)]
 pub struct Server {
     static_paths: Vec<String>,
+    addr: String,
+    port: usize,
     apis: Vec<(String, Arc<Handler>)>
 }
 
 impl Server {
-    pub fn new() -> Server {
+    pub(crate) fn new() -> Server {
         Server {
+            port: 8080, // Because I'm not a monster
+            addr: "127.0.0.1".into(),
             static_paths: vec![],
             apis: vec![],
         }
@@ -95,13 +99,23 @@ impl Server {
         self
     }
 
+    pub fn port(mut self, port: usize) -> Self {
+        self.port = port;
+        self
+    }
+
+    pub fn address<S: Into<String>>(mut self, addr: S) -> Self {
+        self.addr = addr.into();
+        self
+    }
+
     pub fn run(self) {
-        let addr = "127.0.0.1:1337".parse().unwrap();
         let routes = self.apis.iter().cloned().map(|(s, h)| {
             let parsed = super::parse_route::parse(&s).unwrap();
             let (method, regex) = parsed.compile();
             (method, regex, h)
         });
+
         let routes = super::routes::RouteBuilder::new(routes);
 
         let service = RunningService {
@@ -109,9 +123,9 @@ impl Server {
             routes: routes
         };
 
+        let addr = format!("{}:{}", self.addr, self.port).parse().unwrap();
         let server = Http::new().bind(&addr, move || Ok(service.clone())).unwrap();
 
-        println!("Listening on http://{} with 1 thread.", server.local_addr().unwrap());
         server.run().unwrap();
     }
 }
@@ -158,7 +172,8 @@ impl ::hyper::server::Service for RunningService {
 
             // Process the body
             let result = body.and_then(move |body_vec| {
-                (handler)((method, uri, http_version, headers), body_vec)
+                let re_tupled = (method, uri, http_version, headers);
+                (handler)(re_tupled, body_vec)
             });
 
             // Return with the result body
@@ -168,16 +183,19 @@ impl ::hyper::server::Service for RunningService {
 
             // Convert application errors to HTTP Errors
             let result = result.or_else(|error| {
-                eprintln!("{}", error);
+                error!("{:?}", error);
                 // TODO: custom error body
-                ok(Response::new().with_status(StatusCode::InternalServerError).with_body("oh no."))
+                let resp = Response::new()
+                    .with_status(StatusCode::InternalServerError)
+                    .with_body("oh no.");
+                ok(resp)
             });
 
             result.boxed()
 
         } else {
             // FIXME 
-            println!("no handler found: {}", uri.path());
+            warn!("404 no handler found: {}", uri.path());
             let res = Response::new()
                 .with_body("404 not found")
                 .with_status(StatusCode::NotFound);

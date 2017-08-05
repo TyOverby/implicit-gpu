@@ -7,6 +7,7 @@ description = "A simple web framework with a focus on serving static files and h
 license = "MIT/Apache-2.0"
 
 [dependencies]
+log = "0.3.*"
 serde = "1.*.*"
 serde_json = "1.*.*"
 futures = "0.1.*"

@@ -8,7 +8,7 @@ struct LeftPad {
     padding: usize,
 }
 
-fn left_pad(_: happy::api::RequestInfo, problem: LeftPad) -> String {
+fn left_pad(_: happy::RequestInfo, problem: LeftPad) -> String {
     let LeftPad { string, padding } = problem;
     format!("{:width$}", string, width = padding)
 }
