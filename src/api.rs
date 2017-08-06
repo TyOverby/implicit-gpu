@@ -15,13 +15,20 @@ pub struct _FormInfo;
 
 pub struct RequestInfo;
 
-type BoxErr = Box<Error + Send + 'static>;
+#[derive(Debug)]
+pub enum ErrorKind {
+    Serialize(serde_json::Error),
+    Deserialize(serde_json::Error),
+    Hyper(hyper::Error),
+    User(Box<Error + Send + 'static>),
+}
+
 type Handler = Box<Fn((
         (hyper::Method, 
          hyper::Uri, 
          hyper::HttpVersion, 
          hyper::header::Headers)), Vec<u8>) -> 
-            BoxFuture<Response, BoxErr> + Send + Sync> ;
+            BoxFuture<Response, ErrorKind> + Send + Sync> ;
 
 #[derive(Clone)]
 pub struct Server {
@@ -72,32 +79,40 @@ impl Server {
           P: Into<String>,
     {
         use futures::Future;
+        use futures::future::err;
         
         self.apis.push((path.into(), Arc::new(Box::new(move |_ri, in_body| {
+
             let mut bytes = &in_body[..];
             let value: I = match serde_json::from_reader(&mut bytes) {
                 Ok(v) => v,
-                Err(e) => return futures::future::err(Box::new(e) as BoxErr).boxed(),
+                Err(e) => return err(ErrorKind::Deserialize(e)).boxed(),
             };
 
-            f(RequestInfo, value).and_then(|result| {
+            let res = f(RequestInfo, value);
+            let res = res.map_err(|e| ErrorKind::User(Box::new(e)));
+            res.and_then(|result| {
                 let out = if cfg!(debug) {
                     serde_json::to_string_pretty(&result)
                 } else {
                     serde_json::to_string(&result)
                 };
 
-                let out = out.unwrap();
+                let out = match out {
+                    Ok(out) => out,
+                    Err(e) => return err(ErrorKind::Serialize(e)),
+                };
+
                 let response = Response::new().with_body(out);
                 futures::future::ok(response)
-            }).map_err(|e| Box::new(e) as BoxErr).boxed()
+            }).boxed()
         }))));
         self
 }
 
     pub fn custom<P, F>(mut self, path: P, f: F) -> Self 
     where P: Into<String>,
-          F: Fn(Request) -> BoxFuture<Response, BoxErr> + Send + Sync + 'static {
+          F: Fn(Request) -> BoxFuture<Response, ErrorKind> + Send + Sync + 'static {
         self.apis.push((path.into(), Arc::new(Box::new(move |intuple, body| {
             let (method, uri, http_version, headers) = intuple;
             let mut request = Request::new(method, uri);
@@ -160,7 +175,7 @@ impl ::hyper::server::Service for RunningService {
 
 
     fn call(&self, req: Request) -> Self::Future {
-        use futures::future::{ok, FutureResult};
+        use futures::future::{ok, err, FutureResult};
         use futures::Future;
         use hyper::StatusCode;
         use hyper::header::ContentType;
@@ -179,12 +194,11 @@ impl ::hyper::server::Service for RunningService {
         if let Some((handler, _matches)) = self.routes.match_path(method.clone(), uri.clone().path()) {
             let handler = handler.clone();
 
+            // Get a future of Vec<u8> 
             let body =  body.fold(Vec::new(), |mut v, b| -> FutureResult<Vec<u8>, ::hyper::Error> { 
                 v.extend_from_slice(&*b); 
                 ok(v)
-            }).map_err(|e| {
-                Box::new(e) as Box<Error + Send>
-            });
+            }).map_err(ErrorKind::Hyper);
 
             // Process the body
             let result = body.and_then(move |body_vec| {
@@ -195,11 +209,27 @@ impl ::hyper::server::Service for RunningService {
             // Convert application errors to HTTP Errors
             let result = result.or_else(|error| {
                 error!("{:?}", error);
-                // TODO: custom error body
-                let resp = Response::new()
-                    .with_status(StatusCode::InternalServerError)
-                    .with_body("oh no.");
-                ok(resp)
+                match error {
+                    ErrorKind::Hyper(h) => err(h),
+                    ErrorKind::Deserialize(d) => {
+                        let resp = Response::new()
+                            .with_status(StatusCode::BadRequest)
+                            .with_body(format!("400 BAD REQUEST\n{}", d));
+                        ok(resp)
+                    }
+                    ErrorKind::Serialize(_d) => {
+                        let resp = Response::new()
+                            .with_status(StatusCode::InternalServerError)
+                            .with_body("500 INTERNAL SERVER ERROR");
+                        ok(resp)
+                    }
+                    ErrorKind::User(_u) => {
+                        let resp = Response::new()
+                            .with_status(StatusCode::InternalServerError)
+                            .with_body("500 INTERNAL SERVER ERROR");
+                        ok(resp)
+                    }
+                }
             });
 
             result.boxed()
@@ -208,8 +238,8 @@ impl ::hyper::server::Service for RunningService {
             // FIXME 
             warn!("404 no handler found: {}", uri.path());
             let res = Response::new()
-                .with_body("404 not found")
-                .with_status(StatusCode::NotFound);
+                .with_status(StatusCode::NotFound)
+                .with_body("404 not found");
             ok(res).boxed()
         }
     }
