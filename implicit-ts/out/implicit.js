@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 function shape(implicit, opts) {
     var default_opts = {
         color: [0, 0, 0],
-        draw_style: "filled",
+        draw_mode: "filled",
     };
     if (opts === null || opts === undefined) {
         opts = default_opts;
@@ -14,7 +14,7 @@ function shape(implicit, opts) {
     return {
         implicit: implicit,
         color: opts.color,
-        draw_style: opts.draw_style,
+        draw_mode: opts.draw_mode,
     };
 }
 exports.shape = shape;
@@ -110,6 +110,15 @@ function modulate(how_much, target) {
     };
 }
 exports.modulate = modulate;
+function translate(dx, dy, target) {
+    return {
+        kind: "translate",
+        dx: dx,
+        dy: dy,
+        target: target,
+    };
+}
+exports.translate = translate;
 function break_here(target) {
     return {
         kind: "break",
@@ -141,3 +150,7 @@ function extend(a, b) {
     }
     return result;
 }
+function write_scene(scene) {
+    console.log(JSON.stringify(scene, null, 2));
+}
+exports.write_scene = write_scene;

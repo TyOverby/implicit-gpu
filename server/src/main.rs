@@ -7,7 +7,7 @@ use implicit::scene::Scene;
 use happy::{RequestInfo, Response};
 use hyper::header::ContentType;
 
-fn hello_world(_: RequestInfo, scene: Scene) -> Response {
+fn process(_: RequestInfo, scene: Scene) -> Response {
     let mut telemetry = implicit::telemetry::NullTelemetry;
     let out = implicit::run_scene(&scene, &mut telemetry);
     let mut out_svg: Vec<u8> = Vec::new();
@@ -18,9 +18,14 @@ fn hello_world(_: RequestInfo, scene: Scene) -> Response {
         .with_header(ContentType(svg))
 }
 
+fn validate(_: RequestInfo, _scene: Scene) -> String {
+    "looks good!".into()
+}
+
 fn main() {
     happy::create()
-        .custom_response("api", hello_world)
+        .custom_response("api/process", process)
+        .api("api/validate", validate)
         .static_dir("../implicit-ts")
         .run();
 }
