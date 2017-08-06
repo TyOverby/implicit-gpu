@@ -110,7 +110,15 @@ impl Server {
         self
     }
 
-    pub fn custom_response<I, P, F>(mut self, path: P, f: F) -> Self 
+    pub fn custom_response<I, P, F>(self, path: P, f: F) -> Self 
+    where P: Into<String>,
+          for <'de> I: Deserialize<'de> + 'static,
+          F: Fn(RequestInfo, I) -> Response + Send + Sync + 'static {
+        use futures::future::ok;
+        self.async_custom_response(path, move |a, b| ok(f(a, b)).boxed())
+    }
+
+    pub fn async_custom_response<I, P, F>(mut self, path: P, f: F) -> Self 
     where P: Into<String>,
           for <'de> I: Deserialize<'de> + 'static,
           F: Fn(RequestInfo, I) -> BoxFuture<Response, ErrorKind> + Send + Sync + 'static {

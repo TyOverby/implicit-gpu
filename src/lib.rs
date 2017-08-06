@@ -15,6 +15,8 @@ mod routes;
 mod parse_route;
 mod static_file;
 
+pub use hyper::{Request, Response};
+
 pub use api::Server;
 pub use api::RequestInfo;
 
