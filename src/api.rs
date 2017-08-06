@@ -21,7 +21,7 @@ type Handler = Box<Fn((
          hyper::Uri, 
          hyper::HttpVersion, 
          hyper::header::Headers)), Vec<u8>) -> 
-            BoxFuture<Vec<u8>, BoxErr> + Send + Sync> ;
+            BoxFuture<Response, BoxErr> + Send + Sync> ;
 
 #[derive(Clone)]
 pub struct Server {
@@ -88,9 +88,25 @@ impl Server {
                 };
 
                 let out = out.unwrap();
-                futures::future::ok(out.into_bytes())
+                let response = Response::new().with_body(out);
+                futures::future::ok(response)
             }).map_err(|e| Box::new(e) as BoxErr).boxed()
         }))));
+        self
+}
+
+    pub fn custom<P, F>(mut self, path: P, f: F) -> Self 
+    where P: Into<String>,
+          F: Fn(Request) -> BoxFuture<Response, BoxErr> + Send + Sync + 'static {
+        self.apis.push((path.into(), Arc::new(Box::new(move |intuple, body| {
+            let (method, uri, http_version, headers) = intuple;
+            let mut request = Request::new(method, uri);
+            request.set_version(http_version);
+            *request.headers_mut() = headers;
+            request.set_body(body);
+            f(request)
+        }))));
+
         self
     }
 
@@ -174,11 +190,6 @@ impl ::hyper::server::Service for RunningService {
             let result = body.and_then(move |body_vec| {
                 let re_tupled = (method, uri, http_version, headers);
                 (handler)(re_tupled, body_vec)
-            });
-
-            // Return with the result body
-            let result = result.and_then(|res_body| {
-                ok(Response::new().with_body(res_body))
             });
 
             // Convert application errors to HTTP Errors
