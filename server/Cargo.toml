@@ -9,12 +9,12 @@ name = "implicit-server"
 path = "./src/main.rs"
 
 [dependencies]
-iron = "0.5.*"
-staticfile = "0.4.*"
-mount = "0.3.*"
-serde = "1.*.*"
-serde_derive = "1.*.*"
-serde_json= "1.*.*"
+hyper = "*"
+mime = "*"
+
+[dependencies.happy]
+path = "../../happy"
 
 [dependencies.implicit]
 path = "../implicit"
+

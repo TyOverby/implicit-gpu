@@ -142,7 +142,7 @@ impl Telemetry for DumpTelemetry {
         create_dir_all(&self.path).unwrap();
         let path_base = self.path_for_figure();
         let svg_path = path_base.with_extension("svg");
-        svg::write_out(svg_path, OutputScene {
+        svg::write_to_file(svg_path, OutputScene {
             figures: vec![
                 OutputFigure {
                     shapes: figure.iter().cloned().collect()
@@ -156,7 +156,7 @@ impl Telemetry for DumpTelemetry {
 
         ::flame::end("scene");
         let svg_path = self.path.join("scene").with_extension("svg");
-        svg::write_out(svg_path, scene.clone()).unwrap();
+        svg::write_to_file(svg_path, scene.clone()).unwrap();
 
         let perf_file = File::create(self.path.join("scene").with_extension("perf")).unwrap();
         ::flame::dump_text_to_writer(perf_file).unwrap();
