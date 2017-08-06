@@ -108,7 +108,25 @@ impl Server {
             }).boxed()
         }))));
         self
-}
+    }
+
+    pub fn custom_response<I, P, F>(mut self, path: P, f: F) -> Self 
+    where P: Into<String>,
+          for <'de> I: Deserialize<'de> + 'static,
+          F: Fn(RequestInfo, I) -> BoxFuture<Response, ErrorKind> + Send + Sync + 'static {
+        use futures::future::err;
+        self.apis.push((path.into(), Arc::new(Box::new(move |_ri, body| {
+            let mut bytes = &body[..];
+            let value: I = match serde_json::from_reader(&mut bytes) {
+                Ok(v) => v,
+                Err(e) => return err(ErrorKind::Deserialize(e)).boxed(),
+            };
+
+            f(RequestInfo, value).boxed()
+        }))));
+
+        self
+    }
 
     pub fn custom<P, F>(mut self, path: P, f: F) -> Self 
     where P: Into<String>,
