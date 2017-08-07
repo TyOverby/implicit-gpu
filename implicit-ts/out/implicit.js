@@ -133,6 +133,14 @@ function freeze(target) {
     };
 }
 exports.freeze = freeze;
+function smooth_outer(how_much, target) {
+    return modulate(-how_much, freeze(modulate(how_much, target)));
+}
+exports.smooth_outer = smooth_outer;
+function smooth_inner(how_much, target) {
+    return modulate(how_much, freeze(modulate(-how_much, target)));
+}
+exports.smooth_inner = smooth_inner;
 function extend(a, b) {
     var is_object = typeof b === "object" && b !== null && !Array.isArray(b);
     if (!is_object) {
