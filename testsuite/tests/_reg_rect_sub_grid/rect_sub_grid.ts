@@ -16,7 +16,7 @@ const count = 4;
 const size = 10;
 
 const holes = implicit.or(... grid(count, count, size, size));
-const rect = implicit.rect(0, 0, count * size * 2, count * size * 2);
+const rect = implicit.rect(-5, -5, count * size * 2, count * size * 2);
 const shape = implicit.subtract(rect, holes);
 
 var scene = implicit.singleton_scene(shape);

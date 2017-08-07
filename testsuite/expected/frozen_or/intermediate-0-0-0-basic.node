@@ -1,0 +1,23 @@
+Modulate {
+    how_much: 10,
+    target: NodeRef {
+        node: Or {
+            children: [
+                NodeRef {
+                    node: Circle {
+                        x: 22,
+                        y: 22,
+                        r: 30
+                    }
+                },
+                NodeRef {
+                    node: Circle {
+                        x: 52,
+                        y: 22,
+                        r: 30
+                    }
+                }
+            ]
+        }
+    }
+}

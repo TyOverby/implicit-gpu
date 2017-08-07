@@ -1,6 +1,6 @@
 Translate {
-    dx: -49,
-    dy: -49,
+    dx: -48,
+    dy: -48,
     target: NodeRef {
         node: And {
             children: [

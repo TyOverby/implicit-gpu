@@ -1,36 +1,36 @@
 {
-  "unit": "px",
-  "simplify": true,
   "figures": [
     {
       "shapes": [
         {
-          "color": [
-            0,
-            0,
-            0
-          ],
-          "draw_mode": "filled",
           "implicit": {
             "kind": "and",
             "children": [
               {
                 "kind": "circle",
-                "x": 20.0,
-                "y": 20.0,
-                "r": 10.0
+                "x": 20,
+                "y": 20,
+                "r": 10
               },
               {
                 "kind": "rect",
-                "x": 0.0,
-                "y": 0.0,
-                "w": 50.0,
-                "h": 50.0
+                "x": 0,
+                "y": 0,
+                "w": 50,
+                "h": 50
               }
             ]
-          }
+          },
+          "color": [
+            0,
+            0,
+            0
+          ],
+          "draw_mode": "filled"
         }
       ]
     }
-  ]
+  ],
+  "unit": "px",
+  "simplify": true
 }

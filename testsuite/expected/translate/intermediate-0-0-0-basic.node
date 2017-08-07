@@ -1,6 +1,6 @@
 Translate {
-    dx: -9,
-    dy: -9,
+    dx: -8,
+    dy: -8,
     target: NodeRef {
         node: Translate {
             dx: 10,

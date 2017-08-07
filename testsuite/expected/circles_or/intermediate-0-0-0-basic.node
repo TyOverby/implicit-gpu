@@ -1,6 +1,6 @@
 Translate {
-    dx: 51,
-    dy: 51,
+    dx: 52,
+    dy: 52,
     target: NodeRef {
         node: Or {
             children: [

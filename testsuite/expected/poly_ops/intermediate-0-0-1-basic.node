@@ -2,8 +2,8 @@ And {
     children: [
         NodeRef {
             node: Circle {
-                x: 76,
-                y: 31,
+                x: 77,
+                y: 32,
                 r: 75
             }
         },

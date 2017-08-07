@@ -6,8 +6,13 @@ use walkdir::{WalkDir};
 use {flame, implicit, latin};
 
 pub enum Error {
+    NoExpectedFiles,
     CouldNotFind { file: String },
     UnexpectedFile { file: String },
+    AabbMismatch {
+        expected: String,
+        actual: String
+    },
     SvgMismatch {
         expected: String,
         actual: String
@@ -35,9 +40,15 @@ pub enum Error {
 impl ::std::fmt::Display for Error {
     fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> Result<(), ::std::fmt::Error> {
         match *self {
+            Error::NoExpectedFiles => writeln!(formatter, "  • No Expected files found")?,
             Error::CouldNotFind { ref file } => writeln!(formatter, "  • Could not find file {}", file)?,
             Error::SvgMismatch { ref expected, ref actual } => {
                 writeln!(formatter, "  • svg files are not the same")?;
+                writeln!(formatter, "    expected file : {}", expected)?;
+                writeln!(formatter, "    actual file   : {}", actual)?;
+            }
+            Error::AabbMismatch { ref expected, ref actual } => {
+                writeln!(formatter, "  • bounding box files are not the same")?;
                 writeln!(formatter, "    expected file : {}", expected)?;
                 writeln!(formatter, "    actual file   : {}", actual)?;
             }
@@ -96,10 +107,12 @@ pub fn run_test(paths: &Paths) -> Result<(), Vec<Error>> {
             latin::file::write(&actual_path, formats::lines::lines_to_text(lines)).unwrap();
         });
 
-    ::latin::file::write(&paths.json, ::serde_json::to_string_pretty(&scene).unwrap()).unwrap();
-
+    ::std::fs::create_dir_all(&paths.actual_dump).unwrap();
     implicit::run_scene(&scene, &mut telemetry);
 
+    if !paths.expected_dump.exists() {
+        return Err(vec![Error::NoExpectedFiles])
+    }
     let expected_paths =
         WalkDir::new(&paths.expected_dump)
             .into_iter()
@@ -163,6 +176,15 @@ pub fn run_test(paths: &Paths) -> Result<(), Vec<Error>> {
                 if latin::file::read_string_utf8(&actual).unwrap() !=
                    latin::file::read_string_utf8(&expected).unwrap() {
                     errors.push(Error::SvgMismatch {
+                        expected: expected.to_string_lossy().into_owned(),
+                        actual: actual.to_string_lossy().into_owned(),
+                    })
+                }
+            }
+            "aabb" => {
+                if latin::file::read_string_utf8(&actual).unwrap() !=
+                   latin::file::read_string_utf8(&expected).unwrap() {
+                    errors.push(Error::AabbMismatch {
                         expected: expected.to_string_lossy().into_owned(),
                         actual: actual.to_string_lossy().into_owned(),
                     })
