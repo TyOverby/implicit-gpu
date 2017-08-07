@@ -206,6 +206,14 @@ export function freeze(target: Implicit): Freeze {
     };
 }
 
+export function smooth_outer(how_much: number, target: Implicit): Implicit {
+    return modulate(-how_much, freeze(modulate(how_much, target)))
+}
+
+export function smooth_inner(how_much: number, target: Implicit): Implicit {
+    return modulate(how_much, freeze(modulate(-how_much, target)))
+}
+
 function extend<A, B>(a: A, b: B): A & B {
     let is_object = typeof b === "object" && b !== null && !Array.isArray(b);
 
