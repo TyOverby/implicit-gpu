@@ -59,7 +59,8 @@ pub fn run_scene(scene: &scene::Scene, telemetry: &mut telemetry::Telemetry) -> 
             rect = match (rect, shape.implicit.bounding_box()) {
                 (None, (a, _)) => Some(a),
                 (Some(None), _) | (_, (None, _)) => Some(None),
-                (Some(Some(a)), (Some(b), _)) => Some(Some(a.union_with(&b))),
+                (Some(Some(a)), (Some(b), Some(c))) => Some(Some(a.union_with(&b.union_with(&c)))),
+                (Some(Some(a)), (Some(b), None)) => Some(Some(a.union_with(&b))),
             }
         }
 
@@ -92,8 +93,8 @@ pub fn run_scene(scene: &scene::Scene, telemetry: &mut telemetry::Telemetry) -> 
         let figure_bounds = compute_figure_size(figure).expect("can't handle null figure sizes");
         for shape in &figure.shapes {
             let id = nest.group(nodes::NodeRef::new(nodes::Node::Translate {
-                dx: -figure_bounds.left() + 1f32,
-                dy: -figure_bounds.top() + 1f32,
+                dx: -figure_bounds.left() + 2f32,
+                dy: -figure_bounds.top() + 2f32,
                 target: shape.implicit.clone(),
             }));
             treemap.insert(shape, id);
@@ -105,7 +106,9 @@ pub fn run_scene(scene: &scene::Scene, telemetry: &mut telemetry::Telemetry) -> 
         None => panic!("can't deal with null scene size right now"),
     };
 
-    let evaluator = Evaluator::new(nest, bb.width() as usize + 2, bb.height() as usize + 2, None);
+    telemetry.scene_bounding_box(bb.top_left.x, bb.top_left.y, bb.width(), bb.height());
+
+    let evaluator = Evaluator::new(nest, bb.width().ceil() as usize + 4, bb.height().ceil() as usize + 4, None);
 
     for figure in &scene.figures {
         let mut output_shapes = vec![];

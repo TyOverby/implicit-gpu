@@ -1,6 +1,9 @@
 use opencl::{FieldBuffer, LineBuffer, OpenClContext};
 
-const PROGRAM: &'static str = include_str!("./polygon.c");
+const PROGRAM: &'static str =
+    concat!(
+        include_str!("./dist_to_line.c"),
+        include_str!("./polygon.c"));
 
 // TODO: rewrite this function so that it just takes &[f32]
 pub fn run_poly<I>(points: I, width: usize, height: usize, pos_mod: Option<(f32, f32)>, ctx: &OpenClContext) -> Option<FieldBuffer>

@@ -277,19 +277,25 @@ impl Rect {
     }
 
     pub fn expand_to_include(&mut self, point: &Point) {
-        if (point.x < self.top_left.x || self.top_left.x.is_nan()) && !point.x.is_nan() {
-            self.top_left.x = point.x;
-        }
-        if (point.y < self.top_left.y || self.top_left.y.is_nan()) && !point.y.is_nan() {
-            self.top_left.y = point.y;
+        fn min(a: f32, b: f32) -> f32 {
+            if a.is_nan() { return b; }
+            if b.is_nan() { return a; }
+            if a < b { return a; }
+            return b;
         }
 
-        if (point.x > self.bottom_right.x || self.bottom_right.x.is_nan()) && !point.x.is_nan() {
-            self.bottom_right.x = point.x;
+        fn max(a: f32, b: f32) -> f32 {
+            if a.is_nan() { return b; }
+            if b.is_nan() { return a; }
+            if a > b { return a; }
+            return b;
         }
-        if (point.y > self.bottom_right.y || self.bottom_right.y.is_nan()) && !point.y.is_nan() {
-            self.bottom_right.y = point.y;
-        }
+
+        self.top_left.x = min(self.top_left.x, point.x);
+        self.top_left.y = min(self.top_left.y, point.y);
+
+        self.bottom_right.x = max(self.bottom_right.x, point.x);
+        self.bottom_right.y = max(self.bottom_right.y, point.y);
     }
 
     pub fn union_with(&self, other: &Rect) -> Rect {

@@ -5,6 +5,8 @@ use std::cell::RefCell;
 use std::fmt::Write;
 use std::rc::Rc;
 
+const DIST_TO_LINE: &'static str = include_str!("../polygon/dist_to_line.c");
+
 #[derive(Clone)]
 pub struct SharedInfo {
     pub identifier_id: usize,
@@ -27,12 +29,15 @@ pub fn compile(node: &Node) -> (String, SharedInfo) {
 
     let (cc, shared) = CompilationContext::new();
 
-    let mut buffer = "".into(); // preamble.into();
+    let mut buffer: String = "".into(); // preamble.into();
     let final_result = comp(node, cc.clone(), &mut buffer);
     buffer.push('\n');
     writeln!(&mut buffer, "  buffer[pos] = {}; \n}}", final_result).unwrap();
 
-    let mut preamble = r"__kernel void apply(__global float* buffer, ulong width".to_string();
+    let mut preamble = format!("{}\n{}",
+        DIST_TO_LINE,
+        r"__kernel void apply(__global float* buffer, ulong width");
+
     for b in cc.dep_strings() {
         preamble.push_str(&format!(", __global float* {}", b));
     }
@@ -57,12 +62,55 @@ fn comp(node: &Node, mut cc: CompilationContext, buff: &mut String) -> String {
             let (res, _dx, _dy, _out) = (cc.get_id("rect"), cc.get_id("dx"), cc.get_id("dy"), cc.get_id("out"));
 
             buff.push('\n');
-            writeln!(buff, "  float {result};", result = res).unwrap();
+            writeln!(buff, "  float {result} = INFINITY; float {result}_sign = 0.0;", result = res).unwrap();
             writeln!(buff, "  {{").unwrap();
             writeln!(
                 buff,
-                "    {result} = ({x}-{a}) * ({x} - {c}) * ({y} - {b}) * ({y} - {d});",
+                r"
+    float {temp_val} = dist_to_line({x}, {y}, {a}, {b}, {c}, {b});
+    float {temp_sign} = sign(position({x}, {y}, {a}, {b}, {c}, {b}));
+    if (fabs({temp_val}) < fabs({result})) {{
+        {result} = copysign({temp_val}, {temp_sign});
+        {result}_sign = {temp_sign};
+    }}
+    if ({temp_val} == {result} && {result}_sign != {temp_sign}) {{
+        {result} = copysign({result}, -1);
+    }}
+
+    {temp_val} = dist_to_line({x}, {y}, {c}, {b}, {c}, {d});
+    {temp_sign} = sign(position({x}, {y}, {c}, {b}, {c}, {d}));
+    if (fabs({temp_val}) < fabs({result})) {{
+        {result} = copysign({temp_val}, {temp_sign});
+        {result}_sign = {temp_sign};
+    }}
+    if ({temp_val} == {result} && {result}_sign != {temp_sign}) {{
+        {result} = copysign({result}, -1);
+    }}
+
+    {temp_val} = dist_to_line({x}, {y}, {c}, {d}, {a}, {d});
+    {temp_sign} = sign(position({x}, {y}, {c}, {d}, {a}, {d}));
+    if (fabs({temp_val}) < fabs({result})) {{
+        {result} = copysign({temp_val}, {temp_sign});
+        {result}_sign = {temp_sign};
+    }}
+    if ({temp_val} == {result} && {result}_sign != {temp_sign}) {{
+        {result} = copysign({result}, -1);
+    }}
+
+    {temp_val} = dist_to_line({x}, {y}, {a}, {d}, {a}, {b});
+    {temp_sign} = sign(position({x}, {y}, {a}, {d}, {a}, {b}));
+    if (fabs({temp_val}) < fabs({result})) {{
+        {result} = copysign({temp_val}, {temp_sign});
+        {result}_sign = {temp_sign};
+    }}
+    if ({temp_val} == {result} && {result}_sign != {temp_sign}) {{
+        {result} = copysign({result}, -1);
+    }}
+    {result} = -{result};
+",
                 result = res,
+                temp_val = cc.get_id("temp"),
+                temp_sign= cc.get_id("temp_sign"),
                 x = cc.get_x(),
                 y = cc.get_y(),
                 a = x,

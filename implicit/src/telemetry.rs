@@ -11,6 +11,7 @@ pub trait Telemetry {
     fn figure_finished(&mut self, figure: &[OutputShape]);
 
     fn scene_started(&mut self);
+    fn scene_bounding_box(&mut self, f32, f32, f32, f32);
     fn scene_finished(&mut self, scene: &OutputScene);
 }
 
@@ -22,6 +23,7 @@ impl Telemetry for NullTelemetry {
     fn intermediate_eval_poly(&mut self, _buffer: &FieldBuffer) {}
     fn figure_finished(&mut self, _figure: &[OutputShape]) {}
     fn scene_started(&mut self) {}
+    fn scene_bounding_box(&mut self, _: f32, _: f32, _: f32, _:f32) {}
     fn scene_finished(&mut self, _scene: &OutputScene) {}
 }
 
@@ -161,5 +163,13 @@ impl Telemetry for DumpTelemetry {
         let perf_file = File::create(self.path.join("scene").with_extension("perf")).unwrap();
         ::flame::dump_text_to_writer(perf_file).unwrap();
         ::flame::clear();
+    }
+
+    fn scene_bounding_box(&mut self, x: f32, y: f32, w: f32, h: f32) {
+        use std::fs::File;
+        use std::io::Write;
+        let bb_path = self.path.join("scene").with_extension("aabb");
+        let mut perf_file = File::create(bb_path).unwrap();
+        write!(perf_file, "x y: {} {}\nw h: {} {}", x, y, w, h).unwrap();
     }
 }
