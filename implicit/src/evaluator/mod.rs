@@ -1,5 +1,5 @@
 use compiler::*;
-use telemetry::Telemetry;
+use telemetry::{Telemetry, TelemetryLocation};
 
 use itertools::Itertools;
 use nodes::{Node, NodeRef, PolyGroup};
@@ -29,22 +29,25 @@ impl Evaluator {
         }
     }
 
-    pub fn evaluate(&self, which: GroupId, ctx: &OpenClContext, telemetry: &mut Telemetry) -> FieldBuffer {
+    pub fn evaluate(&self, which: GroupId, ctx: &OpenClContext, telemetry: &mut Telemetry, tloc: TelemetryLocation) -> FieldBuffer {
         let _guard = ::flame::start_guard(format!("evaluate {:?}", which));
         {
-            let finished = self.finished.lock().unwrap();
+           let finished = self.finished.lock().unwrap();
             if let Some(buff) = finished.get(&which) {
                 return buff.clone();
             }
         }
 
-        let eval_basic_group = |root: &Node, telemetry: &mut Telemetry| -> FieldBuffer {
+        let eval_basic_group = |root: &Node, telemetry: &mut Telemetry, mut tloc: TelemetryLocation| -> FieldBuffer {
             let _guard = ::flame::start_guard(format!("eval_basic_group"));
             let (program, compilation_info) = ::compiler::compile(root);
             let deps: Vec<FieldBuffer> = compilation_info
                 .dependencies
                 .iter()
-                .map(|&g| self.evaluate(g, ctx, telemetry))
+                .map(|&g| {
+                    tloc.new_intermediate();
+                    self.evaluate(g, ctx, telemetry, tloc)
+                })
                 .collect();
 
             let out = ctx.field_buffer(self.width, self.height, None);
@@ -61,7 +64,7 @@ impl Evaluator {
 
             ::flame::span_of("eval", || kc.enq().unwrap());
 
-            telemetry.intermediate_eval_basic(&out, &program, root);
+            telemetry.intermediate_eval_basic(tloc, &out, &program, root);
             out
         };
 
@@ -106,15 +109,17 @@ impl Evaluator {
                 additive_field
             };
 
-            telemetry.intermediate_eval_poly(&out);
+            telemetry.intermediate_eval_poly(tloc, &out);
             out
         };
 
         let group = self.nest.get(which);
         let out = match group {
-            &NodeGroup::Basic(ref root) => eval_basic_group(root, telemetry),
+            &NodeGroup::Basic(ref root) => {
+                eval_basic_group(root, telemetry, tloc)
+            },
             &NodeGroup::Freeze(ref root) => {
-                let field_buf = eval_basic_group(root, telemetry);
+                let field_buf = eval_basic_group(root, telemetry, tloc);
                 let (width, height) = field_buf.size();
                 let lines = ::marching::run_marching(&field_buf, ctx);
                 let res = ::polygon::run_poly_raw(lines, width, height, None, ctx);

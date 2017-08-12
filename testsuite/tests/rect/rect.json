@@ -10,9 +10,7 @@
             0,
             0
           ],
-          "draw_mode": {
-            "line": "solid"
-          },
+          "draw_mode": "filled",
           "implicit": {
             "kind": "polygon",
             "dx": 0.0,

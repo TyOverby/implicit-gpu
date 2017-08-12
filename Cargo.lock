@@ -362,7 +362,7 @@ dependencies = [
  "snoot 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "typed-arena 1.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "vecmath 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "vectorphile 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "vectorphile 0.1.4-pre",
 ]
 
 [[package]]
@@ -1075,8 +1075,7 @@ dependencies = [
 
 [[package]]
 name = "vectorphile"
-version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
+version = "0.1.4-pre"
 
 [[package]]
 name = "version_check"
@@ -1244,7 +1243,6 @@ dependencies = [
 "checksum utf-8 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)" = "a9aee9ba280438b56d1ebc5329f2094f0ff457f811eeeff0b278d75aa99db400"
 "checksum utf8-ranges 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "662fab6525a98beff2921d7f61a39e7d59e0b425ebc7d0d9e66d316e55124122"
 "checksum vecmath 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)" = "bebe25d9d469c3bc85dd86564c7318a0290e31d472d9fcbca682c93e2925ff00"
-"checksum vectorphile 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)" = "8bc2beb672643225ccf6f1eea01e6cc43ece5de118615621f85e9aca63a922b3"
 "checksum version_check 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)" = "6b772017e347561807c1aa192438c5fd74242a670a6cffacc40f2defd1dc069d"
 "checksum void 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)" = "6a02e4885ed3bc0f2de90ea6dd45ebcbb66dacffe03547fadbb0eeae2770887d"
 "checksum walkdir 1.0.7 (registry+https://github.com/rust-lang/crates.io-index)" = "bb08f9e670fab86099470b97cd2b252d6527f0b3cc1401acdb595ffc9dd288ff"

@@ -1,5 +1,6 @@
 use self::util::geom;
 use self::util::quadtree::QuadTree;
+use ::telemetry::{Telemetry, TelemetryLocation};
 
 mod fuse_ends;
 pub mod util;
@@ -59,7 +60,8 @@ pub fn separate_polygons(bag: Vec<Vec<Point>>) -> (Vec<Vec<Point>>, Vec<Vec<Poin
     (additive, subtractive)
 }
 
-pub fn connect_lines(mut lines: Vec<Line>, simplify: bool) -> (Vec<Vec<Point>>, QuadTree<geom::Line>) {
+pub fn connect_lines(mut lines: Vec<Line>, simplify: bool, telemetry: &mut Telemetry, tloc: TelemetryLocation)
+-> (Vec<Vec<Point>>, QuadTree<geom::Line>) {
     use std::cmp::{PartialOrd, Ordering};
 
     fn rotate<T>(slice: &mut [T], at: usize) {
@@ -90,6 +92,13 @@ pub fn connect_lines(mut lines: Vec<Line>, simplify: bool) -> (Vec<Vec<Point>>, 
 
         if !any_progress {
             break;
+        }
+    }
+
+    telemetry.shape_line_joined(tloc, &joined);
+    for line in &joined {
+        if let &LineType::Unjoined(ref pts) = line {
+            //println!("{:?} .. {} .. {:?}\n", pts.first().unwrap(), pts.len(), pts.last().unwrap());
         }
     }
 

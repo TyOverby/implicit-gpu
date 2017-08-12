@@ -41,7 +41,8 @@ pub fn run_single(node: nodes::NodeRef, width: usize, height: usize) -> ::opencl
 
     // Create a new Execution Context
     let evaluator = Evaluator::new(nest, width, height, None);
-    let result = evaluator.evaluate(target, &ctx, &mut telemetry::NullTelemetry);
+    let tloc = telemetry::TelemetryLocation::new();
+    let result = evaluator.evaluate(target, &ctx, &mut telemetry::NullTelemetry, tloc);
     ctx.empty_queue();
     result
 }
@@ -106,28 +107,35 @@ pub fn run_scene(scene: &scene::Scene, telemetry: &mut telemetry::Telemetry) -> 
         None => panic!("can't deal with null scene size right now"),
     };
 
-    telemetry.scene_bounding_box(bb.top_left.x, bb.top_left.y, bb.width(), bb.height());
+    let mut tloc = telemetry::TelemetryLocation::new();
 
+    telemetry.scene_bounding_box(tloc, bb.top_left.x, bb.top_left.y, bb.width(), bb.height());
     let evaluator = Evaluator::new(nest, bb.width().ceil() as usize + 4, bb.height().ceil() as usize + 4, None);
 
     for figure in &scene.figures {
+        tloc.new_figure();
+        let mut figure_telemetry = tloc.clone();
+
         let mut output_shapes = vec![];
         for shape in &figure.shapes {
+            figure_telemetry.new_shape();
+            let shape_telemetry = figure_telemetry.clone();
+
             let id = treemap.get(&shape).unwrap();
 
-            let result = evaluator.evaluate(*id, &ctx, telemetry);
+            let result = evaluator.evaluate(*id, &ctx, telemetry, shape_telemetry);
 
             let lines = ::marching::run_marching(&result, &ctx).values();
 
-            let lines = lines.into_iter()
-                             .tuples::<(_, _, _, _)>()
-                             .filter(|&(a, b, c, d)| !(a.is_nan() || b.is_nan() || c.is_nan() || d.is_nan()))
-                             .map(|(a, b, c, d)| ((a, b), (c, d)))
-                             .collect::<Vec<_>>();
+            let lines = lines
+                .into_iter()
+                .tuples::<(_, _, _, _)>()
+                .filter(|&(a, b, c, d)| !(a.is_nan() || b.is_nan() || c.is_nan() || d.is_nan()))
+                .map(|(a, b, c, d)| ((a, b), (c, d)))
+                .collect::<Vec<_>>();
+            telemetry.shape_finished(shape_telemetry, &result, &lines);
 
-            telemetry.shape_finished(&result, &lines);
-
-            let (lines, _) = lines::connect_lines(lines, scene.simplify);
+            let (lines, _) = lines::connect_lines(lines, scene.simplify, telemetry, shape_telemetry);
             let (additive, subtractive) = lines::separate_polygons(lines);
             let output_shape = match shape.draw_mode {
                 DrawMode::Filled => OutputShape {
@@ -153,9 +161,9 @@ pub fn run_scene(scene: &scene::Scene, telemetry: &mut telemetry::Telemetry) -> 
             ctx.empty_queue();
         }
 
-        telemetry.figure_finished(&output_shapes);
+        telemetry.figure_finished(figure_telemetry, &output_shapes);
         output.figures.push(OutputFigure { shapes: output_shapes });
     }
-    telemetry.scene_finished(&output);
+    telemetry.scene_finished(tloc, &output);
     output
 }

@@ -43,6 +43,9 @@ pub fn save_image<P: AsRef<Path>>(samples: &[f32], width: usize, file_name: P, c
             }
             (ColorMode::BlackAndWhite, true, false) => [0, 0, 0],
             (ColorMode::BlackAndWhite, false, false) => [255, 255, 255],
+            (ColorMode::Debug, _, _) if sample == 0.0 => {
+                [0, 255, 0]
+            }
             (ColorMode::Debug, true, _) => {
                 let compressed = sample / max;
                 let rounded = (compressed * 255.0) as u8;

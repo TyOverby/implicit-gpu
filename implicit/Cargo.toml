@@ -19,4 +19,7 @@ latin = "0.1.5"
 rand = "0.3.15"
 serde_json = "1.*.*"
 snoot = "0.1.*"
-vectorphile = "0.1.*"
+
+[dependencies.vectorphile]
+path = "../../vectorphile"
+#vectorphile = "0.1.*"

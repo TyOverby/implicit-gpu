@@ -98,13 +98,11 @@ pub fn run_test(paths: &Paths) -> Result<(), Vec<Error>> {
     let mut telemetry =
         telemetry::DumpTelemetry::new(paths.actual_dump.clone())
         .with_field_writer(|path, buffer| {
-            let actual_path = path.with_extension("values");
-            latin::file::write(&actual_path, formats::field::field_to_text(buffer)).unwrap();
+            latin::file::write(&path, formats::field::field_to_text(buffer)).unwrap();
         })
         .with_line_writer(|path, lines| {
-            let actual_path = path.with_extension("lines");
             let lines = lines.iter().map(|&((x1, y1), (x2, y2))| formats::lines::Line(x1, y1, x2, y2));
-            latin::file::write(&actual_path, formats::lines::lines_to_text(lines)).unwrap();
+            latin::file::write(&path, formats::lines::lines_to_text(lines)).unwrap();
         });
 
     ::std::fs::create_dir_all(&paths.actual_dump).unwrap();
@@ -163,7 +161,7 @@ pub fn run_test(paths: &Paths) -> Result<(), Vec<Error>> {
                     })
                 }
             }
-            "node" => {
+            "txt" => {
                 if latin::file::read_string_utf8(&actual).unwrap() !=
                    latin::file::read_string_utf8(&expected).unwrap() {
                     errors.push(Error::NodesMismatch {

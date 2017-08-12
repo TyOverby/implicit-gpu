@@ -51,24 +51,26 @@ fn join_lines_internal(lines: Vec<geom::Line>) -> (Vec<LineType>, QuadTree<geom:
         loop {
             let closest = {
                 let query = geom::Rect::centered_with_radius(&last, resolution / 2.0);
-                let mut near_last = tree.query(query);
-                near_last.sort_by(|&(l1, _, _), &(l2, _, _)| {
-                    let d1a = l1.0.distance_2(&last);
-                    let d1b = l1.1.distance_2(&last);
+                let near_last = tree.query(query);
+                let mut near_last = near_last.into_iter().map(|(line, _, id)| {
+                    let da = line.0.distance_2(&last);
+                    let db = line.0.distance_2(&last);
+                    (line, id, da.min(db))
+                }).collect::<Vec<_>>();
 
-                    let d2a = l2.0.distance_2(&last);
-                    let d2b = l2.1.distance_2(&last);
-
-                    let l1_min = d1a.min(d1b);
-                    let l2_min = d2a.min(d2b);
-                    l1_min.partial_cmp(&l2_min).unwrap_or(::std::cmp::Ordering::Equal)
+                near_last.sort_by(|&(_, _, d1), &(_, _, d2)| {
+                    d1.partial_cmp(&d2).unwrap_or(::std::cmp::Ordering::Equal)
                 });
+
+                if near_last.len() >= 2 {
+                    // println!("SPLIT {:?}", near_last.len());
+                }
 
                 let closest_line_opt = near_last.into_iter().next();
                 closest_line_opt.map(|(a, b, c)| (a.clone(), b.clone(), c.clone()))
             };
 
-            if let Some((line, _, id)) = closest {
+            if let Some((line, id, _)) = closest {
                 tree.remove(id);
                 if line.0.distance_2(&last) < line.1.distance_2(&last) {
                     last = line.1;
