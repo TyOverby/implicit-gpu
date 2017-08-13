@@ -1,5 +1,5 @@
 use self::util::geom;
-use self::util::quadtree::QuadTree;
+use self::util::quadtree::{QuadTree, ItemId as QuadId};
 use ::telemetry::{Telemetry, TelemetryLocation};
 
 mod fuse_ends;
@@ -97,7 +97,7 @@ pub fn connect_lines(mut lines: Vec<Line>, simplify: bool, telemetry: &mut Telem
 
     telemetry.shape_line_joined(tloc, &joined);
     for line in &joined {
-        if let &LineType::Unjoined(ref pts) = line {
+        if let &LineType::Unjoined(ref _pts) = line {
             //println!("{:?} .. {} .. {:?}\n", pts.first().unwrap(), pts.len(), pts.last().unwrap());
         }
     }

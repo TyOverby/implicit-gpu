@@ -151,13 +151,13 @@ impl Telemetry for DumpTelemetry {
             let (pts, restitch) = match line {
                 &LineType::Joined(ref pts) => {
                     canvas
-                        .apply(Command::StartShape(DrawOptions::stroked((0, 0, 0), 0.01)))
+                        .apply(Command::StartShape(DrawOptions::stroked((0, 0, 0), 0.1)))
                         .unwrap();
                     (&pts[..], true)
                 }
                 &LineType::Unjoined(ref pts) => {
                     canvas
-                        .apply(Command::StartShape(DrawOptions::stroked((255, 0, 0), 0.01)))
+                        .apply(Command::StartShape(DrawOptions::stroked((255, 0, 0), 0.1)))
                         .unwrap();
                     (&pts[..], false)
                 }
