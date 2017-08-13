@@ -132,6 +132,7 @@ pub fn run_test(paths: &Paths) -> Result<(), Vec<Error>> {
             None => continue,
         };
         match extension {
+            "DS_Store" => { /* fuck osx */ }
             "png" => { /* png is for debugging only */ }
             "perf" => { /* perf data is for debugging only */ }
             "values" => {
