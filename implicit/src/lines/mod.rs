@@ -14,6 +14,7 @@ const OPT_EPSILON: f32 = 0.05;
 
 pub struct DashSegment(pub Vec<geom::Point>);
 
+#[derive(PartialOrd, PartialEq)]
 pub enum LineType {
     Joined(Vec<geom::Point>),
     Unjoined(Vec<geom::Point>),
@@ -80,6 +81,9 @@ pub fn connect_lines(mut lines: Vec<Line>, simplify: bool, telemetry: &mut Telem
         geom::Line(geom::Point { x: x1, y: y1 }, geom::Point { x: x2, y: y2 })
     }));
 
+    joined.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal));
+
+/*
     loop {
         let mut any_progress = false;
         let (joined_t, p) = fuse_ends::fuse_ends(joined);
@@ -94,6 +98,7 @@ pub fn connect_lines(mut lines: Vec<Line>, simplify: bool, telemetry: &mut Telem
             break;
         }
     }
+    */
 
     telemetry.shape_line_joined(tloc, &joined);
     for line in &joined {

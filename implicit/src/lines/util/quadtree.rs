@@ -1,5 +1,3 @@
-
-
 use super::geom::{Line, Point, Rect};
 use fnv::FnvHasher;
 use std::cmp::Ord;
@@ -77,13 +75,11 @@ impl Clone for QuadNode {
                 ref aabb,
                 ref elements,
                 ref depth,
-            } => {
-                QuadNode::Leaf {
-                    aabb: aabb.clone(),
-                    elements: elements.clone(),
-                    depth: depth.clone(),
-                }
-            }
+            } => QuadNode::Leaf {
+                aabb: aabb.clone(),
+                elements: elements.clone(),
+                depth: depth.clone(),
+            },
         }
     }
 }
@@ -143,7 +139,7 @@ impl<T> QuadTree<T> {
     {
         let mut ids = vec![];
         self.root.query(bounding_box, &mut ids);
-        ids.sort_by(|&(id1, _), &(ref id2, _)| id1.cmp(id2));
+        ids.sort_by_key(|&(id, _)| id);
         ids.dedup();
         ids.iter()
             .map(|&(id, _)| {
@@ -281,9 +277,9 @@ impl QuadNode {
                     ));
                 } else {
                     if config.allow_duplicates ||
-                        !elements.iter().any(
-                            |&(_, ref e_bb)| e_bb.close_to(&item_aabb, EPSILON),
-                        )
+                        !elements
+                            .iter()
+                            .any(|&(_, ref e_bb)| e_bb.close_to(&item_aabb, EPSILON))
                     {
                         elements.push((item_id, item_aabb));
                         did_insert = true;

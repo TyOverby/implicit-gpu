@@ -4,8 +4,9 @@ pub fn join_lines<I>(lines: I) -> (Vec<LineType>, QuadTree<geom::Line>)
 where
     I: Iterator<Item = geom::Line>,
 {
-    // Get rid of "lines" that have the same start and end point.
-    let lines = lines.filter(|&geom::Line(geom::Point{x: x1, y: y1}, geom::Point{x: x2, y: y2})| {
+    // Get rid of "lines" that have the same start and end
+    // point.
+    let lines = lines.filter(|&geom::Line(geom::Point { x: x1, y: y1 }, geom::Point { x: x2, y: y2 })| {
         x1 != x2 || y1 != y2
     });
 
@@ -17,8 +18,13 @@ where
     join_lines_internal(lines)
 }
 
+
 fn join_lines_internal(lines: Vec<geom::Line>) -> (Vec<LineType>, QuadTree<geom::Line>) {
-    let resolution = lines[0].bounding_box().width();
+    let mut resolution = 0.0f32;
+    for &line in &lines {
+        let bb = line.bounding_box();
+        resolution = resolution.max(bb.width().max(bb.height()));
+    }
 
     let mut aabb: Option<geom::Rect> = None;
     for line in &lines {
@@ -36,10 +42,17 @@ fn join_lines_internal(lines: Vec<geom::Line>) -> (Vec<LineType>, QuadTree<geom:
     };
 
     let mut tree = QuadTree::new(aabb, false, 4, 16, 4);
-    for line in lines {
+    for &line in &lines {
         tree.insert(line);
     }
+    let mut tree = remove_peninsulas(tree, resolution);
     let tree_dup = tree.clone();
+    return (
+        tree.iter()
+            .map(|(_, &(l, _))| LineType::Unjoined(vec![l.0, l.1]))
+            .collect(),
+        tree_dup,
+    );
 
     let mut out = vec![];
 
@@ -47,45 +60,97 @@ fn join_lines_internal(lines: Vec<geom::Line>) -> (Vec<LineType>, QuadTree<geom:
         let first_id = tree.first().unwrap();
         let (segment, _) = tree.remove(first_id).unwrap();
 
-        match continue_with(segment.0, segment.1, tree.clone(), resolution).map_err(|e|
-              (e, continue_with(segment.1, segment.0, tree.clone(), resolution))) {
-                  Ok((mut pts, tr)) => {
-                      pts.insert(0, segment.1);
-                      pts.insert(0, segment.0);
-                      tree = tr;
-                      out.push(LineType::Joined(pts));
-                  },
-                  Err((_, Ok((mut pts, tr)))) => {
-                      pts.insert(0, segment.0);
-                      pts.insert(0, segment.1);
-                      tree = tr;
-                      out.push(LineType::Joined(pts));
-                  }
-                  Err(((pts1, tr1), Err((pts2, tr2)))) => {
-                      if pts1.len() < pts2.len() {
-                          let (mut pts, tr)  = (pts1, tr1);
-                          pts.insert(0, segment.1);
-                          pts.insert(0, segment.0);
-                          tree = tr;
-                          out.push(LineType::Unjoined(pts));
-                      } else {
-                          let (mut pts, tr)  = (pts2, tr2);
-                          pts.insert(0, segment.0);
-                          pts.insert(0, segment.1);
-                          tree = tr;
-                          out.push(LineType::Unjoined(pts));
-                      };
-                  }
-              }
+        match continue_with(segment.0, segment.1, tree.clone(), resolution)
+            .map_err(|e| (e, continue_with(segment.1, segment.0, tree.clone(), resolution)))
+        {
+            Ok((mut pts, tr)) => {
+                pts.insert(0, segment.1);
+                pts.insert(0, segment.0);
+                tree = tr;
+                out.push(LineType::Joined(pts));
+            }
+            Err((_, Ok((mut pts, tr)))) => {
+                pts.insert(0, segment.0);
+                pts.insert(0, segment.1);
+                tree = tr;
+                out.push(LineType::Joined(pts));
+            }
+            Err(((pts1, tr1), Err((pts2, tr2)))) => {
+                if pts1.len() < pts2.len() {
+                    let (mut pts, tr) = (pts1, tr1);
+                    pts.insert(0, segment.1);
+                    pts.insert(0, segment.0);
+                    tree = tr;
+                    out.push(LineType::Unjoined(pts));
+                } else {
+                    let (mut pts, tr) = (pts2, tr2);
+                    pts.insert(0, segment.0);
+                    pts.insert(0, segment.1);
+                    tree = tr;
+                    out.push(LineType::Unjoined(pts));
+                };
+            }
+        }
 
     }
 
     (out, tree_dup)
 }
 
+fn remove_peninsulas(mut tree: QuadTree<geom::Line>, resolution: f32) -> QuadTree<geom::Line> {
+    loop {
+        let mut any_removed = false;
+
+        let lines = tree.iter().map(|(&id, &(line, _))| (id, line)).collect::<Vec<_>>();
+
+        for (id, line) in lines {
+            println!("\n\n{:?}, {:?}, res: {}", id, line, resolution);
+
+            let left_side = geom::Rect::centered_with_radius(&line.0, resolution / 4.0);
+            let right_side = geom::Rect::centered_with_radius(&line.1, resolution / 4.0);
+
+            println!("left query:  {:?}", left_side);
+            println!("right query: {:?}", right_side);
+
+            let should_remove = {
+                let shares_endpoint = |geom::Line(q1, q2)| {
+                    let geom::Line(p1, p2) = line;
+                    // optimization for when we're comparing against our own line;
+                    if p1 == q1 { return true; }
+
+                    let closest =
+                        p1.distance(&q1).min(
+                        p2.distance(&q1)).min(
+                        p1.distance(&q2).min(
+                        p2.distance(&q2)));
+
+                    return closest < (resolution / 4.0);
+                };
+                let q_left = tree.query(left_side).into_iter().filter(|&(&l, _, _)| shares_endpoint(l));
+                let q_right = tree.query(right_side).into_iter().filter(|&(&l, _, _)| shares_endpoint(l));
+
+                //println!("### {} \n {:?} \n {:?} {:?}", q_left.len() + q_right.len(), line, q_left, q_right);
+
+                q_left.count() < 2 || q_right.count() < 2
+            };
+
+            if should_remove {
+                tree.remove(id);
+                println!("REMOVED: {:?}", id);
+                any_removed = true;
+            }
+        }
+
+        if !any_removed {
+            break;
+        }
+    }
+
+    tree
+}
+
 fn continue_with(goal: geom::Point, mut last: geom::Point, mut tree: QuadTree<geom::Line>, resolution: f32)
-    -> Result<(Vec<geom::Point>, QuadTree<geom::Line>),
-              (Vec<geom::Point>, QuadTree<geom::Line>)> {
+    -> Result<(Vec<geom::Point>, QuadTree<geom::Line>), (Vec<geom::Point>, QuadTree<geom::Line>)> {
     let mut points = Vec::new();
 
     loop {
@@ -93,25 +158,28 @@ fn continue_with(goal: geom::Point, mut last: geom::Point, mut tree: QuadTree<ge
 
         if near_last.len() == 0 {
             return Err((points, tree));
-        }
-        else if near_last.len() == 1 {
+        } else if near_last.len() == 1 {
             let (line, id, _) = near_last[0];
             tree.remove(id);
             let this = furthest_end_from_line(last, line);
             points.push(this);
             last = this;
         } else {
-            let mut continued = near_last.into_iter().map(|(line, id, _)| {
-                let this = furthest_end_from_line(last, line);
-                let mut ct = tree.clone();
-                ct.remove(id);
-                (this, continue_with(goal, this, ct, resolution))
-            }).collect::<Vec<_>>();
+            let mut continued = near_last
+                .into_iter()
+                .map(|(line, id, _)| {
+                    let this = furthest_end_from_line(last, line);
+                    let mut ct = tree.clone();
+                    ct.remove(id);
+                    (this, continue_with(goal, this, ct, resolution))
+                })
+                .collect::<Vec<_>>();
 
             // Sort the continuation options such that
             // * OKs show up before errors
             // * OKs that have long lengths show up before low lengths
-            // * Errs that have short lengths will show up before errs with long lengths.
+            // * Errs that have short lengths will show up before errs
+            // with long lengths.
             continued.sort_by_key(|&(_, ref res)| match res {
                 &Ok((ref pts, _)) => -(pts.len() as i64),
                 &Err((ref pts, _)) => pts.len() as i64,
@@ -133,7 +201,7 @@ fn continue_with(goal: geom::Point, mut last: geom::Point, mut tree: QuadTree<ge
 
         if goal.distance_2(&last) < resolution {
             points.pop();
-            return Ok((points, tree))
+            return Ok((points, tree));
         }
     }
 }
@@ -147,24 +215,25 @@ fn furthest_end_from_line(target: geom::Point, line: geom::Line) -> geom::Point 
 }
 
 fn get_lines_near(target: geom::Point, tree: &QuadTree<geom::Line>, resolution: f32) -> Vec<(geom::Line, QuadId, f32)> {
-    let query = geom::Rect::centered_with_radius(&target, resolution / 2.0);
-    let mut near_target =
-        tree.query(query)
-            .into_iter()
-            .map(|(line, _, id)| {
-                let da = line.0.distance_2(&target);
-                let db = line.1.distance_2(&target);
-                (line.clone(), id, da.min(db))
-            })
-            .collect::<Vec<_>>();
+    let query = geom::Rect::centered_with_radius(&target, resolution / 4.0);
+    let mut near_target = tree.query(query)
+        .into_iter()
+        .map(|(line, _, id)| {
+            let da = line.0.distance_2(&target);
+            let db = line.1.distance_2(&target);
+            (line.clone(), id, da.min(db))
+        })
+        .collect::<Vec<_>>();
 
-    // If we only have 0 or 1 elements, no need to do any sorting, filtering, or anything
+    // If we only have 0 or 1 elements, no need to do any
+    // sorting, filtering, or anything
     if near_target.len() == 0 || near_target.len() == 1 {
         return near_target;
     }
 
-    // If all of the lines are the same distance away, then no need to sort and filter.
-    if near_target.windows(2).all(|window| { window[0].2 == window[1].2} ) {
+    // If all of the lines are the same distance away, then no
+    // need to sort and filter.
+    if near_target.windows(2).all(|window| window[0].2 == window[1].2) {
         return near_target;
     }
 
@@ -175,7 +244,8 @@ fn get_lines_near(target: geom::Point, tree: &QuadTree<geom::Line>, resolution: 
 
     let smallest_dist = near_target.last().unwrap().2;
 
-    // Pop off all the other lines that don't have that small distance.
+    // Pop off all the other lines that don't have that small
+    // distance.
     loop {
         if near_target.last().unwrap().2 == smallest_dist {
             break;
