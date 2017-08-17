@@ -2,14 +2,14 @@ use self::util::geom;
 use self::util::quadtree::{QuadTree, ItemId as QuadId};
 use ::telemetry::{Telemetry, TelemetryLocation};
 
-mod fuse_ends;
+//mod fuse_ends;
 pub mod util;
 pub mod dash;
 mod join;
 mod simplify;
-mod connect;
+//mod connect;
 
-const EPSILON: f32 = 0.001;
+//const EPSILON: f32 = 0.001;
 const OPT_EPSILON: f32 = 0.05;
 
 pub struct DashSegment(pub Vec<geom::Point>);

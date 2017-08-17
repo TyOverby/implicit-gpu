@@ -69,8 +69,8 @@ fn join_lines_internal(lines: Vec<geom::Line>, telemetry: &mut Telemetry, tloc: 
                 out.push(LineType::Joined(pts));
             }
             Err((mut pts, tr)) => {
-                pts.insert(0, segment.0);
                 pts.insert(0, segment.1);
+                pts.insert(0, segment.0);
                 tree = tr;
                 out.push(LineType::Unjoined(pts));
             }

@@ -4,7 +4,7 @@ use super::opencl::FieldBuffer;
 use super::output::{OutputScene, OutputShape};
 use lines::LineType;
 use std::fs::create_dir_all;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 #[derive(Clone, Copy)]
 pub struct TelemetryLocation {
@@ -116,7 +116,7 @@ impl DumpTelemetry {
         }
     }
 
-    fn scene_path(&self, tloc: TelemetryLocation, file: &str) -> PathBuf {
+    fn scene_path(&self, _: TelemetryLocation, file: &str) -> PathBuf {
         create_dir_all(&self.path).unwrap();
         self.path.join(file)
     }
