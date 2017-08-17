@@ -115,9 +115,9 @@ fn remove_peninsulas(mut tree: QuadTree<geom::Line>, resolution: f32) -> QuadTre
                 q_left.count() < 2 || q_right.count() < 2
             };
 
-            let is_dot = (line.0).distance(&line.1) < 0.001;
+            //let is_dot = (line.0).distance(&line.1) < 0.001;
 
-            let should_remove = is_peninsula | is_dot;
+            let should_remove = is_peninsula; //| is_dot;
 
             if should_remove {
                 tree.remove(id);
@@ -231,6 +231,9 @@ fn get_lines_near(target: geom::Point, tree: &QuadTree<geom::Line>, resolution: 
     });
 
     let smallest_dist = near_target.first().unwrap().2;
+    for &(_, _, d) in &near_target {
+        debug_assert!(smallest_dist <= d);
+    }
 
     // Pop off all the other lines that don't have that small
     // distance.
@@ -240,6 +243,11 @@ fn get_lines_near(target: geom::Point, tree: &QuadTree<geom::Line>, resolution: 
         } else {
             near_target.pop();
         }
+    }
+
+    for &(_, _, d) in &near_target {
+        debug_assert!(d == smallest_dist);
+        debug_assert!(!d.is_nan());
     }
 
     near_target
