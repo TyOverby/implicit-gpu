@@ -79,7 +79,7 @@ pub fn connect_lines(mut lines: Vec<Line>, simplify: bool, telemetry: &mut Telem
 
     let (mut joined, qt) = join::join_lines(lines.into_iter().map(|((x1, y1), (x2, y2))| {
         geom::Line(geom::Point { x: x1, y: y1 }, geom::Point { x: x2, y: y2 })
-    }));
+    }), telemetry, tloc);
 
     joined.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal));
 

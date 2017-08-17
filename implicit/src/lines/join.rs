@@ -1,6 +1,6 @@
 use super::*;
 
-pub fn join_lines<I>(lines: I) -> (Vec<LineType>, QuadTree<geom::Line>)
+pub fn join_lines<I>(lines: I, telemetry: &mut Telemetry, tloc: TelemetryLocation) -> (Vec<LineType>, QuadTree<geom::Line>)
 where
     I: Iterator<Item = geom::Line>,
 {
@@ -15,11 +15,12 @@ where
         return (Vec::new(), QuadTree::default(geom::Rect::null()));
     }
 
-    join_lines_internal(lines)
+    join_lines_internal(lines, telemetry, tloc)
 }
 
+fn join_lines_internal(lines: Vec<geom::Line>, telemetry: &mut Telemetry, tloc: TelemetryLocation) -> (Vec<LineType>, QuadTree<geom::Line>) {
+    telemetry.shape_line_pre_prune(tloc, &lines);
 
-fn join_lines_internal(lines: Vec<geom::Line>) -> (Vec<LineType>, QuadTree<geom::Line>) {
     let mut resolution = 0.0f32;
     for &line in &lines {
         let bb = line.bounding_box();
@@ -45,14 +46,13 @@ fn join_lines_internal(lines: Vec<geom::Line>) -> (Vec<LineType>, QuadTree<geom:
     for &line in &lines {
         tree.insert(line);
     }
+
     let mut tree = remove_peninsulas(tree, resolution);
+
+    let after: Vec<geom::Line> = tree.iter().map(|(_, &(line, _))| line).collect();
+    telemetry.shape_line_pruned(tloc, &after);
+
     let tree_dup = tree.clone();
-    return (
-        tree.iter()
-            .map(|(_, &(l, _))| LineType::Unjoined(vec![l.0, l.1]))
-            .collect(),
-        tree_dup,
-    );
 
     let mut out = vec![];
 
@@ -60,8 +60,7 @@ fn join_lines_internal(lines: Vec<geom::Line>) -> (Vec<LineType>, QuadTree<geom:
         let first_id = tree.first().unwrap();
         let (segment, _) = tree.remove(first_id).unwrap();
 
-        match continue_with(segment.0, segment.1, tree.clone(), resolution)
-            .map_err(|e| (e, continue_with(segment.1, segment.0, tree.clone(), resolution)))
+        match continue_with(segment.0, segment.1, tree, resolution)
         {
             Ok((mut pts, tr)) => {
                 pts.insert(0, segment.1);
@@ -69,26 +68,11 @@ fn join_lines_internal(lines: Vec<geom::Line>) -> (Vec<LineType>, QuadTree<geom:
                 tree = tr;
                 out.push(LineType::Joined(pts));
             }
-            Err((_, Ok((mut pts, tr)))) => {
+            Err((mut pts, tr)) => {
                 pts.insert(0, segment.0);
                 pts.insert(0, segment.1);
                 tree = tr;
-                out.push(LineType::Joined(pts));
-            }
-            Err(((pts1, tr1), Err((pts2, tr2)))) => {
-                if pts1.len() < pts2.len() {
-                    let (mut pts, tr) = (pts1, tr1);
-                    pts.insert(0, segment.1);
-                    pts.insert(0, segment.0);
-                    tree = tr;
-                    out.push(LineType::Unjoined(pts));
-                } else {
-                    let (mut pts, tr) = (pts2, tr2);
-                    pts.insert(0, segment.0);
-                    pts.insert(0, segment.1);
-                    tree = tr;
-                    out.push(LineType::Unjoined(pts));
-                };
+                out.push(LineType::Unjoined(pts));
             }
         }
 
@@ -98,21 +82,20 @@ fn join_lines_internal(lines: Vec<geom::Line>) -> (Vec<LineType>, QuadTree<geom:
 }
 
 fn remove_peninsulas(mut tree: QuadTree<geom::Line>, resolution: f32) -> QuadTree<geom::Line> {
+
+    // Optimization Opporitunity: When you remove a line, nearby lines are likely to be the
+    // next to go.
     loop {
         let mut any_removed = false;
 
         let lines = tree.iter().map(|(&id, &(line, _))| (id, line)).collect::<Vec<_>>();
 
         for (id, line) in lines {
-            println!("\n\n{:?}, {:?}, res: {}", id, line, resolution);
 
             let left_side = geom::Rect::centered_with_radius(&line.0, resolution / 4.0);
             let right_side = geom::Rect::centered_with_radius(&line.1, resolution / 4.0);
 
-            println!("left query:  {:?}", left_side);
-            println!("right query: {:?}", right_side);
-
-            let should_remove = {
+            let is_peninsula = {
                 let shares_endpoint = |geom::Line(q1, q2)| {
                     let geom::Line(p1, p2) = line;
                     // optimization for when we're comparing against our own line;
@@ -129,14 +112,15 @@ fn remove_peninsulas(mut tree: QuadTree<geom::Line>, resolution: f32) -> QuadTre
                 let q_left = tree.query(left_side).into_iter().filter(|&(&l, _, _)| shares_endpoint(l));
                 let q_right = tree.query(right_side).into_iter().filter(|&(&l, _, _)| shares_endpoint(l));
 
-                //println!("### {} \n {:?} \n {:?} {:?}", q_left.len() + q_right.len(), line, q_left, q_right);
-
                 q_left.count() < 2 || q_right.count() < 2
             };
 
+            let is_dot = (line.0).distance(&line.1) < 0.001;
+
+            let should_remove = is_peninsula | is_dot;
+
             if should_remove {
                 tree.remove(id);
-                println!("REMOVED: {:?}", id);
                 any_removed = true;
             }
         }
@@ -165,6 +149,10 @@ fn continue_with(goal: geom::Point, mut last: geom::Point, mut tree: QuadTree<ge
             points.push(this);
             last = this;
         } else {
+            for &(_, _, d) in &near_last {
+                debug_assert!(d == near_last[0].2);
+            }
+
             let mut continued = near_last
                 .into_iter()
                 .map(|(line, id, _)| {
@@ -242,7 +230,7 @@ fn get_lines_near(target: geom::Point, tree: &QuadTree<geom::Line>, resolution: 
         d1.partial_cmp(&d2).unwrap_or(::std::cmp::Ordering::Equal)
     });
 
-    let smallest_dist = near_target.last().unwrap().2;
+    let smallest_dist = near_target.first().unwrap().2;
 
     // Pop off all the other lines that don't have that small
     // distance.

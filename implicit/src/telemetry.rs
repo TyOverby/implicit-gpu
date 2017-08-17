@@ -1,4 +1,5 @@
 use super::nodes::Node;
+use super::lines::util::geom;
 use super::opencl::FieldBuffer;
 use super::output::{OutputScene, OutputShape};
 use lines::LineType;
@@ -34,21 +35,20 @@ impl TelemetryLocation {
 
     pub fn new_intermediate(&mut self) { self.intermediate += 1; }
 
-    fn scene_path(&self) -> PathBuf { PathBuf::new() }
-    fn figure_path(&self) -> PathBuf {
+    fn t_figure_path(&self) -> PathBuf {
         let mut r = PathBuf::new();
         r.push(format!("figure_{}", self.figure));
         r
     }
 
-    fn shape_path(&self) -> PathBuf {
+    fn t_shape_path(&self) -> PathBuf {
         let mut r = PathBuf::new();
         r.push(format!("figure_{}", self.figure));
         r.push(format!("shape_{}", self.shape));
         r
     }
 
-    fn intermediate_path(&self) -> PathBuf {
+    fn t_intermediate_path(&self) -> PathBuf {
         let mut r = PathBuf::new();
         r.push(format!("figure_{}", self.figure));
         r.push(format!("shape_{}", self.shape));
@@ -59,6 +59,8 @@ impl TelemetryLocation {
 
 pub trait Telemetry {
     fn shape_finished(&mut self, t: TelemetryLocation, buffer: &FieldBuffer, lines: &[((f32, f32), (f32, f32))]);
+    fn shape_line_pre_prune(&mut self, t: TelemetryLocation, lines: &[geom::Line]);
+    fn shape_line_pruned(&mut self, t: TelemetryLocation, lines: &[geom::Line]);
     fn shape_line_joined(&mut self, t: TelemetryLocation, lines: &[LineType]);
     fn intermediate_eval_basic(&mut self, t: TelemetryLocation, buffer: &FieldBuffer, program: &str, node: &Node);
     fn intermediate_eval_poly(&mut self, t: TelemetryLocation, buffer: &FieldBuffer);
@@ -75,6 +77,8 @@ impl Telemetry for NullTelemetry {
     fn shape_finished(&mut self, _t: TelemetryLocation, _buffer: &FieldBuffer, _lines: &[((f32, f32), (f32, f32))]) {}
     fn intermediate_eval_basic(&mut self, _t: TelemetryLocation, _buffer: &FieldBuffer, _program: &str, _node: &Node) {}
     fn intermediate_eval_poly(&mut self, _t: TelemetryLocation, _buffer: &FieldBuffer) {}
+    fn shape_line_pre_prune(&mut self, _t: TelemetryLocation, _lines: &[geom::Line]) {}
+    fn shape_line_pruned(&mut self, _t: TelemetryLocation, _lines: &[geom::Line]) {}
     fn shape_line_joined(&mut self, _t: TelemetryLocation, _lines: &[LineType]) {}
     fn figure_finished(&mut self, _t: TelemetryLocation, _figure: &[OutputShape]) {}
 
@@ -85,8 +89,8 @@ impl Telemetry for NullTelemetry {
 
 pub struct DumpTelemetry {
     path: PathBuf,
-    field_writer: Option<Box<Fn(&Path, &FieldBuffer)>>,
-    line_writer: Option<Box<Fn(&Path, &[((f32, f32), (f32, f32))])>>,
+    field_writer: Option<Box<Fn(PathBuf, &FieldBuffer)>>,
+    line_writer: Option<Box<Fn(PathBuf, &[((f32, f32), (f32, f32))])>>,
 }
 
 impl DumpTelemetry {
@@ -98,55 +102,151 @@ impl DumpTelemetry {
         }
     }
 
-    pub fn with_field_writer<F: 'static + Fn(&Path, &FieldBuffer)>(self, f: F) -> DumpTelemetry {
+    pub fn with_field_writer<F: 'static + Fn(PathBuf, &FieldBuffer)>(self, f: F) -> DumpTelemetry {
         DumpTelemetry {
             field_writer: Some(Box::new(f)),
             ..self
         }
     }
 
-    pub fn with_line_writer<F: 'static + Fn(&Path, &[((f32, f32), (f32, f32))])>(self, f: F) -> DumpTelemetry {
+    pub fn with_line_writer<F: 'static + Fn(PathBuf, &[((f32, f32), (f32, f32))])>(self, f: F) -> DumpTelemetry {
         DumpTelemetry {
             line_writer: Some(Box::new(f)),
             ..self
         }
     }
+
+    fn scene_path(&self, tloc: TelemetryLocation, file: &str) -> PathBuf {
+        create_dir_all(&self.path).unwrap();
+        self.path.join(file)
+    }
+
+    fn figure_path(&self, tloc: TelemetryLocation, file: &str) -> PathBuf {
+        let base = self.path.join(tloc.t_figure_path());
+        create_dir_all(&base).unwrap();
+        base.join(file)
+    }
+
+    fn shape_path(&self, tloc: TelemetryLocation, file: &str) -> PathBuf {
+        let base = self.path.join(tloc.t_shape_path());
+        create_dir_all(&base).unwrap();
+        base.join(file)
+    }
+
+    fn intermediate_path(&self, tloc: TelemetryLocation, file: &str) -> PathBuf {
+        let base =self.path.join(tloc.t_intermediate_path());
+        create_dir_all(&base).unwrap();
+        base.join(file)
+    }
+
 }
+
 
 impl Telemetry for DumpTelemetry {
     fn scene_started(&mut self) { ::flame::start("scene"); }
 
-    fn shape_finished(&mut self, t: TelemetryLocation, buffer: &FieldBuffer, lines: &[((f32, f32), (f32, f32))]) {
+    fn shape_finished(&mut self, tloc: TelemetryLocation, buffer: &FieldBuffer, lines: &[((f32, f32), (f32, f32))]) {
         let _guard = ::flame::start_guard("telemetry shape_finished");
 
-        create_dir_all(&self.path).unwrap();
-        let path_base = self.path.join(t.shape_path());
-        let image_location = path_base.join("field.png");
-
-        ::debug::image::save_field_buffer(buffer, image_location, ::debug::image::ColorMode::Debug);
+        ::debug::image::save_field_buffer(buffer, self.shape_path(tloc, "field.png"), ::debug::image::ColorMode::Debug);
 
         if let Some(field_writer) = self.field_writer.as_ref() {
-            (field_writer)(&path_base.join("field.values"), buffer);
+            (field_writer)(self.shape_path(tloc, "field.values"), buffer);
         }
 
         if let Some(line_writer) = self.line_writer.as_ref() {
-            (line_writer)(&path_base.join("outline.lines"), lines);
+            (line_writer)(self.shape_path(tloc, "outlines.lines"), lines);
         }
 
     }
 
-    fn shape_line_joined(&mut self, t: TelemetryLocation, lines: &[LineType]) {
-        use vectorphile::Canvas;
-        use vectorphile::backend::{Command, DrawBackend, DrawOptions};
-        use vectorphile::svg::SvgBackend;
+    fn shape_line_pre_prune(&mut self, tloc: TelemetryLocation, lines: &[geom::Line]) {
+        use std::fs::File;
+        let _guard = ::flame::start_guard("telemetry shape_line_joined");
+        let file = File::create(self.shape_path(tloc, "pre-pruned.svg")).unwrap();
+        output_svg_lines(file, lines.iter().cloned());
+    }
+
+    fn shape_line_pruned(&mut self, tloc: TelemetryLocation, lines: &[geom::Line]) {
         use std::fs::File;
 
         let _guard = ::flame::start_guard("telemetry shape_line_joined");
+        let file = File::create(self.shape_path(tloc, "pruned.svg")).unwrap();
+        output_svg_lines(file, lines.iter().cloned());
+    }
 
-        let path_base = self.path.join(t.intermediate_path());
-        create_dir_all(&path_base).unwrap();
-        let file = File::create(path_base.join("joined.svg")).unwrap();
+    fn shape_line_joined(&mut self, tloc: TelemetryLocation, lines: &[LineType]) {
+        use std::fs::File;
+
+        let _guard = ::flame::start_guard("telemetry shape_line_joined");
+        let file = File::create(self.shape_path(tloc, "joined.svg")).unwrap();
+        output_svg_linetype(file, lines.iter());
+    }
+
+    fn intermediate_eval_basic(&mut self, tloc: TelemetryLocation, buffer: &FieldBuffer, program: &str, node: &Node) {
+        let _guard = ::flame::start_guard("telemetry intermediate_eval_basic");
+
+        ::debug::image::save_field_buffer(buffer, self.intermediate_path(tloc, "field.png"), ::debug::image::ColorMode::Debug);
+        if let Some(field_writer) = self.field_writer.as_ref() {
+            (field_writer)(self.intermediate_path(tloc, "field.values"), buffer);
+        }
+
+        ::latin::file::write(self.intermediate_path(tloc, "shader.c"), program).unwrap();
+        ::latin::file::write(self.intermediate_path(tloc, "node.txt"), format!("{:#?}", node)).unwrap();
+    }
+
+    fn intermediate_eval_poly(&mut self, tloc: TelemetryLocation, buffer: &FieldBuffer) {
+        let _guard = ::flame::start_guard("telemetry intermediate_eval_poly");
+
+        ::debug::image::save_field_buffer(buffer, self.intermediate_path(tloc, "field.png"), ::debug::image::ColorMode::Debug);
+        if let Some(field_writer) = self.field_writer.as_ref() {
+            (field_writer)(self.intermediate_path(tloc, "field.values"), buffer);
+        }
+    }
+
+    fn figure_finished(&mut self, tloc: TelemetryLocation, figure: &[OutputShape]) {
+        use export::svg;
+        use output::{OutputFigure, OutputScene};
+        let _guard = ::flame::start_guard("telemetry figure_finished");
+
+        let svg_path = self.figure_path(tloc, "figure.svg");
+        svg::write_to_file(
+            svg_path,
+            OutputScene {
+                figures: vec![
+                    OutputFigure {
+                        shapes: figure.iter().cloned().collect(),
+                    },
+                ],
+            },
+        ).unwrap();
+    }
+    fn scene_finished(&mut self, tloc: TelemetryLocation, scene: &OutputScene) {
+        use export::svg;
+        use std::fs::File;
+
+        ::flame::end("scene");
+        svg::write_to_file(self.scene_path(tloc, "scene.svg"), scene.clone()).unwrap();
+
+        ::flame::dump_text_to_writer(File::create(self.scene_path(tloc, "scene.perf")).unwrap()).unwrap();
+        ::flame::clear();
+    }
+
+    fn scene_bounding_box(&mut self, tloc: TelemetryLocation, x: f32, y: f32, w: f32, h: f32) {
+        use std::fs::File;
+        use std::io::Write;
+        let mut perf_file = File::create(self.scene_path(tloc, "scene.aabb")).unwrap();
+        write!(perf_file, "x y: {} {}\nw h: {} {}", x, y, w, h).unwrap();
+    }
+}
+
+fn output_svg_linetype<'a, I>(file: ::std::fs::File, lines: I) where
+I: Iterator<Item=&'a LineType> {
+        use vectorphile::Canvas;
+        use vectorphile::backend::{Command, DrawBackend, DrawOptions};
+        use vectorphile::svg::SvgBackend;
         let mut canvas = Canvas::new(SvgBackend::new(file).unwrap());
+
         for line in lines {
             let (pts, restitch) = match line {
                 &LineType::Joined(ref pts) => {
@@ -189,73 +289,29 @@ impl Telemetry for DumpTelemetry {
             canvas.apply(Command::EndShape).unwrap();
         }
         canvas.close().unwrap();
-    }
+}
 
-    fn intermediate_eval_basic(&mut self, t: TelemetryLocation, buffer: &FieldBuffer, program: &str, node: &Node) {
-        let _guard = ::flame::start_guard("telemetry intermediate_eval_basic");
+fn output_svg_lines<'a, I>(file: ::std::fs::File, lines: I) where
+I: Iterator<Item=geom::Line> {
+        use vectorphile::Canvas;
+        use vectorphile::backend::{Command, DrawBackend, DrawOptions};
+        use vectorphile::svg::SvgBackend;
+        let mut canvas = Canvas::new(SvgBackend::new(file).unwrap());
 
-        let path_base = self.path.join(t.intermediate_path());
-        create_dir_all(&path_base).unwrap();
+        canvas
+            .apply(Command::StartShape(DrawOptions::stroked((0, 0, 0), 0.1)))
+            .unwrap();
 
-        ::debug::image::save_field_buffer(buffer, path_base.join("field.png"), ::debug::image::ColorMode::Debug);
-        if let Some(field_writer) = self.field_writer.as_ref() {
-            (field_writer)(&path_base.join("field.values"), buffer);
+        for geom::Line(p1, p2) in lines {
+            canvas
+                .apply(Command::MoveTo{x: p1.x as f64, y: p1.y as f64})
+                .unwrap();
+            canvas
+                .apply(Command::LineTo{x: p2.x as f64, y: p2.y as f64})
+                .unwrap();
         }
 
-        ::latin::file::write(path_base.join("shader.c"), program).unwrap();
-        ::latin::file::write(path_base.join("node.txt"), format!("{:#?}", node)).unwrap();
-    }
+        canvas.apply(Command::EndShape).unwrap();
 
-    fn intermediate_eval_poly(&mut self, t: TelemetryLocation, buffer: &FieldBuffer) {
-        let _guard = ::flame::start_guard("telemetry intermediate_eval_poly");
-        let path_base = self.path.join(t.intermediate_path());
-        create_dir_all(&path_base).unwrap();
-
-        ::debug::image::save_field_buffer(buffer, path_base.join("field.png"), ::debug::image::ColorMode::Debug);
-        if let Some(field_writer) = self.field_writer.as_ref() {
-            (field_writer)(&path_base.join("field.values"), buffer);
-        }
-    }
-
-    fn figure_finished(&mut self, t: TelemetryLocation, figure: &[OutputShape]) {
-        use export::svg;
-        use output::{OutputFigure, OutputScene};
-        let _guard = ::flame::start_guard("telemetry figure_finished");
-
-        let path_base = self.path.join(t.figure_path());
-        create_dir_all(&path_base).unwrap();
-
-        let svg_path = path_base.join("figure.svg");
-        svg::write_to_file(
-            svg_path,
-            OutputScene {
-                figures: vec![
-                    OutputFigure {
-                        shapes: figure.iter().cloned().collect(),
-                    },
-                ],
-            },
-        ).unwrap();
-    }
-    fn scene_finished(&mut self, t: TelemetryLocation, scene: &OutputScene) {
-        use export::svg;
-        use std::fs::File;
-
-        ::flame::end("scene");
-        let path_base = self.path.join(t.scene_path());
-        let svg_path = path_base.join("scene.svg");
-        svg::write_to_file(svg_path, scene.clone()).unwrap();
-
-        let perf_file = File::create(path_base.join("scene.perf")).unwrap();
-        ::flame::dump_text_to_writer(perf_file).unwrap();
-        ::flame::clear();
-    }
-
-    fn scene_bounding_box(&mut self, t: TelemetryLocation, x: f32, y: f32, w: f32, h: f32) {
-        use std::fs::File;
-        use std::io::Write;
-        let bb_path = self.path.join(t.scene_path());
-        let mut perf_file = File::create(bb_path.join("scene.aabb")).unwrap();
-        write!(perf_file, "x y: {} {}\nw h: {} {}", x, y, w, h).unwrap();
-    }
+        canvas.close().unwrap();
 }
