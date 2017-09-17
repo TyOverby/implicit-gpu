@@ -41,7 +41,7 @@ fn join_lines_internal(lines: Vec<geom::Line>, telemetry: &mut Telemetry, tloc: 
     let aabb = match aabb {
         Some(aabb) => {
             // Give the bounding box some extra room
-            let padding  = resolution * 2.0;
+            let padding = resolution * 2.0;
             aabb.expand(padding, padding, padding, padding)
         }
         None => return (vec![], QuadTree::new(geom::Rect::null(), false, 4, 16, 4)),
@@ -61,12 +61,13 @@ fn join_lines_internal(lines: Vec<geom::Line>, telemetry: &mut Telemetry, tloc: 
 
     let mut out = vec![];
 
+    let mut inflection_point_tree = QuadTree::new(aabb, false, 4, 16, 4);
+
     while !tree.is_empty() {
         let first_id = tree.first().unwrap();
         let (segment, _) = tree.remove(first_id).unwrap();
 
-        match continue_with(segment.0, segment.1, tree, resolution)
-        {
+        match continue_with(segment.0, segment.1, tree, &inflection_point_tree, resolution) {
             Ok((mut pts, tr)) => {
                 println!("OK");
                 pts.insert(0, segment.1);
@@ -74,12 +75,21 @@ fn join_lines_internal(lines: Vec<geom::Line>, telemetry: &mut Telemetry, tloc: 
                 tree = tr;
                 out.push(LineType::Joined(pts));
             }
-            Err((mut pts, tr)) => {
+            Err((pts, tr)) => {
                 println!("ERR {:?}", segment);
-                pts.insert(0, segment.1);
-                pts.insert(0, segment.0);
-                tree = tr;
-                out.push(LineType::Unjoined(pts));
+                let (mut back_pts, back_tree) = match continue_with(
+                    segment.1, segment.0, tr, &inflection_point_tree, resolution) {
+                    Ok(back) => back,
+                    Err(back) => back,
+                };
+                back_pts.reverse();
+                back_pts.push(segment.0);
+                back_pts.push(segment.1);
+                back_pts.extend(pts);
+                tree = back_tree;
+                inflection_point_tree.insert(back_pts.first().unwrap().clone());
+                inflection_point_tree.insert(back_pts.last().unwrap().clone());
+                out.push(LineType::Unjoined(back_pts));
             }
         }
 
@@ -90,7 +100,8 @@ fn join_lines_internal(lines: Vec<geom::Line>, telemetry: &mut Telemetry, tloc: 
 
 fn remove_peninsulas(mut tree: QuadTree<geom::Line>, resolution: f32) -> QuadTree<geom::Line> {
 
-    // Optimization Opporitunity: When you remove a line, nearby lines are likely to be the
+    // Optimization Opporitunity: When you remove a line,
+    // nearby lines are likely to be the
     // next to go.
     loop {
         let mut any_removed = false;
@@ -104,20 +115,27 @@ fn remove_peninsulas(mut tree: QuadTree<geom::Line>, resolution: f32) -> QuadTre
 
             let is_peninsula = {
                 let shares_endpoint = |geom::Line(q1, q2)| {
-                    // optimization for when we're comparing against our own line;
-                    if p1 == q1 && p2 == q2 { return false; }
+                    // optimization for when we're comparing against our own
+                    // line;
+                    if p1 == q1 && p2 == q2 {
+                        return false;
+                    }
 
                     let closest = p2.distance(&q1).min(p1.distance(&q2));
                     return closest < (resolution / 4.0);
                 };
 
-                let q_left = tree.query(left_side).into_iter().filter(|&(&l, _, _)| shares_endpoint(l));
-                let q_right = tree.query(right_side).into_iter().filter(|&(&l, _, _)| shares_endpoint(l));
+                let q_left = tree.query(left_side)
+                    .into_iter()
+                    .filter(|&(&l, _, _)| shares_endpoint(l));
+                let q_right = tree.query(right_side)
+                    .into_iter()
+                    .filter(|&(&l, _, _)| shares_endpoint(l));
 
                 q_left.count() < 1 || q_right.count() < 1
             };
 
-            //let is_dot = (line.0).distance(&line.1) < 0.001;
+            // let is_dot = (line.0).distance(&line.1) < 0.001;
 
             let should_remove = is_peninsula; //| is_dot;
 
@@ -135,7 +153,12 @@ fn remove_peninsulas(mut tree: QuadTree<geom::Line>, resolution: f32) -> QuadTre
     tree
 }
 
-fn continue_with(goal: geom::Point, mut last: geom::Point, mut tree: QuadTree<geom::Line>, resolution: f32)
+fn continue_with(
+    goal: geom::Point,
+    mut last: geom::Point,
+    mut tree: QuadTree<geom::Line>,
+    inflection_points: &QuadTree<geom::Point>,
+    resolution: f32)
     -> Result<(Vec<geom::Point>, QuadTree<geom::Line>), (Vec<geom::Point>, QuadTree<geom::Line>)> {
     let mut points = Vec::new();
 
@@ -147,15 +170,19 @@ fn continue_with(goal: geom::Point, mut last: geom::Point, mut tree: QuadTree<ge
 
         let near_last = get_lines_near(last, &tree, resolution);
 
+        let inflection_query = geom::Rect::centered_with_radius(&last, resolution / 4.0);
+        let near_inflection_point = inflection_points.query(inflection_query).len() > 0;
+
         if near_last.len() == 0 {
             println!("none near {:?}", last);
             return Err((points, tree));
-        } else if near_last.len() == 1 {
+        } else if near_last.len() == 1 && !near_inflection_point {
             let (line, id, _) = near_last[0];
             tree.remove(id);
             last = furthest_end_from_line(last, line);
             points.push(last);
         } else {
+            return Err((points, tree));
             for &(_, _, d) in &near_last {
                 debug_assert!(d == near_last[0].2);
             }
@@ -166,7 +193,7 @@ fn continue_with(goal: geom::Point, mut last: geom::Point, mut tree: QuadTree<ge
                     let this = furthest_end_from_line(last, line);
                     let mut ct = tree.clone();
                     ct.remove(id);
-                    (this, continue_with(goal, this, ct, resolution))
+                    (this, continue_with(goal, this, ct, inflection_points, resolution))
                 })
                 .collect::<Vec<_>>();
 
@@ -212,7 +239,12 @@ fn get_lines_near(target: geom::Point, tree: &QuadTree<geom::Line>, resolution: 
             let da = line.0.distance_2(&target);
             (line.clone(), id, da)
         })
+        .filter(|&(ref line, _, _)| {
+            (target).distance_2(&line.0) < resolution / 4.0 || (target).distance_2(&line.1) < resolution / 4.0
+        })
         .collect::<Vec<_>>();
+
+    return near_target;
 
     // If we only have 0 or 1 elements, no need to do any
     // sorting, filtering, or anything
@@ -239,7 +271,7 @@ fn get_lines_near(target: geom::Point, tree: &QuadTree<geom::Line>, resolution: 
     // Pop off all the other lines that don't have that small
     // distance.
     loop {
-        if near_target.last().unwrap().2 == smallest_dist {
+        if (near_target.last().unwrap().2 - smallest_dist).abs() < 0.001 {
             break;
         } else {
             near_target.pop();
@@ -247,7 +279,7 @@ fn get_lines_near(target: geom::Point, tree: &QuadTree<geom::Line>, resolution: 
     }
 
     for &(_, _, d) in &near_target {
-        debug_assert!(d == smallest_dist);
+        debug_assert!((d - smallest_dist).abs() < 0.01);
         debug_assert!(!d.is_nan());
     }
 
