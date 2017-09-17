@@ -1,5 +1,5 @@
-use super::nodes::Node;
 use super::lines::util::geom;
+use super::nodes::Node;
 use super::opencl::FieldBuffer;
 use super::output::{OutputScene, OutputShape};
 use lines::LineType;
@@ -134,11 +134,10 @@ impl DumpTelemetry {
     }
 
     fn intermediate_path(&self, tloc: TelemetryLocation, file: &str) -> PathBuf {
-        let base =self.path.join(tloc.t_intermediate_path());
+        let base = self.path.join(tloc.t_intermediate_path());
         create_dir_all(&base).unwrap();
         base.join(file)
     }
-
 }
 
 
@@ -186,7 +185,11 @@ impl Telemetry for DumpTelemetry {
     fn intermediate_eval_basic(&mut self, tloc: TelemetryLocation, buffer: &FieldBuffer, program: &str, node: &Node) {
         let _guard = ::flame::start_guard("telemetry intermediate_eval_basic");
 
-        ::debug::image::save_field_buffer(buffer, self.intermediate_path(tloc, "field.png"), ::debug::image::ColorMode::Debug);
+        ::debug::image::save_field_buffer(
+            buffer,
+            self.intermediate_path(tloc, "field.png"),
+            ::debug::image::ColorMode::Debug,
+        );
         if let Some(field_writer) = self.field_writer.as_ref() {
             (field_writer)(self.intermediate_path(tloc, "field.values"), buffer);
         }
@@ -198,7 +201,11 @@ impl Telemetry for DumpTelemetry {
     fn intermediate_eval_poly(&mut self, tloc: TelemetryLocation, buffer: &FieldBuffer) {
         let _guard = ::flame::start_guard("telemetry intermediate_eval_poly");
 
-        ::debug::image::save_field_buffer(buffer, self.intermediate_path(tloc, "field.png"), ::debug::image::ColorMode::Debug);
+        ::debug::image::save_field_buffer(
+            buffer,
+            self.intermediate_path(tloc, "field.png"),
+            ::debug::image::ColorMode::Debug,
+        );
         if let Some(field_writer) = self.field_writer.as_ref() {
             (field_writer)(self.intermediate_path(tloc, "field.values"), buffer);
         }
@@ -240,78 +247,82 @@ impl Telemetry for DumpTelemetry {
     }
 }
 
-fn output_svg_linetype<'a, I>(file: ::std::fs::File, lines: I) where
-I: Iterator<Item=&'a LineType> {
-        use vectorphile::Canvas;
-        use vectorphile::backend::{Command, DrawBackend, DrawOptions};
-        use vectorphile::svg::SvgBackend;
-        let mut canvas = Canvas::new(SvgBackend::new(file).unwrap());
+fn output_svg_linetype<'a, I>(file: ::std::fs::File, lines: I)
+where
+    I: Iterator<Item = &'a LineType>,
+{
+    use vectorphile::Canvas;
+    use vectorphile::backend::{Command, DrawBackend, DrawOptions};
+    use vectorphile::svg::SvgBackend;
+    let mut canvas = Canvas::new(SvgBackend::new(file).unwrap());
 
-        for line in lines {
-            let (pts, restitch) = match line {
-                &LineType::Joined(ref pts) => {
-                    canvas
-                        .apply(Command::StartShape(DrawOptions::stroked((0, 0, 0), 0.1)))
-                        .unwrap();
-                    (&pts[..], true)
-                }
-                &LineType::Unjoined(ref pts) => {
-                    canvas
-                        .apply(Command::StartShape(DrawOptions::stroked((255, 0, 0), 0.1)))
-                        .unwrap();
-                    (&pts[..], false)
-                }
-            };
-            if pts.len() > 0 {
+    for line in lines {
+        let (pts, restitch) = match line {
+            &LineType::Joined(ref pts) => {
                 canvas
-                    .apply(Command::MoveTo {
+                    .apply(Command::StartShape(DrawOptions::stroked((0, 0, 0), 0.2)))
+                    .unwrap();
+                (&pts[..], true)
+            }
+            &LineType::Unjoined(ref pts) => {
+                canvas
+                    .apply(Command::StartShape(DrawOptions::stroked((255, 0, 0), 0.2)))
+                    .unwrap();
+                (&pts[..], false)
+            }
+        };
+        if pts.len() > 0 {
+            canvas
+                .apply(Command::MoveTo {
+                    x: pts[0].x as f64,
+                    y: pts[0].y as f64,
+                })
+                .unwrap();
+            canvas
+                .apply_all(
+                    pts.iter()
+                        .skip(1)
+                        .map(|pt| Command::LineTo { x: pt.x as f64, y: pt.y as f64 }),
+                )
+                .unwrap();
+
+            if restitch {
+                canvas
+                    .apply(Command::LineTo {
                         x: pts[0].x as f64,
                         y: pts[0].y as f64,
                     })
                     .unwrap();
-                canvas
-                    .apply_all(
-                        pts.iter()
-                            .skip(1)
-                            .map(|pt| Command::LineTo { x: pt.x as f64, y: pt.y as f64 }),
-                    )
-                    .unwrap();
-
-                if restitch {
-                    canvas
-                        .apply(Command::LineTo {
-                            x: pts[0].x as f64,
-                            y: pts[0].y as f64,
-                        })
-                        .unwrap();
-                }
             }
-            canvas.apply(Command::EndShape).unwrap();
         }
-        canvas.close().unwrap();
+        canvas.apply(Command::EndShape).unwrap();
+    }
+    canvas.close().unwrap();
 }
 
-fn output_svg_lines<'a, I>(file: ::std::fs::File, lines: I) where
-I: Iterator<Item=geom::Line> {
-        use vectorphile::Canvas;
-        use vectorphile::backend::{Command, DrawBackend, DrawOptions};
-        use vectorphile::svg::SvgBackend;
-        let mut canvas = Canvas::new(SvgBackend::new(file).unwrap());
+fn output_svg_lines<'a, I>(file: ::std::fs::File, lines: I)
+where
+    I: Iterator<Item = geom::Line>,
+{
+    use vectorphile::Canvas;
+    use vectorphile::backend::{Command, DrawBackend, DrawOptions};
+    use vectorphile::svg::SvgBackend;
+    let mut canvas = Canvas::new(SvgBackend::new(file).unwrap());
 
+    canvas
+        .apply(Command::StartShape(DrawOptions::stroked((0, 0, 0), 0.2)))
+        .unwrap();
+
+    for geom::Line(p1, p2) in lines {
         canvas
-            .apply(Command::StartShape(DrawOptions::stroked((0, 0, 0), 0.1)))
+            .apply(Command::MoveTo { x: p1.x as f64, y: p1.y as f64 })
             .unwrap();
+        canvas
+            .apply(Command::LineTo { x: p2.x as f64, y: p2.y as f64 })
+            .unwrap();
+    }
 
-        for geom::Line(p1, p2) in lines {
-            canvas
-                .apply(Command::MoveTo{x: p1.x as f64, y: p1.y as f64})
-                .unwrap();
-            canvas
-                .apply(Command::LineTo{x: p2.x as f64, y: p2.y as f64})
-                .unwrap();
-        }
+    canvas.apply(Command::EndShape).unwrap();
 
-        canvas.apply(Command::EndShape).unwrap();
-
-        canvas.close().unwrap();
+    canvas.close().unwrap();
 }

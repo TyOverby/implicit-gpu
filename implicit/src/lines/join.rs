@@ -63,12 +63,14 @@ fn join_lines_internal(lines: Vec<geom::Line>, telemetry: &mut Telemetry, tloc: 
         match continue_with(segment.0, segment.1, tree, resolution)
         {
             Ok((mut pts, tr)) => {
+                println!("OK");
                 pts.insert(0, segment.1);
                 pts.insert(0, segment.0);
                 tree = tr;
                 out.push(LineType::Joined(pts));
             }
             Err((mut pts, tr)) => {
+                println!("ERR {:?}", segment);
                 pts.insert(0, segment.1);
                 pts.insert(0, segment.0);
                 tree = tr;
@@ -101,11 +103,7 @@ fn remove_peninsulas(mut tree: QuadTree<geom::Line>, resolution: f32) -> QuadTre
                     // optimization for when we're comparing against our own line;
                     if p1 == q1 { return true; }
 
-                    let closest =
-                        p1.distance(&q1).min(
-                        p2.distance(&q1)).min(
-                        p1.distance(&q2).min(
-                        p2.distance(&q2)));
+                    let closest = p2.distance(&q1).min(p1.distance(&q2));
 
                     return closest < (resolution / 4.0);
                 };
@@ -138,16 +136,21 @@ fn continue_with(goal: geom::Point, mut last: geom::Point, mut tree: QuadTree<ge
     let mut points = Vec::new();
 
     loop {
+        if goal.distance_2(&last) < resolution {
+            points.pop();
+            return Ok((points, tree));
+        }
+
         let near_last = get_lines_near(last, &tree, resolution);
 
         if near_last.len() == 0 {
+            println!("none near {:?}", last);
             return Err((points, tree));
         } else if near_last.len() == 1 {
             let (line, id, _) = near_last[0];
             tree.remove(id);
-            let this = furthest_end_from_line(last, line);
-            points.push(this);
-            last = this;
+            last = furthest_end_from_line(last, line);
+            points.push(last);
         } else {
             for &(_, _, d) in &near_last {
                 debug_assert!(d == near_last[0].2);
@@ -186,11 +189,6 @@ fn continue_with(goal: geom::Point, mut last: geom::Point, mut tree: QuadTree<ge
                 }
             }
         }
-
-        if goal.distance_2(&last) < resolution {
-            points.pop();
-            return Ok((points, tree));
-        }
     }
 }
 
@@ -208,8 +206,7 @@ fn get_lines_near(target: geom::Point, tree: &QuadTree<geom::Line>, resolution: 
         .into_iter()
         .map(|(line, _, id)| {
             let da = line.0.distance_2(&target);
-            let db = line.1.distance_2(&target);
-            (line.clone(), id, da.min(db))
+            (line.clone(), id, da)
         })
         .collect::<Vec<_>>();
 
