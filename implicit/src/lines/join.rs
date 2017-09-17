@@ -37,8 +37,13 @@ fn join_lines_internal(lines: Vec<geom::Line>, telemetry: &mut Telemetry, tloc: 
         }
     }
 
+
     let aabb = match aabb {
-        Some(aabb) => aabb,
+        Some(aabb) => {
+            // Give the bounding box some extra room
+            let padding  = resolution * 2.0;
+            aabb.expand(padding, padding, padding, padding)
+        }
         None => return (vec![], QuadTree::new(geom::Rect::null(), false, 4, 16, 4)),
     };
 
@@ -92,25 +97,24 @@ fn remove_peninsulas(mut tree: QuadTree<geom::Line>, resolution: f32) -> QuadTre
 
         let lines = tree.iter().map(|(&id, &(line, _))| (id, line)).collect::<Vec<_>>();
 
-        for (id, line) in lines {
+        for (id, geom::Line(p1, p2)) in lines {
 
-            let left_side = geom::Rect::centered_with_radius(&line.0, resolution / 4.0);
-            let right_side = geom::Rect::centered_with_radius(&line.1, resolution / 4.0);
+            let left_side = geom::Rect::centered_with_radius(&p1, resolution / 2.0);
+            let right_side = geom::Rect::centered_with_radius(&p2, resolution / 2.0);
 
             let is_peninsula = {
                 let shares_endpoint = |geom::Line(q1, q2)| {
-                    let geom::Line(p1, p2) = line;
                     // optimization for when we're comparing against our own line;
-                    if p1 == q1 { return true; }
+                    if p1 == q1 && p2 == q2 { return false; }
 
                     let closest = p2.distance(&q1).min(p1.distance(&q2));
-
                     return closest < (resolution / 4.0);
                 };
+
                 let q_left = tree.query(left_side).into_iter().filter(|&(&l, _, _)| shares_endpoint(l));
                 let q_right = tree.query(right_side).into_iter().filter(|&(&l, _, _)| shares_endpoint(l));
 
-                q_left.count() < 2 || q_right.count() < 2
+                q_left.count() < 1 || q_right.count() < 1
             };
 
             //let is_dot = (line.0).distance(&line.1) < 0.001;
@@ -136,7 +140,7 @@ fn continue_with(goal: geom::Point, mut last: geom::Point, mut tree: QuadTree<ge
     let mut points = Vec::new();
 
     loop {
-        if goal.distance_2(&last) < resolution {
+        if points.len() > 1 && goal.distance_2(&last) < resolution / 4.0 {
             points.pop();
             return Ok((points, tree));
         }
