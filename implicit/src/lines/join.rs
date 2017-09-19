@@ -158,25 +158,30 @@ fn continue_with(goal: geom::Point, mut last: geom::Point, mut tree: QuadTree<ge
     let mut points = Vec::new();
 
     loop {
-        let near_inflection_point = near_inflection(last, resolution, inflection_points);
-        if points.len() > 1 && goal.distance_2(&last) < resolution / 4.0 && !near_inflection_point {
-            points.pop();
-            return Ok((points, tree));
+        if near_inflection(last, resolution, inflection_points) {
+            return Err((points, tree));
         }
 
         let near_last = get_lines_near(last, &tree, resolution);
+        let close_to_goal = goal.distance_2(&last) < resolution / 4.0;
 
-        if near_last.len() == 0 {
-            return Err((points, tree));
-        } else if near_last.len() == 1 && !near_inflection_point {
-            let (line, id) = near_last[0];
-            tree.remove(id);
-            last = furthest_end_from_line(last, line);
-            points.push(last);
-            continue;
+        match (near_last.len(), close_to_goal) {
+            // Nothing left, near goal, no inflection point close by
+            (0, true) => {
+                points.pop();
+                return Ok((points, tree));
+            }
+            // We have other options and we're near the goal
+            (1, true) => return Err((points, tree)),
+            // We have one option, not near a goal or inflection point. Take it!
+            (1, false) => {
+                let (line, id) = near_last[0];
+                tree.remove(id);
+                last = furthest_end_from_line(last, line);
+                points.push(last);
+            }
+            (_, _) => return Err((points, tree)),
         }
-
-        return Err((points, tree));
     }
 }
 
