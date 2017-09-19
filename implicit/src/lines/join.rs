@@ -69,26 +69,26 @@ fn join_lines_internal(lines: Vec<geom::Line>, telemetry: &mut Telemetry, tloc: 
 
         match continue_with(segment.0, segment.1, tree, &inflection_point_tree, resolution) {
             Ok((mut pts, tr)) => {
-                println!("OK");
                 pts.insert(0, segment.1);
                 pts.insert(0, segment.0);
                 tree = tr;
                 out.push(LineType::Joined(pts));
             }
             Err((pts, tr)) => {
-                println!("ERR {:?}", segment);
-                let (mut back_pts, back_tree) = match continue_with(
-                    segment.1, segment.0, tr, &inflection_point_tree, resolution) {
+                let (mut back_pts, back_tree) = match continue_with(segment.1, segment.0, tr, &inflection_point_tree, resolution) {
                     Ok(back) => back,
                     Err(back) => back,
                 };
+
                 back_pts.reverse();
                 back_pts.push(segment.0);
                 back_pts.push(segment.1);
                 back_pts.extend(pts);
-                tree = back_tree;
+
                 inflection_point_tree.insert(back_pts.first().unwrap().clone());
                 inflection_point_tree.insert(back_pts.last().unwrap().clone());
+
+                tree = back_tree;
                 out.push(LineType::Unjoined(back_pts));
             }
         }
@@ -153,74 +153,37 @@ fn remove_peninsulas(mut tree: QuadTree<geom::Line>, resolution: f32) -> QuadTre
     tree
 }
 
-fn continue_with(
-    goal: geom::Point,
-    mut last: geom::Point,
-    mut tree: QuadTree<geom::Line>,
-    inflection_points: &QuadTree<geom::Point>,
-    resolution: f32)
+fn continue_with(goal: geom::Point, mut last: geom::Point, mut tree: QuadTree<geom::Line>, inflection_points: &QuadTree<geom::Point>, resolution: f32)
     -> Result<(Vec<geom::Point>, QuadTree<geom::Line>), (Vec<geom::Point>, QuadTree<geom::Line>)> {
     let mut points = Vec::new();
 
     loop {
-        if points.len() > 1 && goal.distance_2(&last) < resolution / 4.0 {
+        let near_inflection_point = near_inflection(last, resolution, inflection_points);
+        if points.len() > 1 && goal.distance_2(&last) < resolution / 4.0 && !near_inflection_point {
             points.pop();
             return Ok((points, tree));
         }
 
         let near_last = get_lines_near(last, &tree, resolution);
 
-        let inflection_query = geom::Rect::centered_with_radius(&last, resolution / 4.0);
-        let near_inflection_point = inflection_points.query(inflection_query).len() > 0;
-
         if near_last.len() == 0 {
-            println!("none near {:?}", last);
             return Err((points, tree));
         } else if near_last.len() == 1 && !near_inflection_point {
-            let (line, id, _) = near_last[0];
+            let (line, id) = near_last[0];
             tree.remove(id);
             last = furthest_end_from_line(last, line);
             points.push(last);
-        } else {
-            return Err((points, tree));
-            for &(_, _, d) in &near_last {
-                debug_assert!(d == near_last[0].2);
-            }
-
-            let mut continued = near_last
-                .into_iter()
-                .map(|(line, id, _)| {
-                    let this = furthest_end_from_line(last, line);
-                    let mut ct = tree.clone();
-                    ct.remove(id);
-                    (this, continue_with(goal, this, ct, inflection_points, resolution))
-                })
-                .collect::<Vec<_>>();
-
-            // Sort the continuation options such that
-            // * OKs show up before errors
-            // * OKs that have long lengths show up before low lengths
-            // * Errs that have short lengths will show up before errs
-            // with long lengths.
-            continued.sort_by_key(|&(_, ref res)| match res {
-                &Ok((ref pts, _)) => -(pts.len() as i64),
-                &Err((ref pts, _)) => pts.len() as i64,
-            });
-
-            match continued.into_iter().next().unwrap() {
-                (pt, Ok((pts, tree))) => {
-                    points.push(pt);
-                    points.extend(pts);
-                    return Ok((points, tree));
-                }
-                (pt, Err((pts, tree))) => {
-                    points.push(pt);
-                    points.extend(pts);
-                    return Err((points, tree));
-                }
-            }
+            continue;
         }
+
+        return Err((points, tree));
     }
+}
+
+fn near_inflection(pt: geom::Point, res: f32, inflection_points: &QuadTree<geom::Point>) -> bool {
+    let inflection_query = geom::Rect::centered_with_radius(&pt, res / 4.0);
+    let near_inflection_point = inflection_points.query(inflection_query).len() > 0;
+    near_inflection_point
 }
 
 fn furthest_end_from_line(target: geom::Point, line: geom::Line) -> geom::Point {
@@ -231,57 +194,17 @@ fn furthest_end_from_line(target: geom::Point, line: geom::Line) -> geom::Point 
     }
 }
 
-fn get_lines_near(target: geom::Point, tree: &QuadTree<geom::Line>, resolution: f32) -> Vec<(geom::Line, QuadId, f32)> {
+fn get_lines_near(target: geom::Point, tree: &QuadTree<geom::Line>, resolution: f32) -> Vec<(geom::Line, QuadId)> {
     let query = geom::Rect::centered_with_radius(&target, resolution / 4.0);
-    let mut near_target = tree.query(query)
+    let near_target = tree.query(query)
         .into_iter()
         .map(|(line, _, id)| {
-            let da = line.0.distance_2(&target);
-            (line.clone(), id, da)
+            (line.clone(), id)
         })
-        .filter(|&(ref line, _, _)| {
+        .filter(|&(ref line, _)| {
             (target).distance_2(&line.0) < resolution / 4.0 || (target).distance_2(&line.1) < resolution / 4.0
         })
         .collect::<Vec<_>>();
 
     return near_target;
-
-    // If we only have 0 or 1 elements, no need to do any
-    // sorting, filtering, or anything
-    if near_target.len() == 0 || near_target.len() == 1 {
-        return near_target;
-    }
-
-    // If all of the lines are the same distance away, then no
-    // need to sort and filter.
-    if near_target.windows(2).all(|window| window[0].2 == window[1].2) {
-        return near_target;
-    }
-
-    // Find the smallest distance and only use those
-    near_target.sort_by(|&(_, _, d1), &(_, _, d2)| {
-        d1.partial_cmp(&d2).unwrap_or(::std::cmp::Ordering::Equal)
-    });
-
-    let smallest_dist = near_target.first().unwrap().2;
-    for &(_, _, d) in &near_target {
-        debug_assert!(smallest_dist <= d);
-    }
-
-    // Pop off all the other lines that don't have that small
-    // distance.
-    loop {
-        if (near_target.last().unwrap().2 - smallest_dist).abs() < 0.001 {
-            break;
-        } else {
-            near_target.pop();
-        }
-    }
-
-    for &(_, _, d) in &near_target {
-        debug_assert!((d - smallest_dist).abs() < 0.01);
-        debug_assert!(!d.is_nan());
-    }
-
-    near_target
 }
