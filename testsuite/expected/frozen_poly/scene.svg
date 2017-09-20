@@ -1,3 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg">
-    <path fill-rule="evenodd" style="fill: rgb(0, 0, 0); stroke: none; stroke-width: none;" d="M4.00,3.00 L102.00,52.00 L201.00,151.00 L201.32,150.00 L201.00,149.00 L152.00,2.00 L4.00,2.00 L4.00,3.00 "/>
-</svg>
+    <path fill-rule="evenodd" style="fill: rgb(0, 0, 0); stroke: none; stroke-width: none;" d="M4.00,2.00 L4.00,3.00 L102.00,52.00 L139.00,89.00 L140.00,90.00 L201.00,151.00 L201.32,150.00 L152.00,2.00 L4.00,2.00 "/>
+
+<script>
+let paths = Array.from(document.children[0].children).filter(function(c) {
+    var orig = c.style.stroke;
+    c.onmouseover = function() {
+        c.style.stroke = "rgb(0, 0, 255)";
+    };
+    c.onmouseout = function () {
+        c.style.stroke = orig;
+    };
+});
+
+for (let path of paths) {
+    console.log(path);
+}
+</script></svg>

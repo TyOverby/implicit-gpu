@@ -62,6 +62,7 @@ pub trait Telemetry {
     fn shape_line_pre_prune(&mut self, t: TelemetryLocation, lines: &[geom::Line]);
     fn shape_line_pruned(&mut self, t: TelemetryLocation, lines: &[geom::Line]);
     fn shape_line_joined(&mut self, t: TelemetryLocation, lines: &[LineType]);
+    fn shape_line_connected(&mut self, t: TelemetryLocation, lines: &[LineType]);
     fn intermediate_eval_basic(&mut self, t: TelemetryLocation, buffer: &FieldBuffer, program: &str, node: &Node);
     fn intermediate_eval_poly(&mut self, t: TelemetryLocation, buffer: &FieldBuffer);
     fn figure_finished(&mut self, t: TelemetryLocation, figure: &[OutputShape]);
@@ -80,6 +81,7 @@ impl Telemetry for NullTelemetry {
     fn shape_line_pre_prune(&mut self, _t: TelemetryLocation, _lines: &[geom::Line]) {}
     fn shape_line_pruned(&mut self, _t: TelemetryLocation, _lines: &[geom::Line]) {}
     fn shape_line_joined(&mut self, _t: TelemetryLocation, _lines: &[LineType]) {}
+    fn shape_line_connected(&mut self, _t: TelemetryLocation, _lines: &[LineType]) {}
     fn figure_finished(&mut self, _t: TelemetryLocation, _figure: &[OutputShape]) {}
 
     fn scene_started(&mut self) {}
@@ -161,7 +163,7 @@ impl Telemetry for DumpTelemetry {
 
     fn shape_line_pre_prune(&mut self, tloc: TelemetryLocation, lines: &[geom::Line]) {
         use std::fs::File;
-        let _guard = ::flame::start_guard("telemetry shape_line_joined");
+        let _guard = ::flame::start_guard("telemetry shape_line_pre_prune");
         let file = File::create(self.shape_path(tloc, "pre-pruned.svg")).unwrap();
         output_svg_lines(file, lines.iter().cloned());
     }
@@ -169,7 +171,7 @@ impl Telemetry for DumpTelemetry {
     fn shape_line_pruned(&mut self, tloc: TelemetryLocation, lines: &[geom::Line]) {
         use std::fs::File;
 
-        let _guard = ::flame::start_guard("telemetry shape_line_joined");
+        let _guard = ::flame::start_guard("telemetry shape_line_pruned");
         let file = File::create(self.shape_path(tloc, "pruned.svg")).unwrap();
         output_svg_lines(file, lines.iter().cloned());
     }
@@ -179,6 +181,14 @@ impl Telemetry for DumpTelemetry {
 
         let _guard = ::flame::start_guard("telemetry shape_line_joined");
         let file = File::create(self.shape_path(tloc, "joined.svg")).unwrap();
+        output_svg_linetype(file, lines.iter());
+    }
+
+    fn shape_line_connected(&mut self, tloc: TelemetryLocation, lines: &[LineType]) {
+        use std::fs::File;
+
+        let _guard = ::flame::start_guard("telemetry shape_line_connected");
+        let file = File::create(self.shape_path(tloc, "connected.svg")).unwrap();
         output_svg_linetype(file, lines.iter());
     }
 

@@ -1,3 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg">
-    <path fill-rule="evenodd" style="fill: rgb(0, 0, 0); stroke: none; stroke-width: none;" d="M2.01,51.00 L3.00,51.99 L5.00,51.91 L10.00,51.36 L15.00,50.28 L20.00,48.65 L25.00,46.40 L29.00,44.08 L33.29,41.00 L34.00,40.42 L37.71,37.00 L42.00,32.00 L44.71,28.00 L46.90,24.00 L49.37,18.00 L50.77,13.00 L51.64,8.00 L51.99,3.00 L51.00,2.01 L49.00,2.09 L44.00,2.64 L39.00,3.72 L34.00,5.35 L29.00,7.60 L25.00,9.92 L21.00,12.77 L16.29,17.00 L12.00,22.00 L9.29,26.00 L7.10,30.00 L4.63,36.00 L3.23,41.00 L2.36,46.00 L2.01,51.00 "/>
-</svg>
+    <path fill-rule="evenodd" style="fill: rgb(0, 0, 0); stroke: none; stroke-width: none;" d="M2.01,51.00 L3.00,51.99 L4.00,51.96 L9.00,51.51 L14.00,50.54 L19.06,49.00 L20.00,48.65 L25.00,46.40 L29.00,44.08 L33.00,41.23 L37.71,37.00 L42.00,32.00 L44.71,28.00 L46.90,24.00 L49.37,18.00 L50.77,13.00 L51.64,8.00 L51.99,3.00 L51.00,2.01 L49.00,2.09 L44.00,2.64 L39.00,3.72 L34.00,5.35 L29.00,7.60 L25.00,9.92 L21.00,12.77 L16.29,17.00 L12.00,22.00 L9.29,26.00 L7.10,30.00 L4.63,36.00 L3.23,41.00 L2.36,46.00 L2.01,51.00 "/>
+
+<script>
+let paths = Array.from(document.children[0].children).filter(function(c) {
+    var orig = c.style.stroke;
+    c.onmouseover = function() {
+        c.style.stroke = "rgb(0, 0, 255)";
+    };
+    c.onmouseout = function () {
+        c.style.stroke = orig;
+    };
+});
+
+for (let path of paths) {
+    console.log(path);
+}
+</script></svg>

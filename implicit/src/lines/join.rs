@@ -1,11 +1,13 @@
 use super::*;
+use super::graph_stitch::connect_unconnected;
 
 pub fn join_lines<I>(lines: I, telemetry: &mut Telemetry, tloc: TelemetryLocation) -> (Vec<LineType>, QuadTree<geom::Line>)
 where
     I: Iterator<Item = geom::Line>,
 {
-    // Get rid of "lines" that have the same start and end
-    // point.
+    let _guard = ::flame::start_guard("join_lines");
+
+    // Get rid of "lines" that have the same start and end point.
     let lines = lines.filter(|&geom::Line(geom::Point { x: x1, y: y1 }, geom::Point { x: x2, y: y2 })| {
         x1 != x2 || y1 != y2
     });
@@ -15,10 +17,15 @@ where
         return (Vec::new(), QuadTree::default(geom::Rect::null()));
     }
 
-    join_lines_internal(lines, telemetry, tloc)
+    let (out, t) = join_lines_internal(lines, telemetry, tloc);
+
+    let out = connect_unconnected(out);
+    telemetry.shape_line_connected(tloc, &out);
+    (out, t)
 }
 
 fn join_lines_internal(lines: Vec<geom::Line>, telemetry: &mut Telemetry, tloc: TelemetryLocation) -> (Vec<LineType>, QuadTree<geom::Line>) {
+    let _guard = ::flame::start_guard("join_lines_internal");
     telemetry.shape_line_pre_prune(tloc, &lines);
 
     let mut resolution = 0.0f32;
@@ -95,10 +102,13 @@ fn join_lines_internal(lines: Vec<geom::Line>, telemetry: &mut Telemetry, tloc: 
 
     }
 
+    telemetry.shape_line_joined(tloc, &out);
+
     (out, tree_dup)
 }
 
 fn remove_peninsulas(mut tree: QuadTree<geom::Line>, resolution: f32) -> QuadTree<geom::Line> {
+    let _guard = ::flame::start_guard("remove_peninsulas");
 
     // Optimization Opporitunity: When you remove a line,
     // nearby lines are likely to be the
@@ -135,9 +145,9 @@ fn remove_peninsulas(mut tree: QuadTree<geom::Line>, resolution: f32) -> QuadTre
                 q_left.count() < 1 || q_right.count() < 1
             };
 
-            // let is_dot = (line.0).distance(&line.1) < 0.001;
+            let is_dot = p1.distance_2(&p2) < 0.0001;
 
-            let should_remove = is_peninsula; //| is_dot;
+            let should_remove = is_peninsula || is_dot;
 
             if should_remove {
                 tree.remove(id);

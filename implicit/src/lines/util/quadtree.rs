@@ -133,6 +133,10 @@ impl<T> QuadTree<T> {
         self.insert_with_box(t, b)
     }
 
+    pub fn get(&self, id: ItemId) -> Option<&T> {
+        self.elements.get(&id).map(|&(ref a, _)| a)
+    }
+
     pub fn query(&self, bounding_box: Rect) -> Vec<(&T, &Rect, ItemId)>
     where
         T: ::std::fmt::Debug,

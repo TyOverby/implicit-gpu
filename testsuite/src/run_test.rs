@@ -122,6 +122,14 @@ pub fn run_test(paths: &Paths) -> Result<(), Vec<Error>> {
         let unique: PathBuf = unique.components().skip(1).map(|c|c.as_os_str()).collect();
         let actual = paths.parent.join("actual").join(unique);
 
+        // Ignore all files that start with "." (LOOKING AT YOU .DS_Store)
+        if expected.file_name()
+                   .and_then(|o| o.to_str())
+                   .map(|p| p.starts_with("."))
+                   .unwrap_or(false) {
+            continue;
+        }
+
         if !actual.exists() {
             errors.push(Error::CouldNotFind { file: actual.to_string_lossy().into_owned() });
             continue;
@@ -132,7 +140,6 @@ pub fn run_test(paths: &Paths) -> Result<(), Vec<Error>> {
             None => continue,
         };
         match extension {
-            "DS_Store" => { /* fuck osx */ }
             "png" => { /* png is for debugging only */ }
             "perf" => { /* perf data is for debugging only */ }
             "values" => {

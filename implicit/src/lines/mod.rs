@@ -2,12 +2,11 @@ use self::util::geom;
 use self::util::quadtree::{QuadTree, ItemId as QuadId};
 use ::telemetry::{Telemetry, TelemetryLocation};
 
-//mod fuse_ends;
 pub mod util;
 pub mod dash;
 mod join;
 mod simplify;
-//mod connect;
+mod graph_stitch;
 
 //const EPSILON: f32 = 0.001;
 const OPT_EPSILON: f32 = 0.05;
@@ -24,6 +23,8 @@ type Point = (f32, f32);
 type Line = (Point, Point);
 
 pub fn separate_polygons(bag: Vec<Vec<Point>>) -> (Vec<Vec<Point>>, Vec<Vec<Point>>) {
+    let _guard = ::flame::start_guard("separate_polygons");
+
     fn _compute_aabb(points: &[Point]) -> geom::Rect {
         let mut start = geom::Rect::null();
         for &(x, y) in points {
@@ -63,6 +64,7 @@ pub fn separate_polygons(bag: Vec<Vec<Point>>) -> (Vec<Vec<Point>>, Vec<Vec<Poin
 
 pub fn connect_lines(mut lines: Vec<Line>, simplify: bool, telemetry: &mut Telemetry, tloc: TelemetryLocation)
 -> (Vec<Vec<Point>>, QuadTree<geom::Line>) {
+    let _guard = ::flame::start_guard("connect_lines");
     use std::cmp::{PartialOrd, Ordering};
 
     fn rotate<T>(slice: &mut [T], at: usize) {
@@ -83,24 +85,6 @@ pub fn connect_lines(mut lines: Vec<Line>, simplify: bool, telemetry: &mut Telem
 
     joined.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal));
 
-/*
-    loop {
-        let mut any_progress = false;
-        let (joined_t, p) = fuse_ends::fuse_ends(joined);
-        joined = joined_t;
-        any_progress |= p;
-
-        let (connected_t, p) = connect::connect_linetypes(joined);
-        joined = connected_t;
-        any_progress |= p;
-
-        if !any_progress {
-            break;
-        }
-    }
-    */
-
-    telemetry.shape_line_joined(tloc, &joined);
     for line in &joined {
         if let &LineType::Unjoined(ref _pts) = line {
             //println!("{:?} .. {} .. {:?}\n", pts.first().unwrap(), pts.len(), pts.last().unwrap());
