@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg">
-    <path fill-rule="evenodd" style="fill: rgb(0, 0, 0); stroke: none; stroke-width: none;" d="M4.00,2.00 L4.00,3.00 L102.00,52.00 L201.00,151.00 L201.33,150.00 L200.33,147.00 L200.00,146.00 L152.00,2.00 L4.00,2.00 "/>
+    <path fill-rule="evenodd" style="fill: rgb(0, 0, 0); stroke: none; stroke-width: none;" d="M3.00,2.00 L4.00,3.00 L102.00,52.00 L201.00,151.00 L201.33,150.00 L199.67,145.00 L199.33,144.00 L152.00,2.00 L3.00,2.00 "/>
 
 <script>
 let paths = Array.from(document.children[0].children).filter(function(c) {

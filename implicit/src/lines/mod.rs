@@ -1,6 +1,6 @@
 use self::util::geom;
-use self::util::quadtree::{QuadTree, ItemId as QuadId};
-use ::telemetry::{Telemetry, TelemetryLocation};
+use self::util::quadtree::{ItemId as QuadId, QuadTree};
+use telemetry::{Telemetry, TelemetryLocation};
 
 pub mod util;
 pub mod dash;
@@ -8,7 +8,7 @@ mod join;
 mod simplify;
 mod graph_stitch;
 
-//const EPSILON: f32 = 0.001;
+// const EPSILON: f32 = 0.001;
 const OPT_EPSILON: f32 = 0.05;
 
 pub struct DashSegment(pub Vec<geom::Point>);
@@ -25,18 +25,7 @@ type Line = (Point, Point);
 pub fn separate_polygons(bag: Vec<Vec<Point>>) -> (Vec<Vec<Point>>, Vec<Vec<Point>>) {
     let _guard = ::flame::start_guard("separate_polygons");
 
-    fn _compute_aabb(points: &[Point]) -> geom::Rect {
-        let mut start = geom::Rect::null();
-        for &(x, y) in points {
-            start.expand_to_include(&geom::Point { x, y });
-        }
-        start
-    }
-
     fn contains(a: &[Point], b: &[Point]) -> bool { geom::point_in_poly(a, b[0]) }
-
-    // let bag_with_aabb: Vec<_> = bag.into_iter().map(|shape|
-    // (compute_aabb(&shape), shape)).collect();
 
     let mut additive_or_subtractive = vec![];
     for (i, a) in bag.iter().enumerate() {
@@ -53,9 +42,9 @@ pub fn separate_polygons(bag: Vec<Vec<Point>>) -> (Vec<Vec<Point>>, Vec<Vec<Poin
         additive_or_subtractive.push(inside_count % 2 == 0);
     }
 
-    let (additive, subtractive): (Vec<_>, Vec<_>) = bag.into_iter().zip(additive_or_subtractive.into_iter()).partition(
-        |&(_, i)| i,
-    );
+    let (additive, subtractive): (Vec<_>, Vec<_>) = bag.into_iter()
+        .zip(additive_or_subtractive.into_iter())
+        .partition(|&(_, i)| i);
     let additive = additive.into_iter().map(|(b, _)| b).collect();
     let subtractive = subtractive.into_iter().map(|(b, _)| b).collect();
 
@@ -63,9 +52,9 @@ pub fn separate_polygons(bag: Vec<Vec<Point>>) -> (Vec<Vec<Point>>, Vec<Vec<Poin
 }
 
 pub fn connect_lines(mut lines: Vec<Line>, simplify: bool, telemetry: &mut Telemetry, tloc: TelemetryLocation)
--> (Vec<Vec<Point>>, QuadTree<geom::Line>) {
+    -> (Vec<Vec<Point>>, QuadTree<geom::Line>) {
     let _guard = ::flame::start_guard("connect_lines");
-    use std::cmp::{PartialOrd, Ordering};
+    use std::cmp::{Ordering, PartialOrd};
 
     fn rotate<T>(slice: &mut [T], at: usize) {
         {
@@ -79,15 +68,20 @@ pub fn connect_lines(mut lines: Vec<Line>, simplify: bool, telemetry: &mut Telem
 
     lines.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal));
 
-    let (mut joined, qt) = join::join_lines(lines.into_iter().map(|((x1, y1), (x2, y2))| {
-        geom::Line(geom::Point { x: x1, y: y1 }, geom::Point { x: x2, y: y2 })
-    }), telemetry, tloc);
+    let (mut joined, qt) = join::join_lines(
+        lines.into_iter().map(|((x1, y1), (x2, y2))| {
+            geom::Line(geom::Point { x: x1, y: y1 }, geom::Point { x: x2, y: y2 })
+        }),
+        telemetry,
+        tloc,
+    );
 
     joined.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal));
 
     for line in &joined {
         if let &LineType::Unjoined(ref _pts) = line {
-            //println!("{:?} .. {} .. {:?}\n", pts.first().unwrap(), pts.len(), pts.last().unwrap());
+            // println!("{:?} .. {} .. {:?}\n", pts.first().unwrap(),
+            // pts.len(), pts.last().unwrap());
         }
     }
 

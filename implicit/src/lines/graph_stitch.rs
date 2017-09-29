@@ -1,5 +1,6 @@
 use super::*;
 use super::util::quadtree::*;
+use std::collections::HashSet;
 
 // TODO: *LOTS* of optimization opporitunities here
 
@@ -7,6 +8,9 @@ use super::util::quadtree::*;
 struct Graph {
     tree: QuadTree<Vec<geom::Point>>,
 }
+
+type VisitedSet = HashSet<ItemId>;
+type Path = Vec<(ItemId, f32)>;
 
 fn is_close(p1: geom::Point, p2: geom::Point) -> bool { p1.close_to(&p2, 0.001) }
 
@@ -65,39 +69,76 @@ impl Graph {
     }
 
     fn remove(&mut self, id: ItemId) -> Vec<geom::Point> { self.tree.remove(id).unwrap().0 }
+    fn try_remove(&mut self, id: ItemId) { self.tree.remove(id); }
 }
 
-fn try_solve_inner(goal: Option<geom::Point>, id: ItemId, mut graph: Graph) -> Result<(Graph, Vec<Vec<geom::Point>>, f32), Graph> {
-    let target_length = graph.length_of(id);
-    let neighbors = graph.connected_to(id);
-    let target_path = graph.remove(id);
+fn recur(at: ItemId, graph: &Graph, mut visited: VisitedSet, mut path: Path, possible: &mut Vec<Path>, dead_ends: &mut Vec<Path>) {
+    if visited.contains(&at) {
+        let pos = path.iter().position(|&(id, _)| id == at).unwrap();
+        path.drain(0..pos);
+        possible.push(path);
+        return;
+    }
 
-    let mut solutions = vec![];
+    let length = graph.length_of(at);
+
+    let neighbors = graph.connected_to(at);
+    if neighbors.is_empty() {
+        path.push((at, length));
+        dead_ends.push(path);
+        return;
+    }
+
+    path.push((at, length));
+    visited.insert(at);
+
     for neighbor in neighbors {
-        let goal = goal.or(Some(target_path.first().cloned().unwrap()));
-        if let Ok((g, mut p, d)) = try_solve_inner(goal, neighbor, graph.clone()) {
-            p.push(target_path.clone());
-            solutions.push((g, p, d + target_length));
+        if neighbor != at {
+            recur(neighbor, graph, visited.clone(), path.clone(), possible, dead_ends);
+        }
+    }
+}
+
+fn one_iter(mut graph: Graph) -> (Graph, Vec<Vec<geom::Point>>) {
+    use std::cmp::{PartialOrd, Ordering};
+    let mut possible = vec![];
+    let mut dead_ends = vec![];
+    let first_id = graph.tree.iter().next().unwrap().0.clone();
+
+    recur(first_id, &graph, HashSet::new(), vec![], &mut possible, &mut dead_ends);
+
+    let mut possible: Vec<_> = possible.into_iter().map(|path| {
+        let length: f32 = path.iter().map(|&(_, l)| l).sum();
+        let items = path.into_iter().map(|(p, _)| p).collect::<Vec<_>>();
+        (items, length)
+    }).collect();
+
+    // Start with the longest loops
+    possible.sort_by(|&(_, al), &(_, bl)|
+        al.partial_cmp(&bl).unwrap_or(Ordering::Equal));
+    possible.reverse();
+
+    let mut out = vec![];
+    let mut visited_loops = HashSet::new();
+    let mut trash_points = HashSet::new();
+    trash_points.extend(dead_ends.into_iter().flat_map(|v| v.into_iter().map(|(p,_)| p)));
+
+    for (l00p, _) in possible {
+        let intersects = l00p.iter().any(|point| visited_loops.contains(point));
+        if intersects {
+            trash_points.extend(l00p);
+        } else {
+            visited_loops.extend(l00p.iter().cloned());
+            // TODO: this flattens things but the edge conditions might be weird.
+            out.push(l00p.into_iter().flat_map(|pt| graph.remove(pt)).collect::<Vec<_>>());
         }
     }
 
-    match goal {
-        Some(g) => {
-            if is_close(g, target_path.last().cloned().unwrap()){
-                solutions.push((graph.clone(), vec![target_path], target_length));
-            }
-        }
-        None => {
-            let first = target_path.first().cloned().unwrap();
-            let last = target_path.last().cloned().unwrap();
-            if is_close(first, last) {
-                solutions.push((graph.clone(), vec![target_path], target_length));
-            }
-        }
+    for pt in visited_loops.into_iter().chain(trash_points.into_iter()) {
+        graph.try_remove(pt);
     }
 
-    solutions.sort_by(|a, b| (a.2).partial_cmp(&b.2).unwrap());
-    solutions.into_iter().last().ok_or(graph)
+    (graph, out)
 }
 
 fn try_solve(mut graph: Graph) -> Vec<Vec<geom::Point>> {
@@ -105,18 +146,9 @@ fn try_solve(mut graph: Graph) -> Vec<Vec<geom::Point>> {
 
     let mut out = vec![];
     while !graph.tree.is_empty() {
-        let first_id = graph.tree.iter().next().unwrap().0.clone();
-        match try_solve_inner(None, first_id, graph) {
-            Ok((g, mut path, _)) => {
-                path.reverse();
-                let path = path.into_iter().flat_map(|mut a| { a.pop(); a.into_iter() }).collect();
-                graph = g;
-                out.push(path);
-            }
-            Err(g) => {
-                graph = g;
-            }
-        }
+        let (ng, pts) = one_iter(graph);
+        graph = ng;
+        out.extend(pts);
     }
 
     out

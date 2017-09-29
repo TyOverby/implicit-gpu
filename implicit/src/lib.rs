@@ -50,7 +50,6 @@ pub fn run_single(node: nodes::NodeRef, width: usize, height: usize) -> ::opencl
 pub fn run_scene(scene: &scene::Scene, telemetry: &mut telemetry::Telemetry) -> output::OutputScene {
     use output::*;
     use scene::*;
-    use itertools::Itertools;
     use compiler::Nest;
     use evaluator::Evaluator;
 
@@ -125,18 +124,14 @@ pub fn run_scene(scene: &scene::Scene, telemetry: &mut telemetry::Telemetry) -> 
 
             let result = evaluator.evaluate(*id, &ctx, telemetry, shape_telemetry);
 
-            let lines = ::marching::run_marching(&result, &ctx).values();
+            let line_buffer = ::marching::run_marching(&result, &ctx);
 
-            let lines = lines
-                .into_iter()
-                .tuples::<(_, _, _, _)>()
-                .filter(|&(a, b, c, d)| !(a.is_nan() || b.is_nan() || c.is_nan() || d.is_nan()))
-                .map(|(a, b, c, d)| ((a, b), (c, d)))
-                .collect::<Vec<_>>();
-            telemetry.shape_finished(shape_telemetry, &result, &lines);
+            let (additive, subtractive) = evaluator::line_buffer_to_poly(
+                &line_buffer,
+                telemetry,
+                tloc,
+                scene.simplify);
 
-            let (lines, _) = lines::connect_lines(lines, scene.simplify, telemetry, shape_telemetry);
-            let (additive, subtractive) = lines::separate_polygons(lines);
             let output_shape = match shape.draw_mode {
                 DrawMode::Filled => OutputShape {
                     color: shape.color,
