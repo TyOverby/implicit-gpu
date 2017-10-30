@@ -90,7 +90,12 @@ pub fn run_scene(scene: &scene::Scene, telemetry: &mut telemetry::Telemetry) -> 
     // This will allow for further optimization in the future.
     let mut treemap = ::std::collections::BTreeMap::new();
     for figure in &scene.figures {
-        let figure_bounds = compute_figure_size(figure).expect("can't handle null figure sizes");
+        let figure_bounds = if let Some(figure) = compute_figure_size(figure) {
+            figure
+        } else {
+            continue
+        };
+
         for shape in &figure.shapes {
             let id = nest.group(nodes::NodeRef::new(nodes::Node::Translate {
                 dx: -figure_bounds.left() + 2f32,
@@ -103,7 +108,9 @@ pub fn run_scene(scene: &scene::Scene, telemetry: &mut telemetry::Telemetry) -> 
 
     let bb = match compute_scene_size(scene) {
         Some(bb) => bb,
-        None => panic!("can't deal with null scene size right now"),
+        None => return OutputScene {
+            figures: vec![],
+        }
     };
 
     let mut tloc = telemetry::TelemetryLocation::new();

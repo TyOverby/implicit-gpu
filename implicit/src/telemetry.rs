@@ -5,6 +5,7 @@ use super::output::{OutputScene, OutputShape};
 use lines::LineType;
 use std::fs::create_dir_all;
 use std::path::PathBuf;
+use super::debug::*;
 
 #[derive(Clone, Copy)]
 pub struct TelemetryLocation {
@@ -149,7 +150,7 @@ impl Telemetry for DumpTelemetry {
     fn shape_finished(&mut self, tloc: TelemetryLocation, buffer: &FieldBuffer, lines: &[((f32, f32), (f32, f32))]) {
         let _guard = ::flame::start_guard("telemetry shape_finished");
 
-        ::debug::image::save_field_buffer(buffer, self.shape_path(tloc, "field.png"), ::debug::image::ColorMode::Debug);
+        save_field_buffer(buffer, self.shape_path(tloc, "field.png"), ColorMode::Debug);
 
         if let Some(field_writer) = self.field_writer.as_ref() {
             (field_writer)(self.shape_path(tloc, "field.values"), buffer);
@@ -195,10 +196,10 @@ impl Telemetry for DumpTelemetry {
     fn intermediate_eval_basic(&mut self, tloc: TelemetryLocation, buffer: &FieldBuffer, program: &str, node: &Node) {
         let _guard = ::flame::start_guard("telemetry intermediate_eval_basic");
 
-        ::debug::image::save_field_buffer(
+        save_field_buffer(
             buffer,
             self.intermediate_path(tloc, "field.png"),
-            ::debug::image::ColorMode::Debug,
+            ColorMode::Debug,
         );
         if let Some(field_writer) = self.field_writer.as_ref() {
             (field_writer)(self.intermediate_path(tloc, "field.values"), buffer);
@@ -211,10 +212,10 @@ impl Telemetry for DumpTelemetry {
     fn intermediate_eval_poly(&mut self, tloc: TelemetryLocation, buffer: &FieldBuffer) {
         let _guard = ::flame::start_guard("telemetry intermediate_eval_poly");
 
-        ::debug::image::save_field_buffer(
+        save_field_buffer(
             buffer,
             self.intermediate_path(tloc, "field.png"),
-            ::debug::image::ColorMode::Debug,
+            ColorMode::Debug,
         );
         if let Some(field_writer) = self.field_writer.as_ref() {
             (field_writer)(self.intermediate_path(tloc, "field.values"), buffer);
