@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "strict": false,
+        "outDir": "./dist/",
+        "lib": [
+           "es2015", "dom"
+        ],
+        "sourceMap": true,
+        "module": "commonjs",
+        "target": "es5",
+        "alwaysStrict": true,
+        "newLine": "LF",
+        "jsx": "react"
+    },
+    "files": [
+        "./src/index.tsx",
+        "./src/implicit.ts"
+    ]
+}
