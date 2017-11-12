@@ -1,19 +1,19 @@
 {
     "compilerOptions": {
-        "strict": false,
+        "strict": true,
         "outDir": "./dist/",
-        "lib": [
-           "es2015", "dom"
-        ],
         "sourceMap": true,
         "module": "commonjs",
+        "lib": [
+            "dom", "es2015"
+        ],
         "target": "es5",
         "alwaysStrict": true,
         "newLine": "LF",
         "jsx": "react"
     },
     "files": [
-        "./src/index.tsx",
-        "./src/implicit.ts"
+        "./src/scripts/index.tsx",
+        "./src/scripts/components/Hello.tsx"
     ]
 }

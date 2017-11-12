@@ -1,14 +1,12 @@
 var CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
-    entry: "./src/index.tsx",
+    entry: "./src/scripts/index.tsx",
     output: {
         filename: "bundle.js",
         path: __dirname + "/dist"
     },
-    externals: {
-        "require": true,
-    },
+
     // Enable sourcemaps for debugging webpack's output.
     devtool: "source-map",
 
@@ -20,10 +18,12 @@ module.exports = {
     plugins: [
         new CopyWebpackPlugin([
             { from: "./src/index.html" },
+            { from: "./src/scripts/runworker.js" },
             { from: "./src/styles/", to: "styles" },
             { from: "./node_modules/react/dist/react.js", to: "deps" },
             { from: "./node_modules/react-dom/dist/react-dom.js", to: "deps" },
-            { from: "./res/", to: "res" }
+            { from: "./res/", to: "res" },
+            { from: 'node_modules/monaco-editor/min/vs', to: 'vs', }
         ])
     ],
 

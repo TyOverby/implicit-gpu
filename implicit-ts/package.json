@@ -1,27 +1,32 @@
 {
-  "name": "implicit-ts",
+  "name": "typescript-react-webpack",
   "version": "1.0.0",
-  "description": "",
+  "description": "A template for typescript/react/webpack projects",
+  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "./node_modules/.bin/tsc -t ES5 --lib ES2015,DOM ./src/implicit.ts ./src/index.ts --outDir ./out && cp ./src/index.html out"
+    "build": "webpack",
+    "watch": "webpack -w",
+    "serve": "http-server ./dist",
+    "dev": "concurrently \"npm run watch\" \"npm run serve\"  "
   },
   "author": "Ty Overby",
   "license": "MIT",
-  "dependencies": {
+  "devDependencies": {
     "awesome-typescript-loader": "^3.1.3",
-    "copy-webpack-plugin": "^4.2.0",
-    "react-monaco-editor": "^0.12.0",
+    "copy-webpack-plugin": "^4.0.1",
     "source-map-loader": "^0.2.1",
     "typescript": "^2.3.2",
     "webpack": "^2.5.1"
   },
-  "devDependencies": {
-    "typescript": "^2.4.2",
+  "dependencies": {
     "@types/react": "^15.0.24",
     "@types/react-dom": "^15.5.0",
     "@types/react-monaco-editor": "^0.10.0",
+    "concurrently": "^3.5.0",
+    "http-server": "^0.10.0",
     "react": "^15.5.4",
-    "react-dom": "^15.5.4"
+    "react-dom": "^15.5.4",
+    "react-monaco-editor": "^0.12.0",
+    "simple-http": "^0.0.23"
   }
 }
