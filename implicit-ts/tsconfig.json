@@ -5,7 +5,8 @@
         "sourceMap": true,
         "module": "commonjs",
         "lib": [
-            "dom", "es2015"
+            "dom",
+            "es2015"
         ],
         "target": "es5",
         "alwaysStrict": true,
@@ -13,7 +14,6 @@
         "jsx": "react"
     },
     "files": [
-        "./src/scripts/index.tsx",
-        "./src/scripts/components/Hello.tsx"
+        "./src/scripts/index.tsx"
     ]
 }

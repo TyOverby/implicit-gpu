@@ -1,11 +1,26 @@
 import * as React from 'react';
+import { getResult } from '../workerManager';
 import MonacoEditor from 'react-monaco-editor';
+import * as state from '../state';
+import Error from '../types/error';
 
 interface EditorProps { };
+
+export interface ErrorStructure {
+    start: number,
+    length: number,
+    messageText: string,
+}
 
 interface EditorState {
     code: string,
 };
+
+const start_code = `
+import { circle, singleton_scene } from 'implicit';
+
+export default singleton_scene(circle(10, 10, 20));
+`.trim();
 
 export class Editor extends React.Component<EditorProps, EditorState> {
     resize_interval_id: number = -1;
@@ -17,7 +32,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     constructor() {
         super();
         this.state = {
-            code: '// type your code...',
+            code: start_code,
         };
     }
 
@@ -28,9 +43,13 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     editorDidMount(editor: monaco.editor.ICodeEditor, monacoModule: typeof monaco) {
         editor.focus();
         this.editor = editor;
+        this.onChange("", null as any);
     }
 
-    editorWillMount(monacoModule: typeof monaco) {
+    async editorWillMount(monacoModule: typeof monaco) {
+        const implicit_source = await (await fetch('./implicit.ts')).text();
+        monaco.languages.typescript.typescriptDefaults.addExtraLib("declare module 'implicit' {" + implicit_source + "}");
+
         monacoModule.languages.typescript.typescriptDefaults.setCompilerOptions({
             target: monaco.languages.typescript.ScriptTarget.ES5,
             allowNonTsExtensions: true,
@@ -38,23 +57,70 @@ export class Editor extends React.Component<EditorProps, EditorState> {
             alwaysStrict: true,
             strictNullChecks: true,
         });
-
-        monaco.languages.typescript.typescriptDefaults.addExtraLib("declare module 'implicit' { export var x: number = 3; }");
     }
 
     async onChange(val: string, ev: monaco.editor.IModelContentChangedEvent) {
-        console.log('onChange', val, ev);
-
-        if (this.editor == null) { return;}
+        if (this.editor == null) { return; }
 
         const model = this.editor.getModel();
         const worker = await monaco.languages.typescript.getTypeScriptWorker();
         const client = await worker(model.uri);
         const compilation = await client.getEmitOutput(model.uri.toString());
-        const syntaxErrors = await client.getSyntacticDiagnostics(model.uri.toString());
-        const semanticErrors = await client.getSemanticDiagnostics(model.uri.toString());
+        const syntaxErrors: ErrorStructure[] = await client.getSyntacticDiagnostics(model.uri.toString());
+        const semanticErrors: ErrorStructure[] = await client.getSemanticDiagnostics(model.uri.toString());
         const text = compilation.outputFiles[0].text;
-        console.log(text);
+
+        if (syntaxErrors.length != 0 || semanticErrors.length != 0) {
+            state.changeOutput({
+                kind: 'err',
+                errors: {
+                    syntax: syntaxErrors.map(e => es_to_err(model, e)),
+                    semantic: semanticErrors.map(e => es_to_err(model, e)),
+                    runtime: [],
+                },
+            });
+        } else {
+            console.log("evaling");
+            const result = await getResult(text);
+            console.log("done evaling");
+            if (result.status === 'ok') {
+                const res = await fetch("/api/process", {
+                    method: "POST",
+                    body: JSON.stringify(result.exports.default)
+                });
+                console.log(res);
+
+                const result_text = await res.text();
+                if (res.ok) {
+                    state.changeOutput({
+                        kind: 'ok',
+                        figures_svg: [result_text]
+                    });
+                } else {
+                    state.changeOutput({
+                        kind: 'err',
+                        errors: {
+                            syntax: [],
+                            semantic: [],
+                            runtime: [{
+                                col_num: 0,
+                                line_num: 0,
+                                message: result_text
+                            }],
+                        }
+                    })
+                }
+            } else if (result.status === 'err') {
+                state.changeOutput({
+                    kind: 'err',
+                    errors: {
+                        syntax: [],
+                        semantic: [],
+                        runtime: [result.error],
+                    }
+                })
+            }
+        }
     }
 
     containerRef(e: HTMLDivElement | null) {
@@ -82,6 +148,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     render() {
         const code = this.state.code;
         const options: monaco.editor.IEditorOptions = {
+            scrollBeyondLastLine: false,
             selectOnLineNumbers: true,
             renderLineHighlight: 'none',
             minimap: {
@@ -91,8 +158,8 @@ export class Editor extends React.Component<EditorProps, EditorState> {
 
         return <div className="inside-relative" ref={(e) => this.containerRef(e)}>
             <MonacoEditor
-                width="100%"
-                height="100%"
+                width="50%"
+                height="50%"
                 language="typescript"
                 theme="vs-dark"
                 value={code}
@@ -102,5 +169,14 @@ export class Editor extends React.Component<EditorProps, EditorState> {
                 editorWillMount={this.editorWillMount.bind(this)}
             />
         </div>;
+    }
+}
+
+function es_to_err(model: monaco.editor.IModel, es: ErrorStructure): Error {
+    const p = model.getPositionAt(es.start);
+    return {
+        message: es.messageText,
+        line_num: p.lineNumber,
+        col_num: p.column,
     }
 }

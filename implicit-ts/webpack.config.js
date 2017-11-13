@@ -1,9 +1,12 @@
 var CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
-    entry: "./src/scripts/index.tsx",
+    entry: {
+        implicit: "./src/implicit.ts",
+        bundle: "./src/scripts/index.tsx"
+    },
     output: {
-        filename: "bundle.js",
+        filename: "[name].js",
         path: __dirname + "/dist"
     },
 
@@ -19,6 +22,7 @@ module.exports = {
         new CopyWebpackPlugin([
             { from: "./src/index.html" },
             { from: "./src/scripts/runworker.js" },
+            { from: "./src/implicit.ts" },
             { from: "./src/styles/", to: "styles" },
             { from: "./node_modules/react/dist/react.js", to: "deps" },
             { from: "./node_modules/react-dom/dist/react-dom.js", to: "deps" },

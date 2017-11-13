@@ -34,6 +34,6 @@ fn main() {
     happy::create()
         .custom_response("api/process", process)
         .api("api/validate", validate)
-        .static_dir("../implicit-ts")
+        .static_dir("../implicit-ts/dist")
         .run();
 }

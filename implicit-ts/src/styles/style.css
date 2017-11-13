@@ -25,3 +25,49 @@ div {
 .inside-relative>* {
     position: absolute;
 }
+
+#error-window {
+    padding: 10px;
+    font-family: sans-serif;
+}
+#error-window h1 {
+    margin: 0;
+    background-color: #771a1a;
+    color: #fafafa;
+    padding: 5px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+#error-window th {
+    text-align: left;
+    font-size: 1.2em;
+}
+
+#error-window h2 {
+    margin: 0;
+    padding: 0;
+}
+
+#error-window table {
+    width: 100%;
+}
+
+#error-window td, #error-window th {
+    padding: 4px;
+}
+
+#error-window td:nth-child(odd), #error-window th:nth-child(odd)
+{
+    background: rgb(253, 208, 208);
+}
+
+#error-window td:nth-child(even), #error-window th:nth-child(even)
+{
+    background: rgb(255, 233, 233);
+}
+
+#error-window td:only-child
+{
+    background-color: rgb(255, 255, 255);
+}
