@@ -11,7 +11,6 @@ onmessage = async ev => {
                 throw new Error("could not require " + s);
             }
         };
-        console.log(ev.data);
         eval(ev.data);
         postMessage({
             status: 'ok',
@@ -20,7 +19,6 @@ onmessage = async ev => {
     }
     catch (e) {
         var stack_string = e.stack;
-        console.log(stack_string);
         var r = /at.*:([0-9]+):([0-9]+)/;
         var matches = r.exec(stack_string);
 

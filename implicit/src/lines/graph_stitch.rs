@@ -72,20 +72,31 @@ impl Graph {
     fn try_remove(&mut self, id: ItemId) { self.tree.remove(id); }
 }
 
-fn recur(at: ItemId, graph: &Graph, mut visited: VisitedSet, mut path: Path, possible: &mut Vec<Path>, dead_ends: &mut Vec<Path>) {
-    if visited.contains(&at) {
-        let pos = path.iter().position(|&(id, _)| id == at).unwrap();
-        path.drain(0..pos);
-        possible.push(path);
-        return;
-    }
-
+fn recur(
+    at: ItemId, current_length: f32, graph: &Graph, visited: &mut VisitedSet, path: &mut Path, best_possible: &mut f32, possible: &mut Vec<Path>,
+    dead_ends: &mut Vec<Path>,
+) {
     let length = graph.length_of(at);
+
+    if visited.contains(&at) {
+        if current_length + length < *best_possible {
+            return;
+        }
+
+        if let Some(pos) = path.iter().position(|&(id, _)| id == at) {
+            let mut pos_path = path.clone();
+            pos_path.drain(0..pos);
+            possible.push(pos_path);
+            *best_possible = (current_length + length).max(*best_possible);
+            return;
+        }
+    }
 
     let neighbors = graph.connected_to(at);
     if neighbors.is_empty() {
-        path.push((at, length));
-        dead_ends.push(path);
+        let mut dead_path = path.clone();
+        dead_path.push((at, length));
+        dead_ends.push(dead_path);
         return;
     }
 
@@ -94,34 +105,58 @@ fn recur(at: ItemId, graph: &Graph, mut visited: VisitedSet, mut path: Path, pos
 
     for neighbor in neighbors {
         if neighbor != at {
-            recur(neighbor, graph, visited.clone(), path.clone(), possible, dead_ends);
+            recur(
+                neighbor,
+                current_length + length,
+                graph,
+                visited,
+                path,
+                best_possible,
+                possible,
+                dead_ends,
+            );
         }
     }
+
+    path.pop();
+    //visited.remove(&at);
 }
 
 fn one_iter(mut graph: Graph) -> (Graph, Vec<Vec<geom::Point>>) {
-    use std::cmp::{PartialOrd, Ordering};
+    use std::cmp::{Ordering, PartialOrd};
+    let mut best_possible = 0.0;
     let mut possible = vec![];
     let mut dead_ends = vec![];
     let first_id = graph.tree.iter().next().unwrap().0.clone();
 
-    recur(first_id, &graph, HashSet::new(), vec![], &mut possible, &mut dead_ends);
+    recur(
+        first_id,
+        0.0,
+        &graph,
+        &mut HashSet::new(),
+        &mut vec![],
+        &mut best_possible,
+        &mut possible,
+        &mut dead_ends,
+    );
 
-    let mut possible: Vec<_> = possible.into_iter().map(|path| {
-        let length: f32 = path.iter().map(|&(_, l)| l).sum();
-        let items = path.into_iter().map(|(p, _)| p).collect::<Vec<_>>();
-        (items, length)
-    }).collect();
+    let mut possible: Vec<_> = possible
+        .into_iter()
+        .map(|path| {
+            let length: f32 = path.iter().map(|&(_, l)| l).sum();
+            let items = path.into_iter().map(|(p, _)| p).collect::<Vec<_>>();
+            (items, length)
+        })
+        .collect();
 
     // Start with the longest loops
-    possible.sort_by(|&(_, al), &(_, bl)|
-        al.partial_cmp(&bl).unwrap_or(Ordering::Equal));
+    possible.sort_by(|&(_, al), &(_, bl)| al.partial_cmp(&bl).unwrap_or(Ordering::Equal));
     possible.reverse();
 
     let mut out = vec![];
     let mut visited_loops = HashSet::new();
     let mut trash_points = HashSet::new();
-    trash_points.extend(dead_ends.into_iter().flat_map(|v| v.into_iter().map(|(p,_)| p)));
+    trash_points.extend(dead_ends.into_iter().flat_map(|v| v.into_iter().map(|(p, _)| p)));
 
     for (l00p, _) in possible {
         let intersects = l00p.iter().any(|point| visited_loops.contains(point));
@@ -129,7 +164,8 @@ fn one_iter(mut graph: Graph) -> (Graph, Vec<Vec<geom::Point>>) {
             trash_points.extend(l00p);
         } else {
             visited_loops.extend(l00p.iter().cloned());
-            // TODO: this flattens things but the edge conditions might be weird.
+            // TODO: this flattens things but the edge conditions might
+            // be weird.
             out.push(l00p.into_iter().flat_map(|pt| graph.remove(pt)).collect::<Vec<_>>());
         }
     }

@@ -9,7 +9,7 @@ interface EditorProps { };
 export interface ErrorStructure {
     start: number,
     length: number,
-    messageText: string,
+    messageText: string | ErrorStructure,
 }
 
 interface EditorState {
@@ -17,9 +17,18 @@ interface EditorState {
 };
 
 const start_code = `
-import { circle, singleton_scene } from 'implicit';
+import {circle, Implicit, or, singleton_scene} from 'implicit';
 
-export default singleton_scene(circle(10, 10, 20));
+const circles: Implicit[] = [];
+
+for (let i = 0; i < 10; i ++) {
+    for (let k = 0; k < 10; k++) {
+        const r = Math.sqrt(i + k);
+        circles.push(circle(i * 10, k * 10, r));
+    }
+}
+
+export default singleton_scene(or(... circles));
 `.trim();
 
 export class Editor extends React.Component<EditorProps, EditorState> {
@@ -80,15 +89,12 @@ export class Editor extends React.Component<EditorProps, EditorState> {
                 },
             });
         } else {
-            console.log("evaling");
             const result = await getResult(text);
-            console.log("done evaling");
             if (result.status === 'ok') {
                 const res = await fetch("/api/process", {
                     method: "POST",
                     body: JSON.stringify(result.exports.default)
                 });
-                console.log(res);
 
                 const result_text = await res.text();
                 if (res.ok) {
@@ -174,8 +180,11 @@ export class Editor extends React.Component<EditorProps, EditorState> {
 
 function es_to_err(model: monaco.editor.IModel, es: ErrorStructure): Error {
     const p = model.getPositionAt(es.start);
+    const m: string = typeof es.messageText === 'string' ?
+        es.messageText :
+        es_to_err(model, es.messageText).message;
     return {
-        message: es.messageText,
+        message: m,
         line_num: p.lineNumber,
         col_num: p.column,
     }

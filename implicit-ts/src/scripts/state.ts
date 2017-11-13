@@ -6,6 +6,7 @@ export var history: State[] = [];
 
 export var current: State = {
     source: "import { circle} from 'implicit';\nexport default circle(0, 0, 100);",
+    prev_ok: [],
     output: {
         kind: 'ok',
         figures_svg: []
@@ -27,6 +28,7 @@ export type OutputState =
 
 export type State = {
     source: string,
+    prev_ok: string[],
     output: OutputState,
 }
 
@@ -57,10 +59,17 @@ export function changeSource(source: string) {
 }
 
 export function changeOutput(output: OutputState) {
+    const previous = current;
     history.push(current);
+
     current = clone(current);
     output = clone(output);
     current.output = output;
+
+    if (output.kind == 'ok') {
+        current.prev_ok = output.figures_svg;
+    }
+
     setDirty();
 }
 

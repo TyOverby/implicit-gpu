@@ -7,7 +7,7 @@ export interface OutputProps { figures_svg: string[] }
 export class OutputWindow extends React.Component<OutputProps> {
     render() {
         function text_to_svg(src: string, idx: number): JSX.Element {
-            return <svg key={idx} dangerouslySetInnerHTML={({ __html: src })} />
+            return <div key={idx} dangerouslySetInnerHTML={({ __html: src })} />
         }
         const svgs = this.props.figures_svg.map(text_to_svg);
         return <div>

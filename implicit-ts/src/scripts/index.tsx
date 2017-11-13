@@ -11,7 +11,12 @@ export class Index extends React.Component<State> {
     render() {
         let side_window: JSX.Element;
         if (this.props.output.kind === 'ok') {
-            side_window = <OutputWindow figures_svg={this.props.output.figures_svg} />
+            side_window = <OutputWindow figures_svg={this.props.output.figures_svg} />;
+        } else if (this.props.output.kind === 'err' && this.props.prev_ok.length > 0) {
+            side_window = <div>
+                <OutputWindow figures_svg={this.props.prev_ok} />
+                <ErrorWindow {... this.props.output.errors} />
+            </div>;
         } else if (this.props.output.kind === 'err') {
             side_window = <ErrorWindow {... this.props.output.errors} />
         } else {

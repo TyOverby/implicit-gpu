@@ -59,7 +59,8 @@
     <path fill-rule="evenodd" style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 0.2;" d="M15.77,3.00 L16.00,2.92 "/>
 
 <script>
-let paths = Array.from(document.children[0].children).filter(function(c) {
+let svgs = document.children[0];
+let paths = Array.from(svgs.children).filter(function(c) {
     var orig = c.style.stroke;
     c.onmouseover = function() {
         c.style.stroke = "rgb(0, 0, 255)";
@@ -67,6 +68,9 @@ let paths = Array.from(document.children[0].children).filter(function(c) {
     c.onmouseout = function () {
         c.style.stroke = orig;
     };
+    c.onclick = function () {
+        svgs.removeChild();
+    }
 });
 
 for (let path of paths) {

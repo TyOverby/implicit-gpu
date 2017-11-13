@@ -18,13 +18,13 @@ export async function getResult(source: string): Promise<WorkerMessage> {
         worker = availableWorker;
         availableWorker = null;
     } else {
-        console.log('spawning');
         worker = new Worker("./runworker.js");
     }
 
     worker.postMessage(source);
 
     worker.onmessage = ev => {
+        console.log(ev.data);
         let message: WorkerMessage = ev.data;
         resolve(message);
         availableWorker = worker;

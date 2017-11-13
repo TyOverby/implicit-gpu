@@ -4,7 +4,8 @@
     <path fill-rule="evenodd" style="fill: none; stroke: rgb(0, 0, 0); stroke-width: 0.2;" d="M44.86,45.00 L45.00,44.86 L45.00,44.86 L46.00,44.00 L47.00,43.34 L47.66,43.00 L48.00,42.84 L49.00,42.46 L50.00,42.20 L51.00,42.05 L52.00,42.00 L53.00,42.05 L54.00,42.20 L55.00,42.46 L56.00,42.84 L56.34,43.00 L57.00,43.34 L58.00,44.00 L59.00,44.86 L59.00,44.86 L59.14,45.00 L59.14,45.00 L60.00,46.00 L60.66,47.00 L61.00,47.66 L61.16,48.00 L61.54,49.00 L61.80,50.00 L61.95,51.00 L62.00,52.00 L61.95,53.00 L61.80,54.00 L61.54,55.00 L61.16,56.00 L61.00,56.34 L60.66,57.00 L60.00,58.00 L59.14,59.00 L59.14,59.00 L59.00,59.14 L59.00,59.14 L58.00,60.00 L57.00,60.66 L56.34,61.00 L56.00,61.16 L55.00,61.54 L54.00,61.80 L53.00,61.95 L52.00,62.00 L51.00,61.95 L50.00,61.80 L49.00,61.54 L48.00,61.16 L47.66,61.00 L47.00,60.66 L46.00,60.00 L45.00,59.14 L45.00,59.14 L44.86,59.00 L44.86,59.00 L44.00,58.00 L43.34,57.00 L43.00,56.34 L42.84,56.00 L42.46,55.00 L42.20,54.00 L42.05,53.00 L42.00,52.00 L42.05,51.00 L42.20,50.00 L42.46,49.00 L42.84,48.00 L43.00,47.66 L43.34,47.00 L44.00,46.00 L44.86,45.00 L44.86,45.00 "/>
 
 <script>
-let paths = Array.from(document.children[0].children).filter(function(c) {
+let svgs = document.children[0];
+let paths = Array.from(svgs.children).filter(function(c) {
     var orig = c.style.stroke;
     c.onmouseover = function() {
         c.style.stroke = "rgb(0, 0, 255)";
@@ -12,6 +13,9 @@ let paths = Array.from(document.children[0].children).filter(function(c) {
     c.onmouseout = function () {
         c.style.stroke = orig;
     };
+    c.onclick = function () {
+        svgs.removeChild();
+    }
 });
 
 for (let path of paths) {
