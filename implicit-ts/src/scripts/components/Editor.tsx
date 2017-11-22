@@ -1,8 +1,7 @@
 import * as React from 'react';
-import { getResult } from '../workerManager';
 import MonacoEditor from 'react-monaco-editor';
 import * as state from '../state';
-import Error from '../types/error';
+import run_compile from '../run_compile';
 
 interface EditorProps { };
 
@@ -35,9 +34,6 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     resize_interval_id: number = -1;
     editor: monaco.editor.ICodeEditor | null = null;
 
-    pastWidth: number = 0;
-    pastHeight: number = 0;
-
     constructor() {
         super();
         this.state = {
@@ -52,7 +48,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     editorDidMount(editor: monaco.editor.ICodeEditor, monacoModule: typeof monaco) {
         editor.focus();
         this.editor = editor;
-        this.onChange("", null as any);
+        this.onChange(start_code);
     }
 
     async editorWillMount(monacoModule: typeof monaco) {
@@ -68,7 +64,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
         });
     }
 
-    async onChange(val: string, ev: monaco.editor.IModelContentChangedEvent) {
+    async onChange(val: string) {
         if (this.editor == null) { return; }
 
         const model = this.editor.getModel();
@@ -79,76 +75,12 @@ export class Editor extends React.Component<EditorProps, EditorState> {
         const semanticErrors: ErrorStructure[] = await client.getSemanticDiagnostics(model.uri.toString());
         const text = compilation.outputFiles[0].text;
 
-        if (syntaxErrors.length != 0 || semanticErrors.length != 0) {
-            state.changeOutput({
-                kind: 'err',
-                errors: {
-                    syntax: syntaxErrors.map(e => es_to_err(model, e)),
-                    semantic: semanticErrors.map(e => es_to_err(model, e)),
-                    runtime: [],
-                },
-            });
-        } else {
-            const result = await getResult(text);
-            if (result.status === 'ok') {
-                const res = await fetch("/api/process", {
-                    method: "POST",
-                    body: JSON.stringify(result.exports.default)
-                });
-
-                const result_text = await res.text();
-                if (res.ok) {
-                    state.changeOutput({
-                        kind: 'ok',
-                        figures_svg: [result_text]
-                    });
-                } else {
-                    state.changeOutput({
-                        kind: 'err',
-                        errors: {
-                            syntax: [],
-                            semantic: [],
-                            runtime: [{
-                                col_num: 0,
-                                line_num: 0,
-                                message: result_text
-                            }],
-                        }
-                    })
-                }
-            } else if (result.status === 'err') {
-                state.changeOutput({
-                    kind: 'err',
-                    errors: {
-                        syntax: [],
-                        semantic: [],
-                        runtime: [result.error],
-                    }
-                })
-            }
-        }
+        await run_compile(text, model, syntaxErrors, semanticErrors);
     }
 
-    containerRef(e: HTMLDivElement | null) {
-        if (e === null) {
-            if (this.resize_interval_id != -1) {
-                clearInterval(this.resize_interval_id)
-            }
-            return;
-        }
-
-        const resizeHandler = () => {
-            if (e.clientHeight !== this.pastHeight || e.clientWidth !== this.pastWidth) {
-                this.pastHeight = e.clientHeight;
-                this.pastWidth = e.clientWidth;
-                if (this.editor !== null) {
-                    this.editor.layout({ width: this.pastWidth, height: this.pastHeight });
-                }
-            }
-        }
-
-        window.addEventListener('resize', resizeHandler);
-        this.resize_interval_id = setInterval(resizeHandler, 500);
+    update_position(x: number, y: number, w: number, h: number) {
+        if (this.editor === null) { return; }
+        this.editor.layout({ width: w, height: h });
     }
 
     render() {
@@ -162,30 +94,14 @@ export class Editor extends React.Component<EditorProps, EditorState> {
             }
         };
 
-        return <div className="inside-relative" ref={(e) => this.containerRef(e)}>
-            <MonacoEditor
-                width="50%"
-                height="50%"
-                language="typescript"
-                theme="vs-dark"
-                value={code}
-                options={options}
-                onChange={this.onChange.bind(this)}
-                editorDidMount={this.editorDidMount.bind(this)}
-                editorWillMount={this.editorWillMount.bind(this)}
-            />
-        </div>;
-    }
-}
-
-function es_to_err(model: monaco.editor.IModel, es: ErrorStructure): Error {
-    const p = model.getPositionAt(es.start);
-    const m: string = typeof es.messageText === 'string' ?
-        es.messageText :
-        es_to_err(model, es.messageText).message;
-    return {
-        message: m,
-        line_num: p.lineNumber,
-        col_num: p.column,
+        return <MonacoEditor
+            language="typescript"
+            theme="vs-dark"
+            value={code}
+            options={options}
+            onChange={this.onChange.bind(this)}
+            editorDidMount={this.editorDidMount.bind(this)}
+            editorWillMount={this.editorWillMount.bind(this)}
+        />;
     }
 }

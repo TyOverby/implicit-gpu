@@ -1,4 +1,4 @@
-import * as impl from "../../../implicit-ts/implicit"
+import * as impl from "../../../implicit-ts/src/implicit"
 
 const shape =
     impl.or(

@@ -24,7 +24,6 @@ export async function getResult(source: string): Promise<WorkerMessage> {
     worker.postMessage(source);
 
     worker.onmessage = ev => {
-        console.log(ev.data);
         let message: WorkerMessage = ev.data;
         resolve(message);
         availableWorker = worker;

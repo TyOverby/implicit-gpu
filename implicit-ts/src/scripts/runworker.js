@@ -21,14 +21,17 @@ onmessage = async ev => {
         var stack_string = e.stack;
         var r = /at.*:([0-9]+):([0-9]+)/;
         var matches = r.exec(stack_string);
-
-        postMessage({
-            status: 'err',
-            error: {
-                line_num: matches[1],
-                col_num: matches[2],
-                message: e.message
-            }
-        });
+        if (matches.length >= 3) {
+            postMessage({
+                status: 'err',
+                error: {
+                    line_num: matches[1],
+                    col_num: matches[2],
+                    message: e.message
+                }
+            });
+        } else {
+            console.error(e);
+        }
     }
 };

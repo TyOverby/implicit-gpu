@@ -1,6 +1,6 @@
 use super::*;
 use super::util::quadtree::*;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 // TODO: *LOTS* of optimization opporitunities here
 
@@ -9,7 +9,7 @@ struct Graph {
     tree: QuadTree<Vec<geom::Point>>,
 }
 
-type VisitedSet = HashSet<ItemId>;
+type VisitedSet = HashMap<ItemId, f32>;
 type Path = Vec<(ItemId, f32)>;
 
 fn is_close(p1: geom::Point, p2: geom::Point) -> bool { p1.close_to(&p2, 0.001) }
@@ -48,12 +48,14 @@ impl Graph {
         return self.tree
             .query(query)
             .into_iter()
-            .filter_map(|(ref v, _, id2)| if id == id2 {
-                return None;
-            } else if is_close(segment.last().cloned().unwrap(), v.first().cloned().unwrap()) {
-                Some(id2)
-            } else {
-                None
+            .filter_map(|(ref v, _, id2)| {
+                if id == id2 {
+                    return None;
+                } else if is_close(segment.last().cloned().unwrap(), v.first().cloned().unwrap()) {
+                    Some(id2)
+                } else {
+                    None
+                }
             })
             .collect();
     }
@@ -78,8 +80,8 @@ fn recur(
 ) {
     let length = graph.length_of(at);
 
-    if visited.contains(&at) {
-        if current_length + length < *best_possible {
+    if let Some(prior_length) = visited.get(&at) {
+        if *prior_length >= current_length {
             return;
         }
 
@@ -92,7 +94,12 @@ fn recur(
         }
     }
 
-    let neighbors = graph.connected_to(at);
+    let mut neighbors: Vec<_> = graph
+        .connected_to(at)
+        .into_iter()
+        .map(|a| (a, graph.length_of(a)))
+        .collect();
+
     if neighbors.is_empty() {
         let mut dead_path = path.clone();
         dead_path.push((at, length));
@@ -101,9 +108,12 @@ fn recur(
     }
 
     path.push((at, length));
-    visited.insert(at);
+    visited.insert(at, current_length);
 
-    for neighbor in neighbors {
+    // TODO: is this actually faster?  Back up with data
+    neighbors.sort_by(|&(_, a), &(_, b)| a.partial_cmp(&b).unwrap());
+
+    for (neighbor, _) in neighbors.into_iter().rev() {
         if neighbor != at {
             recur(
                 neighbor,
@@ -119,7 +129,7 @@ fn recur(
     }
 
     path.pop();
-    //visited.remove(&at);
+    // visited.remove(&at);
 }
 
 fn one_iter(mut graph: Graph) -> (Graph, Vec<Vec<geom::Point>>) {
@@ -133,7 +143,7 @@ fn one_iter(mut graph: Graph) -> (Graph, Vec<Vec<geom::Point>>) {
         first_id,
         0.0,
         &graph,
-        &mut HashSet::new(),
+        &mut HashMap::new(),
         &mut vec![],
         &mut best_possible,
         &mut possible,
@@ -156,7 +166,11 @@ fn one_iter(mut graph: Graph) -> (Graph, Vec<Vec<geom::Point>>) {
     let mut out = vec![];
     let mut visited_loops = HashSet::new();
     let mut trash_points = HashSet::new();
-    trash_points.extend(dead_ends.into_iter().flat_map(|v| v.into_iter().map(|(p, _)| p)));
+    trash_points.extend(
+        dead_ends
+            .into_iter()
+            .flat_map(|v| v.into_iter().map(|(p, _)| p)),
+    );
 
     for (l00p, _) in possible {
         let intersects = l00p.iter().any(|point| visited_loops.contains(point));
@@ -166,7 +180,11 @@ fn one_iter(mut graph: Graph) -> (Graph, Vec<Vec<geom::Point>>) {
             visited_loops.extend(l00p.iter().cloned());
             // TODO: this flattens things but the edge conditions might
             // be weird.
-            out.push(l00p.into_iter().flat_map(|pt| graph.remove(pt)).collect::<Vec<_>>());
+            out.push(
+                l00p.into_iter()
+                    .flat_map(|pt| graph.remove(pt))
+                    .collect::<Vec<_>>(),
+            );
         }
     }
 

@@ -1,4 +1,4 @@
-import * as implicit from "../../../implicit-ts/implicit";
+import * as implicit from "../../../implicit-ts/src/implicit";
 
 function grid(m: number, n: number, size: number, gap: number): implicit.Implicit[] {
     const out: implicit.Implicit[] = [];

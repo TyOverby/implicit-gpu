@@ -11,6 +11,8 @@ path = "./src/main.rs"
 [dependencies]
 hyper = "*"
 mime = "*"
+serde = "1.*.*"
+serde_derive = "1.*.*"
 
 [dependencies.happy]
 path = "../../happy"

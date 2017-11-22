@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "server"
+		},
+		{
+			"path": "implicit"
+		},
+		{
+			"path": "implicit-ts"
+		},
+		{
+			"path": "testsuite"
+		}
+	],
+	"settings": {}
+}

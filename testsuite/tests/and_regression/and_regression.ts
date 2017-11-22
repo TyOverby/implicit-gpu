@@ -1,4 +1,4 @@
-import * as implicit from "../../../implicit-ts/implicit"
+import * as implicit from "../../../implicit-ts/src/implicit"
 
 const rect = implicit.rect(0, 0, 50, 50);
 const circle = implicit.circle(20, 20, 10);

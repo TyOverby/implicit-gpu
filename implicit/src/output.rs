@@ -6,6 +6,10 @@ pub struct OutputScene {
 #[derive(Clone)]
 pub struct OutputFigure {
     pub shapes: Vec<OutputShape>,
+    pub left: f32,
+    pub top: f32,
+    pub width: f32,
+    pub height: f32,
 }
 
 #[derive(Clone)]

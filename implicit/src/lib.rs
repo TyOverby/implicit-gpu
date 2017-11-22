@@ -1,19 +1,19 @@
+extern crate flame;
+extern crate fnv;
+extern crate image as image_crate;
+extern crate itertools;
+extern crate latin;
+extern crate lazy_static;
+extern crate ocl;
 extern crate rand;
 extern crate serde;
-#[cfg(test)]
-extern crate serde_json;
 #[macro_use]
 extern crate serde_derive;
-extern crate lazy_static;
-extern crate latin;
+#[cfg(test)]
+extern crate serde_json;
 extern crate typed_arena;
 extern crate vecmath;
 extern crate vectorphile;
-extern crate ocl;
-extern crate flame;
-extern crate fnv;
-extern crate itertools;
-extern crate image as image_crate;
 
 pub mod nodes;
 pub mod compiler;
@@ -48,10 +48,10 @@ pub fn run_single(node: nodes::NodeRef, width: usize, height: usize) -> ::opencl
 }
 
 pub fn run_scene(scene: &scene::Scene, telemetry: &mut telemetry::Telemetry) -> output::OutputScene {
-    use output::*;
-    use scene::*;
     use compiler::Nest;
     use evaluator::Evaluator;
+    use output::*;
+    use scene::*;
 
     fn compute_figure_size(figure: &scene::Figure) -> Option<lines::util::geom::Rect> {
         let mut rect: Option<Option<Rect>> = None;
@@ -93,7 +93,7 @@ pub fn run_scene(scene: &scene::Scene, telemetry: &mut telemetry::Telemetry) -> 
         let figure_bounds = if let Some(figure) = compute_figure_size(figure) {
             figure
         } else {
-            continue
+            continue;
         };
 
         for shape in &figure.shapes {
@@ -108,9 +108,7 @@ pub fn run_scene(scene: &scene::Scene, telemetry: &mut telemetry::Telemetry) -> 
 
     let bb = match compute_scene_size(scene) {
         Some(bb) => bb,
-        None => return OutputScene {
-            figures: vec![],
-        }
+        None => return OutputScene { figures: vec![] },
     };
 
     let mut tloc = telemetry::TelemetryLocation::new();
@@ -133,11 +131,7 @@ pub fn run_scene(scene: &scene::Scene, telemetry: &mut telemetry::Telemetry) -> 
 
             let line_buffer = ::marching::run_marching(&result, &ctx);
 
-            let (additive, subtractive) = evaluator::line_buffer_to_poly(
-                &line_buffer,
-                telemetry,
-                tloc,
-                scene.simplify);
+            let (additive, subtractive) = evaluator::line_buffer_to_poly(&line_buffer, telemetry, tloc, scene.simplify);
 
             let output_shape = match shape.draw_mode {
                 DrawMode::Filled => OutputShape {
@@ -164,7 +158,14 @@ pub fn run_scene(scene: &scene::Scene, telemetry: &mut telemetry::Telemetry) -> 
         }
 
         telemetry.figure_finished(figure_telemetry, &output_shapes);
-        output.figures.push(OutputFigure { shapes: output_shapes });
+        let fbb = compute_figure_size(figure).unwrap();
+        output.figures.push(OutputFigure {
+            shapes: output_shapes,
+            left: fbb.left() as f32,
+            top: fbb.top() as f32,
+            width: fbb.width() as f32,
+            height: fbb.height() as f32,
+        });
     }
     telemetry.scene_finished(tloc, &output);
     output

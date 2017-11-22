@@ -19,7 +19,7 @@ let paths = Array.from(svgs.children).filter(function(c) {
         c.style.stroke = orig;
     };
     c.onclick = function () {
-        svgs.removeChild();
+        svgs.removeChild()
     }
 });
 

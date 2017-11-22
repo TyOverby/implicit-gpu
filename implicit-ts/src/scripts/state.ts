@@ -9,26 +9,37 @@ export var current: State = {
     prev_ok: [],
     output: {
         kind: 'ok',
-        figures_svg: []
+        figures: []
     }
 };
 
+export type Figure = {
+    svg: string,
+    left: number,
+    top: number,
+    width: number,
+    height: number,
+}
+
+export type Errors = {
+    syntax: Error[],
+    semantic: Error[],
+    runtime: Error[],
+}
 export type OutputState =
     {
         kind: 'ok',
-        figures_svg: string[]
+        figures: Figure[]
     } |
     {
-        kind: 'err', errors: {
-            syntax: Error[],
-            semantic: Error[],
-            runtime: Error[],
-        }
+        kind: 'err',
+        errors: Errors
     }
+
 
 export type State = {
     source: string,
-    prev_ok: string[],
+    prev_ok: Figure[],
     output: OutputState,
 }
 
@@ -67,9 +78,12 @@ export function changeOutput(output: OutputState) {
     current.output = output;
 
     if (output.kind == 'ok') {
-        current.prev_ok = output.figures_svg;
+        current.prev_ok = output.figures;
     }
 
     setDirty();
 }
 
+export function changeError(errors: Errors) {
+    changeOutput({ 'kind': 'err', errors: errors });
+}
