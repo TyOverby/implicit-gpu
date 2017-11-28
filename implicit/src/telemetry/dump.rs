@@ -156,6 +156,7 @@ impl Telemetry for DumpTelemetry {
         assert!(scene.figures.len() == 1);
         svg::write_to_file(self.scene_path(tloc, "scene.svg"), scene.figures[0].clone()).unwrap();
         ::flame::dump_text_to_writer(File::create(self.scene_path(tloc, "scene.perf")).unwrap()).unwrap();
+        ::flame::dump_json(&mut File::create(self.scene_path(tloc, "scene.perfjson")).unwrap()).unwrap();
         ::flame::clear();
     }
 

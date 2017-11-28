@@ -142,6 +142,7 @@ pub fn run_test(paths: &Paths) -> Result<(), Vec<Error>> {
         match extension {
             "png" => { /* png is for debugging only */ }
             "perf" => { /* perf data is for debugging only */ }
+            "perfjson" => { /* perf json data is for debugging only */ }
             "values" => {
                 if let Err(e) = formats::field::compare(&expected, &actual) {
                     errors.push(Error::FieldMismatch {

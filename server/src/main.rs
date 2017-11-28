@@ -40,7 +40,6 @@ fn process(_: RequestInfo, scene: Scene) -> Result<Vec<FigureResult>, SceneError
             let mut out_svg: Vec<u8> = Vec::new();
             let (l, t, w, h) = (figure.left, figure.top, figure.width, figure.height);
             implicit::export::svg::write_to(&mut out_svg, figure).unwrap();
-            println!("{} {}", l, t);
             FigureResult {
                 svg: String::from_utf8(out_svg).unwrap(),
                 left: l,

@@ -25,7 +25,7 @@ export class OutputWindow extends React.Component<OutputProps, OutputState> {
             const source = figure.svg.replace(
                 "<svg ",
                 `<svg viewbox=\"${viewbox}\"`);
-            return <div key={idx} style={({ position: 'absolute' })} dangerouslySetInnerHTML={({ __html: source })} />
+            return <div key={idx} dangerouslySetInnerHTML={({ __html: source })} />
         }
 
         const svgs = this.props.figures_svg.map(text_to_svg);
