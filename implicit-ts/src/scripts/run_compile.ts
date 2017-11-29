@@ -4,6 +4,7 @@ import * as state from './state';
 import Error from './types/error';
 
 export default async function run_compile(
+    source: string,
     text: string,
     model: monaco.editor.IModel,
     syntaxErrors: ErrorStructure[],
@@ -32,7 +33,10 @@ export default async function run_compile(
 
     const res = await fetch("/api/process", {
         method: "POST",
-        body: JSON.stringify(result.exports.default)
+        body: JSON.stringify({
+            source: source,
+            scene: result.exports.default
+        })
     });
 
     if (!res.ok) {

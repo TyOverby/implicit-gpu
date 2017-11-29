@@ -75,7 +75,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
         const semanticErrors: ErrorStructure[] = await client.getSemanticDiagnostics(model.uri.toString());
         const text = compilation.outputFiles[0].text;
 
-        await run_compile(text, model, syntaxErrors, semanticErrors);
+        await run_compile(val, text, model, syntaxErrors, semanticErrors);
     }
 
     update_position(x: number, y: number, w: number, h: number) {
