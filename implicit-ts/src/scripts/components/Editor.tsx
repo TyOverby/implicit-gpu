@@ -1,4 +1,5 @@
 import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 import MonacoEditor from 'react-monaco-editor';
 import * as state from '../state';
 import run_compile from '../run_compile';
@@ -45,6 +46,23 @@ export class Editor extends React.Component<EditorProps, EditorState> {
         return false;
     }
 
+    componentDidMount() {
+        const parent = ReactDOM.findDOMNode(this).parentElement;
+        const listener = () => {
+            if (parent === null) {
+                throw new Error("not loaded");
+            }
+            if (this.editor === null) {
+                setTimeout(listener, 50);
+                return;
+            }
+            this.editor.layout({ width: parent.clientWidth, height: parent.clientHeight });
+        };
+
+        window.addEventListener('resize', listener);
+        listener();
+    }
+
     editorDidMount(editor: monaco.editor.ICodeEditor, monacoModule: typeof monaco) {
         editor.focus();
         this.editor = editor;
@@ -76,11 +94,6 @@ export class Editor extends React.Component<EditorProps, EditorState> {
         const text = compilation.outputFiles[0].text;
 
         await run_compile(val, text, model, syntaxErrors, semanticErrors);
-    }
-
-    update_position(x: number, y: number, w: number, h: number) {
-        if (this.editor === null) { return; }
-        this.editor.layout({ width: w, height: h });
     }
 
     render() {

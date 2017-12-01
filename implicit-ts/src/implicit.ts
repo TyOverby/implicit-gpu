@@ -113,7 +113,7 @@ type scene_opts = {
 export function scene(figures: Figure[], opts?: scene_opts): Scene {
     let default_opts: scene_opts = {
         unit: "px",
-        simplify: true,
+        simplify: false,
     };
 
     if (opts === null || opts === undefined) {

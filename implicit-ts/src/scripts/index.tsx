@@ -1,24 +1,10 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
-import manualSize from "./components/ManualSize";
 import { OutputWindow } from "./components/OutputWindow";
 import { ErrorWindow } from "./components/ErrorWindow";
 import { Editor } from "./components/Editor";
 import { State, current as default_state } from './state'
-
-const editor = (() => {
-    let global_editor_instance: Editor | null = null;
-    const global_editor = <Editor ref={(a) => global_editor_instance = a} />;
-    const editor_proxy = manualSize(
-        () => global_editor,
-        (x, y, w, h) => {
-            if (global_editor_instance != null) {
-                global_editor_instance.update_position(x, y, w, h);
-            }
-        });
-    return editor_proxy;
-})();
 
 export class Index extends React.Component<State> {
     render() {
@@ -37,9 +23,11 @@ export class Index extends React.Component<State> {
         }
 
         return <div>
-            {editor}
+            <div style={({ width: "100%", height: "100%" })}>
+                <Editor />
+            </div>
             {side_window}
-        </div>
+        </div >
     }
 }
 
