@@ -144,6 +144,15 @@ fn segment_with_one_line() {
 }
 
 #[test]
+fn segment_with_one_line_but_the_line_is_really_short() {
+    run(Problem {
+        input: vec![vec![Point { x: 0.0, y: 0.0 }, Point { x: 0.0, y: 0.0 }]],
+        expected: vec![],
+        ..default_problem()
+    });
+}
+
+#[test]
 fn segment_with_two_disjoint_lines() {
     run(Problem {
         input: vec![

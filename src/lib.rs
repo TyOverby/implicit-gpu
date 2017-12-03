@@ -37,9 +37,9 @@ pub struct Point {
 
 impl std::cmp::Eq for Point {}
 
-
 impl PathSegment {
-    fn new<P: Into<SmallVec<[Point; 2]>>>(path: P, epsilon: f32) -> PathSegment {
+    /// TODO: doc
+    pub fn new<P: Into<SmallVec<[Point; 2]>>>(path: P, epsilon: f32) -> PathSegment {
         let mut path = path.into();
 
         assert!(path.len() > 1);
@@ -53,6 +53,7 @@ impl PathSegment {
             x: last.x,
             y: last.y,
         };
+
         let query_rect = geom::Rect::centered_with_radius(&first_pt, epsilon);
         let closed = query_rect.contains(&last_pt);
         if closed {
@@ -72,6 +73,30 @@ impl PathSegment {
     fn last(&self) -> Point {
         *self.path.last().unwrap()
     }
+
+    /// TODO: document
+    pub fn length_2(&self) -> f32 {
+        self.path
+            .as_slice()
+            .windows(2)
+            .map(|s| dist_2(s[0], s[1]))
+            .sum()
+    }
+
+    /// TODO: document
+    pub fn length(&self) -> f32 {
+        self.path
+            .as_slice()
+            .windows(2)
+            .map(|s| dist_2(s[0], s[1]).sqrt())
+            .sum()
+    }
+}
+
+fn dist_2(Point { x: x1, y: y1 }: Point, Point { x: x2, y: y2 }: Point) -> f32 {
+    let dx = x2 - x1;
+    let dy = y2 - y1;
+    dx * dx + dy * dy
 }
 
 impl Spatial for Point {
