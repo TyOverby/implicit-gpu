@@ -1,4 +1,5 @@
 use super::*;
+use itertools::{self, Itertools};
 
 /// todo: doc
 pub fn optimize<P, I>(
@@ -9,13 +10,13 @@ pub fn optimize<P, I>(
 ) -> Vec<PathSegment>
 where
     I: IntoIterator<Item = P>,
-    P: Into<smallvec::SmallVec<[Point; 1]>>,
+    P: Into<smallvec::SmallVec<[Point; 2]>>,
 {
     let mut all_segments = vec![];
     let mut scene_aabb = geom::Rect::null();
 
     for segment in segments.into_iter().map(Into::into).filter(|a| a.len() > 1) {
-        let segment = PathSegment(segment);
+        let segment = PathSegment::new(segment, epsilon);
 
         let first = segment.first();
         let last = segment.first();
@@ -47,17 +48,18 @@ where
         }
     }
 
-    out.into_iter()
-        .map(|chained_segments| {
-            let mut segment =
-                SmallVec::with_capacity(chained_segments.iter().map(|p| p.0.len()).sum());
-            segment.extend_from_slice(&chained_segments[0].0);
-            for other_segment in &chained_segments[1..] {
-                segment.extend_from_slice(&other_segment.0[1..]);
-            }
-            PathSegment(segment)
-        })
-        .collect()
+    return out.into_iter()
+        .map(|a| recombine_segments(a, epsilon))
+        .collect();
+
+    fn recombine_segments(segments: Vec<PathSegment>, epsilon: f32) -> PathSegment {
+        let mut segment = SmallVec::with_capacity(segments.iter().map(|p| p.path.len()).sum());
+        segment.extend_from_slice(&segments[0].path);
+        for other_segment in &segments[1..] {
+            segment.extend_from_slice(&other_segment.path[1..]);
+        }
+        PathSegment::new(segment, epsilon)
+    }
 }
 
 fn chain_single(
@@ -82,8 +84,8 @@ fn chain_single(
     }
 
     loop {
-        println!("{:?}", first_going_backwards);
-        let next = dual_qt.query_backward(first_going_backwards, epsilon, only_starts, allow_ambiguous);
+        let next =
+            dual_qt.query_backward(first_going_backwards, epsilon, only_starts, allow_ambiguous);
         if let Some(next) = next {
             first_going_backwards = next.first();
             combined.insert(0, next);
@@ -93,7 +95,7 @@ fn chain_single(
     }
 
 
-    let total_count: usize = combined.iter().map(|a| a.0.len()).sum();
+    let total_count: usize = combined.iter().map(|a| a.path.len()).sum();
 
     if total_count > 1 {
         Some(combined)

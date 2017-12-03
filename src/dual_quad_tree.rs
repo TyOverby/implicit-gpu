@@ -150,6 +150,6 @@ impl DualQuadTree {
 }
 
 fn reverse_and_return(mut v: PathSegment) -> PathSegment {
-    v.0.reverse();
+    v.path.reverse();
     v
 }
