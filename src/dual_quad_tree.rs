@@ -67,39 +67,7 @@ impl DualQuadTree {
         only_starts: bool,
         allow_ambiguous: bool,
     ) -> Option<PathSegment> {
-        let (start, end) = self.query_impl(point, epsilon, allow_ambiguous);
-        if only_starts {
-            match (start, end) {
-                // A start and an end at this point means that there is likely a better
-                // path between those two segments.
-                (Ok(Some(_)), Ok(Some(_))) => {
-                    self.ambiguity_points.insert(point);
-                    None
-                }
-                // ignore errors here for now
-                (Ok(Some(a)), _) => self.remove(a),
-                (Ok(None), _) => None,
-                (Err(_), _) => {
-                    self.ambiguity_points.insert(point);
-                    None
-                }
-            }
-        } else {
-            match (start, end, allow_ambiguous) {
-                (Ok(None), Ok(None), _) => None,
-                (Ok(Some(a)), Ok(Some(_)), true) => self.remove(a),
-                (Ok(Some(_)), Ok(Some(_)), false) => {
-                    self.ambiguity_points.insert(point);
-                    None
-                }
-                (Ok(Some(a)), Ok(None), _) => self.remove(a),
-                (Ok(None), Ok(Some(b)), _) => self.remove(b).map(reverse_and_return),
-                (Err(_), _, _) | (_, Err(_), _) => {
-                    self.ambiguity_points.insert(point);
-                    None
-                }
-            }
-        }
+        self.query_direction(false, point, epsilon, only_starts, allow_ambiguous)
     }
 
     pub fn query_backward(
@@ -109,13 +77,32 @@ impl DualQuadTree {
         only_starts: bool,
         allow_ambiguous: bool,
     ) -> Option<PathSegment> {
-        let (end, start) = self.query_impl(point, epsilon, allow_ambiguous);
+        self.query_direction(true, point, epsilon, only_starts, allow_ambiguous)
+    }
+
+    fn query_direction(
+        &mut self,
+        should_swap: bool,
+        point: Point,
+        epsilon: f32,
+        only_starts: bool,
+        allow_ambiguous: bool,
+    ) -> Option<PathSegment> {
+        let (mut start, mut end) = self.query_impl(point, epsilon, allow_ambiguous);
+        if should_swap {
+            std::mem::swap(&mut start, &mut end);
+        }
+        let (start, end) = (start, end);
+
         if only_starts {
             match (start, end) {
+                // A start and an end at this point means that there is likely a better
+                // path between those two segments.
                 (Ok(Some(_)), Ok(Some(_))) => {
                     self.ambiguity_points.insert(point);
                     None
                 }
+                // ignore errors here for now
                 (Ok(Some(a)), _) => self.remove(a),
                 (Ok(None), _) => None,
                 (Err(_), _) => {

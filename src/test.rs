@@ -32,18 +32,22 @@ fn run(mut p: Problem) {
             new_p.only_starts,
             new_p.allow_ambiguous,
         );
-        assert_same(output, new_p.expected, !p.only_starts);
+        assert_same(output, new_p.expected, !p.only_starts).unwrap();
     }
 
-    fn assert_same(actual: Vec<PathSegment>, expected: Vec<PathSegment>, permit_reversed: bool) {
+    fn assert_same(
+        actual: Vec<PathSegment>,
+        expected: Vec<PathSegment>,
+        permit_reversed: bool,
+    ) -> Result<(), String> {
         if actual.len() != expected.len() {
-            panic!(
+            return Err(format!(
                 "assert_same wrong lengths {} vs {}\n actual: {:?}\n expected: {:?}",
                 actual.len(),
                 expected.len(),
                 actual,
                 expected
-            );
+            ));
         }
 
         for ex in &expected {
@@ -56,14 +60,16 @@ fn run(mut p: Problem) {
             }
 
             if !found {
-                panic!(
+                return Err(format!(
                     "{:?} not found in actual\n actual: {:?}\n expected: {:?}",
                     ex,
                     actual,
                     expected
-                );
+                ));
             }
         }
+
+        return Ok(());
 
         fn is_equal(expected: &PathSegment, actual: &PathSegment, permit_reversed: bool) -> bool {
             if expected.path.len() != actual.path.len() || expected.closed != actual.closed {
