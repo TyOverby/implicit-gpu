@@ -3,8 +3,8 @@
 
 extern crate aabb_quadtree;
 extern crate fnv;
-extern crate smallvec;
 extern crate itertools;
+extern crate smallvec;
 
 mod dual_quad_tree;
 mod optimize;
@@ -18,7 +18,7 @@ use dual_quad_tree::*;
 pub use optimize::optimize;
 
 /// A single path segment that may be merged with other path segments.
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct PathSegment {
     /// The path of points
     pub path: SmallVec<[Point; 2]>,
@@ -39,23 +39,29 @@ impl std::cmp::Eq for Point {}
 
 
 impl PathSegment {
-    fn new(path: SmallVec<[Point; 2]>, epsilon: f32) -> PathSegment {
+    fn new<P: Into<SmallVec<[Point; 2]>>>(path: P, epsilon: f32) -> PathSegment {
+        let mut path = path.into();
+
         assert!(path.len() > 1);
         let first = path.first().cloned().unwrap();
         let last = path.last().cloned().unwrap();
         let first_pt = geom::Point {
-                x: first.x,
-                y: first.y,
+            x: first.x,
+            y: first.y,
         };
         let last_pt = geom::Point {
-                x: last.x,
-                y: last.y,
+            x: last.x,
+            y: last.y,
         };
         let query_rect = geom::Rect::centered_with_radius(&first_pt, epsilon);
+        let closed = query_rect.contains(&last_pt);
+        if closed {
+            path.pop();
+        }
 
         PathSegment {
             path: path,
-            closed: query_rect.contains(&last_pt),
+            closed: closed,
         }
     }
 

@@ -1,5 +1,6 @@
 use super::*;
-use itertools::{self, Itertools};
+use std::cell::RefCell;
+use itertools::{repeat_call, Itertools};
 
 /// todo: doc
 pub fn optimize<P, I>(
@@ -12,6 +13,7 @@ where
     I: IntoIterator<Item = P>,
     P: Into<smallvec::SmallVec<[Point; 2]>>,
 {
+    println!("START");
     let mut all_segments = vec![];
     let mut scene_aabb = geom::Rect::null();
 
@@ -36,21 +38,17 @@ where
     for segment in all_segments {
         dual_qt.insert(segment);
     }
+    let dual_qt = RefCell::new(dual_qt);
 
-    let mut out = vec![];
-    while !dual_qt.is_empty() {
-        // ok to unwrap because dual_qt is not empty.
-        let head = dual_qt.pop().unwrap();
-        if let Some(seg_chain) =
-            chain_single(head, &mut dual_qt, epsilon, only_starts, allow_ambiguous)
-        {
-            out.push(seg_chain);
-        }
-    }
-
-    return out.into_iter()
+    return repeat_call(|| dual_qt.borrow_mut().pop())
+        .while_some()
+        .filter_map(|head| {
+            let mut borrowed = dual_qt.borrow_mut();
+            chain_single(head, &mut *borrowed, epsilon, only_starts, allow_ambiguous)
+        })
         .map(|a| recombine_segments(a, epsilon))
         .collect();
+
 
     fn recombine_segments(segments: Vec<PathSegment>, epsilon: f32) -> PathSegment {
         let mut segment = SmallVec::with_capacity(segments.iter().map(|p| p.path.len()).sum());

@@ -8,6 +8,7 @@ pub struct DualQuadTree {
     id_to_segment: HashMap<DqtId, (PathSegment, ItemId, ItemId)>,
     starts: QuadTree<DqtId>,
     ends: QuadTree<DqtId>,
+    ambiguity_points: QuadTree<Point>,
 }
 
 impl DualQuadTree {
@@ -17,6 +18,7 @@ impl DualQuadTree {
             id_to_segment: HashMap::default(),
             starts: QuadTree::default(aabb),
             ends: QuadTree::default(aabb),
+            ambiguity_points: QuadTree::default(aabb),
         }
     }
 
@@ -53,6 +55,7 @@ impl DualQuadTree {
         return Some(segment);
     }
 
+    #[allow(dead_code)]
     pub fn is_empty(&self) -> bool {
         self.id_to_segment.is_empty()
     }
@@ -65,13 +68,37 @@ impl DualQuadTree {
         allow_ambiguous: bool,
     ) -> Option<PathSegment> {
         let (start, end) = self.query_impl(point, epsilon, allow_ambiguous);
-        match (start, end, allow_ambiguous, only_starts) {
-            (Some(a), None, _, _) => self.remove(a),
-            (None, Some(_), _, true) => None,
-            (None, Some(b), _, false) => self.remove(b).map(reverse_and_return),
-            (None, None, _, _) => None,
-            (Some(a), Some(_), true, _) => self.remove(a),
-            (Some(_), Some(_), false, _) => None,
+        if only_starts {
+            match (start, end) {
+                // A start and an end at this point means that there is likely a better
+                // path between those two segments.
+                (Ok(Some(_)), Ok(Some(_))) => {
+                    self.ambiguity_points.insert(point);
+                    None
+                }
+                // ignore errors here for now
+                (Ok(Some(a)), _) => self.remove(a),
+                (Ok(None), _) => None,
+                (Err(_), _) => {
+                    self.ambiguity_points.insert(point);
+                    None
+                }
+            }
+        } else {
+            match (start, end, allow_ambiguous) {
+                (Ok(None), Ok(None), _) => None,
+                (Ok(Some(a)), Ok(Some(_)), true) => self.remove(a),
+                (Ok(Some(_)), Ok(Some(_)), false) => {
+                    self.ambiguity_points.insert(point);
+                    None
+                }
+                (Ok(Some(a)), Ok(None), _) => self.remove(a),
+                (Ok(None), Ok(Some(b)), _) => self.remove(b).map(reverse_and_return),
+                (Err(_), _, _) | (_, Err(_), _) => {
+                    self.ambiguity_points.insert(point);
+                    None
+                }
+            }
         }
     }
 
@@ -82,27 +109,50 @@ impl DualQuadTree {
         only_starts: bool,
         allow_ambiguous: bool,
     ) -> Option<PathSegment> {
-        let (start, end) = self.query_impl(point, epsilon, allow_ambiguous);
-        println!("(start: {:?},  end: {:?})", start, end);
-        match (end, start, allow_ambiguous, only_starts) {
-            (Some(a), None, _, _) => self.remove(a),
-            (None, Some(_), _, true) => None,
-            (None, Some(b), _, false) => self.remove(b).map(reverse_and_return),
-            (None, None, _, _) => None,
-            (Some(a), Some(_), true, _) => self.remove(a),
-            (Some(_), Some(_), false, _) => None,
+        let (end, start) = self.query_impl(point, epsilon, allow_ambiguous);
+        if only_starts {
+            match (start, end) {
+                (Ok(Some(_)), Ok(Some(_))) => {
+                    self.ambiguity_points.insert(point);
+                    None
+                }
+                (Ok(Some(a)), _) => self.remove(a),
+                (Ok(None), _) => None,
+                (Err(_), _) => {
+                    self.ambiguity_points.insert(point);
+                    None
+                }
+            }
+        } else {
+            match (start, end, allow_ambiguous) {
+                (Ok(None), Ok(None), _) => None,
+                (Ok(Some(a)), Ok(Some(_)), true) => self.remove(a),
+                (Ok(Some(_)), Ok(Some(_)), false) => {
+                    self.ambiguity_points.insert(point);
+                    None
+                }
+                (Ok(Some(a)), Ok(None), _) => self.remove(a),
+                (Ok(None), Ok(Some(b)), _) => self.remove(b).map(reverse_and_return),
+                (Err(_), _, _) | (_, Err(_), _) => {
+                    self.ambiguity_points.insert(point);
+                    None
+                }
+            }
         }
     }
 
     fn query_impl(
-        &self,
+        &mut self,
         point: Point,
         epsilon: f32,
         allow_ambiguous: bool,
-    ) -> (Option<DqtId>, Option<DqtId>) {
+    ) -> (Result<Option<DqtId>, ()>, Result<Option<DqtId>, ()>) {
         let query_aabb = point.aabb().expand(epsilon, epsilon, epsilon, epsilon);
+        if self.ambiguity_points.query(query_aabb).len() > 0 {
+            return (Ok(None), Ok(None));
+        }
 
-        let query_starts = move || {
+        let query_starts = || {
             let mut out = None;
             let query = self.starts
                 .query(query_aabb)
@@ -121,7 +171,7 @@ impl DualQuadTree {
             return Ok(out);
         };
 
-        let query_ends = move || {
+        let query_ends = || {
             let mut out = None;
             let query = self.ends
                 .query(query_aabb)
@@ -140,12 +190,7 @@ impl DualQuadTree {
             return Ok(out);
         };
 
-        let res = (query_starts(), query_ends());
-
-        match  res {
-            (Ok(a), Ok(b)) => (a, b),
-            _ => (None, None),
-        }
+        (query_starts(), query_ends())
     }
 }
 
