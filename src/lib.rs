@@ -8,8 +8,8 @@ extern crate smallvec;
 
 mod dual_quad_tree;
 mod optimize;
-#[cfg(test)]
 mod test;
+pub(crate) mod util;
 
 use aabb_quadtree::*;
 use smallvec::SmallVec;
