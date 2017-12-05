@@ -41,6 +41,7 @@ pub fn prune_removes_single_line() {
         only_starts: true,
         .. p.clone()
     });
+
     run(Problem {
         only_starts: false,
         .. p
@@ -90,6 +91,32 @@ pub fn prune_removes_a_middle_line() {
             vec![Point { x: 2.0, y: 2.0 }, Point { x: 3.0, y: 3.0 }],
         ],
         expected: vec![ ],
+        ..default_problem()
+    };
+
+    run(Problem {
+        only_starts: true,
+        ..p.clone()
+    });
+    run(Problem {
+        only_starts: false,
+        ..p
+    });
+}
+
+#[test]
+pub fn prune_doesnt_remove_a_triangle() {
+    let p = Problem {
+        input: vec![
+            vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
+            vec![Point { x: 1.0, y: 1.0 }, Point { x: 1.0, y: 0.0 }],
+            vec![Point { x: 1.0, y: 0.0 }, Point { x: 0.0, y: 0.0 }],
+        ],
+        expected: vec![
+            PathSegment::new(vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }], EPSILON),
+            PathSegment::new(vec![Point { x: 1.0, y: 1.0 }, Point { x: 1.0, y: 0.0 }], EPSILON),
+            PathSegment::new(vec![Point { x: 1.0, y: 0.0 }, Point { x: 0.0, y: 0.0 }], EPSILON),
+         ],
         ..default_problem()
     };
 
