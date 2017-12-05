@@ -6,8 +6,8 @@ pub struct DqtId(u32);
 pub struct DualQuadTree {
     id: u32,
     id_to_segment: HashMap<DqtId, (PathSegment, ItemId, ItemId)>,
-    starts: QuadTree<DqtId>,
-    ends: QuadTree<DqtId>,
+    pub starts: QuadTree<DqtId>,
+    pub ends: QuadTree<DqtId>,
     ambiguity_points: QuadTree<Point>,
 }
 
@@ -20,6 +20,16 @@ impl DualQuadTree {
             ends: QuadTree::default(aabb),
             ambiguity_points: QuadTree::default(aabb),
         }
+    }
+
+    pub fn iter<'a>(&'a self) -> Box<Iterator<Item = (DqtId, &'a PathSegment)> + 'a> {
+        let iterator = self.id_to_segment.iter().map(|(&k, &(ref p, _, _))| (k, p));
+        Box::new(iterator) as Box<Iterator<Item = (DqtId, &PathSegment)> + 'a>
+    }
+
+    pub fn into_iter(self) -> Box<Iterator<Item = PathSegment>> {
+        let iterator = self.id_to_segment.into_iter().map(|(_, (p, _, _))| p);
+        Box::new(iterator) as Box<Iterator<Item = PathSegment>>
     }
 
     pub fn insert(&mut self, segment: PathSegment) {
@@ -58,6 +68,24 @@ impl DualQuadTree {
     #[allow(dead_code)]
     pub fn is_empty(&self) -> bool {
         self.id_to_segment.is_empty()
+    }
+
+    pub fn has_forward_neighbor(&self, id: DqtId, point: Point, epsilon: f32) -> bool {
+        let query_aabb = point.aabb().expand(epsilon, epsilon, epsilon, epsilon);
+        self.ends
+            .query(query_aabb)
+            .into_iter()
+            .filter(|&(&qid, _, _)| qid != id)
+            .count() != 0
+    }
+
+    pub fn has_backward_neighbor(&self, id: DqtId, point: Point, epsilon: f32) -> bool {
+        let query_aabb = point.aabb().expand(epsilon, epsilon, epsilon, epsilon);
+        self.starts
+            .query(query_aabb)
+            .into_iter()
+            .filter(|&(&qid, _, _)| qid != id)
+            .count() != 0
     }
 
     pub fn query_forward(

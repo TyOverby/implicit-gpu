@@ -4,18 +4,23 @@
 extern crate aabb_quadtree;
 extern crate fnv;
 extern crate itertools;
+#[cfg(test)]
+extern crate permutohedron;
 extern crate smallvec;
 
 mod dual_quad_tree;
 mod optimize;
 mod test;
+mod prune;
 pub(crate) mod util;
 
 use aabb_quadtree::*;
 use smallvec::SmallVec;
 use dual_quad_tree::*;
 
+
 pub use optimize::optimize;
+pub use prune::prune;
 
 /// A single path segment that may be merged with other path segments.
 #[derive(Debug, PartialEq, Eq, Clone)]

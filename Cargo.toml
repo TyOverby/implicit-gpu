@@ -8,3 +8,6 @@ aabb-quadtree = "0.1.0"
 smallvec = "0.6.0"
 fnv="1.0.6"
 itertools="0.7.4"
+
+[dev-dependencies]
+permutohedron="0.2.4"
