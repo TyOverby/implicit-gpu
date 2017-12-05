@@ -31,10 +31,19 @@ fn run(mut p: Problem) {
 
 #[test]
 pub fn prune_removes_single_line() {
-    run(Problem {
+    let p = Problem {
         input: vec![vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }]],
         expected: vec![],
         ..default_problem()
+    };
+
+    run(Problem {
+        only_starts: true,
+        .. p.clone()
+    });
+    run(Problem {
+        only_starts: false,
+        .. p
     });
 }
 
@@ -58,10 +67,38 @@ pub fn prune_doesnt_remove_two_duplicate_lines_if_only_starts_is_off() {
             vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
         ],
         expected: vec![
-            PathSegment::new(vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }], EPSILON),
-            PathSegment::new(vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }], EPSILON),
+            PathSegment::new(
+                vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
+                EPSILON,
+            ),
+            PathSegment::new(
+                vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
+                EPSILON,
+            ),
         ],
         only_starts: false,
         ..default_problem()
+    });
+}
+
+#[test]
+pub fn prune_removes_a_middle_line() {
+    let p = Problem {
+        input: vec![
+            vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
+            vec![Point { x: 1.0, y: 1.0 }, Point { x: 2.0, y: 2.0 }],
+            vec![Point { x: 2.0, y: 2.0 }, Point { x: 3.0, y: 3.0 }],
+        ],
+        expected: vec![ ],
+        ..default_problem()
+    };
+
+    run(Problem {
+        only_starts: true,
+        ..p.clone()
+    });
+    run(Problem {
+        only_starts: false,
+        ..p
     });
 }
