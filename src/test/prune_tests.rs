@@ -25,7 +25,9 @@ fn run(mut p: Problem) {
     let new_p = p.clone();
     permute(&mut p.input, |input| {
         let output = prune(input.to_vec(), new_p.epsilon, new_p.only_starts);
-        assert_same(&output, &new_p.expected, !new_p.only_starts).unwrap();
+        if let Err(e) = assert_same(&output, &new_p.expected, !new_p.only_starts) {
+            panic!("{}", e);
+        }
     });
 }
 
@@ -39,12 +41,12 @@ pub fn prune_removes_single_line() {
 
     run(Problem {
         only_starts: true,
-        .. p.clone()
+        ..p.clone()
     });
 
     run(Problem {
         only_starts: false,
-        .. p
+        ..p
     });
 }
 
@@ -90,7 +92,7 @@ pub fn prune_removes_a_middle_line() {
             vec![Point { x: 1.0, y: 1.0 }, Point { x: 2.0, y: 2.0 }],
             vec![Point { x: 2.0, y: 2.0 }, Point { x: 3.0, y: 3.0 }],
         ],
-        expected: vec![ ],
+        expected: vec![],
         ..default_problem()
     };
 
@@ -113,10 +115,167 @@ pub fn prune_doesnt_remove_a_triangle() {
             vec![Point { x: 1.0, y: 0.0 }, Point { x: 0.0, y: 0.0 }],
         ],
         expected: vec![
-            PathSegment::new(vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }], EPSILON),
-            PathSegment::new(vec![Point { x: 1.0, y: 1.0 }, Point { x: 1.0, y: 0.0 }], EPSILON),
-            PathSegment::new(vec![Point { x: 1.0, y: 0.0 }, Point { x: 0.0, y: 0.0 }], EPSILON),
-         ],
+            PathSegment::new(
+                vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
+                EPSILON,
+            ),
+            PathSegment::new(
+                vec![Point { x: 1.0, y: 1.0 }, Point { x: 1.0, y: 0.0 }],
+                EPSILON,
+            ),
+            PathSegment::new(
+                vec![Point { x: 1.0, y: 0.0 }, Point { x: 0.0, y: 0.0 }],
+                EPSILON,
+            ),
+        ],
+        ..default_problem()
+    };
+
+    run(Problem {
+        only_starts: true,
+        ..p.clone()
+    });
+    run(Problem {
+        only_starts: false,
+        ..p
+    });
+}
+
+#[test]
+fn prune_doesnt_remove_a_cycle_between_two_lines() {
+    let p = Problem {
+        input: vec![
+            vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
+            vec![Point { x: 1.0, y: 1.0 }, Point { x: 0.0, y: 0.0 }],
+        ],
+        expected: vec![
+            PathSegment::new(
+                vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
+                EPSILON,
+            ),
+            PathSegment::new(
+                vec![Point { x: 1.0, y: 1.0 }, Point { x: 0.0, y: 0.0 }],
+                EPSILON,
+            ),
+        ],
+        ..default_problem()
+    };
+
+    run(Problem {
+        only_starts: true,
+        ..p.clone()
+    });
+    run(Problem {
+        only_starts: false,
+        ..p
+    });
+}
+
+#[test]
+fn removes_a_dangling_line_off_the_front_of_a_cycle() {
+    let p = Problem {
+        input: vec![
+            vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
+            vec![Point { x: 1.0, y: 1.0 }, Point { x: 0.0, y: 0.0 }],
+            vec![Point { x: -1.0, y: -1.0 }, Point { x: 0.0, y: 0.0 }],
+        ],
+        expected: vec![
+            PathSegment::new(
+                vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
+                EPSILON,
+            ),
+            PathSegment::new(
+                vec![Point { x: 1.0, y: 1.0 }, Point { x: 0.0, y: 0.0 }],
+                EPSILON,
+            ),
+        ],
+        ..default_problem()
+    };
+
+    run(Problem {
+        only_starts: true,
+        ..p.clone()
+    });
+    run(Problem {
+        only_starts: false,
+        ..p
+    });
+
+    let p = Problem {
+        input: vec![
+            vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
+            vec![Point { x: 1.0, y: 1.0 }, Point { x: 0.0, y: 0.0 }],
+            vec![Point { x: 0.0, y: 0.0 }, Point { x: -1.0, y: -1.0 }],
+        ],
+        expected: vec![
+            PathSegment::new(
+                vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
+                EPSILON,
+            ),
+            PathSegment::new(
+                vec![Point { x: 1.0, y: 1.0 }, Point { x: 0.0, y: 0.0 }],
+                EPSILON,
+            ),
+        ],
+        ..default_problem()
+    };
+
+    run(Problem {
+        only_starts: true,
+        ..p.clone()
+    });
+    run(Problem {
+        only_starts: false,
+        ..p
+    });
+}
+
+#[test]
+fn removes_a_dangling_line_off_the_back_of_a_cycle() {
+    let p = Problem {
+        input: vec![
+            vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
+            vec![Point { x: 1.0, y: 1.0 }, Point { x: 0.0, y: 0.0 }],
+            vec![Point { x: 2.0, y: 2.0 }, Point { x: 1.0, y: 1.0 }],
+        ],
+        expected: vec![
+            PathSegment::new(
+                vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
+                EPSILON,
+            ),
+            PathSegment::new(
+                vec![Point { x: 1.0, y: 1.0 }, Point { x: 0.0, y: 0.0 }],
+                EPSILON,
+            ),
+        ],
+        ..default_problem()
+    };
+
+    run(Problem {
+        only_starts: true,
+        ..p.clone()
+    });
+    run(Problem {
+        only_starts: false,
+        ..p
+    });
+
+    let p = Problem {
+        input: vec![
+            vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
+            vec![Point { x: 1.0, y: 1.0 }, Point { x: 0.0, y: 0.0 }],
+            vec![Point { x: 1.0, y: 1.0 }, Point { x: 2.0, y: 2.0 }],
+        ],
+        expected: vec![
+            PathSegment::new(
+                vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
+                EPSILON,
+            ),
+            PathSegment::new(
+                vec![Point { x: 1.0, y: 1.0 }, Point { x: 0.0, y: 0.0 }],
+                EPSILON,
+            ),
+        ],
         ..default_problem()
     };
 
