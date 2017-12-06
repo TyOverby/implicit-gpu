@@ -242,3 +242,5 @@ fn doesnt_continue_on_ambiguities() {
 
     run(problem);
 }
+
+// TODO: make a double-diamond <><> shape and assert that there aren't any closed paths
