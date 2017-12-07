@@ -25,8 +25,6 @@ fn prune_one_iter(dual_qt: &mut DualQuadTree, epsilon: f32, only_starts: bool) -
     for (id, path) in dual_qt.iter() {
         let (start, end) = (path.first(), path.last());
 
-        println!("{:?}", dual_qt.starts.iter());
-
         let a = dual_qt.has_forward_neighbor(id, start, epsilon);
         let b = || dual_qt.has_backward_neighbor(id, start, epsilon);
 

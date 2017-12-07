@@ -244,3 +244,4 @@ fn doesnt_continue_on_ambiguities() {
 }
 
 // TODO: make a double-diamond <><> shape and assert that there aren't any closed paths
+// Wait, are diamond shapes inherantly bad?  I think it's totally fine.

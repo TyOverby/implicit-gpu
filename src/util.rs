@@ -1,9 +1,6 @@
 use ::*;
 
-pub fn populate<I, P>(
-    segments: I,
-    epsilon: f32,
-) -> DualQuadTree
+pub fn populate<I, P>(segments: I, epsilon: f32) -> DualQuadTree
 where
     I: IntoIterator<Item = P>,
     P: Into<smallvec::SmallVec<[Point; 2]>>,
@@ -18,7 +15,7 @@ where
         }
 
         let first = segment.first();
-        let last = segment.first();
+        let last = segment.last();
 
         scene_aabb.expand_to_include(&geom::Point {
             x: first.x,
@@ -30,6 +27,9 @@ where
         });
         all_segments.push(segment);
     }
+    let w = scene_aabb.width() / 20.0;
+    let h = scene_aabb.height() / 20.0;
+    scene_aabb = scene_aabb.expand(w, h, w, h);
 
     let mut dual_qt = DualQuadTree::new(scene_aabb);
     for segment in all_segments {
