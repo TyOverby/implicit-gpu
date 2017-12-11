@@ -1,120 +1,100 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import MonacoEditor from 'react-monaco-editor';
-import * as state from '../state';
+import { ErrorStructure } from '../types/error';
+import { ErrorWindow } from './ErrorWindow';
 import run_compile from '../run_compile';
 
-interface EditorProps { };
+export class Editor extends React.Component {
+    me: HTMLElement;
+    editor: monaco.editor.IEditor;
 
-export interface ErrorStructure {
-    start: number,
-    length: number,
-    messageText: string | ErrorStructure,
-}
-
-interface EditorState {
-    code: string,
-};
-
-const start_code = `
-import {circle, Implicit, or, singleton_scene} from 'implicit';
-
-const circles: Implicit[] = [];
-
-for (let i = 0; i < 10; i ++) {
-    for (let k = 0; k < 10; k++) {
-        const r = Math.sqrt(i + k);
-        circles.push(circle(i * 10, k * 10, r));
-    }
-}
-
-export default singleton_scene(or(... circles));
-`.trim();
-
-export class Editor extends React.Component<EditorProps, EditorState> {
-    resize_interval_id: number = -1;
-    editor: monaco.editor.ICodeEditor | null = null;
-
-    constructor() {
-        super();
-        this.state = {
-            code: start_code,
-        };
+    async componentDidMount() {
+        this.me = ReactDOM.findDOMNode(this) as HTMLElement;
+        await (window as any).monaco_loaded;
+        await this.monacoDidLoad();
     }
 
-    shouldComponentUpdate() {
-        return false;
-    }
+    async monacoDidLoad() {
+        const [
+            implicit_source,
+            react_like_source,
+            jsx_like_source,
+        ] = await Promise.all([
+            fetch('./lib/implicit.ts').then(a => a.text()),
+            fetch('./lib/react_like.ts').then(a => a.text()),
+            fetch('./lib/jsx_like.ts').then(a => a.text()),
+        ]);
 
-    componentDidMount() {
-        const parent = ReactDOM.findDOMNode(this).parentElement;
-        const listener = () => {
-            if (parent === null) {
-                throw new Error("not loaded");
-            }
-            if (this.editor === null) {
-                setTimeout(listener, 50);
-                return;
-            }
-            this.editor.layout({ width: parent.clientWidth, height: parent.clientHeight });
-        };
-
-        window.addEventListener('resize', listener);
-        listener();
-    }
-
-    editorDidMount(editor: monaco.editor.ICodeEditor, monacoModule: typeof monaco) {
-        editor.focus();
-        this.editor = editor;
-        this.onChange(start_code);
-    }
-
-    async editorWillMount(monacoModule: typeof monaco) {
-        const implicit_source = await (await fetch('./implicit.ts')).text();
-        monaco.languages.typescript.typescriptDefaults.addExtraLib("declare module 'implicit' {" + implicit_source + "}");
-
-        monacoModule.languages.typescript.typescriptDefaults.setCompilerOptions({
+        monaco.languages.typescript.typescriptDefaults.addExtraLib("declare module 'implicit' {" + implicit_source + "}", "implicit.ts");
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(react_like_source, "react_like.ts");
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(jsx_like_source, "jsx_like.ts");
+        monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
             target: monaco.languages.typescript.ScriptTarget.ES5,
+            jsx: 2,
+            jsxFactory: 'Impl.createElement',
+            reactNamespace: 'Impl',
             allowNonTsExtensions: true,
+            sourceMap: true,
             diagnostics: true,
             alwaysStrict: true,
             strictNullChecks: true,
         });
+
+        let text: string;
+        if (typeof this.props.children === 'string') {
+            text = this.props.children;
+        } else if (Array.isArray(this.props.children)) {
+            text = (this.props.children as string[]).reduce((a, b) => a + b, "");
+        } else {
+            text = "";
+        }
+
+        this.editor = monaco.editor.create(this.me, {
+            folding: true,
+            showFoldingControls: 'always',
+            theme: "vs-dark",
+            minimap: {
+                enabled: false
+            },
+            selectOnLineNumbers: true,
+            automaticLayout: true,
+            model: monaco.editor.createModel(text, "typescript", monaco.Uri.file("./test.tsx")),
+        });
+
+        const model = this.editor.getModel() as monaco.editor.IModel;
+        model.onDidChangeContent(e => this.modelUpdated(model));
     }
 
-    async onChange(val: string) {
-        if (this.editor == null) { return; }
-
-        const model = this.editor.getModel();
+    async modelUpdated(model: monaco.editor.IModel) {
+        const string = model.getValue();
         const worker = await monaco.languages.typescript.getTypeScriptWorker();
         const client = await worker(model.uri);
         const compilation = await client.getEmitOutput(model.uri.toString());
         const syntaxErrors: ErrorStructure[] = await client.getSyntacticDiagnostics(model.uri.toString());
         const semanticErrors: ErrorStructure[] = await client.getSemanticDiagnostics(model.uri.toString());
-        const text = compilation.outputFiles[0].text;
+        const output = compilation.outputFiles[1].text;
+        const mapping = compilation.outputFiles[0].text;
+        await this.textUpdated(string, output, mapping, model, syntaxErrors, semanticErrors);
+    }
 
-        await run_compile(val, text, model, syntaxErrors, semanticErrors);
+    async textUpdated(
+        source: string,
+        output: string,
+        mapping: string,
+        model: monaco.editor.IModel,
+        syntaxErrors: ErrorStructure[],
+        semanticErrors: ErrorStructure[],
+    ) {
+        await run_compile(source, output, model, syntaxErrors, semanticErrors);
     }
 
     render() {
-        const code = this.state.code;
-        const options: monaco.editor.IEditorOptions = {
-            scrollBeyondLastLine: false,
-            selectOnLineNumbers: true,
-            renderLineHighlight: 'none',
-            minimap: {
-                enabled: false,
-            }
+        const style: React.CSSProperties = {
+            width: "100%",
+            height: "100%",
+            overflow: "hidden",
         };
 
-        return <MonacoEditor
-            language="typescript"
-            theme="vs-dark"
-            value={code}
-            options={options}
-            onChange={this.onChange.bind(this)}
-            editorDidMount={this.editorDidMount.bind(this)}
-            editorWillMount={this.editorWillMount.bind(this)}
-        />;
+        return <div className="react-editor-container" style={style} />
     }
 }

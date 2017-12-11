@@ -1,7 +1,6 @@
-import { ErrorStructure } from './components/Editor';
 import { getResult } from './workerManager';
 import * as state from './state';
-import Error from './types/error';
+import Error, { ErrorStructure } from './types/error';
 
 export default async function run_compile(
     source: string,

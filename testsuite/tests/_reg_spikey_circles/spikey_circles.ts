@@ -1,4 +1,3 @@
-
 import { write_scene, circle, Implicit, or, singleton_scene } from '../../../implicit-ts/src/implicit';
 
 const circles: Implicit[] = [];

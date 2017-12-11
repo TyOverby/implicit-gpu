@@ -22,9 +22,25 @@ export class Index extends React.Component<State> {
             throw new Error("unexpected output kind: ");
         }
 
+        const defaultText = `
+                    import {circle, Implicit, or, singleton_scene} from 'implicit';
+
+const circles: Implicit[] = [];
+
+for (let i = 0; i < 10; i ++) {
+    for (let k = 0; k < 10; k++) {
+        const r = Math.sqrt(i + k);
+        circles.push(circle(i * 10, k * 10, r));
+    }
+}
+
+export default singleton_scene(or(... circles));
+`.trim();
         return <div>
             <div style={({ width: "100%", height: "100%" })}>
-                <Editor />
+                <Editor>
+                    {defaultText}
+                </Editor>
             </div>
             {side_window}
         </div >

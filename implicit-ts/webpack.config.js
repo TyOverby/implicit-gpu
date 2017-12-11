@@ -2,7 +2,7 @@ var CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
     entry: {
-        implicit: "./src/implicit.ts",
+        implicit: "./src/lib/implicit.ts",
         bundle: "./src/scripts/index.tsx"
     },
     output: {
@@ -22,12 +22,12 @@ module.exports = {
         new CopyWebpackPlugin([
             { from: "./src/index.html" },
             { from: "./src/scripts/runworker.js" },
-            { from: "./src/implicit.ts" },
+            { from: "./src/lib", to: 'lib'},
             { from: "./src/styles/", to: "styles" },
             { from: "./node_modules/react/dist/react.js", to: "deps" },
             { from: "./node_modules/react-dom/dist/react-dom.js", to: "deps" },
             { from: "./res/", to: "res" },
-            { from: 'node_modules/monaco-editor/min/vs', to: 'vs', }
+            { from: 'node_modules/monaco-editor', to: 'monaco-editor'}
         ])
     ],
 

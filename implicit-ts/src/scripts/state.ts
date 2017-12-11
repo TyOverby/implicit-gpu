@@ -1,5 +1,4 @@
 import { render } from './index'
-import { ErrorStructure } from './components/Editor'
 import Error from './types/error';
 
 export var history: State[] = [];

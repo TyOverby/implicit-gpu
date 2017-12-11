@@ -1,5 +1,4 @@
 import * as React from "react";
-import { ErrorStructure } from './Editor';
 import Error from '../types/error';
 
 export interface ErrorProps {

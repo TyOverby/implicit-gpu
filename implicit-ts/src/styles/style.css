@@ -10,6 +10,10 @@ html, body {
     position: absolute;
 }
 
+.monaco-aria-container {
+    display: none;
+}
+
 div {
     padding: 0;
     margin: 0;

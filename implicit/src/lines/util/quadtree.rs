@@ -6,7 +6,6 @@ use std::hash::BuildHasherDefault;
 
 type FnvHashMap<K, V> = HashMap<K, V, BuildHasherDefault<FnvHasher>>;
 
-const EPSILON: f32 = 0.001;
 
 pub trait Spatial {
     fn aabb(&self) -> Rect;
@@ -21,6 +20,7 @@ struct QuadTreeConfig {
     max_children: usize,
     min_children: usize,
     max_depth: usize,
+    epsilon: f32,
 }
 
 #[derive(Debug, Clone)]
@@ -97,6 +97,7 @@ impl<T> QuadTree<T> {
                 max_children: max_children,
                 min_children: min_children,
                 max_depth: max_depth,
+                epsilon: 0.0001,
             },
             id: 0,
             elements: HashMap::with_capacity_and_hasher(max_children * 16, Default::default()),
@@ -234,7 +235,7 @@ impl QuadNode {
                 if item_aabb.contains(&aabb.midpoint()) {
                     // Only insert if there isn't another item with a very
                     // similar aabb.
-                    if config.allow_duplicates || !in_all.iter().any(|&(_, ref e_bb)| e_bb.close_to(&item_aabb, EPSILON)) {
+                    if config.allow_duplicates || !in_all.iter().any(|&(_, ref e_bb)| e_bb.close_to(&item_aabb, config.epsilon)) {
                         in_all.push((item_id, item_aabb));
                         did_insert = true;
                         *element_count += 1;
@@ -283,7 +284,7 @@ impl QuadNode {
                     if config.allow_duplicates ||
                         !elements
                             .iter()
-                            .any(|&(_, ref e_bb)| e_bb.close_to(&item_aabb, EPSILON))
+                            .any(|&(_, ref e_bb)| e_bb.close_to(&item_aabb, config.epsilon))
                     {
                         elements.push((item_id, item_aabb));
                         did_insert = true;
