@@ -34,6 +34,7 @@ export class Editor extends React.Component {
         monaco.languages.typescript.typescriptDefaults.addExtraLib(components_source, "components.d.ts");
         monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
             target: monaco.languages.typescript.ScriptTarget.ES5,
+            lib: ["ES6"],
             jsx: 2,
             jsxFactory: 'Impl.createElement',
             reactNamespace: 'Impl',
