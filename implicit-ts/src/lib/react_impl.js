@@ -2,11 +2,14 @@ var impl = require('implicit');
 
 var Impl = {
     createElement: function (type, props, ...children) {
-        console.log(type, props, children);
-        if (type.prototype.constructor === type) {
-            return new type(props, children).render();
-        } else {
+        try {
             return type(props, children);
+        } catch (e) {
+            if (e.prototype === TypeError) {
+                return new type(props, children).render();
+            } else {
+                throw e
+            }
         }
     }
 };

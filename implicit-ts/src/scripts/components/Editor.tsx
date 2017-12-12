@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { ErrorStructure } from '../types/error';
+import "monaco-editor";
 import { ErrorWindow } from './ErrorWindow';
 import run_compile from '../run_compile';
 
@@ -19,15 +20,18 @@ export class Editor extends React.Component {
             implicit_source,
             react_like_source,
             jsx_like_source,
+            components_source,
         ] = await Promise.all([
             fetch('./lib/implicit.ts').then(a => a.text()),
             fetch('./lib/react_like.ts').then(a => a.text()),
             fetch('./lib/jsx_like.ts').then(a => a.text()),
+            fetch('./lib/components.d.ts').then(a => a.text()),
         ]);
 
         monaco.languages.typescript.typescriptDefaults.addExtraLib("declare module 'implicit' {" + implicit_source + "}", "implicit.ts");
         monaco.languages.typescript.typescriptDefaults.addExtraLib(react_like_source, "react_like.ts");
         monaco.languages.typescript.typescriptDefaults.addExtraLib(jsx_like_source, "jsx_like.ts");
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(components_source, "components.d.ts");
         monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
             target: monaco.languages.typescript.ScriptTarget.ES5,
             jsx: 2,
@@ -85,6 +89,7 @@ export class Editor extends React.Component {
         syntaxErrors: ErrorStructure[],
         semanticErrors: ErrorStructure[],
     ) {
+        console.log(output);
         await run_compile(source, output, model, syntaxErrors, semanticErrors);
     }
 
