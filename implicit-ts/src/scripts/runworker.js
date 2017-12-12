@@ -1,21 +1,37 @@
 onmessage = async ev => {
     try {
-        var implicit_js = await (await fetch('./implicit.js')).text();
+        const [implicit_js, react_impl] = await Promise.all([
+            fetch('./implicit.js').then(f => f.text()),
+            fetch('./lib/react_impl.js').then(f => f.text()),
+        ]);
 
-        var exports = {};
+        var modules = {};
 
         var require = s => {
+            if (modules[s]) {
+                return modules[s];
+            }
+
+            var ret;
             if (s === 'implicit') {
-                return eval(implicit_js);
+                ret = eval(implicit_js);
             } else {
                 throw new Error("could not require " + s);
             }
+
+            modules[s] = ret;
+            return ret;
         };
-        eval(ev.data);
-        postMessage({
-            status: 'ok',
-            exports: exports,
-        });
+
+        (function () {
+            var exports = {};
+            eval(react_impl);
+            eval(ev.data);
+            postMessage({
+                status: 'ok',
+                exports: exports,
+            });
+        })();
     }
     catch (e) {
         var stack_string = e.stack;

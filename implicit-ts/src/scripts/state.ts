@@ -18,13 +18,14 @@ export type Figure = {
     top: number,
     width: number,
     height: number,
-}
+};
 
 export type Errors = {
     syntax: Error[],
     semantic: Error[],
     runtime: Error[],
-}
+};
+
 export type OutputState =
     {
         kind: 'ok',
@@ -33,14 +34,14 @@ export type OutputState =
     {
         kind: 'err',
         errors: Errors
-    }
+    };
 
 
 export type State = {
     source: string,
     prev_ok: Figure[],
     output: OutputState,
-}
+};
 
 let isDirty: boolean = false;
 
