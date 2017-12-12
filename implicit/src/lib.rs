@@ -47,7 +47,7 @@ pub fn run_single(node: nodes::NodeRef, width: usize, height: usize) -> ::opencl
     result
 }
 
-pub fn run_scene(scene: &scene::Scene, telemetry: &mut telemetry::Telemetry) -> output::OutputScene {
+pub fn run_scene(mut scene: scene::Scene, telemetry: &mut telemetry::Telemetry) -> output::OutputScene {
     use compiler::Nest;
     use evaluator::Evaluator;
     use output::*;
@@ -88,25 +88,30 @@ pub fn run_scene(scene: &scene::Scene, telemetry: &mut telemetry::Telemetry) -> 
 
     // Build all the shapes first, then collect them later.
     // This will allow for further optimization in the future.
-    let mut treemap = ::std::collections::BTreeMap::new();
-    for figure in &scene.figures {
+    for figure in &mut scene.figures {
         let figure_bounds = if let Some(figure) = compute_figure_size(figure) {
             figure
         } else {
             continue;
         };
 
-        for shape in &figure.shapes {
-            let id = nest.group(nodes::NodeRef::new(nodes::Node::Translate {
+        for shape in &mut figure.shapes {
+            *(&mut shape.implicit) = nodes::NodeRef::new(nodes::Node::Translate {
                 dx: -figure_bounds.left() + 2f32,
                 dy: -figure_bounds.top() + 2f32,
                 target: shape.implicit.clone(),
-            }));
+            });
+        }
+    }
+    let mut treemap = ::std::collections::BTreeMap::new();
+    for figure in &scene.figures {
+        for shape in &figure.shapes {
+            let id = nest.group(shape.implicit.clone());
             treemap.insert(shape, id);
         }
     }
 
-    let bb = match compute_scene_size(scene) {
+    let bb = match compute_scene_size(&scene) {
         Some(bb) => bb,
         None => return OutputScene { figures: vec![] },
     };
@@ -126,11 +131,9 @@ pub fn run_scene(scene: &scene::Scene, telemetry: &mut telemetry::Telemetry) -> 
             let shape_telemetry = figure_telemetry.clone();
 
             let id = treemap.get(&shape).unwrap();
-
             let result = evaluator.evaluate(*id, &ctx, telemetry, shape_telemetry);
 
             let line_buffer = ::marching::run_marching(&result, &ctx);
-
             let (additive, subtractive) = evaluator::line_buffer_to_poly(&line_buffer, telemetry, tloc, scene.simplify);
 
             let output_shape = match shape.draw_mode {

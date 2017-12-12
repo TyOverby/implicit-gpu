@@ -21,7 +21,7 @@ export class OutputWindow extends React.Component<OutputProps, OutputState> {
 
     render() {
         const text_to_svg = (figure: Figure, idx: number): JSX.Element => {
-            const viewbox = `${0} ${0} ${figure.width - figure.left} ${figure.height - figure.top}`;
+            const viewbox = `${figure.left} ${figure.top} ${figure.width} ${figure.height}`;
             const source = figure.svg.replace(
                 "<svg ",
                 `<svg viewbox=\"${viewbox}\"`);

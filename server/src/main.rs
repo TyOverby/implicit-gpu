@@ -1,7 +1,7 @@
+extern crate chrono;
 extern crate happy;
 extern crate hyper;
 extern crate implicit;
-extern crate chrono;
 extern crate latin;
 extern crate serde;
 #[macro_use]
@@ -31,13 +31,11 @@ struct FigureResult {
 struct SceneError;
 
 impl std::fmt::Display for SceneError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        f.write_str("faile")
-    }
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result { f.write_str("faile") }
 }
 
 impl std::error::Error for SceneError {
-    fn description(&self) -> &str {"oh no panic"}
+    fn description(&self) -> &str { "oh no panic" }
     fn cause(&self) -> Option<&std::error::Error> { None }
 }
 
@@ -49,20 +47,24 @@ fn process(_: RequestInfo, scene: SceneRequest) -> Result<Vec<FigureResult>, Sce
         latin::file::write(format!("{}/source.ts", dump_dir), scene.source).unwrap();
         let mut telemetry = DumpTelemetry::new(dump_dir);
 
-        let out = implicit::run_scene(&scene.scene, &mut telemetry);
+        let out = implicit::run_scene(scene.scene, &mut telemetry);
 
-        out.figures.into_iter().map(|figure| {
-            let mut out_svg: Vec<u8> = Vec::new();
-            let (l, t, w, h) = (figure.left, figure.top, figure.width, figure.height);
-            implicit::export::svg::write_to(&mut out_svg, figure).unwrap();
-            FigureResult {
-                svg: String::from_utf8(out_svg).unwrap(),
-                left: l,
-                top: t,
-                width: w,
-                height: h,
-            }
-        }).collect::<Vec<_>>()
+        out.figures
+            .into_iter()
+            .map(|figure| {
+                let mut out_svg: Vec<u8> = Vec::new();
+                let (l, t, w, h) = (figure.left, figure.top, figure.width, figure.height);
+                println!("{} {} {} {}", l, t, w, h);
+                implicit::export::svg::write_to(&mut out_svg, figure).unwrap();
+                FigureResult {
+                    svg: String::from_utf8(out_svg).unwrap(),
+                    left: l,
+                    top: t,
+                    width: w,
+                    height: h,
+                }
+            })
+            .collect::<Vec<_>>()
     }).map_err(|_| SceneError)
 }
 

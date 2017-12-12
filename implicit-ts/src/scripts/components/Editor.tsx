@@ -66,6 +66,7 @@ export class Editor extends React.Component {
         });
 
         const model = this.editor.getModel() as monaco.editor.IModel;
+        this.modelUpdated(model);
         model.onDidChangeContent(e => this.modelUpdated(model));
     }
 

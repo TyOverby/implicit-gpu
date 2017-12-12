@@ -23,18 +23,10 @@ export class Index extends React.Component<State> {
         }
 
         const defaultText = `
-                    import {circle, Implicit, or, singleton_scene} from 'implicit';
+import * as impl from 'implicit';
 
-const circles: Implicit[] = [];
-
-for (let i = 0; i < 10; i ++) {
-    for (let k = 0; k < 10; k++) {
-        const r = Math.sqrt(i + k);
-        circles.push(circle(i * 10, k * 10, r));
-    }
-}
-
-export default singleton_scene(or(... circles));
+let c = <Circle x={0} y={20} r={10} />
+export default impl.singleton_scene(c as any);
 `.trim();
         return <div>
             <div style={({ width: "100%", height: "100%" })}>
