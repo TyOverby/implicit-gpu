@@ -157,7 +157,6 @@ impl Telemetry for DumpTelemetry {
         svg::write_to_file(self.scene_path(tloc, "scene.svg"), scene.figures[0].clone()).unwrap();
         ::flame::dump_text_to_writer(File::create(self.scene_path(tloc, "scene.perf")).unwrap()).unwrap();
         ::flame::dump_json(&mut File::create(self.scene_path(tloc, "scene.perfjson")).unwrap()).unwrap();
-        ::flame::clear();
     }
 
     fn scene_bounding_box(&mut self, tloc: TelemetryLocation, x: f32, y: f32, w: f32, h: f32) {

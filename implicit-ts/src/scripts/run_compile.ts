@@ -52,13 +52,15 @@ export default async function run_compile(
         return;
     }
 
-    const result_text = await res.text();
-    const figures: state.Figure[] = JSON.parse(result_text);
+    type Result = {
+        figures: state.Figure[],
+        perf: any,
+    };
 
-    state.changeOutput({
-        kind: 'ok',
-        figures: figures
-    });
+    const result_text = await res.text();
+    const output: Result = JSON.parse(result_text);
+    state.changeFigures(output.figures);
+    state.changePerf(output.perf);
 }
 
 function es_to_err(model: monaco.editor.IModel, es: ErrorStructure): Error {

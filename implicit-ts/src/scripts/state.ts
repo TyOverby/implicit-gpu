@@ -3,13 +3,17 @@ import Error from './types/error';
 
 export var history: State[] = [];
 
+type Perf = any;
+
 export var current: State = {
     source: "import { circle} from 'implicit';\nexport default circle(0, 0, 100);",
-    prev_ok: [],
-    output: {
-        kind: 'ok',
-        figures: []
-    }
+    figures: [],
+    perf: [],
+    errors: {
+        syntax: [],
+        semantic: [],
+        runtime: [],
+    },
 };
 
 export type Figure = {
@@ -26,21 +30,11 @@ export type Errors = {
     runtime: Error[],
 };
 
-export type OutputState =
-    {
-        kind: 'ok',
-        figures: Figure[]
-    } |
-    {
-        kind: 'err',
-        errors: Errors
-    };
-
-
 export type State = {
     source: string,
-    prev_ok: Figure[],
-    output: OutputState,
+    figures: Figure[],
+    errors: Errors,
+    perf: Perf, // TODO: fix
 };
 
 let isDirty: boolean = false;
@@ -62,28 +56,28 @@ function setDirty() {
     });
 }
 
-export function changeSource(source: string) {
+function prep() {
+    setDirty();
     history.push(current);
     current = clone(current);
-    current.source = source;
-    setDirty();
 }
 
-export function changeOutput(output: OutputState) {
-    const previous = current;
-    history.push(current);
-
-    current = clone(current);
-    output = clone(output);
-    current.output = output;
-
-    if (output.kind == 'ok') {
-        current.prev_ok = output.figures;
-    }
-
-    setDirty();
+export function changeSource(source: string) {
+    prep();
+    current.source = source;
 }
 
 export function changeError(errors: Errors) {
-    changeOutput({ 'kind': 'err', errors: errors });
+    prep();
+    current.errors = errors;
+}
+
+export function changeFigures(figures: Figure[]) {
+    prep();
+    current.figures = figures;
+}
+
+export function changePerf(perf: Perf) {
+    prep();
+    current.perf = perf;
 }

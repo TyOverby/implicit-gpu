@@ -1,7 +1,7 @@
 {
-  "name": "typescript-react-webpack",
+  "name": "implicit-ts",
   "version": "1.0.0",
-  "description": "A template for typescript/react/webpack projects",
+  "description": "lol",
   "main": "index.js",
   "scripts": {
     "build": "webpack",
@@ -19,9 +19,10 @@
     "webpack": "^2.5.1"
   },
   "dependencies": {
-    "@types/react": "^15.6.6",
+    "@types/react": "^15.6.8",
     "@types/react-dom": "^15.5.6",
     "concurrently": "^3.5.0",
+    "flame-vis": "file:../../../web/flame-vis",
     "http-server": "^0.10.0",
     "monaco-editor": "0.10.1",
     "react": "^15.6.2",

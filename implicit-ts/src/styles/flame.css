@@ -1,0 +1,73 @@
+.graph rect {
+    fill: red;
+    stroke: darkred;
+}
+
+#timeline .background {
+    fill: rgb(21, 23, 34);
+}
+#timeline .handle {
+    fill: rgba(255, 255, 255, 0.8);
+    cursor: ew-resize;
+}
+#timeline .handle:hover {
+    fill: white;
+}
+
+body {
+    background: white;
+}
+
+.label {
+    color: black;
+    pointer-events: none;
+    white-space: nowrap;
+    user-select: none;
+    -moz-user-select: none;
+}
+
+#timeline * {
+    user-select: none;
+    -moz-user-select: none;
+}
+
+#selected-bar {
+    fill: rgb(200, 200, 255, 0.2);
+}
+
+.bar-info-group {
+    float: left;
+    padding: 5px;
+    font-family: sans-serif;
+    flex: 1;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.info-group-label {
+    text-transform: uppercase;
+    color: grey;
+    font-size: 0.7em;
+    margin-right: 5px;
+}
+
+#application, #container {
+    width: 100%;
+    height: 100%;
+}
+
+#application {
+    display: grid;
+    grid-template-rows: 30px auto 2em;
+}
+
+#hover-bar {
+    background: rgb(21, 23, 34);
+    color: white;
+
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+}

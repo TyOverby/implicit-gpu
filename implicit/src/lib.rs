@@ -29,6 +29,7 @@ pub mod lines;
 pub mod telemetry;
 
 use lines::util::geom::Rect;
+use opencl::OpenClContext;
 
 pub fn run_single(node: nodes::NodeRef, width: usize, height: usize) -> ::opencl::FieldBuffer {
     use compiler::Nest;
@@ -47,7 +48,7 @@ pub fn run_single(node: nodes::NodeRef, width: usize, height: usize) -> ::opencl
     result
 }
 
-pub fn run_scene(mut scene: scene::Scene, telemetry: &mut telemetry::Telemetry) -> output::OutputScene {
+pub fn run_scene(mut scene: scene::Scene, telemetry: &mut telemetry::Telemetry, ctx: Option<opencl::OpenClContext>) -> (output::OutputScene, OpenClContext) {
     use compiler::Nest;
     use evaluator::Evaluator;
     use output::*;
@@ -81,7 +82,7 @@ pub fn run_scene(mut scene: scene::Scene, telemetry: &mut telemetry::Telemetry) 
     }
     telemetry.scene_started();
     // Setup
-    let ctx = opencl::OpenClContext::default();
+    let ctx = ctx.unwrap_or_else(|| opencl::OpenClContext::default());
     let mut nest = Nest::new();
 
     let mut output = OutputScene { figures: vec![] };
@@ -113,7 +114,7 @@ pub fn run_scene(mut scene: scene::Scene, telemetry: &mut telemetry::Telemetry) 
 
     let bb = match compute_scene_size(&scene) {
         Some(bb) => bb,
-        None => return OutputScene { figures: vec![] },
+        None => return (OutputScene { figures: vec![] }, ctx),
     };
 
     let mut tloc = telemetry::TelemetryLocation::new();
@@ -171,5 +172,5 @@ pub fn run_scene(mut scene: scene::Scene, telemetry: &mut telemetry::Telemetry) 
         });
     }
     telemetry.scene_finished(tloc, &output);
-    output
+    (output, ctx)
 }

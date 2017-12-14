@@ -91,7 +91,6 @@ export class Editor extends React.Component {
         syntaxErrors: ErrorStructure[],
         semanticErrors: ErrorStructure[],
     ) {
-        console.log(output);
         await run_compile(source, output, model, syntaxErrors, semanticErrors);
     }
 

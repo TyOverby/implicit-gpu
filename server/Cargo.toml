@@ -14,7 +14,9 @@ mime = "*"
 serde = "1.*.*"
 serde_derive = "1.*.*"
 chrono = "0.4"
+flame = "0.2.*"
 latin = "0.1.7"
+lazy_static="*"
 
 [dependencies.happy]
 path = "../../happy"
