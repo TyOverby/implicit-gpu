@@ -6,11 +6,11 @@ import { TabBar } from "./TabBar";
 import { ErrorWindow } from "./ErrorWindow";
 import { Editor } from "./Editor";
 import { State } from '../state'
-import { Index } from '../../../../../../web/flame-vis/src/scripts/index';
+import { Fireplace } from '../../../../../../web/flame-vis/src/scripts/components/Fireplace';
 
 export class SidePane extends React.Component<State> {
     render() {
-        let perf = this.props.perf.length > 0 ? <Index threads={this.props.perf} /> : <span> no perf info yet</span>
+        let perf = this.props.perf.length > 0 ? <Fireplace threads={this.props.perf} /> : <span> no perf info yet</span>
         return <div className="side-bar">
             <TabBar>
                 <span>Output</span>

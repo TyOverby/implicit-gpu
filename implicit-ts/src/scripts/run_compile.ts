@@ -8,6 +8,12 @@ export default async function run_compile(
     model: monaco.editor.IModel,
     syntaxErrors: ErrorStructure[],
     semanticErrors: ErrorStructure[]) {
+    // Zero out the errors
+    state.changeError({
+        syntax: [],
+        semantic: [],
+        runtime: [],
+    });
 
     if (syntaxErrors.length != 0 || semanticErrors.length != 0) {
         state.changeError({
