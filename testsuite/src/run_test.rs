@@ -96,7 +96,7 @@ pub fn run_test(paths: &Paths) -> Result<(), Vec<Error>> {
         });
 
     ::std::fs::create_dir_all(&paths.actual_dump).unwrap();
-    implicit::run_scene(scene, &mut telemetry);
+    implicit::run_scene(scene, &mut telemetry, None);
 
     if !paths.expected_dump.exists() {
         return Err(vec![Error::NoExpectedFiles]);
