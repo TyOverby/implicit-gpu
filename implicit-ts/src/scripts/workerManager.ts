@@ -1,4 +1,4 @@
-import Error from './types/error';
+import { Error } from './types/error';
 
 let availableWorker: Worker | null = null;
 

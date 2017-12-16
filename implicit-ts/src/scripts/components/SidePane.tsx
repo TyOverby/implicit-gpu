@@ -5,10 +5,10 @@ import { OutputWindow } from "./OutputWindow";
 import { TabBar } from "./TabBar";
 import { ErrorWindow } from "./ErrorWindow";
 import { Editor } from "./Editor";
-import { State } from '../state'
-import { Fireplace } from '../../../../../../web/flame-vis/src/scripts/components/Fireplace';
+import { WorkspaceState } from './Workspace'
+import { Fireplace } from '../../../../../../web/fireplace/src/scripts/components/Fireplace';
 
-export class SidePane extends React.Component<State> {
+export class SidePane extends React.Component<WorkspaceState> {
     render() {
         let perf = this.props.perf.length > 0 ? <Fireplace threads={this.props.perf} /> : <span> no perf info yet</span>
         return <div className="side-bar">
@@ -21,6 +21,12 @@ export class SidePane extends React.Component<State> {
 
                 <span> Performance</span>
                 {perf}
+
+                <span> Compiled </span>
+                <pre>{this.props.compiled}</pre>
+
+                <span> Scene </span>
+                <pre>{this.props.scene}</pre>
             </TabBar>
         </div>
     }

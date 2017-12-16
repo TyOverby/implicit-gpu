@@ -99,6 +99,7 @@ svg {
     background: #1e1e1e;
     font-family: sans-serif;
     color: white;
+    font-size: 0.65em;
     text-transform: uppercase;
 }
 
@@ -114,4 +115,5 @@ svg {
 .individual-tab.selected {
     background: white;
     color: black;
+    font-weight: bold;
 }

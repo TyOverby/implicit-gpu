@@ -4,8 +4,13 @@ import { ErrorStructure } from '../types/error';
 import "monaco-editor";
 import { ErrorWindow } from './ErrorWindow';
 import run_compile from '../run_compile';
+import { RenderFunc } from './Workspace';
 
-export class Editor extends React.Component {
+export interface EditorProps {
+    render: RenderFunc
+}
+
+export class Editor extends React.Component<EditorProps> {
     me: HTMLElement;
     editor: monaco.editor.IEditor;
 
@@ -28,13 +33,17 @@ export class Editor extends React.Component {
             fetch('./lib/components.d.ts').then(a => a.text()),
         ]);
 
+        /*
         monaco.languages.typescript.typescriptDefaults.addExtraLib("declare module 'implicit' {" + implicit_source + "}", "implicit.ts");
         monaco.languages.typescript.typescriptDefaults.addExtraLib(react_like_source, "react_like.ts");
         monaco.languages.typescript.typescriptDefaults.addExtraLib(jsx_like_source, "jsx_like.ts");
         monaco.languages.typescript.typescriptDefaults.addExtraLib(components_source, "components.d.ts");
+        */
         monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
             target: monaco.languages.typescript.ScriptTarget.ES5,
-            lib: ["ES6"],
+            lib: ["DOM", "ES5", "ScriptHost"],
+            /*
+            noLib: false,
             jsx: 2,
             jsxFactory: 'Impl.createElement',
             reactNamespace: 'Impl',
@@ -43,6 +52,7 @@ export class Editor extends React.Component {
             diagnostics: true,
             alwaysStrict: true,
             strictNullChecks: true,
+            */
         });
 
         let text: string;
@@ -91,7 +101,7 @@ export class Editor extends React.Component {
         syntaxErrors: ErrorStructure[],
         semanticErrors: ErrorStructure[],
     ) {
-        await run_compile(source, output, model, syntaxErrors, semanticErrors);
+        await run_compile(source, output, model, syntaxErrors, semanticErrors, this.props.render);
     }
 
     render() {

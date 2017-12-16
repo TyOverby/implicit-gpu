@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { Figure } from '../state';
+import { Figure } from './Workspace';
 
 export interface OutputProps { figures_svg: Figure[] }
 export interface OutputState { }

@@ -33,7 +33,7 @@ var Circle = __childless__(props =>
 var Rect = __childless__(props =>
     impl.rect(props.x, props.y, props.w, props.h));
 var And = __forward_all__(impl.and);
-var Or = __forward_all__(impl.and);
+var Or = __forward_all__(impl.or);
 var Not = __forward_all__(impl.and);
 var Break = __forward_all__(impl.and);
 var Freeze = __forward_all__(impl.and);

@@ -1,5 +1,5 @@
 import * as React from "react";
-import Error from '../types/error';
+import { Error } from '../types/error';
 
 export interface ErrorProps {
     syntax: Error[],

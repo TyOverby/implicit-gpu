@@ -1,40 +1,51 @@
 import { getResult } from './workerManager';
-import * as state from './state';
-import Error, { ErrorStructure } from './types/error';
+import { Error, ErrorStructure } from './types/error';
+import { RenderFunc, Figure } from './components/Workspace';
 
 export default async function run_compile(
     source: string,
     text: string,
     model: monaco.editor.IModel,
     syntaxErrors: ErrorStructure[],
-    semanticErrors: ErrorStructure[]) {
+    semanticErrors: ErrorStructure[],
+    render: RenderFunc) {
+
     // Zero out the errors
-    state.changeError({
-        syntax: [],
-        semantic: [],
-        runtime: [],
+    render({
+        compiled: text,
+        errors: {
+            syntax: [],
+            semantic: [],
+            runtime: [],
+        }
     });
 
     if (syntaxErrors.length != 0 || semanticErrors.length != 0) {
-        state.changeError({
-            syntax: syntaxErrors.map(e => es_to_err(model, e)),
-            semantic: semanticErrors.map(e => es_to_err(model, e)),
-            runtime: [],
+        render({
+            errors: {
+                syntax: syntaxErrors.map(e => es_to_err(model, e)),
+                semantic: semanticErrors.map(e => es_to_err(model, e)),
+                runtime: [],
+            }
         });
-        return;
     }
 
     const result = await getResult(text);
 
     if (result.status === 'err') {
-        state.changeError({
-            syntax: [],
-            semantic: [],
-            runtime: [result.error],
+        render({
+            errors: {
+                syntax: [],
+                semantic: [],
+                runtime: [result.error],
+            }
         });
         return;
     }
 
+    render({
+        scene: JSON.stringify(result.exports.default, null, 2)
+    });
 
     const res = await fetch("/api/process", {
         method: "POST",
@@ -45,28 +56,31 @@ export default async function run_compile(
     });
 
     if (!res.ok) {
-        state.changeError({
-            syntax: [],
-            semantic: [],
-            runtime: [{
-                col_num: 0,
-                line_num: 0,
-                message: await res.text()
-            }]
+        render({
+            errors: {
+                syntax: [],
+                semantic: [],
+                runtime: [{
+                    col_num: 0,
+                    line_num: 0,
+                    message: await res.text()
+                }]
+            }
         });
-
         return;
     }
 
     type Result = {
-        figures: state.Figure[],
+        figures: Figure[],
         perf: any,
     };
 
     const result_text = await res.text();
     const output: Result = JSON.parse(result_text);
-    state.changeFigures(output.figures);
-    state.changePerf(output.perf);
+    render({
+        figures: output.figures,
+        perf: output.perf
+    })
 }
 
 function es_to_err(model: monaco.editor.IModel, es: ErrorStructure): Error {
