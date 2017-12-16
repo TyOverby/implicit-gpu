@@ -28,6 +28,7 @@ export type WorkspaceProps = {
 };
 
 export type WorkspaceState = {
+    figure_out_of_date: boolean,
     figures: Figure[],
     errors: Errors,
 
@@ -44,6 +45,7 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
         super(props);
 
         this.state = {
+            figure_out_of_date: true,
             figures: [],
             errors: {
                 syntax: [],

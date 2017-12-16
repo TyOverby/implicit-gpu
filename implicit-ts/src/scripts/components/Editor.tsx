@@ -26,23 +26,23 @@ export class Editor extends React.Component<EditorProps> {
             react_like_source,
             jsx_like_source,
             components_source,
+            js_lib_source,
         ] = await Promise.all([
             fetch('./lib/implicit.ts').then(a => a.text()),
             fetch('./lib/react_like.ts').then(a => a.text()),
             fetch('./lib/jsx_like.ts').then(a => a.text()),
             fetch('./lib/components.d.ts').then(a => a.text()),
+            fetch('./deps/typescript/lib.d.ts').then(a => a.text()),
         ]);
 
-        /*
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(js_lib_source, "lib.d.ts");
         monaco.languages.typescript.typescriptDefaults.addExtraLib("declare module 'implicit' {" + implicit_source + "}", "implicit.ts");
         monaco.languages.typescript.typescriptDefaults.addExtraLib(react_like_source, "react_like.ts");
         monaco.languages.typescript.typescriptDefaults.addExtraLib(jsx_like_source, "jsx_like.ts");
         monaco.languages.typescript.typescriptDefaults.addExtraLib(components_source, "components.d.ts");
-        */
         monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
             target: monaco.languages.typescript.ScriptTarget.ES5,
-            lib: ["DOM", "ES5", "ScriptHost"],
-            /*
+            lib: [],
             noLib: false,
             jsx: 2,
             jsxFactory: 'Impl.createElement',
@@ -52,7 +52,6 @@ export class Editor extends React.Component<EditorProps> {
             diagnostics: true,
             alwaysStrict: true,
             strictNullChecks: true,
-            */
         });
 
         let text: string;

@@ -12,8 +12,10 @@ export default async function run_compile(
 
     // Zero out the errors
     render({
-        compiled: text,
-        errors: {
+        figure_out_of_date: true,
+        compiled: text, // Set the recently compiled text
+        perf: [], // no perf at the moment
+        errors: { // Clear out the errors
             syntax: [],
             semantic: [],
             runtime: [],
@@ -50,9 +52,9 @@ export default async function run_compile(
     const res = await fetch("/api/process", {
         method: "POST",
         body: JSON.stringify({
+            scene: result.exports.default,
             source: source,
-            scene: result.exports.default
-        })
+        }, null, 2)
     });
 
     if (!res.ok) {
@@ -78,6 +80,7 @@ export default async function run_compile(
     const result_text = await res.text();
     const output: Result = JSON.parse(result_text);
     render({
+        figure_out_of_date: false,
         figures: output.figures,
         perf: output.perf
     })

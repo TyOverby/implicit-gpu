@@ -2,7 +2,7 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { Figure } from './Workspace';
 
-export interface OutputProps { figures_svg: Figure[] }
+export interface OutputProps { figures_svg: Figure[], out_of_date: boolean }
 export interface OutputState { }
 
 // 'HelloProps' describes the shape of props.
@@ -29,7 +29,8 @@ export class OutputWindow extends React.Component<OutputProps, OutputState> {
         }
 
         const svgs = this.props.figures_svg.map(text_to_svg);
-        return <div>
+        const style: React.CSSProperties = this.props.out_of_date ? { opacity: 0.7 } : {};
+        return <div style={style}>
             {svgs}
         </div >
     }

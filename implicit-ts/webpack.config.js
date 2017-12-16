@@ -26,6 +26,7 @@ module.exports = {
             { from: "./src/styles/", to: "styles" },
             { from: "./node_modules/react/dist/react.js", to: "deps" },
             { from: "./node_modules/react-dom/dist/react-dom.js", to: "deps" },
+            { from: "./node_modules/typescript/lib/lib.d.ts", to: "deps/typescript" },
             { from: "./res/", to: "res" },
             { from: 'node_modules/monaco-editor', to: 'monaco-editor'}
         ])

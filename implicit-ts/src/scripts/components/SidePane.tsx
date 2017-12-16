@@ -2,7 +2,7 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 
 import { OutputWindow } from "./OutputWindow";
-import { TabBar } from "./TabBar";
+import { TabBar, Divider } from "./TabBar";
 import { ErrorWindow } from "./ErrorWindow";
 import { Editor } from "./Editor";
 import { WorkspaceState } from './Workspace'
@@ -14,10 +14,12 @@ export class SidePane extends React.Component<WorkspaceState> {
         return <div className="side-bar">
             <TabBar>
                 <span>Output</span>
-                <OutputWindow figures_svg={this.props.figures} />
+                <OutputWindow figures_svg={this.props.figures} out_of_date={this.props.figure_out_of_date} />
 
                 <span>Errors</span>
                 <ErrorWindow {...this.props.errors} />
+
+                <Divider/>
 
                 <span> Performance</span>
                 {perf}

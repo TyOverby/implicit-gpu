@@ -1,12 +1,13 @@
 import * as React from 'react';
 import * as ReactDom from 'react';
 
-export interface TabBarProps {
-
-}
+export interface TabBarProps { }
 
 interface TabBarState {
     selected: number
+}
+
+export class Divider extends React.Component {
 }
 
 export class TabBar extends React.Component<TabBarProps, TabBarState> {
@@ -19,15 +20,22 @@ export class TabBar extends React.Component<TabBarProps, TabBarState> {
 
     render() {
         let tags = flatten(this.props.children);
-        let even = [];
-        let odd = [];
+        let divider_location = tags.findIndex(a => {
+            const e = a as any;
+            return e && e.type && e.type === Divider
+        });
+        tags = tags.filter((e, i) => i !== divider_location);
+
+        const even = [];
+        const odd = [];
         for (let i = 0; i < tags.length; i++) {
             if (i % 2 === 0) {
                 const setSelected = () => this.setState({ selected: i / 2 });
                 const isSelected = this.state.selected == i / 2;
                 const className = "individual-tab" + (isSelected ? " selected" : "");
+                const style: React.CSSProperties = i === divider_location ? { marginLeft: "auto" } : {};
                 const element =
-                    <div key={i} className={className} onClick={setSelected} >
+                    <div key={i} style={style} className={className} onClick={setSelected} >
                         {tags[i]}
                     </div>
                 even.push(element);
