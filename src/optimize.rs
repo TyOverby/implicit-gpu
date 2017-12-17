@@ -4,15 +4,15 @@ use std::cell::RefCell;
 use itertools::{repeat_call, Itertools};
 
 /// todo: doc
-pub fn optimize<P, I>(
+pub fn optimize<P, I, S: 'static>(
     segments: I,
     epsilon: f32,
     only_starts: bool,
     allow_ambiguous: bool,
-) -> Vec<PathSegment>
+) -> Vec<PathSegment<S>>
 where
     I: IntoIterator<Item = P>,
-    P: Into<smallvec::SmallVec<[Point; 2]>>,
+    P: Into<smallvec::SmallVec<[Point<S>; 2]>>,
 {
     let dual_qt = RefCell::new(populate(segments, epsilon));
 
@@ -26,7 +26,7 @@ where
         .collect();
 
 
-    fn recombine_segments(segments: Vec<PathSegment>, epsilon: f32) -> PathSegment {
+    fn recombine_segments<S>(segments: Vec<PathSegment<S>>, epsilon: f32) -> PathSegment<S> {
         let mut segment = SmallVec::with_capacity(segments.iter().map(|p| p.path.len()).sum());
         segment.extend_from_slice(&segments[0].path);
 
@@ -38,13 +38,13 @@ where
     }
 }
 
-fn chain_single(
-    start: PathSegment,
-    dual_qt: &mut DualQuadTree,
+fn chain_single<S: 'static>(
+    start: PathSegment<S>,
+    dual_qt: &mut DualQuadTree<S>,
     epsilon: f32,
     only_starts: bool,
     allow_ambiguous: bool,
-) -> Option<Vec<PathSegment>> {
+) -> Option<Vec<PathSegment<S>>> {
     let mut last_going_forward = start.last();
     let mut first_going_backwards = start.first();
     let mut combined: Vec<_> = vec![start];

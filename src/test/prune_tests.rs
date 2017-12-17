@@ -1,6 +1,10 @@
-use ::*;
+use ::prune;
 use super::util::*;
 use permutohedron::heap_recursive as permute;
+use euclid::{point2, UnknownUnit};
+
+type Point = ::Point<UnknownUnit>;
+type PathSegment = ::PathSegment<UnknownUnit>;
 
 const EPSILON: f32 = 0.001;
 
@@ -34,7 +38,7 @@ fn run(mut p: Problem) {
 #[test]
 pub fn prune_removes_single_line() {
     let p = Problem {
-        input: vec![vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }]],
+        input: vec![vec![point2(0.0, 0.0), point2(1.0, 1.0)]],
         expected: vec![],
         ..default_problem()
     };
@@ -54,8 +58,8 @@ pub fn prune_removes_single_line() {
 pub fn prune_removes_two_duplicate_lines() {
     run(Problem {
         input: vec![
-            vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
-            vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
+            vec![point2(0.0, 0.0), point2(1.0, 1.0)],
+            vec![point2(0.0, 0.0), point2(1.0, 1.0)],
         ],
         expected: vec![],
         ..default_problem()
@@ -66,18 +70,12 @@ pub fn prune_removes_two_duplicate_lines() {
 pub fn prune_doesnt_remove_two_duplicate_lines_if_only_starts_is_off() {
     run(Problem {
         input: vec![
-            vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
-            vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
+            vec![point2(0.0, 0.0), point2(1.0, 1.0)],
+            vec![point2(0.0, 0.0), point2(1.0, 1.0)],
         ],
         expected: vec![
-            PathSegment::new(
-                vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
-                EPSILON,
-            ),
-            PathSegment::new(
-                vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
-                EPSILON,
-            ),
+            PathSegment::new(vec![point2(0.0, 0.0), point2(1.0, 1.0)], EPSILON),
+            PathSegment::new(vec![point2(0.0, 0.0), point2(1.0, 1.0)], EPSILON),
         ],
         only_starts: false,
         ..default_problem()
@@ -88,9 +86,9 @@ pub fn prune_doesnt_remove_two_duplicate_lines_if_only_starts_is_off() {
 pub fn prune_removes_a_middle_line() {
     let p = Problem {
         input: vec![
-            vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
-            vec![Point { x: 1.0, y: 1.0 }, Point { x: 2.0, y: 2.0 }],
-            vec![Point { x: 2.0, y: 2.0 }, Point { x: 3.0, y: 3.0 }],
+            vec![point2(0.0, 0.0), point2(1.0, 1.0)],
+            vec![point2(1.0, 1.0), point2(2.0, 2.0)],
+            vec![point2(2.0, 2.0), point2(3.0, 3.0)],
         ],
         expected: vec![],
         ..default_problem()
@@ -110,23 +108,14 @@ pub fn prune_removes_a_middle_line() {
 pub fn prune_doesnt_remove_a_triangle() {
     let p = Problem {
         input: vec![
-            vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
-            vec![Point { x: 1.0, y: 1.0 }, Point { x: 1.0, y: 0.0 }],
-            vec![Point { x: 1.0, y: 0.0 }, Point { x: 0.0, y: 0.0 }],
+            vec![point2(0.0, 0.0), point2(1.0, 1.0)],
+            vec![point2(1.0, 1.0), point2(1.0, 0.0)],
+            vec![point2(1.0, 0.0), point2(0.0, 0.0)],
         ],
         expected: vec![
-            PathSegment::new(
-                vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
-                EPSILON,
-            ),
-            PathSegment::new(
-                vec![Point { x: 1.0, y: 1.0 }, Point { x: 1.0, y: 0.0 }],
-                EPSILON,
-            ),
-            PathSegment::new(
-                vec![Point { x: 1.0, y: 0.0 }, Point { x: 0.0, y: 0.0 }],
-                EPSILON,
-            ),
+            PathSegment::new(vec![point2(0.0, 0.0), point2(1.0, 1.0)], EPSILON),
+            PathSegment::new(vec![point2(1.0, 1.0), point2(1.0, 0.0)], EPSILON),
+            PathSegment::new(vec![point2(1.0, 0.0), point2(0.0, 0.0)], EPSILON),
         ],
         ..default_problem()
     };
@@ -145,18 +134,12 @@ pub fn prune_doesnt_remove_a_triangle() {
 fn prune_doesnt_remove_a_cycle_between_two_lines() {
     let p = Problem {
         input: vec![
-            vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
-            vec![Point { x: 1.0, y: 1.0 }, Point { x: 0.0, y: 0.0 }],
+            vec![point2(0.0, 0.0), point2(1.0, 1.0)],
+            vec![point2(1.0, 1.0), point2(0.0, 0.0)],
         ],
         expected: vec![
-            PathSegment::new(
-                vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
-                EPSILON,
-            ),
-            PathSegment::new(
-                vec![Point { x: 1.0, y: 1.0 }, Point { x: 0.0, y: 0.0 }],
-                EPSILON,
-            ),
+            PathSegment::new(vec![point2(0.0, 0.0), point2(1.0, 1.0)], EPSILON),
+            PathSegment::new(vec![point2(1.0, 1.0), point2(0.0, 0.0)], EPSILON),
         ],
         ..default_problem()
     };
@@ -175,19 +158,13 @@ fn prune_doesnt_remove_a_cycle_between_two_lines() {
 fn removes_a_dangling_line_off_the_front_of_a_cycle() {
     let p = Problem {
         input: vec![
-            vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
-            vec![Point { x: 1.0, y: 1.0 }, Point { x: 0.0, y: 0.0 }],
-            vec![Point { x: -1.0, y: -1.0 }, Point { x: 0.0, y: 0.0 }],
+            vec![point2(0.0, 0.0), point2(1.0, 1.0)],
+            vec![point2(1.0, 1.0), point2(0.0, 0.0)],
+            vec![point2(-1.0, -1.0), point2(0.0, 0.0)],
         ],
         expected: vec![
-            PathSegment::new(
-                vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
-                EPSILON,
-            ),
-            PathSegment::new(
-                vec![Point { x: 1.0, y: 1.0 }, Point { x: 0.0, y: 0.0 }],
-                EPSILON,
-            ),
+            PathSegment::new(vec![point2(0.0, 0.0), point2(1.0, 1.0)], EPSILON),
+            PathSegment::new(vec![point2(1.0, 1.0), point2(0.0, 0.0)], EPSILON),
         ],
         ..default_problem()
     };
@@ -203,19 +180,13 @@ fn removes_a_dangling_line_off_the_front_of_a_cycle() {
 
     let p = Problem {
         input: vec![
-            vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
-            vec![Point { x: 1.0, y: 1.0 }, Point { x: 0.0, y: 0.0 }],
-            vec![Point { x: 0.0, y: 0.0 }, Point { x: -1.0, y: -1.0 }],
+            vec![point2(0.0, 0.0), point2(1.0, 1.0)],
+            vec![point2(1.0, 1.0), point2(0.0, 0.0)],
+            vec![point2(0.0, 0.0), point2(-1.0, -1.0)],
         ],
         expected: vec![
-            PathSegment::new(
-                vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
-                EPSILON,
-            ),
-            PathSegment::new(
-                vec![Point { x: 1.0, y: 1.0 }, Point { x: 0.0, y: 0.0 }],
-                EPSILON,
-            ),
+            PathSegment::new(vec![point2(0.0, 0.0), point2(1.0, 1.0)], EPSILON),
+            PathSegment::new(vec![point2(1.0, 1.0), point2(0.0, 0.0)], EPSILON),
         ],
         ..default_problem()
     };
@@ -234,19 +205,13 @@ fn removes_a_dangling_line_off_the_front_of_a_cycle() {
 fn removes_a_dangling_line_off_the_back_of_a_cycle() {
     let p = Problem {
         input: vec![
-            vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
-            vec![Point { x: 1.0, y: 1.0 }, Point { x: 0.0, y: 0.0 }],
-            vec![Point { x: 2.0, y: 2.0 }, Point { x: 1.0, y: 1.0 }],
+            vec![point2(0.0, 0.0), point2(1.0, 1.0)],
+            vec![point2(1.0, 1.0), point2(0.0, 0.0)],
+            vec![point2(2.0, 2.0), point2(1.0, 1.0)],
         ],
         expected: vec![
-            PathSegment::new(
-                vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
-                EPSILON,
-            ),
-            PathSegment::new(
-                vec![Point { x: 1.0, y: 1.0 }, Point { x: 0.0, y: 0.0 }],
-                EPSILON,
-            ),
+            PathSegment::new(vec![point2(0.0, 0.0), point2(1.0, 1.0)], EPSILON),
+            PathSegment::new(vec![point2(1.0, 1.0), point2(0.0, 0.0)], EPSILON),
         ],
         ..default_problem()
     };
@@ -262,19 +227,13 @@ fn removes_a_dangling_line_off_the_back_of_a_cycle() {
 
     let p = Problem {
         input: vec![
-            vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
-            vec![Point { x: 1.0, y: 1.0 }, Point { x: 0.0, y: 0.0 }],
-            vec![Point { x: 1.0, y: 1.0 }, Point { x: 2.0, y: 2.0 }],
+            vec![point2(0.0, 0.0), point2(1.0, 1.0)],
+            vec![point2(1.0, 1.0), point2(0.0, 0.0)],
+            vec![point2(1.0, 1.0), point2(2.0, 2.0)],
         ],
         expected: vec![
-            PathSegment::new(
-                vec![Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }],
-                EPSILON,
-            ),
-            PathSegment::new(
-                vec![Point { x: 1.0, y: 1.0 }, Point { x: 0.0, y: 0.0 }],
-                EPSILON,
-            ),
+            PathSegment::new(vec![point2(0.0, 0.0), point2(1.0, 1.0)], EPSILON),
+            PathSegment::new(vec![point2(1.0, 1.0), point2(0.0, 0.0)], EPSILON),
         ],
         ..default_problem()
     };

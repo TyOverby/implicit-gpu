@@ -1,10 +1,10 @@
 use ::*;
 
 /// Remoes all line segments that can't possibly be part of a cycle.
-pub fn prune<P, I>(segments: I, epsilon: f32, only_starts: bool) -> Vec<PathSegment>
+pub fn prune<P, I, S: 'static>(segments: I, epsilon: f32, only_starts: bool) -> Vec<PathSegment<S>>
 where
     I: IntoIterator<Item = P>,
-    P: Into<smallvec::SmallVec<[Point; 2]>>,
+    P: Into<smallvec::SmallVec<[Point<S>; 2]>>,
 {
     let mut dual_qt = util::populate(segments, epsilon);
 
@@ -18,7 +18,7 @@ where
     dual_qt.into_iter().collect()
 }
 
-fn prune_one_iter(dual_qt: &mut DualQuadTree, epsilon: f32, only_starts: bool) -> bool {
+fn prune_one_iter<S: 'static>(dual_qt: &mut DualQuadTree<S>, epsilon: f32, only_starts: bool) -> bool {
     let mut made_progress = false;
     let mut to_remove = vec![];
 

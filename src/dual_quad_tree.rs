@@ -1,18 +1,19 @@
 use fnv::FnvHashMap as HashMap;
 use ::*;
+use euclid;
 
 #[derive(Clone, Copy, Hash, Eq, PartialEq, Debug)]
 pub struct DqtId(u32);
-pub struct DualQuadTree {
+pub struct DualQuadTree<S> {
     id: u32,
-    id_to_segment: HashMap<DqtId, (PathSegment, ItemId, ItemId)>,
-    pub starts: QuadTree<DqtId>,
-    pub ends: QuadTree<DqtId>,
-    ambiguity_points: QuadTree<Point>,
+    id_to_segment: HashMap<DqtId, (PathSegment<S>, ItemId, ItemId)>,
+    pub starts: QuadTree<DqtId, S>,
+    pub ends: QuadTree<DqtId, S>,
+    ambiguity_points: QuadTree<Point<S>, S>,
 }
 
-impl DualQuadTree {
-    pub fn new(aabb: geom::Rect) -> DualQuadTree {
+impl <S: 'static> DualQuadTree<S> {
+    pub fn new(aabb: euclid::TypedRect<f32, S>) -> DualQuadTree<S> {
         DualQuadTree {
             id: 0,
             id_to_segment: HashMap::default(),
@@ -22,17 +23,17 @@ impl DualQuadTree {
         }
     }
 
-    pub fn iter<'a>(&'a self) -> Box<Iterator<Item = (DqtId, &'a PathSegment)> + 'a> {
+    pub fn iter<'a>(&'a self) -> Box<Iterator<Item = (DqtId, &'a PathSegment<S>)> + 'a> {
         let iterator = self.id_to_segment.iter().map(|(&k, &(ref p, _, _))| (k, p));
-        Box::new(iterator) as Box<Iterator<Item = (DqtId, &PathSegment)> + 'a>
+        Box::new(iterator) as Box<Iterator<Item = (DqtId, &PathSegment<S>)> + 'a>
     }
 
-    pub fn into_iter(self) -> Box<Iterator<Item = PathSegment>> {
+    pub fn into_iter(self) -> Box<Iterator<Item = PathSegment<S>>> {
         let iterator = self.id_to_segment.into_iter().map(|(_, (p, _, _))| p);
-        Box::new(iterator) as Box<Iterator<Item = PathSegment>>
+        Box::new(iterator) as Box<Iterator<Item = PathSegment<S>>>
     }
 
-    pub fn insert(&mut self, segment: PathSegment) {
+    pub fn insert(&mut self, segment: PathSegment<S>) {
         let id = self.id;
         self.id += 1;
         let id = DqtId(id);
@@ -45,7 +46,7 @@ impl DualQuadTree {
         self.id_to_segment.insert(id, (segment, start_id, end_id));
     }
 
-    pub fn pop(&mut self) -> Option<PathSegment> {
+    pub fn pop(&mut self) -> Option<PathSegment<S>> {
         let dqt_id = {
             let first = self.id_to_segment.iter().next();
             if let Some((&dqt_id, _)) = first {
@@ -58,7 +59,7 @@ impl DualQuadTree {
         self.remove(dqt_id)
     }
 
-    pub fn remove(&mut self, dqt_id: DqtId) -> Option<PathSegment> {
+    pub fn remove(&mut self, dqt_id: DqtId) -> Option<PathSegment<S>> {
         let (segment, start_id, end_id) = self.id_to_segment.remove(&dqt_id).unwrap();
         self.starts.remove(start_id);
         self.ends.remove(end_id);
@@ -70,8 +71,8 @@ impl DualQuadTree {
         self.id_to_segment.is_empty()
     }
 
-    pub fn has_forward_neighbor(&self, id: DqtId, point: Point, epsilon: f32) -> bool {
-        let query_aabb = point.aabb().expand(epsilon, epsilon, epsilon, epsilon);
+    pub fn has_forward_neighbor(&self, id: DqtId, point: Point<S>, epsilon: f32) -> bool {
+        let query_aabb = point.aabb().inflate(epsilon, epsilon);
         self.ends
             .query(query_aabb)
             .into_iter()
@@ -79,8 +80,8 @@ impl DualQuadTree {
             .count() != 0
     }
 
-    pub fn has_backward_neighbor(&self, id: DqtId, point: Point, epsilon: f32) -> bool {
-        let query_aabb = point.aabb().expand(epsilon, epsilon, epsilon, epsilon);
+    pub fn has_backward_neighbor(&self, id: DqtId, point: Point<S>, epsilon: f32) -> bool {
+        let query_aabb = point.aabb().inflate(epsilon, epsilon);
         self.starts
             .query(query_aabb)
             .into_iter()
@@ -90,32 +91,32 @@ impl DualQuadTree {
 
     pub fn query_forward(
         &mut self,
-        point: Point,
+        point: Point<S>,
         epsilon: f32,
         only_starts: bool,
         allow_ambiguous: bool,
-    ) -> Option<PathSegment> {
+    ) -> Option<PathSegment<S>> {
         self.query_direction(false, point, epsilon, only_starts, allow_ambiguous)
     }
 
     pub fn query_backward(
         &mut self,
-        point: Point,
+        point: Point<S>,
         epsilon: f32,
         only_starts: bool,
         allow_ambiguous: bool,
-    ) -> Option<PathSegment> {
+    ) -> Option<PathSegment<S>> {
         self.query_direction(true, point, epsilon, only_starts, allow_ambiguous)
     }
 
     fn query_direction(
         &mut self,
         should_swap: bool,
-        point: Point,
+        point: Point<S>,
         epsilon: f32,
         only_starts: bool,
         allow_ambiguous: bool,
-    ) -> Option<PathSegment> {
+    ) -> Option<PathSegment<S>> {
         let (mut start, mut end) = self.query_impl(point, epsilon, allow_ambiguous);
         if should_swap {
             std::mem::swap(&mut start, &mut end);
@@ -158,11 +159,11 @@ impl DualQuadTree {
 
     fn query_impl(
         &mut self,
-        point: Point,
+        point: Point<S>,
         epsilon: f32,
         allow_ambiguous: bool,
     ) -> (Result<Option<DqtId>, ()>, Result<Option<DqtId>, ()>) {
-        let query_aabb = point.aabb().expand(epsilon, epsilon, epsilon, epsilon);
+        let query_aabb = point.aabb().inflate(epsilon, epsilon);
         if self.ambiguity_points.query(query_aabb).len() > 0 {
             return (Ok(None), Ok(None));
         }
@@ -209,7 +210,7 @@ impl DualQuadTree {
     }
 }
 
-fn reverse_and_return(mut v: PathSegment) -> PathSegment {
+fn reverse_and_return<S>(mut v: PathSegment<S>) -> PathSegment<S> {
     v.path.reverse();
     v
 }

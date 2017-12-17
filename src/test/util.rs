@@ -1,4 +1,4 @@
-use ::*;
+type PathSegment = ::PathSegment<::euclid::UnknownUnit>;
 
 pub fn rotate_1<T>(arr: &mut [T]) {
     {
@@ -60,7 +60,7 @@ pub fn is_equal(expected: &PathSegment, actual: &PathSegment, permit_reversed: b
     return basic_shifted || reverse_shifted;
 }
 
-pub fn is_shifted_of<T: Eq + std::fmt::Debug>(goal: &[T], actual: &mut [T]) -> bool {
+pub fn is_shifted_of<T: PartialEq + ::std::fmt::Debug>(goal: &[T], actual: &mut [T]) -> bool {
     if goal.len() != actual.len() {
         return false;
     }

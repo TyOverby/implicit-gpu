@@ -2,6 +2,7 @@
 //! A crate for optimizing line drawing for plotters and
 
 extern crate aabb_quadtree;
+extern crate euclid;
 extern crate fnv;
 extern crate itertools;
 #[cfg(test)]
@@ -18,48 +19,47 @@ use aabb_quadtree::*;
 use smallvec::SmallVec;
 use dual_quad_tree::*;
 
-
 pub use optimize::optimize;
 pub use prune::prune;
 
+type Point<S> = euclid::TypedPoint2D<f32, S>;
+
 /// A single path segment that may be merged with other path segments.
-#[derive(Debug, PartialEq, Eq, Clone)]
-pub struct PathSegment {
+#[derive(PartialEq, Clone)]
+pub struct PathSegment<S> {
     /// The path of points
-    pub path: SmallVec<[Point; 2]>,
+    pub path: SmallVec<[Point<S>; 2]>,
     /// True if the end of the path segment is the same as the
     /// beginning of the path segment.
     pub closed: bool,
 }
 
-/// A single point in 2d space
-#[allow(missing_docs)]
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Point {
-    pub x: f32,
-    pub y: f32,
+impl<S> ::std::fmt::Debug for PathSegment<S> {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        f.debug_struct("PathSegment")
+            .field("path", &self.path)
+            .field("closed", &self.closed)
+            .finish()
+    }
 }
 
-impl std::cmp::Eq for Point {}
+pub(crate) fn centered_with_radius<S>(pt: Point<S>, radius: f32) -> euclid::TypedRect<f32, S> {
+    let half = euclid::vec2(radius, radius);
+    euclid::TypedRect::new(pt - half, (half * 2.0).to_size())
+}
 
-impl PathSegment {
+impl<S> PathSegment<S> {
     /// TODO: doc
-    pub fn new<P: Into<SmallVec<[Point; 2]>>>(path: P, epsilon: f32) -> PathSegment {
+    pub fn new<P: Into<SmallVec<[Point<S>; 2]>>>(path: P, epsilon: f32) -> PathSegment<S> {
         let mut path = path.into();
 
         assert!(path.len() > 1);
         let first = path.first().cloned().unwrap();
         let last = path.last().cloned().unwrap();
-        let first_pt = geom::Point {
-            x: first.x,
-            y: first.y,
-        };
-        let last_pt = geom::Point {
-            x: last.x,
-            y: last.y,
-        };
+        let first_pt: Point<S> = Point::new(first.x, first.y);
+        let last_pt: Point<S> = Point::new(last.x, last.y);
 
-        let query_rect = geom::Rect::centered_with_radius(&first_pt, epsilon);
+        let query_rect = centered_with_radius(first_pt, epsilon);
         let closed = query_rect.contains(&last_pt);
         if closed {
             path.pop();
@@ -71,11 +71,11 @@ impl PathSegment {
         }
     }
 
-    fn first(&self) -> Point {
+    fn first(&self) -> Point<S> {
         *self.path.first().unwrap()
     }
 
-    fn last(&self) -> Point {
+    fn last(&self) -> Point<S> {
         *self.path.last().unwrap()
     }
 
@@ -84,7 +84,7 @@ impl PathSegment {
         self.path
             .as_slice()
             .windows(2)
-            .map(|s| dist_2(s[0], s[1]))
+            .map(|s| (s[1] - s[0]).square_length())
             .sum()
     }
 
@@ -93,22 +93,7 @@ impl PathSegment {
         self.path
             .as_slice()
             .windows(2)
-            .map(|s| dist_2(s[0], s[1]).sqrt())
+            .map(|s| (s[1] - s[0]).length())
             .sum()
-    }
-}
-
-fn dist_2(Point { x: x1, y: y1 }: Point, Point { x: x2, y: y2 }: Point) -> f32 {
-    let dx = x2 - x1;
-    let dy = y2 - y1;
-    dx * dx + dy * dy
-}
-
-impl Spatial for Point {
-    fn aabb(&self) -> geom::Rect {
-        geom::Rect::null_at(&geom::Point {
-            x: self.x,
-            y: self.y,
-        })
     }
 }
