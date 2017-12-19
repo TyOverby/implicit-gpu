@@ -31,5 +31,5 @@
     }
   ],
   "unit": "px",
-  "simplify": true
+  "simplify": false
 }

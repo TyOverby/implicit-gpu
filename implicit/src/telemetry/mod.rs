@@ -3,11 +3,11 @@ pub use self::null::*;
 pub(crate) use self::svg_helpers::*;
 use debug::*;
 use lines::LineType;
-use lines::util::geom;
 use nodes::Node;
 use opencl::FieldBuffer;
 use output::{OutputScene, OutputShape};
 use std::path::PathBuf;
+use geometry::{Line};
 
 mod null;
 mod dump;
@@ -66,8 +66,8 @@ impl TelemetryLocation {
 
 pub trait Telemetry {
     fn shape_finished(&mut self, t: TelemetryLocation, buffer: &FieldBuffer, lines: &[((f32, f32), (f32, f32))]);
-    fn shape_line_pre_prune(&mut self, t: TelemetryLocation, lines: &[geom::Line]);
-    fn shape_line_pruned(&mut self, t: TelemetryLocation, lines: &[geom::Line]);
+    fn shape_line_pre_prune(&mut self, t: TelemetryLocation, lines: &[Line]);
+    fn shape_line_pruned(&mut self, t: TelemetryLocation, lines: &[Line]);
     fn shape_line_joined(&mut self, t: TelemetryLocation, lines: &[LineType]);
     fn shape_line_connected(&mut self, t: TelemetryLocation, lines: &[LineType]);
     fn intermediate_eval_basic(&mut self, t: TelemetryLocation, buffer: &FieldBuffer, program: &str, node: &Node);

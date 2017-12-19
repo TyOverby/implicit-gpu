@@ -1,0 +1,134 @@
+{
+  "figures": [
+    {
+      "shapes": [
+        {
+          "implicit": {
+            "kind": "and",
+            "children": [
+              {
+                "kind": "rect",
+                "x": -5,
+                "y": -5,
+                "w": 80,
+                "h": 80
+              },
+              {
+                "kind": "not",
+                "target": {
+                  "kind": "or",
+                  "children": [
+                    {
+                      "kind": "circle",
+                      "x": 0,
+                      "y": 0,
+                      "r": 5
+                    },
+                    {
+                      "kind": "circle",
+                      "x": 0,
+                      "y": 15,
+                      "r": 5
+                    },
+                    {
+                      "kind": "circle",
+                      "x": 0,
+                      "y": 30,
+                      "r": 5
+                    },
+                    {
+                      "kind": "circle",
+                      "x": 0,
+                      "y": 45,
+                      "r": 5
+                    },
+                    {
+                      "kind": "circle",
+                      "x": 15,
+                      "y": 0,
+                      "r": 5
+                    },
+                    {
+                      "kind": "circle",
+                      "x": 15,
+                      "y": 15,
+                      "r": 5
+                    },
+                    {
+                      "kind": "circle",
+                      "x": 15,
+                      "y": 30,
+                      "r": 5
+                    },
+                    {
+                      "kind": "circle",
+                      "x": 15,
+                      "y": 45,
+                      "r": 5
+                    },
+                    {
+                      "kind": "circle",
+                      "x": 30,
+                      "y": 0,
+                      "r": 5
+                    },
+                    {
+                      "kind": "circle",
+                      "x": 30,
+                      "y": 15,
+                      "r": 5
+                    },
+                    {
+                      "kind": "circle",
+                      "x": 30,
+                      "y": 30,
+                      "r": 5
+                    },
+                    {
+                      "kind": "circle",
+                      "x": 30,
+                      "y": 45,
+                      "r": 5
+                    },
+                    {
+                      "kind": "circle",
+                      "x": 45,
+                      "y": 0,
+                      "r": 5
+                    },
+                    {
+                      "kind": "circle",
+                      "x": 45,
+                      "y": 15,
+                      "r": 5
+                    },
+                    {
+                      "kind": "circle",
+                      "x": 45,
+                      "y": 30,
+                      "r": 5
+                    },
+                    {
+                      "kind": "circle",
+                      "x": 45,
+                      "y": 45,
+                      "r": 5
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "color": [
+            0,
+            0,
+            0
+          ],
+          "draw_mode": "filled"
+        }
+      ]
+    }
+  ],
+  "unit": "px",
+  "simplify": false
+}

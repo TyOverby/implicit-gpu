@@ -1,37 +1,34 @@
 use super::*;
-use super::util::quadtree::*;
+use aabb_quadtree::{ItemId, QuadTree};
+use euclid::{UnknownUnit, point2, vec2};
+use euclid::approxeq::ApproxEq;
+use geometry::{compute_bounding_box, centered_with_radius, Point, Rect};
 use std::collections::{HashMap, HashSet};
 
 // TODO: *LOTS* of optimization opporitunities here
 
 #[derive(Clone)]
 struct Graph {
-    tree: QuadTree<Vec<geom::Point>>,
+    tree: QuadTree<Vec<Point>, UnknownUnit>,
 }
 
 type VisitedSet = HashMap<ItemId, f32>;
 type Path = Vec<(ItemId, f32)>;
 
-fn is_close(p1: geom::Point, p2: geom::Point) -> bool { p1.close_to(&p2, 0.001) }
+fn is_close(p1: Point, p2: Point) -> bool { p1.approx_eq_eps(&p2, &point2(0.001, 0.001)) }
 
 impl Graph {
-    fn new(v: Vec<Vec<geom::Point>>) -> Graph {
+    fn new(v: Vec<Vec<Point>>) -> Graph {
         let v: Vec<_> = v.into_iter()
-            .map(|v| {
-                let mut rect = geom::Rect::null();
-                for v in &v {
-                    rect.expand_to_include(v);
-                }
-                (rect, v)
-            })
+            .map(|v| (compute_bounding_box(v.iter().cloned()), v))
             .collect();
 
-        let mut rect = geom::Rect::null();
+        let mut rect = Rect::new(point2(0.0, 0.0), vec2(0.0, 0.0).to_size());
         for &(ref r, _) in &v {
-            rect = rect.union_with(r);
+            rect = rect.union(r);
         }
 
-        let mut tree = QuadTree::new(rect.expand(2.0, 2.0, 2.0, 2.0), true, 4, 16, 4);
+        let mut tree = QuadTree::new(rect.inflate(2.0, 2.0), false, 4, 16, 4);
 
         for (bb, v) in v {
             tree.insert_with_box(v, bb);
@@ -44,7 +41,7 @@ impl Graph {
         let segment = self.tree.get(id).unwrap();
 
         let last_point = segment.last().cloned().unwrap();
-        let query = geom::Rect::centered_with_radius(&last_point, 1.0 / 4.0);
+        let query = centered_with_radius(last_point, 1.0 / 4.0);
         return self.tree
             .query(query)
             .into_iter()
@@ -64,13 +61,13 @@ impl Graph {
         let segment = self.tree.get(id).unwrap();
         let mut dist = 0.0;
         for window in segment.windows(2) {
-            dist += window[0].distance(&window[1]);
+            dist += (window[0] - window[1]).length();
         }
 
         dist
     }
 
-    fn remove(&mut self, id: ItemId) -> Vec<geom::Point> { self.tree.remove(id).unwrap().0 }
+    fn remove(&mut self, id: ItemId) -> Vec<Point> { self.tree.remove(id).unwrap().0 }
     fn try_remove(&mut self, id: ItemId) { self.tree.remove(id); }
 }
 
@@ -132,7 +129,7 @@ fn recur(
     // visited.remove(&at);
 }
 
-fn one_iter(mut graph: Graph) -> (Graph, Vec<Vec<geom::Point>>) {
+fn one_iter(mut graph: Graph) -> (Graph, Vec<Vec<Point>>) {
     use std::cmp::{Ordering, PartialOrd};
     let mut best_possible = 0.0;
     let mut possible = vec![];
@@ -195,7 +192,7 @@ fn one_iter(mut graph: Graph) -> (Graph, Vec<Vec<geom::Point>>) {
     (graph, out)
 }
 
-fn try_solve(mut graph: Graph) -> Vec<Vec<geom::Point>> {
+fn try_solve(mut graph: Graph) -> Vec<Vec<Point>> {
     let _guard = ::flame::start_guard("solve graph stitch");
 
     let mut out = vec![];

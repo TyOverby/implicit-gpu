@@ -1,4 +1,3 @@
-
 use output::*;
 use std::fs::File;
 use std::io::{Result as IoResult, Write};
@@ -21,8 +20,8 @@ pub fn write_to<W: Write>(write: W, figure: OutputFigure) -> IoResult<()> {
                 };
 
                 canvas.draw_holy_polygon(
-                    additive.iter().map(Vec::as_slice),
-                    subtractive.iter().map(Vec::as_slice),
+                    additive,
+                    subtractive,
                     options,
                 )?;
             }

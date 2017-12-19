@@ -1,8 +1,9 @@
 mod poly;
 
 pub use self::poly::*;
-use super::lines::util::geom::Rect;
 use compiler::GroupId;
+use euclid::{point2, vec2};
+use geometry::{centered_with_radius, Point, Rect, compute_bounding_box};
 use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq, PartialOrd)]
@@ -32,18 +33,14 @@ impl NodeRef {
 
 impl<'de> ::serde::Deserialize<'de> for NodeRef {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: ::serde::Deserializer<'de>,
-    {
+    where D: ::serde::Deserializer<'de> {
         <Node as ::serde::Deserialize>::deserialize(deserializer).map(|res| NodeRef { node: Arc::new(res) })
     }
 }
 
 impl<'de> ::serde::Serialize for NodeRef {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: ::serde::Serializer,
-    {
+    where S: ::serde::Serializer {
         self.node.serialize(serializer)
     }
 }
@@ -69,40 +66,50 @@ impl Node {
     pub fn eq_ignore_group(&self, other: &Node) -> bool {
         match (self, other) {
             (&Node::Circle { x: mx, y: my, r: mr }, &Node::Circle { x: ox, y: oy, r: or }) => mx == ox && my == oy && mr == or,
-            (&Node::And { children: ref mch }, &Node::And { children: ref och }) => mch.iter().zip(och.iter()).all(|(a, b)| a.eq_ignore_group(&*b)),
-            (&Node::Or { children: ref mch }, &Node::Or { children: ref och }) => mch.iter().zip(och.iter()).all(|(a, b)| a.eq_ignore_group(&*b)),
+            (&Node::And { children: ref mch }, &Node::And { children: ref och }) => mch.iter()
+                .zip(och.iter())
+                .all(|(a, b)| a.eq_ignore_group(&*b)),
+            (&Node::Or { children: ref mch }, &Node::Or { children: ref och }) => mch.iter()
+                .zip(och.iter())
+                .all(|(a, b)| a.eq_ignore_group(&*b)),
             (&Node::Not { target: ref mc }, &Node::Not { target: ref oc }) => mc.eq_ignore_group(&*oc),
-            (&Node::Polygon {
-                 dx: dx1,
-                 dy: dy1,
-                 group: ref mpg,
-             },
-             &Node::Polygon {
-                 dx: dx2,
-                 dy: dy2,
-                 group: ref opg,
-             }) => dx1 == dx2 && dy1 == dy2 && mpg == opg,
-            (&Node::Modulate {
-                 how_much: ref mhm,
-                 target: ref mc,
-             },
-             &Node::Modulate {
-                 how_much: ref ohm,
-                 target: ref oc,
-             }) => mhm == ohm && mc.eq_ignore_group(&*oc),
+            (
+                &Node::Polygon {
+                    dx: dx1,
+                    dy: dy1,
+                    group: ref mpg,
+                },
+                &Node::Polygon {
+                    dx: dx2,
+                    dy: dy2,
+                    group: ref opg,
+                },
+            ) => dx1 == dx2 && dy1 == dy2 && mpg == opg,
+            (
+                &Node::Modulate {
+                    how_much: ref mhm,
+                    target: ref mc,
+                },
+                &Node::Modulate {
+                    how_much: ref ohm,
+                    target: ref oc,
+                },
+            ) => mhm == ohm && mc.eq_ignore_group(&*oc),
             (&Node::Break { target: ref mc }, &Node::Break { target: ref oc }) => mc.eq_ignore_group(&*oc),
             (&Node::Freeze { target: ref mc }, &Node::Freeze { target: ref oc }) => mc.eq_ignore_group(&*oc),
             (&Node::OtherGroup { .. }, &Node::OtherGroup { .. }) => true,
-            (&Node::Translate {
-                 dx: dx1,
-                 dy: dy1,
-                 target: ref t1,
-             },
-             &Node::Translate {
-                 dx: dx2,
-                 dy: dy2,
-                 target: ref t2,
-             }) => dx1 == dx2 && dy1 == dy2 && t1.eq_ignore_group(t2),
+            (
+                &Node::Translate {
+                    dx: dx1,
+                    dy: dy1,
+                    target: ref t1,
+                },
+                &Node::Translate {
+                    dx: dx2,
+                    dy: dy2,
+                    target: ref t2,
+                },
+            ) => dx1 == dx2 && dy1 == dy2 && t1.eq_ignore_group(t2),
             (_, _) => false,
         }
     }
@@ -117,8 +124,12 @@ impl Node {
                 dy: pdy + dy,
                 group,
             },
-            Break { target } => Break { target: NodeRef::new(target.take().propagate_translates(dx, dy)) },
-            Freeze { target } => Freeze { target: NodeRef::new(target.take().propagate_translates(dx, dy)) },
+            Break { target } => Break {
+                target: NodeRef::new(target.take().propagate_translates(dx, dy)),
+            },
+            Freeze { target } => Freeze {
+                target: NodeRef::new(target.take().propagate_translates(dx, dy)),
+            },
             And { children } => And {
                 children: children
                     .into_iter()
@@ -131,7 +142,9 @@ impl Node {
                     .map(|child| NodeRef::new(child.take().propagate_translates(dx, dy)))
                     .collect(),
             },
-            Not { target } => Not { target: NodeRef::new(target.take().propagate_translates(dx, dy)) },
+            Not { target } => Not {
+                target: NodeRef::new(target.take().propagate_translates(dx, dy)),
+            },
             Modulate { how_much, target } => Modulate {
                 how_much,
                 target: NodeRef::new(target.take().propagate_translates(dx, dy)),
@@ -159,15 +172,13 @@ impl Node {
     }
 
     pub fn bounding_box(&self) -> (Option<Rect>, Option<Rect>) {
-        use super::lines::util::geom::{Point, Rect, Vector};
-
         fn union<I: Iterator<Item = Option<Rect>>>(mut i: I) -> Option<Rect> {
             let mut res = i.next().and_then(|a| a);
             for r in i {
                 res = match (res, r) {
                     (None, None) => None,
                     (Some(_), None) | (None, Some(_)) => None,
-                    (Some(a), Some(b)) => Some(a.union_with(&b)),
+                    (Some(a), Some(b)) => Some(a.union(&b)),
                 };
             }
             res
@@ -179,48 +190,42 @@ impl Node {
                 res = match (res, r) {
                     (None, None) => None,
                     (Some(a), None) | (None, Some(a)) => Some(a),
-                    (Some(a), Some(b)) => {
-                        let r = a.intersect_with(&b);
-                        if r.is_null() { None } else { Some(r) }
-                    }
+                    (Some(a), Some(b)) => a.intersection(&b),
                 };
             }
             res
         }
 
         match self {
-            &Node::Circle { x, y, r } => (Some(Rect::centered_with_radius(&Point { x, y }, r)), None),
-            &Node::Rect { x, y, w, h } => (Some(Rect::from_point_and_size(&Point { x, y }, &Vector { x: w, y: h })), None),
+            &Node::Circle { x, y, r } => (Some(centered_with_radius(point2(x, y), r)), None),
+            &Node::Rect { x, y, w, h } => (Some(Rect::new(point2(x, y), vec2(w, h).to_size())), None),
             &Node::Polygon { dx, dy, ref group } => {
-                let mut rect = Rect::null();
+                let mut rect = Rect::new(point2(0.0, 0.0), vec2(0.0, 0.0).to_size());
                 for polygon in &group.additive {
-                    for &(x, y) in polygon.points.iter() {
-                        rect.expand_to_include(&Point { x: x + dx, y: y + dy });
-                    }
+                    let p_rect = compute_bounding_box(
+                        polygon.points.iter().cloned().map(|Point{x, y, ..}| point2(x + dx, y + dy)));
+                    rect = rect.union(&p_rect);
                 }
                 (Some(rect), None)
             }
             &Node::Modulate { how_much, ref target } => {
                 let v = how_much;
                 let (a, s) = target.bounding_box();
-                (a.map(|b| b.expand(-v, -v, -v, -v)), s.map(|b| b.expand(v, v, v, v)))
+                (a.map(|b| b.inflate(-v, -v)), s.map(|b| b.inflate(v, v)))
             }
             &Node::Translate { dx, dy, ref target } => {
                 let (a, s) = target.bounding_box();
-                (a.map(|b| b.expand(-dx, -dy, dx, dy)), s.map(|b| b.expand(-dx, -dy, dx, dy)))
+                (a.map(|b| b.translate(&vec2(dx, dy))),
+                 s.map(|b| b.translate(&vec2(dx, dy))))
             }
-            &Node::And { ref children } => {
-                (
-                    intersection(children.iter().map(|n| n.bounding_box().0)),
-                    union(children.iter().map(|n| n.bounding_box().1)),
-                )
-            }
-            &Node::Or { ref children } => {
-                (
-                    union(children.iter().map(|n| n.bounding_box().0)),
-                    intersection(children.iter().map(|n| n.bounding_box().1)),
-                )
-            }
+            &Node::And { ref children } => (
+                intersection(children.iter().map(|n| n.bounding_box().0)),
+                union(children.iter().map(|n| n.bounding_box().1)),
+            ),
+            &Node::Or { ref children } => (
+                union(children.iter().map(|n| n.bounding_box().0)),
+                intersection(children.iter().map(|n| n.bounding_box().1)),
+            ),
             &Node::Not { ref target } => {
                 let (a, s) = target.bounding_box();
                 (s, a)

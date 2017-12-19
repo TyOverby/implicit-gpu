@@ -1,6 +1,6 @@
 use debug::*;
+use geometry::Line;
 use lines::LineType;
-use lines::util::geom;
 use nodes::Node;
 use opencl::FieldBuffer;
 use output::{OutputScene, OutputShape};
@@ -79,14 +79,14 @@ impl Telemetry for DumpTelemetry {
         }
     }
 
-    fn shape_line_pre_prune(&mut self, tloc: TelemetryLocation, lines: &[geom::Line]) {
+    fn shape_line_pre_prune(&mut self, tloc: TelemetryLocation, lines: &[Line]) {
         use std::fs::File;
         let _guard = ::flame::start_guard("telemetry shape_line_pre_prune");
         let file = File::create(self.shape_path(tloc, "pre-pruned.svg")).unwrap();
         output_svg_lines(file, lines.iter().cloned());
     }
 
-    fn shape_line_pruned(&mut self, tloc: TelemetryLocation, lines: &[geom::Line]) {
+    fn shape_line_pruned(&mut self, tloc: TelemetryLocation, lines: &[Line]) {
         use std::fs::File;
 
         let _guard = ::flame::start_guard("telemetry shape_line_pruned");
@@ -133,7 +133,7 @@ impl Telemetry for DumpTelemetry {
 
     fn figure_finished(&mut self, tloc: TelemetryLocation, figure: &[OutputShape]) {
         use export::svg;
-        use output::{OutputFigure};
+        use output::OutputFigure;
         let _guard = ::flame::start_guard("telemetry figure_finished");
 
         let svg_path = self.figure_path(tloc, "figure.svg");

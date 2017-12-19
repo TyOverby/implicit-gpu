@@ -1,5 +1,5 @@
 use lines::LineType;
-use lines::util::geom;
+use geometry::Line;
 
 pub fn output_svg_linetype<'a, I>(file: ::std::fs::File, lines: I)
 where I: Iterator<Item = &'a LineType> {
@@ -53,7 +53,7 @@ where I: Iterator<Item = &'a LineType> {
 }
 
 pub fn output_svg_lines<'a, I>(file: ::std::fs::File, lines: I)
-where I: Iterator<Item = geom::Line> {
+where I: Iterator<Item = Line> {
     use vectorphile::Canvas;
     use vectorphile::backend::{Command, DrawBackend, DrawOptions};
     use vectorphile::svg::SvgBackend;
@@ -63,7 +63,7 @@ where I: Iterator<Item = geom::Line> {
         .apply(Command::StartShape(DrawOptions::stroked((0, 0, 0), 0.2)))
         .unwrap();
 
-    for geom::Line(p1, p2) in lines {
+    for Line(p1, p2) in lines {
         canvas
             .apply(Command::MoveTo { x: p1.x as f64, y: p1.y as f64 })
             .unwrap();

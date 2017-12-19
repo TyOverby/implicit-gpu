@@ -11,7 +11,7 @@ lazy_static = "0.2.*"
 image = "0.10.*"
 itertools = "0.5.*"
 vecmath = "*"
-fnv = "*"
+fnv = "1.0.6"
 typed-arena = "1.2.0"
 serde = "1.*.*"
 serde_derive = "1.*.*"
@@ -19,7 +19,13 @@ latin = "0.1.5"
 rand = "0.3.15"
 serde_json = "1.*.*"
 snoot = "0.1.*"
+euclid = "0.16.0"
+
+[dependencies.line-stitch]
+path = "../../line-stitch"
+
+[dependencies.aabb-quadtree]
+path = "../../aabb-quadtree"
 
 [dependencies.vectorphile]
 path = "../../vectorphile"
-#vectorphile = "0.1.*"

@@ -1,3 +1,5 @@
+use geometry::Point;
+
 #[derive(Clone)]
 pub struct OutputScene {
     pub figures: Vec<OutputFigure>,
@@ -22,8 +24,8 @@ pub struct OutputShape {
 pub enum LineGroup {
     Polygon {
         filled: bool,
-        additive: Vec<Vec<(f32, f32)>>,
-        subtractive: Vec<Vec<(f32, f32)>>,
+        additive: Vec<Vec<Point>>,
+        subtractive: Vec<Vec<Point>>,
     },
-    Lines(Vec<Vec<(f32, f32)>>),
+    Lines(Vec<Vec<Point>>),
 }

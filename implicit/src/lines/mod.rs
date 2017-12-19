@@ -1,8 +1,8 @@
-use self::util::geom;
-use self::util::quadtree::{ItemId as QuadId, QuadTree};
+use aabb_quadtree::{ItemId as QuadId, QuadTree};
+use euclid::{self, UnknownUnit};
+use geometry::{compare_points, point_in_poly, Line, Point, Rect};
 use telemetry::{Telemetry, TelemetryLocation};
 
-pub mod util;
 pub mod dash;
 mod join;
 mod simplify;
@@ -11,21 +11,23 @@ mod graph_stitch;
 // const EPSILON: f32 = 0.001;
 const OPT_EPSILON: f32 = 0.05;
 
-pub struct DashSegment(pub Vec<geom::Point>);
+pub struct DashSegment(pub Vec<Point>);
 
-#[derive(PartialOrd, PartialEq)]
+#[derive(PartialEq)]
 pub enum LineType {
-    Joined(Vec<geom::Point>),
-    Unjoined(Vec<geom::Point>),
+    Joined(Vec<Point>),
+    Unjoined(Vec<Point>),
 }
 
-type Point = (f32, f32);
-type Line = (Point, Point);
+pub(crate) fn centered_with_radius(pt: Point, radius: f32) -> Rect {
+    let half = euclid::vec2(radius, radius);
+    euclid::TypedRect::new(pt - half, (half * 2.0).to_size())
+}
 
 pub fn separate_polygons(bag: Vec<Vec<Point>>) -> (Vec<Vec<Point>>, Vec<Vec<Point>>) {
     let _guard = ::flame::start_guard("separate_polygons");
 
-    fn contains(a: &[Point], b: &[Point]) -> bool { geom::point_in_poly(a, b[0]) }
+    fn contains(a: &[Point], b: &[Point]) -> bool { point_in_poly(a, b[0]) }
 
     let mut additive_or_subtractive = vec![];
     for (i, a) in bag.iter().enumerate() {
@@ -51,8 +53,9 @@ pub fn separate_polygons(bag: Vec<Vec<Point>>) -> (Vec<Vec<Point>>, Vec<Vec<Poin
     (additive, subtractive)
 }
 
-pub fn connect_lines(mut lines: Vec<Line>, simplify: bool, telemetry: &mut Telemetry, tloc: TelemetryLocation)
-    -> (Vec<Vec<Point>>, QuadTree<geom::Line>) {
+pub fn connect_lines(
+    mut lines: Vec<Line>, simplify: bool, telemetry: &mut Telemetry, tloc: TelemetryLocation
+) -> (Vec<Vec<Point>>, QuadTree<Line, UnknownUnit>) {
     let _guard = ::flame::start_guard("connect_lines");
     use std::cmp::{Ordering, PartialOrd};
 
@@ -66,17 +69,13 @@ pub fn connect_lines(mut lines: Vec<Line>, simplify: bool, telemetry: &mut Telem
         slice.reverse();
     }
 
-    lines.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal));
+    lines.sort_by(|l1, l2| l1.partial_cmp(&l2).unwrap_or(Ordering::Equal));
 
-    let (mut joined, qt) = join::join_lines(
-        lines.into_iter().map(|((x1, y1), (x2, y2))| {
-            geom::Line(geom::Point { x: x1, y: y1 }, geom::Point { x: x2, y: y2 })
-        }),
-        telemetry,
-        tloc,
-    );
+    let (mut joined, qt) = join::join_lines(lines, telemetry, tloc);
 
-    joined.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal));
+    // TODO: is this necessary?
+    // joined.sort_by(|a, b|
+    // a.partial_cmp(b).unwrap_or(Ordering::Equal));
 
     for line in &joined {
         if let &LineType::Unjoined(ref _pts) = line {
@@ -99,12 +98,9 @@ pub fn connect_lines(mut lines: Vec<Line>, simplify: bool, telemetry: &mut Telem
         }).map(|lt| match lt {
             LineType::Joined(r) | LineType::Unjoined(r) => r
         // Convert geom::Point back to (f32, f32)
-        }).map(|v|
-            v.into_iter().map(|geom::Point{x, y}| (x, y)).collect::<Vec<_>>()
-        // Rotate the vectors to start at the smallest point.
-        // This can be removed later if it's a perf issue
-        ).map(|mut v| {
-            let (smallest_idx, _) = v.iter().enumerate().min_by(|&(_, a), &(_, b)| a.partial_cmp(&b).unwrap_or(Ordering::Equal)).unwrap();
+        }).map(|mut v| {
+            let (smallest_idx, _) = v.iter().enumerate().min_by(|&(_, a), &(_, b)|
+                compare_points(*a, *b).unwrap_or(Ordering::Equal)).unwrap();
             rotate(&mut v, smallest_idx);
             v
         });

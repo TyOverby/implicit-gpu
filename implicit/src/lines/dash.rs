@@ -1,19 +1,17 @@
 
 use super::*;
+use geometry::Point;
 use itertools::put_back;
 
-fn extend(start: geom::Point, end: geom::Point, dist: f32) -> geom::Point {
+fn extend(start: Point, end: Point, dist: f32) -> Point {
     let mut dx = end.x - start.x;
     let mut dy = end.y - start.y;
-    let magnitude = (end - start).magnitude();
+    let magnitude = (end - start).length();
     dx /= magnitude;
     dy /= magnitude;
     dx *= dist;
     dy *= dist;
-    geom::Point {
-        x: start.x + dx,
-        y: start.y + dy,
-    }
+    Point::new(start.x + dx, start.y + dy)
 }
 
 pub fn dashify<P, D>(points: P, dashes: D) -> Vec<DashSegment>
@@ -22,7 +20,7 @@ where
     D: Iterator<Item = f32> + Clone,
 {
     let mut dashes = dashes.cycle();
-    let mut points = put_back(points.map(|p| geom::Point { x: p.0, y: p.1 }));
+    let mut points = put_back(points.map(|p| Point::new(p.0, p.1)));
     let mut out = vec![];
 
     let mut on = true;
@@ -35,7 +33,7 @@ where
     }
 
     while let (Some(prev), Some(next)) = (previous, points.next()) {
-        let mag = (next - prev).magnitude();
+        let mag = (next - prev).length();
         if mag > dst {
             let next_break = extend(prev, next, dst);
 

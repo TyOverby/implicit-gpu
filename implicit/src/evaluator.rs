@@ -9,6 +9,8 @@ use opencl::OpenClContext;
 use polygon::run_poly;
 use std::collections::HashMap;
 use std::sync::Mutex;
+use geometry::{Point, Line};
+use euclid::point2;
 
 #[derive(Debug)]
 pub struct Evaluator {
@@ -117,7 +119,7 @@ impl Evaluator {
     }
 }
 
-pub fn line_buffer_to_poly(buffer: &LineBuffer, telemetry: &mut Telemetry, tloc: TelemetryLocation, simplify: bool) -> (Vec<Vec<(f32, f32)>>, Vec<Vec<(f32, f32)>>) {
+pub fn line_buffer_to_poly(buffer: &LineBuffer, telemetry: &mut Telemetry, tloc: TelemetryLocation, simplify: bool) -> (Vec<Vec<Point>>, Vec<Vec<Point>>) {
     use ::lines;
     let lines = buffer.values();
 
@@ -125,7 +127,7 @@ pub fn line_buffer_to_poly(buffer: &LineBuffer, telemetry: &mut Telemetry, tloc:
         .into_iter()
         .tuples::<(_, _, _, _)>()
         .filter(|&(a, b, c, d)| !(a.is_nan() || b.is_nan() || c.is_nan() || d.is_nan()))
-        .map(|(a, b, c, d)| ((a, b), (c, d)))
+        .map(|(a, b, c, d)| Line(point2(a, b), point2(c, d)))
         .collect::<Vec<_>>();
 
     let (lines, _) = lines::connect_lines(lines, simplify, telemetry, tloc);

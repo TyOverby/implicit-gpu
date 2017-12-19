@@ -1,9 +1,12 @@
+extern crate aabb_quadtree;
+extern crate euclid;
 extern crate flame;
 extern crate fnv;
 extern crate image as image_crate;
 extern crate itertools;
 extern crate latin;
 extern crate lazy_static;
+extern crate line_stitch;
 extern crate ocl;
 extern crate rand;
 extern crate serde;
@@ -27,8 +30,9 @@ pub mod scene;
 pub mod output;
 pub mod lines;
 pub mod telemetry;
+pub mod geometry;
 
-use lines::util::geom::Rect;
+use geometry::Rect;
 use opencl::OpenClContext;
 
 pub fn run_single(node: nodes::NodeRef, width: usize, height: usize) -> ::opencl::FieldBuffer {
@@ -48,33 +52,35 @@ pub fn run_single(node: nodes::NodeRef, width: usize, height: usize) -> ::opencl
     result
 }
 
-pub fn run_scene(mut scene: scene::Scene, telemetry: &mut telemetry::Telemetry, ctx: Option<opencl::OpenClContext>) -> (output::OutputScene, OpenClContext) {
+pub fn run_scene(
+    mut scene: scene::Scene, telemetry: &mut telemetry::Telemetry, ctx: Option<opencl::OpenClContext>
+) -> (output::OutputScene, OpenClContext) {
     use compiler::Nest;
     use evaluator::Evaluator;
     use output::*;
     use scene::*;
 
-    fn compute_figure_size(figure: &scene::Figure) -> Option<lines::util::geom::Rect> {
+    fn compute_figure_size(figure: &scene::Figure) -> Option<Rect> {
         let mut rect: Option<Option<Rect>> = None;
         for shape in &figure.shapes {
             rect = match (rect, shape.implicit.bounding_box()) {
                 (None, (a, _)) => Some(a),
                 (Some(None), _) | (_, (None, _)) => Some(None),
-                (Some(Some(a)), (Some(b), Some(c))) => Some(Some(a.union_with(&b.union_with(&c)))),
-                (Some(Some(a)), (Some(b), None)) => Some(Some(a.union_with(&b))),
+                (Some(Some(a)), (Some(b), Some(c))) => Some(Some(a.union(&b.union(&c)))),
+                (Some(Some(a)), (Some(b), None)) => Some(Some(a.union(&b))),
             }
         }
 
         rect.and_then(|a| a)
     }
-    fn compute_scene_size(scene: &scene::Scene) -> Option<lines::util::geom::Rect> {
+    fn compute_scene_size(scene: &scene::Scene) -> Option<Rect> {
         let mut rect: Option<Option<Rect>> = None;
 
         for figure in &scene.figures {
             rect = match (rect, compute_figure_size(figure)) {
                 (None, a) => Some(a),
                 (Some(None), _) | (_, None) => Some(None),
-                (Some(Some(a)), Some(b)) => Some(Some(a.union_with(&b))),
+                (Some(Some(a)), Some(b)) => Some(Some(a.union(&b))),
             }
         }
 
@@ -98,12 +104,13 @@ pub fn run_scene(mut scene: scene::Scene, telemetry: &mut telemetry::Telemetry, 
 
         for shape in &mut figure.shapes {
             *(&mut shape.implicit) = nodes::NodeRef::new(nodes::Node::Translate {
-                dx: -figure_bounds.left() + 2f32,
-                dy: -figure_bounds.top() + 2f32,
+                dx: -figure_bounds.min_x() + 2.0,
+                dy: -figure_bounds.min_y() + 2.0,
                 target: shape.implicit.clone(),
             });
         }
     }
+
     let mut treemap = ::std::collections::BTreeMap::new();
     for figure in &scene.figures {
         for shape in &figure.shapes {
@@ -119,8 +126,13 @@ pub fn run_scene(mut scene: scene::Scene, telemetry: &mut telemetry::Telemetry, 
 
     let mut tloc = telemetry::TelemetryLocation::new();
 
-    telemetry.scene_bounding_box(tloc, bb.top_left.x, bb.top_left.y, bb.width(), bb.height());
-    let evaluator = Evaluator::new(nest, bb.width().ceil() as usize + 4, bb.height().ceil() as usize + 4, None);
+    telemetry.scene_bounding_box(tloc, bb.min_x(), bb.min_y(), bb.size.width, bb.size.height);
+    let evaluator = Evaluator::new(
+        nest,
+        (bb.size.width.ceil() + bb.min_x()) as usize + 2,
+        (bb.size.height.ceil() + bb.min_y()) as usize + 2,
+        None,
+    );
 
     for figure in &scene.figures {
         tloc.new_figure();
@@ -165,10 +177,10 @@ pub fn run_scene(mut scene: scene::Scene, telemetry: &mut telemetry::Telemetry, 
         let fbb = compute_figure_size(figure).unwrap();
         output.figures.push(OutputFigure {
             shapes: output_shapes,
-            left: fbb.left() as f32,
-            top: fbb.top() as f32,
-            width: fbb.width() as f32,
-            height: fbb.height() as f32,
+            left: fbb.min_x(),
+            top: fbb.min_y(),
+            width: fbb.size.width,
+            height: fbb.size.height,
         });
     }
     telemetry.scene_finished(tloc, &output);

@@ -1,0 +1,227 @@
+{
+  "figures": [
+    {
+      "shapes": [
+        {
+          "implicit": {
+            "kind": "or",
+            "children": [
+              {
+                "kind": "or",
+                "children": [
+                  {
+                    "kind": "or",
+                    "children": [
+                      {
+                        "kind": "circle",
+                        "x": 400,
+                        "y": 0,
+                        "r": 52.034224525140196
+                      },
+                      {
+                        "kind": "and",
+                        "children": [
+                          {
+                            "kind": "circle",
+                            "x": 300,
+                            "y": 0,
+                            "r": 82.85354496902232
+                          },
+                          {
+                            "kind": "not",
+                            "target": {
+                              "kind": "modulate",
+                              "how_much": -10,
+                              "target": {
+                                "kind": "circle",
+                                "x": 400,
+                                "y": 0,
+                                "r": 52.034224525140196
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "and",
+                    "children": [
+                      {
+                        "kind": "circle",
+                        "x": 240,
+                        "y": 0,
+                        "r": 130.47241934920615
+                      },
+                      {
+                        "kind": "not",
+                        "target": {
+                          "kind": "modulate",
+                          "how_much": -10,
+                          "target": {
+                            "kind": "or",
+                            "children": [
+                              {
+                                "kind": "circle",
+                                "x": 400,
+                                "y": 0,
+                                "r": 52.034224525140196
+                              },
+                              {
+                                "kind": "and",
+                                "children": [
+                                  {
+                                    "kind": "circle",
+                                    "x": 300,
+                                    "y": 0,
+                                    "r": 82.85354496902232
+                                  },
+                                  {
+                                    "kind": "not",
+                                    "target": {
+                                      "kind": "modulate",
+                                      "how_much": -10,
+                                      "target": {
+                                        "kind": "circle",
+                                        "x": 400,
+                                        "y": 0,
+                                        "r": 52.034224525140196
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "and",
+                "children": [
+                  {
+                    "kind": "circle",
+                    "x": 200,
+                    "y": 0,
+                    "r": 208.13689810056078
+                  },
+                  {
+                    "kind": "not",
+                    "target": {
+                      "kind": "modulate",
+                      "how_much": -10,
+                      "target": {
+                        "kind": "or",
+                        "children": [
+                          {
+                            "kind": "or",
+                            "children": [
+                              {
+                                "kind": "circle",
+                                "x": 400,
+                                "y": 0,
+                                "r": 52.034224525140196
+                              },
+                              {
+                                "kind": "and",
+                                "children": [
+                                  {
+                                    "kind": "circle",
+                                    "x": 300,
+                                    "y": 0,
+                                    "r": 82.85354496902232
+                                  },
+                                  {
+                                    "kind": "not",
+                                    "target": {
+                                      "kind": "modulate",
+                                      "how_much": -10,
+                                      "target": {
+                                        "kind": "circle",
+                                        "x": 400,
+                                        "y": 0,
+                                        "r": 52.034224525140196
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "kind": "and",
+                            "children": [
+                              {
+                                "kind": "circle",
+                                "x": 240,
+                                "y": 0,
+                                "r": 130.47241934920615
+                              },
+                              {
+                                "kind": "not",
+                                "target": {
+                                  "kind": "modulate",
+                                  "how_much": -10,
+                                  "target": {
+                                    "kind": "or",
+                                    "children": [
+                                      {
+                                        "kind": "circle",
+                                        "x": 400,
+                                        "y": 0,
+                                        "r": 52.034224525140196
+                                      },
+                                      {
+                                        "kind": "and",
+                                        "children": [
+                                          {
+                                            "kind": "circle",
+                                            "x": 300,
+                                            "y": 0,
+                                            "r": 82.85354496902232
+                                          },
+                                          {
+                                            "kind": "not",
+                                            "target": {
+                                              "kind": "modulate",
+                                              "how_much": -10,
+                                              "target": {
+                                                "kind": "circle",
+                                                "x": 400,
+                                                "y": 0,
+                                                "r": 52.034224525140196
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "color": [
+            0,
+            0,
+            0
+          ],
+          "draw_mode": "filled"
+        }
+      ]
+    }
+  ],
+  "unit": "px",
+  "simplify": false
+}

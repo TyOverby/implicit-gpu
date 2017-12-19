@@ -1,0 +1,256 @@
+Translate {
+    dx: 10.136902,
+    dy: 210.1369,
+    target: NodeRef {
+        node: Or {
+            children: [
+                NodeRef {
+                    node: Or {
+                        children: [
+                            NodeRef {
+                                node: Or {
+                                    children: [
+                                        NodeRef {
+                                            node: Circle {
+                                                x: 400,
+                                                y: 0,
+                                                r: 52.034225
+                                            }
+                                        },
+                                        NodeRef {
+                                            node: And {
+                                                children: [
+                                                    NodeRef {
+                                                        node: Circle {
+                                                            x: 300,
+                                                            y: 0,
+                                                            r: 82.853546
+                                                        }
+                                                    },
+                                                    NodeRef {
+                                                        node: Not {
+                                                            target: NodeRef {
+                                                                node: Modulate {
+                                                                    how_much: -10,
+                                                                    target: NodeRef {
+                                                                        node: Circle {
+                                                                            x: 400,
+                                                                            y: 0,
+                                                                            r: 52.034225
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            NodeRef {
+                                node: And {
+                                    children: [
+                                        NodeRef {
+                                            node: Circle {
+                                                x: 240,
+                                                y: 0,
+                                                r: 130.47241
+                                            }
+                                        },
+                                        NodeRef {
+                                            node: Not {
+                                                target: NodeRef {
+                                                    node: Modulate {
+                                                        how_much: -10,
+                                                        target: NodeRef {
+                                                            node: Or {
+                                                                children: [
+                                                                    NodeRef {
+                                                                        node: Circle {
+                                                                            x: 400,
+                                                                            y: 0,
+                                                                            r: 52.034225
+                                                                        }
+                                                                    },
+                                                                    NodeRef {
+                                                                        node: And {
+                                                                            children: [
+                                                                                NodeRef {
+                                                                                    node: Circle {
+                                                                                        x: 300,
+                                                                                        y: 0,
+                                                                                        r: 82.853546
+                                                                                    }
+                                                                                },
+                                                                                NodeRef {
+                                                                                    node: Not {
+                                                                                        target: NodeRef {
+                                                                                            node: Modulate {
+                                                                                                how_much: -10,
+                                                                                                target: NodeRef {
+                                                                                                    node: Circle {
+                                                                                                        x: 400,
+                                                                                                        y: 0,
+                                                                                                        r: 52.034225
+                                                                                                    }
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    }
+                                                                ]
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                },
+                NodeRef {
+                    node: And {
+                        children: [
+                            NodeRef {
+                                node: Circle {
+                                    x: 200,
+                                    y: 0,
+                                    r: 208.1369
+                                }
+                            },
+                            NodeRef {
+                                node: Not {
+                                    target: NodeRef {
+                                        node: Modulate {
+                                            how_much: -10,
+                                            target: NodeRef {
+                                                node: Or {
+                                                    children: [
+                                                        NodeRef {
+                                                            node: Or {
+                                                                children: [
+                                                                    NodeRef {
+                                                                        node: Circle {
+                                                                            x: 400,
+                                                                            y: 0,
+                                                                            r: 52.034225
+                                                                        }
+                                                                    },
+                                                                    NodeRef {
+                                                                        node: And {
+                                                                            children: [
+                                                                                NodeRef {
+                                                                                    node: Circle {
+                                                                                        x: 300,
+                                                                                        y: 0,
+                                                                                        r: 82.853546
+                                                                                    }
+                                                                                },
+                                                                                NodeRef {
+                                                                                    node: Not {
+                                                                                        target: NodeRef {
+                                                                                            node: Modulate {
+                                                                                                how_much: -10,
+                                                                                                target: NodeRef {
+                                                                                                    node: Circle {
+                                                                                                        x: 400,
+                                                                                                        y: 0,
+                                                                                                        r: 52.034225
+                                                                                                    }
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    }
+                                                                ]
+                                                            }
+                                                        },
+                                                        NodeRef {
+                                                            node: And {
+                                                                children: [
+                                                                    NodeRef {
+                                                                        node: Circle {
+                                                                            x: 240,
+                                                                            y: 0,
+                                                                            r: 130.47241
+                                                                        }
+                                                                    },
+                                                                    NodeRef {
+                                                                        node: Not {
+                                                                            target: NodeRef {
+                                                                                node: Modulate {
+                                                                                    how_much: -10,
+                                                                                    target: NodeRef {
+                                                                                        node: Or {
+                                                                                            children: [
+                                                                                                NodeRef {
+                                                                                                    node: Circle {
+                                                                                                        x: 400,
+                                                                                                        y: 0,
+                                                                                                        r: 52.034225
+                                                                                                    }
+                                                                                                },
+                                                                                                NodeRef {
+                                                                                                    node: And {
+                                                                                                        children: [
+                                                                                                            NodeRef {
+                                                                                                                node: Circle {
+                                                                                                                    x: 300,
+                                                                                                                    y: 0,
+                                                                                                                    r: 82.853546
+                                                                                                                }
+                                                                                                            },
+                                                                                                            NodeRef {
+                                                                                                                node: Not {
+                                                                                                                    target: NodeRef {
+                                                                                                                        node: Modulate {
+                                                                                                                            how_much: -10,
+                                                                                                                            target: NodeRef {
+                                                                                                                                node: Circle {
+                                                                                                                                    x: 400,
+                                                                                                                                    y: 0,
+                                                                                                                                    r: 52.034225
+                                                                                                                                }
+                                                                                                                            }
+                                                                                                                        }
+                                                                                                                    }
+                                                                                                                }
+                                                                                                            }
+                                                                                                        ]
+                                                                                                    }
+                                                                                                }
+                                                                                            ]
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                ]
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    }
+}

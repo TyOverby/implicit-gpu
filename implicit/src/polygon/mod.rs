@@ -1,22 +1,23 @@
+use geometry::Point;
 use opencl::{FieldBuffer, LineBuffer, OpenClContext};
 
-const PROGRAM: &'static str =
-    concat!(
-        include_str!("./dist_to_line.c"),
-        include_str!("./polygon.c"));
+const PROGRAM: &'static str = concat!(include_str!("./dist_to_line.c"), include_str!("./polygon.c"));
 
 // TODO: rewrite this function so that it just takes &[f32]
 pub fn run_poly<I>(points: I, width: usize, height: usize, pos_mod: Option<(f32, f32)>, ctx: &OpenClContext) -> Option<FieldBuffer>
-where I: IntoIterator<Item=(f32, f32)> {
+where
+    I: IntoIterator<Item = Point> {
     let _guard = ::flame::start_guard("run_poly");
 
     let mut buffer = vec![];
-    for (xs, ys) in points {
-        buffer.push(xs);
-        buffer.push(ys);
+    for Point { x, y, .. } in points {
+        buffer.push(x);
+        buffer.push(y);
     }
 
-    if buffer.len() == 0 { return None; }
+    if buffer.len() == 0 {
+        return None;
+    }
 
     let buffer = ctx.line_buffer(&buffer[..]);
 

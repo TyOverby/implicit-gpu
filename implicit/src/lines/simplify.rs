@@ -1,6 +1,6 @@
 
 use super::OPT_EPSILON;
-use super::geom::{Line, Point};
+use geometry::{distance_from_line_to_point, Line, Point};
 
 /// Takes a line of points and joins lines that are very
 /// similar to being
@@ -18,7 +18,7 @@ pub fn simplify_line(pts: Vec<Point>) -> Vec<Point> {
 
     while let Some(p) = pts.next() {
         let line = Line(first, p);
-        let dist_to_prev = line.dist_to_point(prev);
+        let dist_to_prev = distance_from_line_to_point(line, prev);
         if dist_to_prev < OPT_EPSILON {
             prev = p;
         } else {

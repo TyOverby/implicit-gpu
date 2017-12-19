@@ -1,4 +1,4 @@
-import * as impl from "../../../implicit-ts/src/implicit"
+import * as impl from "../../../implicit-ts/src/lib/implicit"
 
 const shape =
     impl.freeze(impl.modulate(10, impl.or(
