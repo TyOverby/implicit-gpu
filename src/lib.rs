@@ -10,9 +10,11 @@ extern crate permutohedron;
 extern crate smallvec;
 
 mod dual_quad_tree;
+mod graph_stitch;
 mod optimize;
 mod test;
 mod prune;
+mod zero_area_loop;
 pub(crate) mod util;
 
 use aabb_quadtree::*;
@@ -21,6 +23,8 @@ use dual_quad_tree::*;
 
 pub use optimize::optimize;
 pub use prune::prune;
+pub use graph_stitch::connect_unconnected as graph_stitch;
+pub use zero_area_loop::remove_zero_area_loops;
 
 type Point<S> = euclid::TypedPoint2D<f32, S>;
 
@@ -43,11 +47,6 @@ impl<S> ::std::fmt::Debug for PathSegment<S> {
     }
 }
 
-pub(crate) fn centered_with_radius<S>(pt: Point<S>, radius: f32) -> euclid::TypedRect<f32, S> {
-    let half = euclid::vec2(radius, radius);
-    euclid::TypedRect::new(pt - half, (half * 2.0).to_size())
-}
-
 impl<S> PathSegment<S> {
     /// TODO: doc
     pub fn new<P: Into<SmallVec<[Point<S>; 2]>>>(path: P, epsilon: f32) -> PathSegment<S> {
@@ -59,7 +58,7 @@ impl<S> PathSegment<S> {
         let first_pt: Point<S> = Point::new(first.x, first.y);
         let last_pt: Point<S> = Point::new(last.x, last.y);
 
-        let query_rect = centered_with_radius(first_pt, epsilon);
+        let query_rect = util::centered_with_radius(first_pt, epsilon);
         let closed = query_rect.contains(&last_pt);
         if closed {
             path.pop();
