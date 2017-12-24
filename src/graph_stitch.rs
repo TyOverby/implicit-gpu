@@ -11,13 +11,7 @@ type Rect<S> = TypedRect<f32, S>;
 
 #[derive(Clone)]
 struct Graph<S> {
-    tree: QuadTree<Vec<Point<S>>, S>,
-}
-
-#[derive(PartialEq)]
-pub enum LineType<S> {
-    Joined(Vec<Point<S>>),
-    Unjoined(Vec<Point<S>>),
+    tree: QuadTree<PathSegment<S>, S>,
 }
 
 type VisitedSet = HashMap<ItemId, f32>;
@@ -28,17 +22,21 @@ fn is_close<S>(p1: Point<S>, p2: Point<S>) -> bool {
 }
 
 impl<S> Graph<S> {
-    fn new(v: Vec<Vec<Point<S>>>) -> Graph<S> {
+    fn new(v: Vec<PathSegment<S>>) -> Graph<S> {
         let v: Vec<_> = v.into_iter()
-            .map(|v| (compute_bounding_box(v.iter().cloned()), v))
+            .map(|v| (compute_bounding_box(vec![v.first(), v.last()]), v))
             .collect();
 
         let mut rect = Rect::new(point2(0.0, 0.0), vec2(0.0, 0.0).to_size());
         for &(ref r, _) in &v {
             rect = rect.union(r);
         }
+        let rect = rect.inflate(
+            2.0f32.max(rect.size.width / 10.0),
+            2.0f32.max(rect.size.height / 10.0),
+        );
 
-        let mut tree = QuadTree::new(rect.inflate(2.0, 2.0), false, 4, 16, 4);
+        let mut tree = QuadTree::new(rect, false, 4, 16, 4);
 
         for (bb, v) in v {
             tree.insert_with_box(v, bb);
@@ -50,7 +48,7 @@ impl<S> Graph<S> {
     fn connected_to(&self, id: ItemId) -> Vec<ItemId> {
         let segment = self.tree.get(id).unwrap();
 
-        let last_point = segment.last().cloned().unwrap();
+        let last_point = segment.last();
         let query = centered_with_radius(last_point, 1.0 / 4.0);
         return self.tree
             .query(query)
@@ -58,10 +56,7 @@ impl<S> Graph<S> {
             .filter_map(|(ref v, _, id2)| {
                 if id == id2 {
                     return None;
-                } else if is_close(
-                    segment.last().cloned().unwrap(),
-                    v.first().cloned().unwrap(),
-                ) {
+                } else if is_close(segment.last(), v.first()) {
                     Some(id2)
                 } else {
                     None
@@ -72,15 +67,10 @@ impl<S> Graph<S> {
 
     fn length_of(&self, id: ItemId) -> f32 {
         let segment = self.tree.get(id).unwrap();
-        let mut dist = 0.0;
-        for window in segment.windows(2) {
-            dist += (window[0] - window[1]).length();
-        }
-
-        dist
+        segment.length()
     }
 
-    fn remove(&mut self, id: ItemId) -> Vec<Point<S>> {
+    fn remove(&mut self, id: ItemId) -> PathSegment<S> {
         self.tree.remove(id).unwrap().0
     }
     fn try_remove(&mut self, id: ItemId) {
@@ -152,7 +142,7 @@ fn recur<S>(
     // visited.remove(&at);
 }
 
-fn one_iter<S>(mut graph: Graph<S>) -> (Graph<S>, Vec<Vec<Point<S>>>) {
+fn one_iter<S>(mut graph: Graph<S>) -> (Graph<S>, Vec<PathSegment<S>>) {
     use std::cmp::{Ordering, PartialOrd};
     let mut best_possible = 0.0;
     let mut possible = vec![];
@@ -205,7 +195,7 @@ fn one_iter<S>(mut graph: Graph<S>) -> (Graph<S>, Vec<Vec<Point<S>>>) {
             out.push(
                 l00p.into_iter()
                     .flat_map(|pt| graph.remove(pt))
-                    .collect::<Vec<_>>(),
+                    .collect::<PathSegment<_>>(),
             );
         }
     }
@@ -217,7 +207,7 @@ fn one_iter<S>(mut graph: Graph<S>) -> (Graph<S>, Vec<Vec<Point<S>>>) {
     (graph, out)
 }
 
-fn try_solve<S>(mut graph: Graph<S>) -> Vec<Vec<Point<S>>> {
+fn try_solve<S>(mut graph: Graph<S>) -> Vec<PathSegment<S>> {
     let mut out = vec![];
     while !graph.tree.is_empty() {
         let (ng, pts) = one_iter(graph);
@@ -230,27 +220,13 @@ fn try_solve<S>(mut graph: Graph<S>) -> Vec<Vec<Point<S>>> {
 
 ///
 /// TODO: document
-pub fn connect_unconnected<S>(joined: Vec<LineType<S>>) -> Vec<LineType<S>> {
-    let (mut good, bad) = joined.into_iter().partition::<Vec<_>, _>(|a| match a {
-        &LineType::Joined(_) => true,
-        &LineType::Unjoined(_) => false,
-    });
+pub fn connect_unconnected<S>(joined: Vec<PathSegment<S>>) -> Vec<PathSegment<S>> {
+    let (mut good, bad) = joined.into_iter().partition::<Vec<_>, _>(|a| a.closed);
 
-    let bad_internal = bad.into_iter()
-        .filter_map(|uj| match uj {
-            LineType::Unjoined(v) => if v.len() > 0 {
-                Some(v)
-            } else {
-                None
-            },
-            _ => None,
-        })
-        .collect::<Vec<_>>();
-
-    let graph = Graph::new(bad_internal);
+    let graph = Graph::new(bad);
     let solved = try_solve(graph);
 
-    good.extend(solved.into_iter().map(LineType::Joined));
+    good.extend(solved.into_iter());
 
     good
 }

@@ -20,6 +20,8 @@ pub(crate) mod util;
 use aabb_quadtree::*;
 use smallvec::SmallVec;
 use dual_quad_tree::*;
+use std::cell::Cell;
+use std::iter::{IntoIterator, FromIterator};
 
 pub use optimize::optimize;
 pub use prune::prune;
@@ -36,6 +38,8 @@ pub struct PathSegment<S> {
     /// True if the end of the path segment is the same as the
     /// beginning of the path segment.
     pub closed: bool,
+    length_2: Cell<Option<f32>>,
+    length: Cell<Option<f32>>,
 }
 
 impl<S> ::std::fmt::Debug for PathSegment<S> {
@@ -67,6 +71,8 @@ impl<S> PathSegment<S> {
         PathSegment {
             path: path,
             closed: closed,
+            length_2: Cell::new(None),
+            length: Cell::new(None),
         }
     }
 
@@ -80,19 +86,51 @@ impl<S> PathSegment<S> {
 
     /// TODO: document
     pub fn length_2(&self) -> f32 {
-        self.path
+        if let Some(l) = self.length_2.get() {
+            return l;
+        }
+
+        let length_2 = self.path
             .as_slice()
             .windows(2)
             .map(|s| (s[1] - s[0]).square_length())
-            .sum()
+            .sum();
+
+        self.length_2.set(Some(length_2));
+
+        return length_2;
     }
 
     /// TODO: document
     pub fn length(&self) -> f32 {
-        self.path
+        if let Some(l) = self.length.get() {
+            return l;
+        }
+
+        let length = self.path
             .as_slice()
             .windows(2)
             .map(|s| (s[1] - s[0]).length())
-            .sum()
+            .sum();
+        self.length.set(Some(length));
+
+        return length;
     }
+}
+
+impl<S> IntoIterator for PathSegment<S> {
+    type Item = Point<S>;
+    type IntoIter = smallvec::IntoIter<[Point<S>; 2]>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.path.into_iter()
+    }
+}
+
+impl <S> FromIterator<Point<S>> for PathSegment<S> {
+    fn from_iter<T>(iter: T) -> Self
+    where
+        T: IntoIterator<Item = Point<S>> {
+        PathSegment::new(iter.into_iter().collect::<Vec<_>>(), 0.001)
+    }
+
 }
