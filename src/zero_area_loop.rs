@@ -29,8 +29,6 @@ where
             .map(|(&line, _, id)| (line, id))
             .collect();
 
-        println!("{} results", q_result.len());
-        println!("query: {:?}", query);
         for ((p1b, p2b), id) in q_result {
             // We are already in the tree TODO: should we remove these duplicates?
             /*

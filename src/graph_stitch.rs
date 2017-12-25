@@ -36,7 +36,7 @@ impl<S> Graph<S> {
             2.0f32.max(rect.size.height / 10.0),
         );
 
-        let mut tree = QuadTree::new(rect, false, 4, 16, 4);
+        let mut tree = QuadTree::new(rect, true, 4, 16, 4);
 
         for (bb, v) in v {
             tree.insert_with_box(v, bb);
@@ -192,11 +192,21 @@ fn one_iter<S>(mut graph: Graph<S>) -> (Graph<S>, Vec<PathSegment<S>>) {
             visited_loops.extend(l00p.iter().cloned());
             // TODO: this flattens things but the edge conditions might
             // be weird.
-            out.push(
-                l00p.into_iter()
-                    .flat_map(|pt| graph.remove(pt))
-                    .collect::<PathSegment<_>>(),
-            );
+
+            let mut loop_out = vec![];
+            let mut first_iteration = true;
+            for mut segment in l00p.into_iter().map(|id| graph.remove(id)) {
+                if !first_iteration {
+                    segment.path.remove(0);
+                }
+                first_iteration = false;
+
+                for point in segment {
+                    loop_out.push(point);
+                }
+            }
+
+            out.push(PathSegment::new(loop_out, 0.001));
         }
     }
 

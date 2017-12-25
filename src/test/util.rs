@@ -16,7 +16,7 @@ pub fn assert_same(
 ) -> Result<(), String> {
     if actual.len() != expected.len() {
         return Err(format!(
-            "assert_same wrong lengths {} vs {}\n actual: {:?}\n expected: {:?}",
+            "assert_same wrong lengths {} vs {}\n actual: {:#?}\n expected: {:#?}",
             actual.len(),
             expected.len(),
             actual,
@@ -35,7 +35,7 @@ pub fn assert_same(
 
         if !found {
             return Err(format!(
-                "{:?} not found in actual\n actual: {:?}\n expected: {:?}",
+                "{:?} not found in actual\n actual: {:#?}\n expected: {:#?}",
                 ex,
                 actual,
                 expected

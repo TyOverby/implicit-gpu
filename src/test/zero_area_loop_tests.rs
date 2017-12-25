@@ -33,7 +33,8 @@ fn run(mut p: Problem) {
         let output: Vec<_> = output.into_iter().map(|(a, b)| PathSegment::new(vec![a, b], new_p.epsilon)).collect();
 
         if let Err(e) = assert_same(&output, &expected, !new_p.only_starts) {
-            panic!("{}", e);
+            print!("${}", e);
+            panic!();
         }
     });
 }
