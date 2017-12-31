@@ -11,7 +11,7 @@ extern crate smallvec;
 
 mod dual_quad_tree;
 mod graph_stitch;
-mod optimize;
+mod connect_obvious;
 mod test;
 mod prune;
 mod zero_area_loop;
@@ -23,7 +23,7 @@ use dual_quad_tree::*;
 use std::cell::Cell;
 use std::iter::{IntoIterator, FromIterator};
 
-pub use optimize::optimize;
+pub use connect_obvious::connect_obvious;
 pub use prune::prune;
 pub use graph_stitch::connect_unconnected as graph_stitch;
 pub use zero_area_loop::remove_zero_area_loops;

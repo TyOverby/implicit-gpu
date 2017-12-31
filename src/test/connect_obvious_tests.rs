@@ -1,5 +1,5 @@
 use super::util::*;
-use ::optimize;
+use ::connect_obvious;
 use permutohedron::heap_recursive as permute;
 use euclid::{UnknownUnit, point2};
 
@@ -30,7 +30,7 @@ fn default_problem() -> Problem {
 fn run(mut p: Problem) {
     let new_p = p.clone();
     permute(&mut p.input, |input| {
-        let output = optimize(
+        let output = connect_obvious(
             input.to_vec(),
             new_p.epsilon,
             new_p.only_starts,

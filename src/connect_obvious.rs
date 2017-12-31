@@ -4,7 +4,7 @@ use std::cell::RefCell;
 use itertools::{repeat_call, Itertools};
 
 /// todo: doc
-pub fn optimize<P, I, S: 'static>(
+pub fn connect_obvious<P, I, S: 'static>(
     segments: I,
     epsilon: f32,
     only_starts: bool,
