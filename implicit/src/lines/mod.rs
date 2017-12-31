@@ -71,7 +71,7 @@ pub fn connect_lines(
 
     lines.sort_by(|l1, l2| l1.partial_cmp(&l2).unwrap_or(Ordering::Equal));
 
-    let (mut joined, qt) = join::join_lines(lines, telemetry, tloc);
+    let (joined, qt) = join::join_lines(lines, telemetry, tloc);
 
     // TODO: is this necessary?
     // joined.sort_by(|a, b|
