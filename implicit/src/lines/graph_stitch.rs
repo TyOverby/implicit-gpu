@@ -28,7 +28,7 @@ impl Graph {
             rect = rect.union(r);
         }
 
-        let mut tree = QuadTree::new(rect.inflate(2.0, 2.0), false, 4, 16, 4);
+        let mut tree = QuadTree::new(rect.inflate(2.0, 2.0), true, 4, 16, 4);
 
         for (bb, v) in v {
             tree.insert_with_box(v, bb);
