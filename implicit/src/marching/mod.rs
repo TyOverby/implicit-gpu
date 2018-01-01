@@ -12,15 +12,18 @@ pub fn run_marching(input: &FieldBuffer, ctx: &OpenClContext) -> LineBuffer {
     let line_buffer = ctx.line_buffer(&from);
     let sync_buffer = ctx.sync_buffer();
 
-    kernel
+    let exec = kernel
+        .queue(ctx.queue().clone())
         .gws([width, height])
         .arg_buf(input.buffer())
         .arg_scl(width as u64)
         .arg_scl(height as u64)
         .arg_buf(line_buffer.buffer())
-        .arg_buf(sync_buffer.buffer())
-        .enq()
-        .unwrap();
+        .arg_buf(sync_buffer.buffer());
+
+    unsafe {
+        exec.enq().unwrap();
+    }
 
     line_buffer
 }

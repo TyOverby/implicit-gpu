@@ -31,15 +31,17 @@ pub fn run_poly_raw(lines: LineBuffer, width: usize, height: usize, pos_mod: Opt
 
     let pos_mod = pos_mod.unwrap_or((0.0, 0.0));
 
-    kernel
+    let exec = kernel
+        .queue(ctx.queue().clone())
         .gws([width, height])
         .arg_buf(out.buffer())
         .arg_scl(width as u64)
         .arg_buf(lines.buffer())
         .arg_scl(lines.size())
         .arg_scl(pos_mod.0)
-        .arg_scl(pos_mod.1)
-        .enq()
-        .unwrap();
+        .arg_scl(pos_mod.1);
+    unsafe {
+        exec.enq().unwrap();
+    }
     out
 }

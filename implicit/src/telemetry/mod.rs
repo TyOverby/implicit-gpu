@@ -2,12 +2,11 @@ pub use self::dump::*;
 pub use self::null::*;
 pub(crate) use self::svg_helpers::*;
 use debug::*;
-use lines::LineType;
+use geometry::{Point, PathSegment};
 use nodes::Node;
 use opencl::FieldBuffer;
 use output::{OutputScene, OutputShape};
 use std::path::PathBuf;
-use geometry::{Line};
 
 mod null;
 mod dump;
@@ -66,10 +65,13 @@ impl TelemetryLocation {
 
 pub trait Telemetry {
     fn shape_finished(&mut self, t: TelemetryLocation, buffer: &FieldBuffer, lines: &[((f32, f32), (f32, f32))]);
-    fn shape_line_pre_prune(&mut self, t: TelemetryLocation, lines: &[Line]);
-    fn shape_line_pruned(&mut self, t: TelemetryLocation, lines: &[Line]);
-    fn shape_line_joined(&mut self, t: TelemetryLocation, lines: &[LineType]);
-    fn shape_line_connected(&mut self, t: TelemetryLocation, lines: &[LineType]);
+
+    fn lines_0_input(&mut self, _t: TelemetryLocation, _lines: &[(Point, Point)]);
+    fn lines_1_zero_area_removed(&mut self, _t: TelemetryLocation, _lines: &[(Point, Point)]);
+    fn lines_2_pruned(&mut self, _t: TelemetryLocation, _lines: &[PathSegment]);
+    fn lines_3_obvious_connected(&mut self, _t: TelemetryLocation, _lines: &[PathSegment]);
+    fn lines_4_graph_stitched(&mut self, _t: TelemetryLocation, _lines: &[PathSegment]);
+
     fn intermediate_eval_basic(&mut self, t: TelemetryLocation, buffer: &FieldBuffer, program: &str, node: &Node);
     fn intermediate_eval_poly(&mut self, t: TelemetryLocation, buffer: &FieldBuffer);
     fn figure_finished(&mut self, t: TelemetryLocation, figure: &[OutputShape]);

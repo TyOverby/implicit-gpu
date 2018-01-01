@@ -1,6 +1,5 @@
 use debug::*;
-use geometry::Line;
-use lines::LineType;
+use geometry::{Point, PathSegment};
 use nodes::Node;
 use opencl::FieldBuffer;
 use output::{OutputScene, OutputShape};
@@ -79,34 +78,50 @@ impl Telemetry for DumpTelemetry {
         }
     }
 
-    fn shape_line_pre_prune(&mut self, tloc: TelemetryLocation, lines: &[Line]) {
+    fn lines_0_input(&mut self, tloc: TelemetryLocation, lines: &[(Point, Point)]) {
         use std::fs::File;
-        let _guard = ::flame::start_guard("telemetry shape_line_pre_prune");
-        let file = File::create(self.shape_path(tloc, "pre-pruned.svg")).unwrap();
+        let _guard = ::flame::start_guard("telemetry lines_0_input");
+        let file = File::create(self.shape_path(tloc, "lines_0_input.svg")).unwrap();
         output_svg_lines(file, lines.iter().cloned());
     }
 
-    fn shape_line_pruned(&mut self, tloc: TelemetryLocation, lines: &[Line]) {
+
+    /*
+    fn lines_0_input(&mut self, _t: TelemetryLocation, _lines: &[Line]) {}
+    fn lines_1_pruned(&mut self, _t: TelemetryLocation, _lines: &[Line]) {}
+    fn lines_2_zero_area_removed(&mut self, _t: TelemetryLocation, _lines: &[PathSegment<euclid::UnknownUnit>]) {}
+    fn lines_3_obvious_connected(&mut self, _t: TelemetryLocation, _lines: &[PathSegment<euclid::UnknownUnit>]) {}
+    fn lines_4_graph_stitched(&mut self, _t: TelemetryLocation, _lines: &[PathSegment<euclid::UnknownUnit>]) {}
+*/
+
+    fn lines_1_zero_area_removed(&mut self, tloc: TelemetryLocation, lines: &[(Point, Point)]) {
         use std::fs::File;
 
-        let _guard = ::flame::start_guard("telemetry shape_line_pruned");
-        let file = File::create(self.shape_path(tloc, "pruned.svg")).unwrap();
+        let _guard = ::flame::start_guard("telemetry lines_1_zero_zrea_removed");
+        let file = File::create(self.shape_path(tloc, "lines_1_zero_area_removed.svg")).unwrap();
         output_svg_lines(file, lines.iter().cloned());
     }
 
-    fn shape_line_joined(&mut self, tloc: TelemetryLocation, lines: &[LineType]) {
+    fn lines_2_pruned(&mut self, tloc: TelemetryLocation, lines: &[PathSegment]) {
         use std::fs::File;
-
-        let _guard = ::flame::start_guard("telemetry shape_line_joined");
-        let file = File::create(self.shape_path(tloc, "joined.svg")).unwrap();
+        let _guard = ::flame::start_guard("telemetry lines_2_pruned");
+        let file = File::create(self.shape_path(tloc, "lines_2_pruned.svg")).unwrap();
         output_svg_linetype(file, lines.iter());
     }
 
-    fn shape_line_connected(&mut self, tloc: TelemetryLocation, lines: &[LineType]) {
+    fn lines_3_obvious_connected(&mut self, tloc: TelemetryLocation, lines: &[PathSegment]) {
         use std::fs::File;
 
-        let _guard = ::flame::start_guard("telemetry shape_line_connected");
-        let file = File::create(self.shape_path(tloc, "connected.svg")).unwrap();
+        let _guard = ::flame::start_guard("telemetry lines_3_obvious_connected");
+        let file = File::create(self.shape_path(tloc, "lines_3_obvious_connected.svg")).unwrap();
+        output_svg_linetype(file, lines.iter());
+    }
+
+    fn lines_4_graph_stitched(&mut self, tloc: TelemetryLocation, lines: &[PathSegment]) {
+        use std::fs::File;
+
+        let _guard = ::flame::start_guard("telemetry lines_4_graph_stitched");
+        let file = File::create(self.shape_path(tloc, "lines_4_graph_stitched.svg")).unwrap();
         output_svg_linetype(file, lines.iter());
     }
 

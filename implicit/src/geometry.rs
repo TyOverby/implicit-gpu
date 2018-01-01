@@ -1,8 +1,11 @@
 use aabb_quadtree;
 use euclid::{self, UnknownUnit, point2};
+use line_stitch;
 
 pub type Point = euclid::Point2D<f32>;
 pub type Rect = euclid::Rect<f32>;
+pub type PathSegment = line_stitch::PathSegment<euclid::UnknownUnit>;
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Line(pub Point, pub Point);
 

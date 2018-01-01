@@ -1,5 +1,5 @@
 use super::*;
-use geometry::Line;
+use geometry::{PathSegment, Point};
 
 pub struct NullTelemetry;
 
@@ -7,10 +7,12 @@ impl Telemetry for NullTelemetry {
     fn shape_finished(&mut self, _t: TelemetryLocation, _buffer: &FieldBuffer, _lines: &[((f32, f32), (f32, f32))]) {}
     fn intermediate_eval_basic(&mut self, _t: TelemetryLocation, _buffer: &FieldBuffer, _program: &str, _node: &Node) {}
     fn intermediate_eval_poly(&mut self, _t: TelemetryLocation, _buffer: &FieldBuffer) {}
-    fn shape_line_pre_prune(&mut self, _t: TelemetryLocation, _lines: &[Line]) {}
-    fn shape_line_pruned(&mut self, _t: TelemetryLocation, _lines: &[Line]) {}
-    fn shape_line_joined(&mut self, _t: TelemetryLocation, _lines: &[LineType]) {}
-    fn shape_line_connected(&mut self, _t: TelemetryLocation, _lines: &[LineType]) {}
+
+    fn lines_0_input(&mut self, _t: TelemetryLocation, _lines: &[(Point, Point)]) {}
+    fn lines_1_zero_area_removed(&mut self, _t: TelemetryLocation, _lines: &[(Point, Point)]) {}
+    fn lines_2_pruned(&mut self, _t: TelemetryLocation, _lines: &[PathSegment]) {}
+    fn lines_3_obvious_connected(&mut self, _t: TelemetryLocation, _lines: &[PathSegment]) {}
+    fn lines_4_graph_stitched(&mut self, _t: TelemetryLocation, _lines: &[PathSegment]) {}
     fn figure_finished(&mut self, _t: TelemetryLocation, _figure: &[OutputShape]) {}
 
     fn scene_started(&mut self) {}

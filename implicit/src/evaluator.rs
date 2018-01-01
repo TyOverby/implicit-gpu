@@ -1,16 +1,16 @@
 use compiler::*;
-use telemetry::{Telemetry, TelemetryLocation};
-
+use euclid::point2;
+use geometry::Point;
 use itertools::Itertools;
+use lines::connect_lines;
 use nodes::{Node, PolyGroup};
+use nodes::poly::separate_polygons;
 use opencl::{FieldBuffer, LineBuffer};
-
 use opencl::OpenClContext;
 use polygon::run_poly;
 use std::collections::HashMap;
 use std::sync::Mutex;
-use geometry::{Point, Line};
-use euclid::point2;
+use telemetry::{Telemetry, TelemetryLocation};
 
 #[derive(Debug)]
 pub struct Evaluator {
@@ -34,7 +34,7 @@ impl Evaluator {
     pub fn evaluate(&self, which: GroupId, ctx: &OpenClContext, telemetry: &mut Telemetry, tloc: TelemetryLocation) -> FieldBuffer {
         let _guard = ::flame::start_guard(format!("evaluate {:?}", which));
         {
-           let finished = self.finished.lock().unwrap();
+            let finished = self.finished.lock().unwrap();
             if let Some(buff) = finished.get(&which) {
                 return buff.clone();
             }
@@ -55,16 +55,17 @@ impl Evaluator {
             let out = ctx.field_buffer(self.width, self.height, None);
             let kernel = ctx.compile("apply", program.clone());
 
-            let mut kc = kernel.gws([self.width, self.height]).arg_buf(out.buffer()).arg_scl(
-                self.width as
-                    u64,
-            );
+            let mut kc = kernel
+                .queue(ctx.queue().clone())
+                .gws([self.width, self.height])
+                .arg_buf(out.buffer())
+                .arg_scl(self.width as u64);
 
             for dep in &deps {
                 kc = kc.arg_buf(dep.buffer());
             }
 
-            ::flame::span_of("eval", || kc.enq().unwrap());
+            ::flame::span_of("eval", || unsafe { kc.enq().unwrap() });
 
             telemetry.intermediate_eval_basic(tloc, &out, &program, root);
             out
@@ -84,9 +85,7 @@ impl Evaluator {
 
         let group = self.nest.get(which);
         let out = match group {
-            &NodeGroup::Basic(ref root) => {
-                eval_basic_group(root, telemetry, tloc)
-            },
+            &NodeGroup::Basic(ref root) => eval_basic_group(root, telemetry, tloc),
             &NodeGroup::Freeze(ref root) => {
                 let field_buf = eval_basic_group(root, telemetry, tloc);
                 let (width, height) = field_buf.size();
@@ -119,25 +118,33 @@ impl Evaluator {
     }
 }
 
-pub fn line_buffer_to_poly(buffer: &LineBuffer, telemetry: &mut Telemetry, tloc: TelemetryLocation, simplify: bool) -> (Vec<Vec<Point>>, Vec<Vec<Point>>) {
-    use ::lines;
+pub fn line_buffer_to_poly(
+    buffer: &LineBuffer, telemetry: &mut Telemetry, tloc: TelemetryLocation, simplify: bool
+) -> (Vec<Vec<Point>>, Vec<Vec<Point>>) {
     let lines = buffer.values();
 
     let lines = lines
         .into_iter()
         .tuples::<(_, _, _, _)>()
         .filter(|&(a, b, c, d)| !(a.is_nan() || b.is_nan() || c.is_nan() || d.is_nan()))
-        .map(|(a, b, c, d)| Line(point2(a, b), point2(c, d)))
+        .map(|(a, b, c, d)| (point2(a, b), point2(c, d)))
         .collect::<Vec<_>>();
 
-    let (lines, _) = lines::connect_lines(lines, simplify, telemetry, tloc);
-    let (additive, subtractive) = lines::separate_polygons(lines);
-    (additive, subtractive)
+
+    let lines = connect_lines(lines, simplify, telemetry, tloc);
+    let (additive, subtractive) = separate_polygons(lines);
+    (
+        additive.into_iter().map(|a| a.path.to_vec()).collect(),
+        subtractive.into_iter().map(|a| a.path.to_vec()).collect(),
+    )
 }
 
 // TODO: replace with impl trait
 fn grouping_to_segments<A, I>(iter: I) -> Vec<A>
-where I: IntoIterator<Item=A>, A: Clone {
+where
+    I: IntoIterator<Item = A>,
+    A: Clone,
+{
     let mut iter = iter.into_iter();
     let mut out = vec![];
     let first = if let Some(first) = iter.next() {

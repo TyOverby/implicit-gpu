@@ -1,48 +1,44 @@
-use lines::LineType;
-use geometry::Line;
+use geometry::Point;
+use line_stitch::PathSegment;
 
-pub fn output_svg_linetype<'a, I>(file: ::std::fs::File, lines: I)
-where I: Iterator<Item = &'a LineType> {
+pub fn output_svg_linetype<'a, I, S: 'static>(file: ::std::fs::File, lines: I)
+where I: Iterator<Item = &'a PathSegment<S>> {
     use vectorphile::Canvas;
     use vectorphile::backend::{Command, DrawBackend, DrawOptions};
     use vectorphile::svg::SvgBackend;
     let mut canvas = Canvas::new(SvgBackend::new(file).unwrap());
 
-    for line in lines {
-        let (pts, restitch) = match line {
-            &LineType::Joined(ref pts) => {
-                canvas
-                    .apply(Command::StartShape(DrawOptions::stroked((0, 0, 0), 0.2)))
-                    .unwrap();
-                (&pts[..], true)
-            }
-            &LineType::Unjoined(ref pts) => {
-                canvas
-                    .apply(Command::StartShape(DrawOptions::stroked((255, 0, 0), 0.2)))
-                    .unwrap();
-                (&pts[..], false)
-            }
-        };
-        if pts.len() > 0 {
+    for &PathSegment{ref path, closed, ..} in lines {
+        if closed {
+            canvas
+                .apply(Command::StartShape(DrawOptions::stroked((0, 0, 0), 0.2)))
+                .unwrap();
+        } else {
+            canvas
+                .apply(Command::StartShape(DrawOptions::stroked((255, 0, 0), 0.2)))
+                .unwrap();
+        }
+
+        if path.len() > 0 {
             canvas
                 .apply(Command::MoveTo {
-                    x: pts[0].x as f64,
-                    y: pts[0].y as f64,
+                    x: path[0].x as f64,
+                    y: path[0].y as f64,
                 })
                 .unwrap();
             canvas
                 .apply_all(
-                    pts.iter()
+                    path.iter()
                         .skip(1)
                         .map(|pt| Command::LineTo { x: pt.x as f64, y: pt.y as f64 }),
                 )
                 .unwrap();
 
-            if restitch {
+            if closed {
                 canvas
                     .apply(Command::LineTo {
-                        x: pts[0].x as f64,
-                        y: pts[0].y as f64,
+                        x: path[0].x as f64,
+                        y: path[0].y as f64,
                     })
                     .unwrap();
             }
@@ -53,7 +49,7 @@ where I: Iterator<Item = &'a LineType> {
 }
 
 pub fn output_svg_lines<'a, I>(file: ::std::fs::File, lines: I)
-where I: Iterator<Item = Line> {
+where I: Iterator<Item = (Point, Point)> {
     use vectorphile::Canvas;
     use vectorphile::backend::{Command, DrawBackend, DrawOptions};
     use vectorphile::svg::SvgBackend;
@@ -63,7 +59,7 @@ where I: Iterator<Item = Line> {
         .apply(Command::StartShape(DrawOptions::stroked((0, 0, 0), 0.2)))
         .unwrap();
 
-    for Line(p1, p2) in lines {
+    for (p1, p2) in lines {
         canvas
             .apply(Command::MoveTo { x: p1.x as f64, y: p1.y as f64 })
             .unwrap();

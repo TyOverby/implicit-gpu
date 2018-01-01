@@ -1,4 +1,4 @@
-mod poly;
+pub mod poly;
 
 pub use self::poly::*;
 use compiler::GroupId;

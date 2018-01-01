@@ -43,7 +43,7 @@ pub fn all_devices() -> Vec<(Platform, Device)> {
 impl OpenClContext {
     pub fn new(platform: Platform, device: Device) -> OpenClContext {
         let context = Context::builder().platform(platform).devices(device).build().unwrap();
-        let queue = Queue::new(&context, device).unwrap();
+        let queue = Queue::new(&context, device, None).unwrap();
 
         OpenClContext {
             platform: platform,
@@ -75,7 +75,7 @@ impl OpenClContext {
             let program_cache = self.program_cache.lock().unwrap();
             if let Some(&(_, ref p)) = program_cache.iter().filter(|&&(ref s, _)| s == &source).next() {
                 let _guard = ::flame::start_guard("Kernel::new");
-                return Kernel::new(name, p, &self.queue).unwrap();
+                return Kernel::new(name, p).unwrap();
             }
         }
 
@@ -90,7 +90,7 @@ impl OpenClContext {
             program_cache.push((source, program.clone()));
         }
 
-        Kernel::new(name, &program, &self.queue).unwrap()
+        Kernel::new(name, &program).unwrap()
     }
 
     pub fn field_buffer(&self, width: usize, height: usize, fill: Option<&[f32]>) -> FieldBuffer {
@@ -149,7 +149,7 @@ impl OpenClContext {
         }
     }
 
-    pub fn empty_queue(&self) { self.queue.finish(); }
+    pub fn empty_queue(&self) { self.queue.finish().unwrap(); }
 
     pub fn platform(&self) -> &Platform { &self.platform }
 
