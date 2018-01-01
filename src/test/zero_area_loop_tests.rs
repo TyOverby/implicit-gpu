@@ -12,7 +12,6 @@ struct Problem {
     input: Vec<(Point, Point)>,
     expected: Vec<(Point, Point)>,
     epsilon: f32,
-    only_starts: bool,
 }
 
 fn default_problem() -> Problem {
@@ -20,7 +19,6 @@ fn default_problem() -> Problem {
         input: vec![],
         expected: vec![],
         epsilon: EPSILON,
-        only_starts: true,
     }
 }
 
@@ -32,7 +30,7 @@ fn run(mut p: Problem) {
         let output = remove_zero_area_loops(input.to_vec(), new_p.epsilon);
         let output: Vec<_> = output.into_iter().map(|(a, b)| PathSegment::new(vec![a, b], new_p.epsilon)).collect();
 
-        if let Err(e) = assert_same(&output, &expected, !new_p.only_starts) {
+        if let Err(e) = assert_same(&output, &expected, true) {
             print!("${}", e);
             panic!();
         }

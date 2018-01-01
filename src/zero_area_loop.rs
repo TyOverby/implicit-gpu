@@ -9,9 +9,9 @@ type Rect<S> = euclid::TypedRect<f32, S>;
 ///
 pub fn remove_zero_area_loops<I, S: 'static>(segments: I, epsilon: f32) -> Vec<(Point<S>, Point<S>)>
 where
-    I: IntoIterator<Item = (Point<S>, Point<S>)>,
+    I: Into<Vec<(Point<S>, Point<S>)>>,
 {
-    let collected: Vec<_> = segments.into_iter().collect();
+    let collected = segments.into();
     let aabb = compute_bounding_box(collected.iter().flat_map(|&(p1, p2)| vec![p1, p2]));
     let aabb = aabb.inflate(1.0f32.max(aabb.size.width / 10.0), 1.0f32.max(aabb.size.height / 10.0));
     let mut quad_tree = QuadTree::default(aabb);

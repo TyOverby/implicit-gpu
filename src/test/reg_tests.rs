@@ -19,3 +19,15 @@ fn circles_99() {
         assert!(segment.closed);
     }
 }
+
+#[test]
+fn one_circle() {
+    let data = include!("./regressions/one_circle.txt");
+    let data = data.iter()
+                   .map(|&(p1, p2)| [point2::<_, UnknownUnit>(p1.0, p1.1), point2::<_, UnknownUnit>(p2.0, p2.1)])
+                   .collect::<Vec<_>>();
+    let input_count = data.len();
+    let out = prune(data, EPSILON, true);
+
+    assert_eq!(out.len(), input_count);
+}

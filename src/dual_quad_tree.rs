@@ -41,8 +41,8 @@ impl <S: 'static> DualQuadTree<S> {
         let start = segment.first();
         let end = segment.last();
 
-        let start_id = self.starts.insert_with_box(id, start.aabb());
-        let end_id = self.ends.insert_with_box(id, end.aabb());
+        let start_id = self.starts.insert_with_box(id, start.aabb()).unwrap();
+        let end_id = self.ends.insert_with_box(id, end.aabb()).unwrap();
         self.id_to_segment.insert(id, (segment, start_id, end_id));
     }
 
@@ -72,7 +72,7 @@ impl <S: 'static> DualQuadTree<S> {
     }
 
     pub fn has_forward_neighbor(&self, id: DqtId, point: Point<S>, epsilon: f32) -> bool {
-        let query_aabb = point.aabb().inflate(epsilon, epsilon);
+        let query_aabb = point.aabb().inflate(epsilon * 2.0, epsilon * 2.0);
         self.ends
             .query(query_aabb)
             .into_iter()
@@ -81,7 +81,7 @@ impl <S: 'static> DualQuadTree<S> {
     }
 
     pub fn has_backward_neighbor(&self, id: DqtId, point: Point<S>, epsilon: f32) -> bool {
-        let query_aabb = point.aabb().inflate(epsilon, epsilon);
+        let query_aabb = point.aabb().inflate(epsilon * 2.0, epsilon * 2.0);
         self.starts
             .query(query_aabb)
             .into_iter()

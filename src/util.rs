@@ -7,8 +7,7 @@ where
     P: Into<smallvec::SmallVec<[Point<S>; 2]>>,
 {
     let mut all_segments = vec![];
-    let mut scene_aabb: TypedRect<f32, S> =
-        TypedRect::new(point2(0.0, 0.0), vec2(0.0, 0.0).to_size());
+    let mut starts_and_ends = vec![];
 
     for segment in segments.into_iter().map(Into::into).filter(|a| a.len() > 1) {
         let segment = PathSegment::new(segment, epsilon);
@@ -18,17 +17,16 @@ where
 
         let first = segment.first();
         let last = segment.last();
-
-        scene_aabb = scene_aabb.union(&centered_with_radius(
-            point2(first.x, first.y),
-            epsilon * 10.0,
-        ));
-        scene_aabb = scene_aabb.union(&centered_with_radius(
-            point2(last.x, last.y),
-            epsilon * 10.0,
-        ));
+        starts_and_ends.push(first);
+        starts_and_ends.push(last);
         all_segments.push(segment);
     }
+
+    let rect = TypedRect::from_points(&starts_and_ends[..]);
+    let scene_aabb = rect.inflate(
+        epsilon.max(rect.size.width / 10.0),
+        epsilon.max(rect.size.height / 10.0),
+    );
 
     let mut dual_qt = DualQuadTree::new(scene_aabb);
     for segment in all_segments {
