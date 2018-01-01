@@ -22,10 +22,10 @@ snoot = "0.1.*"
 euclid = "0.16.0"
 
 [dependencies.line-stitch]
-path = "../../line-stitch"
+path = "../line-stitch"
 
 [dependencies.aabb-quadtree]
-path = "../../aabb-quadtree"
+path = "../aabb-quadtree"
 
 [dependencies.vectorphile]
-path = "../../vectorphile"
+path = "../vectorphile"
