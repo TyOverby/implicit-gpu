@@ -9,7 +9,7 @@ pub struct DualQuadTree<S> {
     id_to_segment: HashMap<DqtId, (PathSegment<S>, ItemId, ItemId)>,
     pub starts: QuadTree<DqtId, S>,
     pub ends: QuadTree<DqtId, S>,
-    ambiguity_points: QuadTree<Point<S>, S>,
+    pub ambiguity_points: QuadTree<Point<S>, S>,
 }
 
 impl <S: 'static> DualQuadTree<S> {
@@ -163,7 +163,7 @@ impl <S: 'static> DualQuadTree<S> {
         epsilon: f32,
         allow_ambiguous: bool,
     ) -> (Result<Option<DqtId>, ()>, Result<Option<DqtId>, ()>) {
-        let query_aabb = point.aabb().inflate(epsilon, epsilon);
+        let query_aabb = point.aabb().inflate(epsilon * 2.0, epsilon * 2.0);
         if self.ambiguity_points.query(query_aabb).len() > 0 {
             return (Ok(None), Ok(None));
         }

@@ -11,10 +11,6 @@ where
 
     for segment in segments.into_iter().map(Into::into).filter(|a| a.len() > 1) {
         let segment = PathSegment::new(segment, epsilon);
-        if segment.length_2() < epsilon {
-            continue;
-        }
-
         let first = segment.first();
         let last = segment.last();
         starts_and_ends.push(first);
@@ -23,10 +19,7 @@ where
     }
 
     let rect = TypedRect::from_points(&starts_and_ends[..]);
-    let scene_aabb = rect.inflate(
-        epsilon.max(rect.size.width / 10.0),
-        epsilon.max(rect.size.height / 10.0),
-    );
+    let scene_aabb = rect.inflate(epsilon.max(rect.size.width / 10.0), epsilon.max(rect.size.height / 10.0));
 
     let mut dual_qt = DualQuadTree::new(scene_aabb);
     for segment in all_segments {
@@ -59,8 +52,5 @@ pub fn compute_bounding_box<S, I: IntoIterator<Item = Point<S>>>(i: I) -> TypedR
         max_y = max_y.max(pt.y);
     }
 
-    TypedRect::new(
-        point2(min_x, min_y),
-        vec2(max_x - min_x, max_y - min_y).to_size(),
-    )
+    TypedRect::new(point2(min_x, min_y), vec2(max_x - min_x, max_y - min_y).to_size())
 }

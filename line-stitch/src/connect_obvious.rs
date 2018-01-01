@@ -70,7 +70,6 @@ fn chain_single<S: 'static>(
         }
     }
 
-
     let total_count: usize = combined.iter().map(|a| a.path.len()).sum();
 
     if total_count > 1 {
