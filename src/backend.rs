@@ -1,7 +1,7 @@
 pub struct DrawOptions {
-    fill_color: Option<(u8, u8, u8)>,
-    stroke_color: Option<(u8, u8, u8)>,
-    stroke_size: f64,
+    pub fill_color: Option<(u8, u8, u8)>,
+    pub stroke_color: Option<(u8, u8, u8)>,
+    pub stroke_size: f64,
 }
 
 impl DrawOptions {
@@ -79,6 +79,13 @@ pub enum Command {
 
 pub trait DrawBackend {
     type Error;
+
     fn apply(&mut self, command: Command) -> Result<(), Self::Error>;
+    fn apply_all<I: Iterator<Item=Command>>(&mut self, commands: I) -> Result<(), Self::Error> {
+        for command in commands {
+            self.apply(command)?;
+        }
+        Ok(())
+    }
     fn close(self) -> Result<(), Self::Error>;
 }
