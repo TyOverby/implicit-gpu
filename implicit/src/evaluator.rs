@@ -93,7 +93,10 @@ impl Evaluator {
                 let (lines, _) = line_buffer_to_poly(&lines, telemetry, tloc, true);
                 let lines = lines.into_iter().flat_map(grouping_to_segments);
                 let res = ::polygon::run_poly(lines, width, height, None, ctx);
-                res.unwrap()
+                match res {
+                    Some(res) => res,
+                    None => ctx.field_buffer_inf(self.width, self.height),
+                }
             }
             &NodeGroup::Polygon { ref group, dx, dy } => eval_polygon(group, dx, dy, telemetry),
         };

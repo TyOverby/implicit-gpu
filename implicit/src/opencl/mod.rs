@@ -42,7 +42,11 @@ pub fn all_devices() -> Vec<(Platform, Device)> {
 
 impl OpenClContext {
     pub fn new(platform: Platform, device: Device) -> OpenClContext {
-        let context = Context::builder().platform(platform).devices(device).build().unwrap();
+        let context = Context::builder()
+            .platform(platform)
+            .devices(device)
+            .build()
+            .unwrap();
         let queue = Queue::new(&context, device, None).unwrap();
 
         OpenClContext {
@@ -54,9 +58,7 @@ impl OpenClContext {
         }
     }
 
-    pub fn max_workgroup_size(&self) -> usize {
-        self.device.max_wg_size().unwrap()
-    }
+    pub fn max_workgroup_size(&self) -> usize { self.device.max_wg_size().unwrap() }
 
     pub fn default() -> OpenClContext {
         let (pt, dv) = all_devices().into_iter().nth(0).unwrap();
@@ -73,7 +75,11 @@ impl OpenClContext {
 
         {
             let program_cache = self.program_cache.lock().unwrap();
-            if let Some(&(_, ref p)) = program_cache.iter().filter(|&&(ref s, _)| s == &source).next() {
+            if let Some(&(_, ref p)) = program_cache
+                .iter()
+                .filter(|&&(ref s, _)| s == &source)
+                .next()
+            {
                 let _guard = ::flame::start_guard("Kernel::new");
                 return Kernel::new(name, p).unwrap();
             }
@@ -113,6 +119,16 @@ impl OpenClContext {
         }
     }
 
+    pub fn field_buffer_inf(&self, width: usize, height: usize) -> FieldBuffer {
+        let buffer = vec![::std::f32::INFINITY; width * height];
+        self.field_buffer(width, height, Some(&buffer))
+    }
+
+    pub fn field_buffer_neg_inf(&self, width: usize, height: usize) -> FieldBuffer {
+        let buffer = vec![::std::f32::NEG_INFINITY; width * height];
+        self.field_buffer(width, height, Some(&buffer))
+    }
+
     pub fn line_buffer(&self, fill: &[f32]) -> LineBuffer {
         let _guard = ::flame::start_guard("OpenClContext::linear_buffer");
         LineBuffer {
@@ -124,7 +140,7 @@ impl OpenClContext {
     pub fn sync_buffer(&self) -> SyncBuffer {
         let _guard = ::flame::start_guard("OpenClContext::sync_buffer");
         SyncBuffer {
-            internal: Buffer::new(self.queue.clone(), Some(MEM_COPY_HOST_PTR), &[1], Some(&[0])).unwrap()
+            internal: Buffer::new(self.queue.clone(), Some(MEM_COPY_HOST_PTR), &[1], Some(&[0])).unwrap(),
         }
     }
 
