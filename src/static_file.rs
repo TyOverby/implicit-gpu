@@ -2,10 +2,12 @@ use mime::Mime;
 use mime_guess::guess_mime_type;
 use std::path::PathBuf;
 use std::fs::File;
-use std::io::{Read, BufReader};
+use std::io::{BufReader, Read};
 
-pub fn serve_statically<'a, I>(roots: I, mut path: &str) -> Option<(Mime, Vec<u8>)> 
-where I: Iterator<Item=&'a str>{
+pub fn serve_statically<'a, I>(roots: I, mut path: &str) -> Option<(Mime, Vec<u8>)>
+where
+    I: Iterator<Item = &'a str>,
+{
     if path.starts_with("./") {
         path = &path[2..];
     }
@@ -14,8 +16,8 @@ where I: Iterator<Item=&'a str>{
         return None;
     }
 
-    // Remove trailing slashes so that the path isn't considered 
-    // "absolute"  This way PathBuf::push doesn't overwrite the 
+    // Remove trailing slashes so that the path isn't considered
+    // "absolute"  This way PathBuf::push doesn't overwrite the
     // whole path.
     while path.starts_with("/") {
         path = &path[1..];
@@ -43,5 +45,5 @@ where I: Iterator<Item=&'a str>{
         }
     }
 
-    return None; 
+    return None;
 }

@@ -1,4 +1,4 @@
-use combine::{self, Parser}; 
+use combine::{self, Parser};
 use combine::*;
 use regex;
 use hyper::Method;
@@ -18,7 +18,7 @@ enum SegmentPiece {
 #[derive(Debug, Eq, PartialEq)]
 struct Segment(Vec<SegmentPiece>);
 
-type StrParser<'a, R> = combine::Parser<Output=R, Input=&'a str>;
+type StrParser<'a, R> = combine::Parser<Output = R, Input = &'a str>;
 
 impl ParseResult {
     pub fn compile(self) -> (Option<Method>, String) {
@@ -38,7 +38,7 @@ impl ParseResult {
         }
         write!(out, "?").unwrap();
 
-        return (self.method, out)
+        return (self.method, out);
     }
 }
 
@@ -47,23 +47,26 @@ fn verb<'a>() -> Box<StrParser<'a, Option<Method>>> {
     use hyper::Method::*;
     use std::ascii::AsciiExt;
     let verbs = &[
-        (Options, "Options"), 
-        (Get, "Get"), 
-        (Post, "Post"), 
-        (Put, "Put"), 
-        (Delete, "Delete"), 
-        (Head, "Head"), 
-        (Trace, "Trace"), 
-        (Connect, "Connect"), 
+        (Options, "Options"),
+        (Get, "Get"),
+        (Post, "Post"),
+        (Put, "Put"),
+        (Delete, "Delete"),
+        (Head, "Head"),
+        (Trace, "Trace"),
+        (Connect, "Connect"),
         (Patch, "Patch"),
     ];
 
-    let construct_verb_parser = |method: Method, s: &'static str|{
-        string_cmp(s, |a, b| AsciiExt::eq_ignore_ascii_case(&a, &b))
-                                 .map(move |_| method.clone())
+    let construct_verb_parser = |method: Method, s: &'static str| {
+        string_cmp(s, |a, b| AsciiExt::eq_ignore_ascii_case(&a, &b)).map(move |_| method.clone())
     };
 
-    let verbs_combinator: Vec<_> = verbs.iter().cloned().map(|(a, b)| construct_verb_parser(a, b)).collect();
+    let verbs_combinator: Vec<_> = verbs
+        .iter()
+        .cloned()
+        .map(|(a, b)| construct_verb_parser(a, b))
+        .collect();
     let verbs_total = combine::choice(verbs_combinator);
     let verbs_and_space = verbs_total.and(many1::<String, _>(token(' '))).map(|x| x.0);
     optional(verbs_and_space).boxed()
@@ -71,43 +74,66 @@ fn verb<'a>() -> Box<StrParser<'a, Option<Method>>> {
 
 fn segment_piece<'a>() -> Box<StrParser<'a, SegmentPiece>> {
     use combine::char::*;
-    let literal = many1::<Vec<_>, _>(none_of("{}/".chars())).map(|r| r.into_iter().collect::<String>());
-    let name = token('_').or(letter()).and(many(token('_').or(alpha_num()))).map(|(f, mut r): (char, String)| {r.insert(0, f); r});
-    let pattern = token('{').and(name).and(token('}')).map(|((_, r), _)| SegmentPiece::Pattern(r));
+    let literal =
+        many1::<Vec<_>, _>(none_of("{}/".chars())).map(|r| r.into_iter().collect::<String>());
+    let name = token('_')
+        .or(letter())
+        .and(many(token('_').or(alpha_num())))
+        .map(|(f, mut r): (char, String)| {
+            r.insert(0, f);
+            r
+        });
+    let pattern = token('{')
+        .and(name)
+        .and(token('}'))
+        .map(|((_, r), _)| SegmentPiece::Pattern(r));
 
-    literal.map(|r| SegmentPiece::Literal(r)).or(pattern).boxed()
+    literal
+        .map(|r| SegmentPiece::Literal(r))
+        .or(pattern)
+        .boxed()
 }
 
 fn segment<'a>() -> Box<StrParser<'a, Segment>> {
-    many1(segment_piece()).map(Segment).and(optional(token('/'))).map(|(v, _)| v).boxed()
+    many1(segment_piece())
+        .map(Segment)
+        .and(optional(token('/')))
+        .map(|(v, _)| v)
+        .boxed()
 }
 
 fn url<'a>() -> Box<StrParser<'a, Vec<Segment>>> {
-    optional(token('/')).and(many1(segment())).map(|(_, v)| v).boxed()
-
+    optional(token('/'))
+        .and(many1(segment()))
+        .map(|(_, v)| v)
+        .boxed()
 }
 
 pub fn parse<'a>(input: &'a str) -> Result<ParseResult, ParseError<&'a str>> {
     use combine::Parser;
-    
-    verb().and(optional(token('/'))).and(url()).map(|((v, _), u)| 
-      ParseResult {
-        method: v,
-        segments: u,
-    }).parse(input).map(|(result, _remaining)| {
-        result
-    })
+
+    verb()
+        .and(optional(token('/')))
+        .and(url())
+        .map(|((v, _), u)| {
+            ParseResult {
+                method: v,
+                segments: u,
+            }
+        })
+        .parse(input)
+        .map(|(result, _remaining)| result)
 }
 
 #[cfg(test)]
 mod test {
-    use combine::{ParseError};
+    use combine::ParseError;
     use super::*;
     use hyper::Method::*;
     use super::SegmentPiece::*;
 
     fn run(input: &str) -> Result<super::ParseResult, ParseError<&str>> {
-        super::parse(input) 
+        super::parse(input)
     }
 
     fn run_ok(input: &str) -> super::ParseResult {
@@ -155,38 +181,32 @@ mod test {
 
         let res = super::segment_piece().parse("/");
         assert!(res.is_err());
-
     }
 
     #[test]
     fn segment() {
         use self::SegmentPiece::*;
         let res = super::segment().parse("abc").unwrap().0;
-        assert_eq!(res, 
-           Segment(vec![
-                Literal("abc".into()) 
-        ]));
+        assert_eq!(res, Segment(vec![Literal("abc".into())]));
 
         let res = super::segment().parse("{abc}").unwrap().0;
-        assert_eq!(res, 
-           Segment(vec![
-                Pattern("abc".into()) 
-        ]));
+        assert_eq!(res, Segment(vec![Pattern("abc".into())]));
 
         let res = super::segment().parse("abc{def}").unwrap().0;
-        assert_eq!(res, 
-           Segment(vec![
-                Literal("abc".into()),
-                Pattern("def".into()),
-        ]));
+        assert_eq!(
+            res,
+            Segment(vec![Literal("abc".into()), Pattern("def".into())])
+        );
 
         let res = super::segment().parse("abc{def}ghi").unwrap().0;
-        assert_eq!(res, 
-           Segment(vec![
+        assert_eq!(
+            res,
+            Segment(vec![
                 Literal("abc".into()),
                 Pattern("def".into()),
                 Literal("ghi".into()),
-        ]));
+            ])
+        );
     }
 
     #[test]
@@ -221,9 +241,7 @@ mod test {
             run_ok("GET foo"),
             super::ParseResult {
                 method: Some(Get),
-                segments: vec![
-                    Segment(vec![Literal("foo".into())]),
-                ]                    
+                segments: vec![Segment(vec![Literal("foo".into())])],
             }
         );
 
@@ -234,7 +252,7 @@ mod test {
                 segments: vec![
                     Segment(vec![Literal("foo".into())]),
                     Segment(vec![Literal("bar".into())]),
-                ]                    
+                ],
             }
         );
 
@@ -245,7 +263,7 @@ mod test {
                 segments: vec![
                     Segment(vec![Literal("foo".into())]),
                     Segment(vec![Literal("bar".into())]),
-                ]                    
+                ],
             }
         );
 
@@ -256,7 +274,7 @@ mod test {
                 segments: vec![
                     Segment(vec![Literal("foo".into())]),
                     Segment(vec![Literal("bar".into())]),
-                ]                    
+                ],
             }
         );
 
@@ -264,9 +282,7 @@ mod test {
             run_ok("foo"),
             super::ParseResult {
                 method: None,
-                segments: vec![
-                    Segment(vec![Literal("foo".into())]),
-                ]                    
+                segments: vec![Segment(vec![Literal("foo".into())])],
             }
         );
 
@@ -277,7 +293,7 @@ mod test {
                 segments: vec![
                     Segment(vec![Literal("foo".into())]),
                     Segment(vec![Literal("bar".into())]),
-                ]                    
+                ],
             }
         );
 
@@ -288,7 +304,7 @@ mod test {
                 segments: vec![
                     Segment(vec![Literal("foo".into())]),
                     Segment(vec![Literal("bar".into())]),
-                ]                    
+                ],
             }
         );
 
@@ -299,7 +315,7 @@ mod test {
                 segments: vec![
                     Segment(vec![Literal("foo".into())]),
                     Segment(vec![Literal("bar".into())]),
-                ]                    
+                ],
             }
         );
     }

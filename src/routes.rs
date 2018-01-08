@@ -1,4 +1,4 @@
-use regex::{Regex, RegexSet, Captures};
+use regex::{Captures, Regex, RegexSet};
 use hyper::Method;
 
 #[derive(Clone)]
@@ -8,8 +8,8 @@ pub struct RouteBuilder<T> {
     values: Vec<T>,
 }
 
-impl <T> RouteBuilder<T> {
-    pub fn new<I: Iterator<Item=(Option<Method>, String, T)>>(routes: I) -> RouteBuilder<T> {
+impl<T> RouteBuilder<T> {
+    pub fn new<I: Iterator<Item = (Option<Method>, String, T)>>(routes: I) -> RouteBuilder<T> {
         let mut all_regex_strings = vec![];
         let mut regex_and_verbs = vec![];
         let mut values = vec![];
@@ -29,7 +29,11 @@ impl <T> RouteBuilder<T> {
         }
     }
 
-    pub fn match_path<'a, 'b>(&'a self, in_verb: Method, target: &'b str) -> Option<(&'a T, Captures<'b>)> {
+    pub fn match_path<'a, 'b>(
+        &'a self,
+        in_verb: Method,
+        target: &'b str,
+    ) -> Option<(&'a T, Captures<'b>)> {
         let mut best_capture = None;
         let mut best_index = None;
         for index in self.set.matches(target) {
@@ -43,13 +47,11 @@ impl <T> RouteBuilder<T> {
             let (nc, ni) = match (best_capture, capture) {
                 (None, new) => (new, Some(index)),
                 (old, None) => (old, best_index),
-                (Some(old), Some(new)) => {
-                    if new.len() > old.len() {
-                        (Some(new), Some(index))
-                    } else {
-                        (Some(old), best_index)
-                    }
-                }
+                (Some(old), Some(new)) => if new.len() > old.len() {
+                    (Some(new), Some(index))
+                } else {
+                    (Some(old), best_index)
+                },
             };
             best_capture = nc;
             best_index = ni;
@@ -58,7 +60,7 @@ impl <T> RouteBuilder<T> {
         match (best_capture, best_index) {
             (Some(bc), Some(bi)) => Some((&self.values[bi], bc)),
             (None, None) => None,
-            _ => unreachable!()
+            _ => unreachable!(),
         }
     }
 }

@@ -1,14 +1,15 @@
-extern crate serde;
+extern crate combine;
+extern crate flame;
+extern crate futures;
+extern crate hyper;
 #[macro_use]
 extern crate log;
-extern crate void;
 extern crate mime;
 extern crate mime_guess;
 extern crate regex;
-extern crate combine;
+extern crate serde;
 extern crate serde_json;
-extern crate hyper;
-extern crate futures;
+extern crate void;
 
 mod api;
 mod routes;
@@ -20,5 +21,6 @@ pub use hyper::{Request, Response};
 pub use api::Server;
 pub use api::RequestInfo;
 
-pub fn create() -> api::Server { api::Server::new() }
-
+pub fn create() -> api::Server {
+    api::Server::new()
+}

@@ -23,19 +23,26 @@ pub enum ErrorKind {
     User(Box<Error + Send + 'static>),
 }
 
-type Handler = Box<Fn((
-        (hyper::Method, 
-         hyper::Uri, 
-         hyper::HttpVersion, 
-         hyper::header::Headers)), Vec<u8>) -> 
-            BoxFuture<Response, ErrorKind> + Send + Sync> ;
+type Handler = Box<
+    Fn(
+        ((
+            hyper::Method,
+            hyper::Uri,
+            hyper::HttpVersion,
+            hyper::header::Headers,
+        )),
+        Vec<u8>,
+    ) -> BoxFuture<Response, ErrorKind>
+        + Send
+        + Sync,
+>;
 
 #[derive(Clone)]
 pub struct Server {
     static_paths: Vec<String>,
     addr: String,
     port: usize,
-    apis: Vec<(String, Arc<Handler>)>
+    apis: Vec<(String, Arc<Handler>)>,
 }
 
 impl Server {
@@ -49,104 +56,119 @@ impl Server {
     }
 
     pub fn api<P, F, I, O>(self, path: P, f: F) -> Self
-    where F: Fn(RequestInfo, I) -> O + 'static + Send + Sync,
-          for <'de> I: Deserialize<'de> + 'static,
-          O: Serialize + Send + 'static,
-          P: Into<String>,
+    where
+        F: Fn(RequestInfo, I) -> O + 'static + Send + Sync,
+        for<'de> I: Deserialize<'de> + 'static,
+        O: Serialize + Send + 'static,
+        P: Into<String>,
     {
-        self.result_api(path, move |a, b| -> Result<O, ::void::Void> {
-            Ok(f(a, b))
-        })
+        self.result_api(path, move |a, b| -> Result<O, ::void::Void> { Ok(f(a, b)) })
     }
 
     pub fn result_api<P, F, I, O, E>(self, path: P, f: F) -> Self
-    where F: Fn(RequestInfo, I) -> Result<O, E> + 'static + Send + Sync,
-          for <'de> I: Deserialize<'de> + 'static,
-          O: Serialize + Send + 'static,
-          E: Error + Send + 'static,
-          P: Into<String>,
+    where
+        F: Fn(RequestInfo, I) -> Result<O, E> + 'static + Send + Sync,
+        for<'de> I: Deserialize<'de> + 'static,
+        O: Serialize + Send + 'static,
+        E: Error + Send + 'static,
+        P: Into<String>,
     {
         self.async_api(path, move |a, b| result(f(a, b)))
     }
 
     pub fn async_api<P, FT, F, I, O, E>(mut self, path: P, f: F) -> Self
-    where F: Fn(RequestInfo, I) -> FT + 'static + Send + Sync,
-          FT: Future<Item=O, Error=E> + Send + 'static,
-          for <'de> I: Deserialize<'de> + 'static,
-          O: Serialize + 'static,
-          E: Error + Send + 'static,
-          // TODO: make this AsRef<str> at some point
-          P: Into<String>,
+    where
+        F: Fn(RequestInfo, I) -> FT + 'static + Send + Sync,
+        FT: Future<Item = O, Error = E> + Send + 'static,
+        for<'de> I: Deserialize<'de> + 'static,
+        O: Serialize + 'static,
+        E: Error + Send + 'static,
+        // TODO: make this AsRef<str> at some point
+        P: Into<String>,
     {
         use futures::Future;
         use futures::future::err;
-        
-        self.apis.push((path.into(), Arc::new(Box::new(move |_ri, in_body| {
 
-            let mut bytes = &in_body[..];
-            let value: I = match serde_json::from_reader(&mut bytes) {
-                Ok(v) => v,
-                Err(e) => return err(ErrorKind::Deserialize(e)).boxed(),
-            };
-
-            let res = f(RequestInfo, value);
-            let res = res.map_err(|e| ErrorKind::User(Box::new(e)));
-            res.and_then(|result| {
-                let out = if cfg!(debug) {
-                    serde_json::to_string_pretty(&result)
-                } else {
-                    serde_json::to_string(&result)
+        self.apis.push((
+            path.into(),
+            Arc::new(Box::new(move |_ri, in_body| {
+                let mut bytes = &in_body[..];
+                let value: I = match serde_json::from_reader(&mut bytes) {
+                    Ok(v) => v,
+                    Err(e) => return err(ErrorKind::Deserialize(e)).boxed(),
                 };
 
-                let out = match out {
-                    Ok(out) => out,
-                    Err(e) => return err(ErrorKind::Serialize(e)),
-                };
+                let res = f(RequestInfo, value);
+                let res = res.map_err(|e| ErrorKind::User(Box::new(e)));
+                res.and_then(|result| {
+                    let out = if cfg!(debug) {
+                        serde_json::to_string_pretty(&result)
+                    } else {
+                        serde_json::to_string(&result)
+                    };
 
-                let response = Response::new().with_body(out);
-                futures::future::ok(response)
-            }).boxed()
-        }))));
+                    let out = match out {
+                        Ok(out) => out,
+                        Err(e) => return err(ErrorKind::Serialize(e)),
+                    };
+
+                    let response = Response::new().with_body(out);
+                    futures::future::ok(response)
+                }).boxed()
+            })),
+        ));
         self
     }
 
-    pub fn custom_response<I, P, F>(self, path: P, f: F) -> Self 
-    where P: Into<String>,
-          for <'de> I: Deserialize<'de> + 'static,
-          F: Fn(RequestInfo, I) -> Response + Send + Sync + 'static {
+    pub fn custom_response<I, P, F>(self, path: P, f: F) -> Self
+    where
+        P: Into<String>,
+        for<'de> I: Deserialize<'de> + 'static,
+        F: Fn(RequestInfo, I) -> Response + Send + Sync + 'static,
+    {
         use futures::future::ok;
         self.async_custom_response(path, move |a, b| ok(f(a, b)).boxed())
     }
 
-    pub fn async_custom_response<I, P, F>(mut self, path: P, f: F) -> Self 
-    where P: Into<String>,
-          for <'de> I: Deserialize<'de> + 'static,
-          F: Fn(RequestInfo, I) -> BoxFuture<Response, ErrorKind> + Send + Sync + 'static {
+    pub fn async_custom_response<I, P, F>(mut self, path: P, f: F) -> Self
+    where
+        P: Into<String>,
+        for<'de> I: Deserialize<'de> + 'static,
+        F: Fn(RequestInfo, I) -> BoxFuture<Response, ErrorKind> + Send + Sync + 'static,
+    {
         use futures::future::err;
-        self.apis.push((path.into(), Arc::new(Box::new(move |_ri, body| {
-            let mut bytes = &body[..];
-            let value: I = match serde_json::from_reader(&mut bytes) {
-                Ok(v) => v,
-                Err(e) => return err(ErrorKind::Deserialize(e)).boxed(),
-            };
+        self.apis.push((
+            path.into(),
+            Arc::new(Box::new(move |_ri, body| {
+                let mut bytes = &body[..];
+                let value: I = match serde_json::from_reader(&mut bytes) {
+                    Ok(v) => v,
+                    Err(e) => return err(ErrorKind::Deserialize(e)).boxed(),
+                };
 
-            f(RequestInfo, value).boxed()
-        }))));
+                f(RequestInfo, value).boxed()
+            })),
+        ));
 
         self
     }
 
-    pub fn custom<P, F>(mut self, path: P, f: F) -> Self 
-    where P: Into<String>,
-          F: Fn(Request) -> BoxFuture<Response, ErrorKind> + Send + Sync + 'static {
-        self.apis.push((path.into(), Arc::new(Box::new(move |intuple, body| {
-            let (method, uri, http_version, headers) = intuple;
-            let mut request = Request::new(method, uri);
-            request.set_version(http_version);
-            *request.headers_mut() = headers;
-            request.set_body(body);
-            f(request)
-        }))));
+    pub fn custom<P, F>(mut self, path: P, f: F) -> Self
+    where
+        P: Into<String>,
+        F: Fn(Request) -> BoxFuture<Response, ErrorKind> + Send + Sync + 'static,
+    {
+        self.apis.push((
+            path.into(),
+            Arc::new(Box::new(move |intuple, body| {
+                let (method, uri, http_version, headers) = intuple;
+                let mut request = Request::new(method, uri);
+                request.set_version(http_version);
+                *request.headers_mut() = headers;
+                request.set_body(body);
+                f(request)
+            })),
+        ));
 
         self
     }
@@ -177,11 +199,13 @@ impl Server {
 
         let service = RunningService {
             static_route: self.static_paths,
-            routes: routes
+            routes: routes,
         };
 
         let addr = format!("{}:{}", self.addr, self.port).parse().unwrap();
-        let server = Http::new().bind(&addr, move || Ok(service.clone())).unwrap();
+        let server = Http::new()
+            .bind(&addr, move || Ok(service.clone()))
+            .unwrap();
 
         server.run().unwrap();
     }
@@ -201,7 +225,7 @@ impl ::hyper::server::Service for RunningService {
 
 
     fn call(&self, req: Request) -> Self::Future {
-        use futures::future::{ok, err, FutureResult};
+        use futures::future::{err, ok, FutureResult};
         use futures::Future;
         use hyper::StatusCode;
         use hyper::header::ContentType;
@@ -214,17 +238,22 @@ impl ::hyper::server::Service for RunningService {
             let response = Response::new()
                 .with_header(ContentType(mime))
                 .with_body(content);
-            return ok(response).boxed()
+            return ok(response).boxed();
         }
 
-        if let Some((handler, _matches)) = self.routes.match_path(method.clone(), uri.clone().path()) {
+        if let Some((handler, _matches)) =
+            self.routes.match_path(method.clone(), uri.clone().path())
+        {
             let handler = handler.clone();
 
-            // Get a future of Vec<u8> 
-            let body =  body.fold(Vec::new(), |mut v, b| -> FutureResult<Vec<u8>, ::hyper::Error> { 
-                v.extend_from_slice(&*b); 
-                ok(v)
-            }).map_err(ErrorKind::Hyper);
+            // Get a future of Vec<u8>
+            let body = body.fold(
+                Vec::new(),
+                |mut v, b| -> FutureResult<Vec<u8>, ::hyper::Error> {
+                    v.extend_from_slice(&*b);
+                    ok(v)
+                },
+            ).map_err(ErrorKind::Hyper);
 
             // Process the body
             let result = body.and_then(move |body_vec| {
@@ -259,9 +288,8 @@ impl ::hyper::server::Service for RunningService {
             });
 
             result.boxed()
-
         } else {
-            // FIXME 
+            // FIXME
             warn!("404 no handler found: {}", uri.path());
             let res = Response::new()
                 .with_status(StatusCode::NotFound)
