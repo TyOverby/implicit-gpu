@@ -1,7 +1,7 @@
 use super::util::*;
-use ::connect_obvious;
-use permutohedron::heap_recursive as permute;
+use connect_obvious;
 use euclid::{UnknownUnit, point2};
+use permutohedron::heap_recursive as permute;
 
 type Point = ::Point<UnknownUnit>;
 type PathSegment = ::PathSegment<UnknownUnit>;
@@ -30,12 +30,7 @@ fn default_problem() -> Problem {
 fn run(mut p: Problem) {
     let new_p = p.clone();
     permute(&mut p.input, |input| {
-        let output = connect_obvious(
-            input.to_vec(),
-            new_p.epsilon,
-            new_p.only_starts,
-            new_p.allow_ambiguous,
-        );
+        let output = connect_obvious(input.to_vec(), new_p.epsilon, new_p.only_starts, new_p.allow_ambiguous);
         assert_same(&output, &new_p.expected, !new_p.only_starts).unwrap();
     });
 }
@@ -64,7 +59,7 @@ fn segment_with_one_line() {
     run(Problem {
         input: vec![vec![point2(0.0, 0.0), point2(1.0, 1.0)]],
         expected: vec![
-            PathSegment::new(vec![point2(0.0, 0.0), point2(1.0, 1.0)], EPSILON),
+            PathSegment::new_and_potentially_close(vec![point2(0.0, 0.0), point2(1.0, 1.0)], EPSILON),
         ],
         ..default_problem()
     });
@@ -73,8 +68,8 @@ fn segment_with_one_line() {
 #[test]
 fn segment_with_one_line_but_the_line_is_really_short() {
     run(Problem {
-        input: vec![vec![point2(0.0, 0.0), point2(0.0, 0.0)]],
-        expected: vec![],
+        input: vec![vec![point2(0.0, 0.0), point2(0.0, 0.1)]],
+        expected: vec![PathSegment::new(vec![point2(0.0, 0.0), point2(0.0, 0.1)])],
         ..default_problem()
     });
 }
@@ -87,8 +82,8 @@ fn segment_with_two_disjoint_lines() {
             vec![point2(3.0, 3.0), point2(4.0, 4.0)],
         ],
         expected: vec![
-            PathSegment::new(vec![point2(0.0, 0.0), point2(1.0, 1.0)], EPSILON),
-            PathSegment::new(vec![point2(3.0, 3.0), point2(4.0, 4.0)], EPSILON),
+            PathSegment::new_and_potentially_close(vec![point2(0.0, 0.0), point2(1.0, 1.0)], EPSILON),
+            PathSegment::new_and_potentially_close(vec![point2(3.0, 3.0), point2(4.0, 4.0)], EPSILON),
         ],
         ..default_problem()
     });
@@ -102,10 +97,7 @@ fn segment_with_two_connected_lines() {
             vec![point2(1.0, 1.0), point2(2.0, 2.0)],
         ],
         expected: vec![
-            PathSegment::new(
-                vec![point2(0.0, 0.0), point2(1.0, 1.0), point2(2.0, 2.0)],
-                EPSILON,
-            ),
+            PathSegment::new_and_potentially_close(vec![point2(0.0, 0.0), point2(1.0, 1.0), point2(2.0, 2.0)], EPSILON),
         ],
         ..default_problem()
     });
@@ -119,8 +111,8 @@ fn segment_with_two_connected_lines_going_the_wrong_way() {
             vec![point2(2.0, 2.0), point2(1.0, 1.0)],
         ],
         expected: vec![
-            PathSegment::new(vec![point2(2.0, 2.0), point2(1.0, 1.0)], EPSILON),
-            PathSegment::new(vec![point2(0.0, 0.0), point2(1.0, 1.0)], EPSILON),
+            PathSegment::new_and_potentially_close(vec![point2(2.0, 2.0), point2(1.0, 1.0)], EPSILON),
+            PathSegment::new_and_potentially_close(vec![point2(0.0, 0.0), point2(1.0, 1.0)], EPSILON),
         ],
         ..default_problem()
     });
@@ -135,10 +127,7 @@ fn segment_with_two_connected_lines_going_the_wrong_way_but_only_starts_is_off()
             vec![point2(2.0, 2.0), point2(1.0, 1.0)],
         ],
         expected: vec![
-            PathSegment::new(
-                vec![point2(2.0, 2.0), point2(1.0, 1.0), point2(0.0, 0.0)],
-                EPSILON,
-            ),
+            PathSegment::new_and_potentially_close(vec![point2(2.0, 2.0), point2(1.0, 1.0), point2(0.0, 0.0)], EPSILON),
         ],
         ..default_problem()
     });
@@ -146,17 +135,14 @@ fn segment_with_two_connected_lines_going_the_wrong_way_but_only_starts_is_off()
 
 #[test]
 fn path_segment_is_not_closed() {
-    let ps = PathSegment::new(
-        vec![point2(0.0, 0.0), point2(1.0, 1.0), point2(2.0, 2.0)],
-        EPSILON,
-    );
+    let ps = PathSegment::new_and_potentially_close(vec![point2(0.0, 0.0), point2(1.0, 1.0), point2(2.0, 2.0)], EPSILON);
 
     assert_eq!(ps.closed, false);
 }
 
 #[test]
 fn path_segment_closes() {
-    let ps = PathSegment::new(
+    let ps = PathSegment::new_and_potentially_close(
         vec![
             point2(0.0, 0.0),
             point2(1.0, 1.0),
@@ -178,7 +164,7 @@ fn can_build_cycles() {
             vec![point2(1.0, 0.0), point2(0.0, 0.0)],
         ],
         expected: vec![
-            PathSegment::new(
+            PathSegment::new_and_potentially_close(
                 vec![
                     point2(0.0, 0.0),
                     point2(1.0, 1.0),
@@ -201,9 +187,9 @@ fn doesnt_continue_on_ambiguities() {
             vec![point2(1.0, 1.0), point2(2.0, 3.0)],
         ],
         expected: vec![
-            PathSegment::new(vec![point2(0.0, 0.0), point2(1.0, 1.0)], EPSILON),
-            PathSegment::new(vec![point2(1.0, 1.0), point2(2.0, 2.0)], EPSILON),
-            PathSegment::new(vec![point2(1.0, 1.0), point2(2.0, 3.0)], EPSILON),
+            PathSegment::new_and_potentially_close(vec![point2(0.0, 0.0), point2(1.0, 1.0)], EPSILON),
+            PathSegment::new_and_potentially_close(vec![point2(1.0, 1.0), point2(2.0, 2.0)], EPSILON),
+            PathSegment::new_and_potentially_close(vec![point2(1.0, 1.0), point2(2.0, 3.0)], EPSILON),
         ],
         ..default_problem()
     };
@@ -211,5 +197,6 @@ fn doesnt_continue_on_ambiguities() {
     run(problem);
 }
 
-// TODO: make a double-diamond <><> shape and assert that there aren't any closed paths
-// Wait, are diamond shapes inherantly bad?  I think it's totally fine.
+// TODO: make a double-diamond <><> shape and assert that
+// there aren't any closed paths Wait, are diamond shapes
+// inherantly bad?  I think it's totally fine.

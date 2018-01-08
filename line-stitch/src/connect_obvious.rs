@@ -1,15 +1,10 @@
 use ::*;
-use util::*;
-use std::cell::RefCell;
 use itertools::{repeat_call, Itertools};
+use std::cell::RefCell;
+use util::*;
 
 /// todo: doc
-pub fn connect_obvious<P, I, S: 'static>(
-    segments: I,
-    epsilon: f32,
-    only_starts: bool,
-    allow_ambiguous: bool,
-) -> Vec<PathSegment<S>>
+pub fn connect_obvious<P, I, S: 'static>(segments: I, epsilon: f32, only_starts: bool, allow_ambiguous: bool) -> Vec<PathSegment<S>>
 where
     I: IntoIterator<Item = P>,
     P: Into<smallvec::SmallVec<[Point<S>; 2]>>,
@@ -34,16 +29,12 @@ where
             segment.extend_from_slice(&other_segment.path[1..]);
         }
 
-        PathSegment::new(segment, epsilon)
+        PathSegment::new_and_potentially_close(segment, epsilon)
     }
 }
 
 fn chain_single<S: 'static>(
-    start: PathSegment<S>,
-    dual_qt: &mut DualQuadTree<S>,
-    epsilon: f32,
-    only_starts: bool,
-    allow_ambiguous: bool,
+    start: PathSegment<S>, dual_qt: &mut DualQuadTree<S>, epsilon: f32, only_starts: bool, allow_ambiguous: bool
 ) -> Option<Vec<PathSegment<S>>> {
     let mut last_going_forward = start.last();
     let mut first_going_backwards = start.first();
@@ -60,8 +51,7 @@ fn chain_single<S: 'static>(
     }
 
     loop {
-        let next =
-            dual_qt.query_backward(first_going_backwards, epsilon, only_starts, allow_ambiguous);
+        let next = dual_qt.query_backward(first_going_backwards, epsilon, only_starts, allow_ambiguous);
         if let Some(next) = next {
             first_going_backwards = next.first();
             combined.insert(0, next);

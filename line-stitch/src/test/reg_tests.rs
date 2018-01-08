@@ -2,6 +2,7 @@ use ::*;
 use euclid::{Point2D, UnknownUnit, point2};
 
 const EPSILON: f32 = 0.001;
+// CIRCLES 99 actually has 97 circles
 const CIRCLES_99_DATA: &'static [((f32, f32), (f32, f32))] = include!("./regressions/99_circles.txt");
 const ONE_CIRCLE_DATA: &'static [((f32, f32), (f32, f32))] = include!("./regressions/one_circle.txt");
 
@@ -29,21 +30,27 @@ fn circles_99_prune() {
 #[test]
 fn circles_99_connect() {
     let data = process(CIRCLES_99_DATA);
-
     let out = connect_obvious(data, EPSILON, true, false);
-    let mut ok = true;
     for segment in &out {
-        println!("{:?}", segment.path);
-        ok = false;
+        assert!(segment.closed);
     }
-    assert!(ok);
-    assert_eq!(out.len(), 99);
+
+    // Note: this is actually correct, 99 circles actually has 97 circles
+    assert_eq!(out.len(), 97);
 }
 
 #[test]
-fn one_circle() {
+fn one_circle_prune() {
     let data = process(ONE_CIRCLE_DATA);
     let input_count = data.len();
     let out = prune(data, EPSILON, true);
     assert_eq!(out.len(), input_count);
+}
+
+#[test]
+fn one_circle_connect() {
+    let data = process(ONE_CIRCLE_DATA);
+    let out = connect_obvious(data, EPSILON, true, false);
+    assert_eq!(out.len(), 1);
+    assert!(out[0].closed);
 }

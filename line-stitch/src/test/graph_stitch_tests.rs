@@ -50,7 +50,7 @@ fn no_segments() {
 fn one_segment_that_is_closed() {
     run(Problem {
         input: vec![
-            PathSegment::new(
+            PathSegment::new_and_potentially_close(
                 vec![
                     point2(0.0, 0.0),
                     point2(0.0, 1.0),
@@ -61,7 +61,7 @@ fn one_segment_that_is_closed() {
             ),
         ],
         expected: vec![
-            PathSegment::new(
+            PathSegment::new_and_potentially_close(
                 vec![
                     point2(0.0, 0.0),
                     point2(0.0, 1.0),
@@ -79,14 +79,14 @@ fn one_segment_that_is_closed() {
 fn two_segments_that_are_close_to_each_other() {
     run(Problem {
         input: vec![
-            PathSegment::new(
+            PathSegment::new_and_potentially_close(
                 vec![
                     point2(0.0, 0.0),
                     point2(0.0, 1.0),
                 ],
                 EPSILON,
             ),
-            PathSegment::new(
+            PathSegment::new_and_potentially_close(
                 vec![
                     point2(0.0, 1.0),
                     point2(1.0, 1.0),
@@ -96,7 +96,7 @@ fn two_segments_that_are_close_to_each_other() {
             ),
         ],
         expected: vec![
-            PathSegment::new(
+            PathSegment::new_and_potentially_close(
                 vec![
                     point2(0.0, 0.0),
                     point2(0.0, 1.0),

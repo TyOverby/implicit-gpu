@@ -10,7 +10,7 @@ where
     let mut starts_and_ends = vec![];
 
     for segment in segments.into_iter().map(Into::into).filter(|a| a.len() > 1) {
-        let segment = PathSegment::new(segment, epsilon);
+        let segment = PathSegment::new(segment);
         let first = segment.first();
         let last = segment.last();
         starts_and_ends.push(first);

@@ -2,8 +2,8 @@ use super::*;
 use aabb_quadtree::{ItemId, QuadTree};
 use euclid::{TypedRect, point2, vec2};
 use euclid::approxeq::ApproxEq;
-use util::{centered_with_radius, compute_bounding_box};
 use std::collections::{HashMap, HashSet};
+use util::{centered_with_radius, compute_bounding_box};
 
 // TODO: *LOTS* of optimization opporitunities here
 
@@ -17,9 +17,7 @@ struct Graph<S> {
 type VisitedSet = HashMap<ItemId, f32>;
 type Path = Vec<(ItemId, f32)>;
 
-fn is_close<S>(p1: Point<S>, p2: Point<S>) -> bool {
-    p1.approx_eq_eps(&p2, &point2(0.001, 0.001))
-}
+fn is_close<S>(p1: Point<S>, p2: Point<S>) -> bool { p1.approx_eq_eps(&p2, &point2(0.001, 0.001)) }
 
 impl<S> Graph<S> {
     fn new(v: Vec<PathSegment<S>>) -> Graph<S> {
@@ -31,10 +29,7 @@ impl<S> Graph<S> {
         for &(ref r, _) in &v {
             rect = rect.union(r);
         }
-        let rect = rect.inflate(
-            2.0f32.max(rect.size.width / 10.0),
-            2.0f32.max(rect.size.height / 10.0),
-        );
+        let rect = rect.inflate(2.0f32.max(rect.size.width / 10.0), 2.0f32.max(rect.size.height / 10.0));
 
         let mut tree = QuadTree::new(rect, true, 4, 16, 4);
 
@@ -70,22 +65,12 @@ impl<S> Graph<S> {
         segment.length()
     }
 
-    fn remove(&mut self, id: ItemId) -> PathSegment<S> {
-        self.tree.remove(id).unwrap().0
-    }
-    fn try_remove(&mut self, id: ItemId) {
-        self.tree.remove(id);
-    }
+    fn remove(&mut self, id: ItemId) -> PathSegment<S> { self.tree.remove(id).unwrap().0 }
+    fn try_remove(&mut self, id: ItemId) { self.tree.remove(id); }
 }
 
 fn recur<S>(
-    at: ItemId,
-    current_length: f32,
-    graph: &Graph<S>,
-    visited: &mut VisitedSet,
-    path: &mut Path,
-    best_possible: &mut f32,
-    possible: &mut Vec<Path>,
+    at: ItemId, current_length: f32, graph: &Graph<S>, visited: &mut VisitedSet, path: &mut Path, best_possible: &mut f32, possible: &mut Vec<Path>,
     dead_ends: &mut Vec<Path>,
 ) {
     let length = graph.length_of(at);
@@ -170,9 +155,7 @@ fn one_iter<S>(mut graph: Graph<S>) -> (Graph<S>, Vec<PathSegment<S>>) {
         .collect();
 
     // Start with the longest loops
-    possible.sort_by(|&(_, al), &(_, bl)| {
-        al.partial_cmp(&bl).unwrap_or(Ordering::Equal)
-    });
+    possible.sort_by(|&(_, al), &(_, bl)| al.partial_cmp(&bl).unwrap_or(Ordering::Equal));
     possible.reverse();
 
     let mut out = vec![];
@@ -206,7 +189,7 @@ fn one_iter<S>(mut graph: Graph<S>) -> (Graph<S>, Vec<PathSegment<S>>) {
                 }
             }
 
-            out.push(PathSegment::new(loop_out, 0.001));
+            out.push(PathSegment::new_and_potentially_close(loop_out, 0.001));
         }
     }
 
@@ -228,7 +211,6 @@ fn try_solve<S>(mut graph: Graph<S>) -> Vec<PathSegment<S>> {
     out
 }
 
-///
 /// TODO: document
 pub fn connect_unconnected<S>(joined: Vec<PathSegment<S>>) -> Vec<PathSegment<S>> {
     let (mut good, bad) = joined.into_iter().partition::<Vec<_>, _>(|a| a.closed);

@@ -18,19 +18,19 @@ mod zero_area_loop;
 pub(crate) mod util;
 
 use aabb_quadtree::*;
-use smallvec::SmallVec;
-use dual_quad_tree::*;
-use std::cell::Cell;
-use std::iter::{IntoIterator, FromIterator};
-
 pub use connect_obvious::connect_obvious;
-pub use prune::prune;
+use dual_quad_tree::*;
 pub use graph_stitch::connect_unconnected as graph_stitch;
+pub use prune::prune;
+use smallvec::SmallVec;
+use std::cell::Cell;
+use std::iter::{FromIterator, IntoIterator};
 pub use zero_area_loop::remove_zero_area_loops;
 
 type Point<S> = euclid::TypedPoint2D<f32, S>;
 
-/// A single path segment that may be merged with other path segments.
+/// A single path segment that may be merged with other
+/// path segments.
 #[derive(PartialEq, Clone)]
 pub struct PathSegment<S> {
     /// The path of points
@@ -53,7 +53,7 @@ impl<S> ::std::fmt::Debug for PathSegment<S> {
 
 impl<S> PathSegment<S> {
     /// TODO: doc
-    pub fn new<P: Into<SmallVec<[Point<S>; 2]>>>(path: P, epsilon: f32) -> PathSegment<S> {
+    pub fn new_and_potentially_close<P: Into<SmallVec<[Point<S>; 2]>>>(path: P, epsilon: f32) -> PathSegment<S> {
         let mut path = path.into();
 
         assert!(path.len() > 1);
@@ -76,13 +76,21 @@ impl<S> PathSegment<S> {
         }
     }
 
-    fn first(&self) -> Point<S> {
-        *self.path.first().unwrap()
+    /// TODO: doc
+    pub fn new<P: Into<SmallVec<[Point<S>; 2]>>>(path: P) -> PathSegment<S> {
+        let path = path.into();
+        assert!(path.len() > 1);
+        PathSegment {
+            path: path,
+            closed: false,
+            length_2: Cell::new(None),
+            length: Cell::new(None),
+        }
     }
 
-    fn last(&self) -> Point<S> {
-        *self.path.last().unwrap()
-    }
+    fn first(&self) -> Point<S> { *self.path.first().unwrap() }
+
+    fn last(&self) -> Point<S> { *self.path.last().unwrap() }
 
     /// TODO: document
     pub fn length_2(&self) -> f32 {
@@ -121,16 +129,12 @@ impl<S> PathSegment<S> {
 impl<S> IntoIterator for PathSegment<S> {
     type Item = Point<S>;
     type IntoIter = smallvec::IntoIter<[Point<S>; 2]>;
-    fn into_iter(self) -> Self::IntoIter {
-        self.path.into_iter()
-    }
+    fn into_iter(self) -> Self::IntoIter { self.path.into_iter() }
 }
 
-impl <S> FromIterator<Point<S>> for PathSegment<S> {
+impl<S> FromIterator<Point<S>> for PathSegment<S> {
     fn from_iter<T>(iter: T) -> Self
-    where
-        T: IntoIterator<Item = Point<S>> {
-        PathSegment::new(iter.into_iter().collect::<Vec<_>>(), 0.001)
+    where T: IntoIterator<Item = Point<S>> {
+        PathSegment::new(iter.into_iter().collect::<Vec<_>>())
     }
-
 }
