@@ -1,5 +1,4 @@
 extern crate combine;
-extern crate flame;
 extern crate futures;
 extern crate hyper;
 #[macro_use]

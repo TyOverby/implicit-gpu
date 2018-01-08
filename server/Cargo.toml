@@ -19,7 +19,7 @@ latin = "0.1.7"
 lazy_static="*"
 
 [dependencies.happy]
-path = "../../happy"
+path = "../happy"
 
 [dependencies.implicit]
 path = "../implicit"
