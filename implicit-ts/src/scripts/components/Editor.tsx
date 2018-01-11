@@ -32,7 +32,7 @@ export class Editor extends React.Component<EditorProps> {
             fetch('./lib/react_like.ts').then(a => a.text()),
             fetch('./lib/jsx_like.ts').then(a => a.text()),
             fetch('./lib/components.d.ts').then(a => a.text()),
-            fetch('./deps/typescript/lib.d.ts').then(a => a.text()),
+            fetch('./deps/typescript/lib.es5.d.ts').then(a => a.text()),
         ]);
 
         monaco.languages.typescript.typescriptDefaults.addExtraLib(js_lib_source, "lib.d.ts");
@@ -43,7 +43,7 @@ export class Editor extends React.Component<EditorProps> {
         monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
             target: monaco.languages.typescript.ScriptTarget.ES5,
             lib: [],
-            noLib: false,
+            noLib: true,
             jsx: 2,
             jsxFactory: 'Impl.createElement',
             reactNamespace: 'Impl',
