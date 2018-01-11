@@ -12,7 +12,7 @@ extern crate serde_derive;
 
 use happy::RequestInfo;
 use implicit::scene::Scene;
-use implicit::telemetry::DumpTelemetry;
+use implicit::telemetry::OnlyFlameTelemetry;
 use std::panic::catch_unwind;
 use std::sync::Mutex;
 
@@ -58,7 +58,8 @@ fn process(_: RequestInfo, scene: SceneRequest) -> Result<Output, SceneError> {
         let dump_dir = format!("dumps/{:?}", current_timestamp);
         ::std::fs::create_dir_all(&dump_dir).unwrap();
         latin::file::write(format!("{}/source.ts", dump_dir), scene.source).unwrap();
-        let mut telemetry = DumpTelemetry::new(dump_dir);
+
+        let mut telemetry = OnlyFlameTelemetry; // DumpTelemetry::new(dump_dir);
 
         let (out, ctx) = implicit::run_scene(scene.scene, &mut telemetry, ctx);
         *CONTEXT.lock().unwrap() = Some(ctx);

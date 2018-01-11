@@ -6,10 +6,14 @@ where
     I: IntoIterator<Item = P>,
     P: Into<smallvec::SmallVec<[Point<S>; 2]>>,
 {
-    let mut all_segments = vec![];
-    let mut starts_and_ends = vec![];
+    let _guard = ::flame::start_guard("populate dual quad-tree");
 
-    for segment in segments.into_iter().map(Into::into).filter(|a| a.len() > 1) {
+    let segments = segments.into_iter();
+    let size_hint = segments.size_hint().1.unwrap_or(0);
+    let mut all_segments = Vec::with_capacity(size_hint);
+    let mut starts_and_ends = Vec::with_capacity(size_hint);
+
+    for segment in segments.map(Into::into).filter(|a| a.len() > 1) {
         let segment = PathSegment::new(segment);
         let first = segment.first();
         let last = segment.last();
@@ -21,7 +25,7 @@ where
     let rect = TypedRect::from_points(&starts_and_ends[..]);
     let scene_aabb = rect.inflate(epsilon.max(rect.size.width / 10.0), epsilon.max(rect.size.height / 10.0));
 
-    let mut dual_qt = DualQuadTree::new(scene_aabb);
+    let mut dual_qt = DualQuadTree::new(scene_aabb, size_hint);
     for segment in all_segments {
         dual_qt.insert(segment);
     }

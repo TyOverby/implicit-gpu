@@ -13,13 +13,21 @@ pub struct DualQuadTree<S> {
 }
 
 impl<S: 'static> DualQuadTree<S> {
-    pub fn new(aabb: euclid::TypedRect<f32, S>) -> DualQuadTree<S> {
+    pub fn new(aabb: euclid::TypedRect<f32, S>, size_hint: usize) -> DualQuadTree<S> {
+        let hasher: fnv::FnvBuildHasher = Default::default();
         DualQuadTree {
             id: 0,
-            id_to_segment: HashMap::default(),
-            starts: QuadTree::default(aabb),
-            ends: QuadTree::default(aabb),
-            ambiguity_points: QuadTree::default(aabb),
+            id_to_segment: HashMap::with_capacity_and_hasher(size_hint, hasher),
+            starts: QuadTree::new(
+                aabb,
+                true,
+                /* min children */ 0,
+                /* max_children */ 64,
+                /* max-depth */ 16,
+                size_hint,
+            ),
+            ends: QuadTree::new(aabb, true, 0, 64, 16, size_hint),
+            ambiguity_points: QuadTree::new(aabb, true, 0, 64, 16, size_hint / 100),
         }
     }
 

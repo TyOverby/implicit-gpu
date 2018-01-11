@@ -21,6 +21,7 @@ fn is_close<S>(p1: Point<S>, p2: Point<S>) -> bool { p1.approx_eq_eps(&p2, &poin
 
 impl<S> Graph<S> {
     fn new(v: Vec<PathSegment<S>>) -> Graph<S> {
+        let size_hint = v.len();
         let v: Vec<_> = v.into_iter()
             .map(|v| (compute_bounding_box(vec![v.first(), v.last()]), v))
             .collect();
@@ -31,7 +32,7 @@ impl<S> Graph<S> {
         }
         let rect = rect.inflate(2.0f32.max(rect.size.width / 10.0), 2.0f32.max(rect.size.height / 10.0));
 
-        let mut tree = QuadTree::new(rect, true, 4, 16, 4);
+        let mut tree = QuadTree::new(rect, true, 4, 16, 4, size_hint);
 
         for (bb, v) in v {
             tree.insert_with_box(v, bb);

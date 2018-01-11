@@ -4,6 +4,7 @@
 extern crate aabb_quadtree;
 extern crate euclid;
 extern crate fnv;
+extern crate flame;
 extern crate itertools;
 #[cfg(test)]
 extern crate permutohedron;

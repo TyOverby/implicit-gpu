@@ -85,15 +85,6 @@ impl Telemetry for DumpTelemetry {
         output_svg_lines(file, lines.iter().cloned());
     }
 
-
-    /*
-    fn lines_0_input(&mut self, _t: TelemetryLocation, _lines: &[Line]) {}
-    fn lines_1_pruned(&mut self, _t: TelemetryLocation, _lines: &[Line]) {}
-    fn lines_2_zero_area_removed(&mut self, _t: TelemetryLocation, _lines: &[PathSegment<euclid::UnknownUnit>]) {}
-    fn lines_3_obvious_connected(&mut self, _t: TelemetryLocation, _lines: &[PathSegment<euclid::UnknownUnit>]) {}
-    fn lines_4_graph_stitched(&mut self, _t: TelemetryLocation, _lines: &[PathSegment<euclid::UnknownUnit>]) {}
-*/
-
     fn lines_1_zero_area_removed(&mut self, tloc: TelemetryLocation, lines: &[(Point, Point)]) {
         use std::fs::File;
 
