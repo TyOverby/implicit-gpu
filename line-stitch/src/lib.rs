@@ -3,11 +3,12 @@
 
 extern crate aabb_quadtree;
 extern crate euclid;
-extern crate fnv;
 extern crate flame;
+extern crate fnv;
 extern crate itertools;
 #[cfg(test)]
 extern crate permutohedron;
+extern crate rayon;
 extern crate smallvec;
 
 mod dual_quad_tree;
@@ -39,9 +40,11 @@ pub struct PathSegment<S> {
     /// True if the end of the path segment is the same as the
     /// beginning of the path segment.
     pub closed: bool,
-    length_2: Cell<Option<f32>>,
-    length: Cell<Option<f32>>,
+    length_2: Cell<f32>,
+    length: Cell<f32>,
 }
+
+unsafe impl <S> Sync for PathSegment<S> {}
 
 impl<S> ::std::fmt::Debug for PathSegment<S> {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
@@ -72,8 +75,8 @@ impl<S> PathSegment<S> {
         PathSegment {
             path: path,
             closed: closed,
-            length_2: Cell::new(None),
-            length: Cell::new(None),
+            length_2: Cell::new(0.0),
+            length: Cell::new(0.0),
         }
     }
 
@@ -84,8 +87,8 @@ impl<S> PathSegment<S> {
         PathSegment {
             path: path,
             closed: false,
-            length_2: Cell::new(None),
-            length: Cell::new(None),
+            length_2: Cell::new(0.0),
+            length: Cell::new(0.0),
         }
     }
 
@@ -95,8 +98,8 @@ impl<S> PathSegment<S> {
 
     /// TODO: document
     pub fn length_2(&self) -> f32 {
-        if let Some(l) = self.length_2.get() {
-            return l;
+        if self.length_2.get() != 0.0 {
+            return self.length_2.get();
         }
 
         let length_2 = self.path
@@ -105,15 +108,15 @@ impl<S> PathSegment<S> {
             .map(|s| (s[1] - s[0]).square_length())
             .sum();
 
-        self.length_2.set(Some(length_2));
+        self.length_2.set(length_2);
 
         return length_2;
     }
 
     /// TODO: document
     pub fn length(&self) -> f32 {
-        if let Some(l) = self.length.get() {
-            return l;
+        if self.length.get() != 0.0 {
+            return self.length.get();
         }
 
         let length = self.path
@@ -121,7 +124,7 @@ impl<S> PathSegment<S> {
             .windows(2)
             .map(|s| (s[1] - s[0]).length())
             .sum();
-        self.length.set(Some(length));
+        self.length.set(length);
 
         return length;
     }

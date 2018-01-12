@@ -6,7 +6,7 @@ use fnv::FnvHashMap as HashMap;
 pub struct DqtId(u32);
 pub struct DualQuadTree<S> {
     id: u32,
-    id_to_segment: HashMap<DqtId, (PathSegment<S>, ItemId, ItemId)>,
+    pub id_to_segment: HashMap<DqtId, (PathSegment<S>, ItemId, ItemId)>,
     pub starts: QuadTree<DqtId, S>,
     pub ends: QuadTree<DqtId, S>,
     pub ambiguity_points: QuadTree<Point<S>, S>,
