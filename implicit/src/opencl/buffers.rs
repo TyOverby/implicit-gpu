@@ -24,7 +24,6 @@ impl SyncBuffer {
 impl FieldBuffer {
     pub fn size(&self) -> (usize, usize) { (self.width(), self.height()) }
     pub fn width(&self) -> usize { self.dims.0 }
-
     pub fn height(&self) -> usize { self.dims.1 }
 
     pub fn values(&self) -> Vec<f32> {

@@ -15,7 +15,6 @@ pub struct OpenClContext {
     program_cache: Mutex<Vec<(String, Program)>>,
 }
 
-
 pub fn all_devices() -> Vec<(Platform, Device)> {
     let mut out = vec![];
     for plat in Platform::list() {

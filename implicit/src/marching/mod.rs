@@ -7,11 +7,12 @@ pub fn run_marching(input: &FieldBuffer, ctx: &OpenClContext) -> LineBuffer {
 
     let (width, height) = (input.width(), input.height());
     let kernel = ctx.compile("apply", PROGRAM);
-    let from = vec![::std::f32::NAN; width * height * 4];
+    let from = ::flame::span_of("opencl marching [build vec]", || vec![::std::f32::NAN; width * height * 4]);
 
     let line_buffer = ctx.line_buffer(&from);
     let sync_buffer = ctx.sync_buffer();
 
+    ::flame::start("setup kernel");
     let exec = kernel
         .queue(ctx.queue().clone())
         .gws([width, height])
@@ -20,9 +21,10 @@ pub fn run_marching(input: &FieldBuffer, ctx: &OpenClContext) -> LineBuffer {
         .arg_scl(height as u64)
         .arg_buf(line_buffer.buffer())
         .arg_buf(sync_buffer.buffer());
+    ::flame::end("setup kernel");
 
     unsafe {
-        exec.enq().unwrap();
+        ::flame::span_of("opencl marching [execution]", || exec.enq().unwrap());
     }
 
     line_buffer
