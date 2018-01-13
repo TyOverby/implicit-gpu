@@ -67,8 +67,6 @@ impl<S: 'static> DualQuadTree<S> {
         self.remove(dqt_id)
     }
 
-    pub fn len(&self) -> usize { self.id_to_segment.len() }
-
     pub fn remove(&mut self, dqt_id: DqtId) -> Option<PathSegment<S>> {
         let (segment, start_id, end_id) = self.id_to_segment.remove(&dqt_id).unwrap();
         self.starts.remove(start_id);
@@ -156,12 +154,9 @@ impl<S: 'static> DualQuadTree<S> {
 
         let query_starts = || {
             let mut out = None;
-            let query = self.starts
-                .query(query_aabb)
-                .into_iter()
-                .map(|(&id, _, _)| (id, self.id_to_segment.get(&id).unwrap().0.first()));
-            let trimmed = take_nearest(point, query);
-            for id in trimmed {
+            let mut query = self.starts.query(query_aabb);
+            let amnt = self.take_nearest(point, true, &mut query);
+            for (&id, _, _) in query.into_iter().take(amnt) {
                 if allow_ambiguous {
                     return Ok(Some(id));
                 } else {
@@ -176,12 +171,9 @@ impl<S: 'static> DualQuadTree<S> {
 
         let query_ends = || {
             let mut out = None;
-            let query = self.ends
-                .query(query_aabb)
-                .into_iter()
-                .map(|(&id, _, _)| (id, self.id_to_segment.get(&id).unwrap().0.last()));
-            let trimmed = take_nearest(point, query);
-            for id in trimmed {
+            let mut query = self.ends.query(query_aabb);
+            let amnt = self.take_nearest(point, false, &mut query);
+            for (&id, _, _) in query.into_iter().take(amnt) {
                 if allow_ambiguous {
                     return Ok(Some(id));
                 } else {
@@ -196,36 +188,43 @@ impl<S: 'static> DualQuadTree<S> {
 
         (query_starts(), query_ends())
     }
-}
 
-fn take_nearest<S, I>(point: Point<S>, points: I) -> Vec<DqtId>
-where I: Iterator<Item = (DqtId, Point<S>)> {
-    use std::cmp::Ordering;
-    let points = points.collect::<Vec<_>>();
-    if points.is_empty() {
-        return vec![];
+    fn take_nearest<'a, 'o>(
+        &self, point: Point<S>, is_start: bool, points: &mut [(&dual_quad_tree::DqtId, euclid::TypedRect<f32, S>, aabb_quadtree::ItemId)]
+    ) -> usize {
+        use std::cmp::Ordering;
+        if points.len() == 0 {
+            return 0;
+        }
+        let dist_for_id = |id| {
+            let elem = &self.id_to_segment.get(id).unwrap().0;
+            let pa = if is_start { elem.first() } else { elem.last() };
+
+            let dist = (point - pa).square_length();
+            dist
+        };
+
+        points.sort_by(|&(ida, _, _), &(idb, _, _)| {
+            let dist_a = dist_for_id(ida);
+            let dist_b = dist_for_id(idb);
+
+            return dist_a.partial_cmp(&dist_b).unwrap_or(Ordering::Equal);
+        });
+
+        let dsmall = dist_for_id(points[0].0);
+
+        let mut number_with_dsmall = 0;
+        for &(id, _, _) in points.iter() {
+            if dist_for_id(id) == dsmall {
+                number_with_dsmall += 1;
+            } else {
+                break;
+            }
+        }
+        return number_with_dsmall;
     }
-
-    let mut with_distance = points
-        .into_iter()
-        .map(|(id, pt)| {
-            let dist = (point - pt).square_length();
-            (id, pt, dist)
-        })
-        .collect::<Vec<_>>();
-
-    with_distance.sort_by(|&(_, _, dist1), &(_, _, dist2)| {
-        return dist1.partial_cmp(&dist2).unwrap_or(Ordering::Equal);
-    });
-
-    let (_, _, dsmall) = with_distance[0];
-
-    return with_distance
-        .into_iter()
-        .take_while(|&(_, _, d)| d == dsmall)
-        .map(|(id, _, _)| id)
-        .collect();
 }
+
 
 fn reverse_and_return<S>(mut v: PathSegment<S>) -> PathSegment<S> {
     v.path.reverse();
