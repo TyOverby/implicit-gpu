@@ -7,9 +7,11 @@
 
 extern crate euclid;
 extern crate fnv;
+extern crate smallvec;
 
 use euclid::{TypedPoint2D, TypedRect, TypedSize2D};
 use fnv::FnvHashMap;
+use smallvec::SmallVec;
 use std::cmp::Ord;
 
 type Rect<S> = TypedRect<f32, S>;
@@ -225,23 +227,15 @@ impl<T, S> QuadTree<T, S> {
 
     /// Returns an iterator of (element, bounding-box, id) for each element
     /// whose bounding box intersects with `bounding_box`.
-    pub fn query(&self, bounding_box: Rect<S>) -> Vec<(&T, &Rect<S>, ItemId)>
+    pub fn query(&self, bounding_box: Rect<S>) -> SmallVec<[(&T, Rect<S>, ItemId); 3]>
     where T: ::std::fmt::Debug {
-        let mut ids = vec![];
-        self.root.query(bounding_box, &self.config, &mut ids);
-        ids.sort_by_key(|&(id, _)| id);
-        ids.dedup();
-        ids.iter()
-            .map(|&(id, _)| {
-                let &(ref t, ref rect) = match self.elements.get(&id) {
-                    Some(e) => e,
-                    None => {
-                        panic!("looked for {:?}", id);
-                    }
-                };
-                (t, rect, id)
-            })
-            .collect()
+        let mut out: SmallVec<[(_, _, _); 3]> = Default::default();
+        self.root.query(bounding_box, &self.config, &mut |id, bb| {
+            out.push((&self.elements.get(&id).unwrap().0, bb, id))
+        });
+        out.sort_by_key(|&(_, _, id)| id);
+        out.dedup_by_key(|&mut (_, _, id)| id);
+        out
     }
 
     /// Attempts to remove the item with id `item_id` from the tree.  If that
@@ -445,7 +439,7 @@ impl<S> QuadNode<S> {
 
         if let Some((size, aabb, depth)) = compact {
             let mut elements = Vec::with_capacity(size);
-            self.query(aabb, config, &mut elements);
+            self.query(aabb, config, &mut |id, bb| elements.push((id, bb)));
             elements.sort_by(|&(id1, _), &(ref id2, _)| id1.cmp(id2));
             elements.dedup();
             *self = QuadNode::Leaf {
@@ -457,26 +451,29 @@ impl<S> QuadNode<S> {
         removed
     }
 
-    fn query(&self, query_aabb: Rect<S>, config: &QuadTreeConfig, out: &mut Vec<(ItemId, Rect<S>)>) {
-        fn match_all<S>(elements: &Vec<(ItemId, Rect<S>)>, query_aabb: Rect<S>, out: &mut Vec<(ItemId, Rect<S>)>, config: &QuadTreeConfig) {
-            for &(ref child_id, child_aabb) in elements {
+    fn query<F>(&self, query_aabb: Rect<S>, config: &QuadTreeConfig, on_find: &mut F)
+    where F: FnMut(ItemId, Rect<S>) {
+        fn match_all<S, F>(elements: &Vec<(ItemId, Rect<S>)>, query_aabb: Rect<S>, on_find: &mut F, config: &QuadTreeConfig)
+        where
+            F: FnMut(ItemId, Rect<S>) {
+            for &(child_id, child_aabb) in elements {
                 if my_intersects(query_aabb, child_aabb) || close_to_rect(query_aabb, child_aabb, config.epsilon) {
-                    out.push((*child_id, child_aabb))
+                    on_find(child_id, child_aabb);
                 }
             }
         }
 
         match self {
             &QuadNode::Branch { ref in_all, ref children, .. } => {
-                match_all(in_all, query_aabb, out, config);
+                match_all(in_all, query_aabb, on_find, config);
 
                 for &(child_aabb, ref child_tree) in children {
                     if my_intersects(query_aabb, child_aabb) {
-                        child_tree.query(query_aabb, config, out);
+                        child_tree.query(query_aabb, config, on_find);
                     }
                 }
             }
-            &QuadNode::Leaf { ref elements, .. } => match_all(elements, query_aabb, out, config),
+            &QuadNode::Leaf { ref elements, .. } => match_all(elements, query_aabb, on_find, config),
         }
     }
 }

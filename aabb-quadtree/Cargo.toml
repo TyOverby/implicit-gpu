@@ -9,4 +9,5 @@ license="MIT/Apache-2.0"
 
 [dependencies]
 fnv = "1.*.*"
-euclid= "0.16.*"
+euclid = "0.16.*"
+smallvec = "0.6.0"
