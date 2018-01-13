@@ -11,7 +11,7 @@ type Rect<S> = TypedRect<f32, S>;
 
 #[derive(Clone)]
 struct Graph<S> {
-    tree: QuadTree<PathSegment<S>, S>,
+    tree: QuadTree<PathSegment<S>, S, [(ItemId, euclid::TypedRect<f32, S>); 32]>,
 }
 
 type VisitedSet = HashMap<ItemId, f32>;

@@ -7,9 +7,9 @@ pub struct DqtId(u32);
 pub struct DualQuadTree<S> {
     id: u32,
     pub id_to_segment: HashMap<DqtId, (PathSegment<S>, ItemId, ItemId)>,
-    pub starts: QuadTree<DqtId, S>,
-    pub ends: QuadTree<DqtId, S>,
-    pub ambiguity_points: QuadTree<Point<S>, S>,
+    pub starts: QuadTree<DqtId, S, [(ItemId, euclid::TypedRect<f32, S>); 32]>,
+    pub ends: QuadTree<DqtId, S, [(ItemId, euclid::TypedRect<f32, S>); 32]>,
+    pub ambiguity_points: QuadTree<Point<S>, S, [(ItemId, euclid::TypedRect<f32, S>); 32]>,
 }
 
 impl<S: 'static> DualQuadTree<S> {
@@ -29,11 +29,6 @@ impl<S: 'static> DualQuadTree<S> {
             ends: QuadTree::new(aabb, true, 0, 64, 16, size_hint),
             ambiguity_points: QuadTree::new(aabb, true, 0, 64, 16, size_hint / 100),
         }
-    }
-
-    pub fn iter<'a>(&'a self) -> Box<Iterator<Item = (DqtId, &'a PathSegment<S>)> + 'a> {
-        let iterator = self.id_to_segment.iter().map(|(&k, &(ref p, _, _))| (k, p));
-        Box::new(iterator) as Box<Iterator<Item = (DqtId, &PathSegment<S>)> + 'a>
     }
 
     pub fn into_iter(self) -> Box<Iterator<Item = PathSegment<S>>> {

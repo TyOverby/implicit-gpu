@@ -11,7 +11,7 @@ extern crate smallvec;
 
 use euclid::{TypedPoint2D, TypedRect, TypedSize2D};
 use fnv::FnvHashMap;
-use smallvec::SmallVec;
+use smallvec::{Array, SmallVec};
 use std::cmp::Ord;
 
 type Rect<S> = TypedRect<f32, S>;
@@ -45,14 +45,14 @@ struct QuadTreeConfig {
 /// The main QuadTree structure.  Mainly supports inserting, removing,
 /// and querying objects in 3d space.
 #[derive(Clone)]
-pub struct QuadTree<T, S> {
-    root: QuadNode<S>,
+pub struct QuadTree<T, S, A: Array<Item = (ItemId, Rect<S>)>> {
+    root: QuadNode<S, A>,
     config: QuadTreeConfig,
     id: u32,
     elements: FnvHashMap<ItemId, (T, Rect<S>)>,
 }
 
-impl<T: ::std::fmt::Debug, S> ::std::fmt::Debug for QuadTree<T, S> {
+impl<T: ::std::fmt::Debug, S, A: Array<Item = (ItemId, Rect<S>)>> ::std::fmt::Debug for QuadTree<T, S, A> {
     fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         formatter
             .debug_struct("QuadTree")
@@ -64,7 +64,7 @@ impl<T: ::std::fmt::Debug, S> ::std::fmt::Debug for QuadTree<T, S> {
     }
 }
 
-impl<S> ::std::fmt::Debug for QuadNode<S> {
+impl<S, A: Array<Item = (ItemId, Rect<S>)>> ::std::fmt::Debug for QuadNode<S, A> {
     fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         match self {
             &QuadNode::Branch {
@@ -96,23 +96,23 @@ impl<S> ::std::fmt::Debug for QuadNode<S> {
     }
 }
 
-enum QuadNode<S> {
+enum QuadNode<S, A: Array<Item = (ItemId, Rect<S>)>> {
     Branch {
         aabb: Rect<S>,
         element_count: usize,
         depth: usize,
-        in_all: Vec<(ItemId, Rect<S>)>,
-        children: [(Rect<S>, Box<QuadNode<S>>); 4],
+        in_all: SmallVec<A>,
+        children: [(Rect<S>, Box<QuadNode<S, A>>); 4],
     },
     Leaf {
         aabb: Rect<S>,
         depth: usize,
-        elements: Vec<(ItemId, Rect<S>)>,
+        elements: SmallVec<A>,
     },
 }
 
-impl<S> Clone for QuadNode<S> {
-    fn clone(&self) -> QuadNode<S> {
+impl<S, A: Array<Item = (ItemId, Rect<S>)>> Clone for QuadNode<S, A> {
+    fn clone(&self) -> QuadNode<S, A> {
         match self {
             &QuadNode::Branch {
                 ref aabb,
@@ -148,7 +148,7 @@ impl<S> Clone for QuadNode<S> {
     }
 }
 
-impl<T, S> QuadTree<T, S> {
+impl<T, S, A: Array<Item = (ItemId, Rect<S>)>> QuadTree<T, S, A> {
     /// Constructs a new QuadTree with customizable options.
     ///
     /// * `size`: the enclosing space for the quad-tree.
@@ -158,11 +158,11 @@ impl<T, S> QuadTree<T, S> {
     /// * `max_depth`: the maximum depth that the tree can grow before it stops.
     pub fn new(
         size: Rect<S>, allow_duplicates: bool, min_children: usize, max_children: usize, max_depth: usize, size_hint: usize
-    ) -> QuadTree<T, S> {
+    ) -> QuadTree<T, S, A> {
         QuadTree {
             root: QuadNode::Leaf {
                 aabb: size,
-                elements: Vec::with_capacity(max_children),
+                elements: SmallVec::new(),
                 depth: 0,
             },
             config: QuadTreeConfig {
@@ -185,7 +185,7 @@ impl<T, S> QuadTree<T, S> {
     /// * `min_children`: 4
     /// * `max_children`: 16
     /// * `max_depth`: 8
-    pub fn default(size: Rect<S>, size_hint: usize) -> QuadTree<T, S> { QuadTree::new(size, true, 4, 16, 8, size_hint) }
+    pub fn default(size: Rect<S>, size_hint: usize) -> QuadTree<T, S, A> { QuadTree::new(size, true, 4, 16, 8, size_hint) }
 
     /// Inserts an element with the provided bounding box.
     pub fn insert_with_box(&mut self, t: T, aabb: Rect<S>) -> Option<ItemId> {
@@ -271,7 +271,7 @@ impl<T, S> QuadTree<T, S> {
     pub fn bounding_box(&self) -> Rect<S> { self.root.bounding_box() }
 }
 
-impl<S> QuadNode<S> {
+impl<S, A: Array<Item = (ItemId, Rect<S>)>> QuadNode<S, A> {
     fn bounding_box(&self) -> Rect<S> {
         match self {
             &QuadNode::Branch { ref aabb, .. } => aabb.clone(),
@@ -279,10 +279,10 @@ impl<S> QuadNode<S> {
         }
     }
 
-    fn new_leaf(aabb: Rect<S>, depth: usize, config: &QuadTreeConfig) -> QuadNode<S> {
+    fn new_leaf(aabb: Rect<S>, depth: usize) -> QuadNode<S, A> {
         QuadNode::Leaf {
             aabb: aabb,
-            elements: Vec::with_capacity(config.max_children / 2),
+            elements: SmallVec::new(),
             depth: depth,
         }
     }
@@ -345,7 +345,7 @@ impl<S> QuadNode<S> {
             } => {
                 if elements.len() == config.max_children && *depth != config.max_depth {
                     // STEAL ALL THE CHILDREN MUAHAHAHAHA
-                    let mut extracted_children = Vec::new();
+                    let mut extracted_children = SmallVec::new();
                     ::std::mem::swap(&mut extracted_children, elements);
                     extracted_children.push((item_id, item_aabb));
                     did_insert = true;
@@ -355,12 +355,12 @@ impl<S> QuadNode<S> {
                         extracted_children,
                         QuadNode::Branch {
                             aabb: aabb,
-                            in_all: Vec::new(),
+                            in_all: SmallVec::new(),
                             children: [
-                                (split[0], Box::new(QuadNode::new_leaf(split[0], depth + 1, config))),
-                                (split[1], Box::new(QuadNode::new_leaf(split[1], depth + 1, config))),
-                                (split[2], Box::new(QuadNode::new_leaf(split[2], depth + 1, config))),
-                                (split[3], Box::new(QuadNode::new_leaf(split[3], depth + 1, config))),
+                                (split[0], Box::new(QuadNode::new_leaf(split[0], depth + 1))),
+                                (split[1], Box::new(QuadNode::new_leaf(split[1], depth + 1))),
+                                (split[2], Box::new(QuadNode::new_leaf(split[2], depth + 1))),
+                                (split[3], Box::new(QuadNode::new_leaf(split[3], depth + 1))),
                             ],
                             element_count: 0,
                             depth: *depth,
@@ -394,7 +394,7 @@ impl<S> QuadNode<S> {
     }
 
     fn remove(&mut self, item_id: ItemId, item_aabb: Rect<S>, config: &QuadTreeConfig) -> bool {
-        fn remove_from<S>(v: &mut Vec<(ItemId, Rect<S>)>, item: ItemId) -> bool {
+        fn remove_from<S, A: Array<Item = (ItemId, Rect<S>)>>(v: &mut SmallVec<A>, item: ItemId) -> bool {
             if let Some(index) = v.iter().position(|a| a.0 == item) {
                 v.swap_remove(index);
                 true
@@ -438,7 +438,7 @@ impl<S> QuadNode<S> {
         };
 
         if let Some((size, aabb, depth)) = compact {
-            let mut elements = Vec::with_capacity(size);
+            let mut elements: SmallVec<A> = SmallVec::with_capacity(size);
             self.query(aabb, config, &mut |id, bb| elements.push((id, bb)));
             elements.sort_by(|&(id1, _), &(ref id2, _)| id1.cmp(id2));
             elements.dedup();
@@ -453,9 +453,10 @@ impl<S> QuadNode<S> {
 
     fn query<F>(&self, query_aabb: Rect<S>, config: &QuadTreeConfig, on_find: &mut F)
     where F: FnMut(ItemId, Rect<S>) {
-        fn match_all<S, F>(elements: &Vec<(ItemId, Rect<S>)>, query_aabb: Rect<S>, on_find: &mut F, config: &QuadTreeConfig)
-        where
-            F: FnMut(ItemId, Rect<S>) {
+        fn match_all<S, F, A: Array<Item = (ItemId, Rect<S>)>>(
+            elements: &SmallVec<A>, query_aabb: Rect<S>, on_find: &mut F, config: &QuadTreeConfig
+        ) where
+            F: FnMut(ItemId, Rect<S>), {
             for &(child_id, child_aabb) in elements {
                 if my_intersects(query_aabb, child_aabb) || close_to_rect(query_aabb, child_aabb, config.epsilon) {
                     on_find(child_id, child_aabb);
