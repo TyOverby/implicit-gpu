@@ -74,6 +74,7 @@ pub fn run_scene(
         rect.and_then(|a| a)
     }
     fn compute_scene_size(scene: &scene::Scene) -> Option<Rect> {
+        let _guard = ::flame::start_guard("compute_scene_size");
         let mut rect: Option<Option<Rect>> = None;
 
         for figure in &scene.figures {
@@ -86,6 +87,7 @@ pub fn run_scene(
 
         rect.and_then(|a| a)
     }
+
     telemetry.scene_started();
     // Setup
     let ctx = ctx.unwrap_or_else(|| opencl::OpenClContext::default());

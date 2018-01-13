@@ -36,6 +36,7 @@ impl Nest {
     }
 
     pub fn group(&mut self, node: NodeRef) -> GroupId {
+        let _guard = ::flame::start_guard("Nest::group");
         let node = if node.contains_break() {
             NodeRef::new(node.take().propagate_translates(0.0, 0.0))
         } else {

@@ -26,6 +26,7 @@ enum CompilationContext {
 
 pub fn compile(node: &Node) -> (String, SharedInfo) {
     use std::ops::Deref;
+    let _guard = ::flame::start_guard("compile emit");
 
     let (cc, shared) = CompilationContext::new();
 
