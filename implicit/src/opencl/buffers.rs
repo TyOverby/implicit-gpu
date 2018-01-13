@@ -7,12 +7,6 @@ pub struct FieldBuffer {
 }
 
 #[derive(Debug, Clone)]
-pub struct MaskBuffer {
-    pub size: usize,
-    pub internal: Buffer<u32>,
-}
-
-#[derive(Debug, Clone)]
 pub struct LineBuffer {
     pub size: usize,
     pub internal: Buffer<f32>,
@@ -67,17 +61,4 @@ impl LineBuffer {
     }
 
     pub fn buffer(&self) -> &Buffer<f32> { &self.internal }
-}
-
-impl MaskBuffer {
-    pub fn size(&self) -> usize { self.size }
-
-    pub fn values(&self) -> Vec<u32> {
-        let _guard = ::flame::start_guard("mask buffer values");
-        let mut out = vec![0; self.size()];
-        self.internal.read(&mut out).enq().unwrap();
-        out
-    }
-
-    pub fn buffer(&self) -> &Buffer<u32> { &self.internal }
 }

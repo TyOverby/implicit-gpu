@@ -146,27 +146,6 @@ impl OpenClContext {
         }
     }
 
-    pub fn mask_buffer(&self, size: usize, fill: Option<&[u32]>) -> MaskBuffer {
-        let _guard = ::flame::start_guard("OpenClContext::mask_buffer");
-        if let Some(fill) = fill {
-            debug_assert!(size == fill.len());
-            MaskBuffer {
-                size: size,
-                internal: Buffer::new(
-                    self.queue.clone(),
-                    Some(MEM_COPY_HOST_PTR | MEM_READ_WRITE),
-                    &[size],
-                    Some(fill),
-                ).unwrap(),
-            }
-        } else {
-            MaskBuffer {
-                size: size,
-                internal: Buffer::new(self.queue.clone(), Some(MEM_READ_WRITE), &[size], None).unwrap(),
-            }
-        }
-    }
-
     pub fn empty_queue(&self) {
         let _guard = ::flame::start_guard("OpenClContext::empty_queue");
         self.queue.finish().unwrap();
