@@ -12,7 +12,7 @@ where I: Into<Vec<(Point<S>, Point<S>)>> {
     let size_hint = collected.len();
     let aabb = compute_bounding_box(collected.iter().flat_map(|&(p1, p2)| vec![p1, p2]));
     let aabb = aabb.inflate(1.0f32.max(aabb.size.width / 10.0), 1.0f32.max(aabb.size.height / 10.0));
-    let mut quad_tree: QuadTree<_, _, [_; 32]> = QuadTree::default(aabb, size_hint);
+    let mut quad_tree: QuadTree<_, _, [_; 32]> = QuadTree::new(aabb, true, 0, 64, 64, size_hint);
     let eps = Point::new(epsilon, epsilon);
 
     'outer: for (p1a, p2a) in collected {

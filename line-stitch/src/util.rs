@@ -17,6 +17,8 @@ where
         let segment = PathSegment::new(segment);
         let first = segment.first();
         let last = segment.last();
+
+
         starts_and_ends.push(first);
         starts_and_ends.push(last);
         all_segments.push(segment);

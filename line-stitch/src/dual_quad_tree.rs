@@ -23,11 +23,11 @@ impl<S: 'static> DualQuadTree<S> {
                 true,
                 /* min children */ 0,
                 /* max_children */ 64,
-                /* max-depth */ 16,
+                /* max-depth */ 64,
                 size_hint,
             ),
-            ends: QuadTree::new(aabb, true, 0, 64, 16, size_hint),
-            ambiguity_points: QuadTree::new(aabb, true, 0, 64, 16, size_hint / 100),
+            ends: QuadTree::new(aabb, true, 0, 64, 64, size_hint),
+            ambiguity_points: QuadTree::new(aabb, true, 0, 64, 64, size_hint / 100),
         }
     }
 

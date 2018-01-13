@@ -1,7 +1,7 @@
-use ::remove_zero_area_loops;
 use super::util::*;
+use euclid::UnknownUnit;
 use permutohedron::heap_recursive as permute;
-use euclid::{UnknownUnit};
+use remove_zero_area_loops;
 
 type Point = ::Point<UnknownUnit>;
 type PathSegment = ::PathSegment<UnknownUnit>;
@@ -24,11 +24,19 @@ fn default_problem() -> Problem {
 
 fn run(mut p: Problem) {
     let new_p = p.clone();
-    let expected: Vec<_> = new_p.expected.clone().into_iter().map(|(a, b)| PathSegment::new_and_potentially_close(vec![a, b], new_p.epsilon)).collect();
+    let expected: Vec<_> = new_p
+        .expected
+        .clone()
+        .into_iter()
+        .map(|(a, b)| PathSegment::new_and_potentially_close(vec![a, b], new_p.epsilon))
+        .collect();
 
     permute(&mut p.input, |input| {
         let output = remove_zero_area_loops(input.to_vec(), new_p.epsilon);
-        let output: Vec<_> = output.into_iter().map(|(a, b)| PathSegment::new_and_potentially_close(vec![a, b], new_p.epsilon)).collect();
+        let output: Vec<_> = output
+            .into_iter()
+            .map(|(a, b)| PathSegment::new_and_potentially_close(vec![a, b], new_p.epsilon))
+            .collect();
 
         if let Err(e) = assert_same(&output, &expected, true) {
             print!("${}", e);
@@ -65,7 +73,7 @@ fn nearby_lines() {
         expected: vec![
             (Point::new(0.0, 0.0), Point::new(1.0, 0.0)),
             (Point::new(1.0, 0.0), Point::new(1.0, 1.0)),
-            ],
+        ],
         ..default_problem()
     });
 
@@ -77,7 +85,7 @@ fn nearby_lines() {
         expected: vec![
             (Point::new(0.0, 0.0), Point::new(1.0, 1.0)),
             (Point::new(1.0, 1.0), Point::new(2.0, 2.0)),
-            ],
+        ],
         ..default_problem()
     });
 }
@@ -89,7 +97,7 @@ fn inverted_lines_are_removed() {
             (Point::new(0.0, 0.0), Point::new(1.0, 0.0)),
             (Point::new(1.0, 0.0), Point::new(0.0, 0.0)),
         ],
-        expected: vec![ ],
+        expected: vec![],
         ..default_problem()
     });
 }

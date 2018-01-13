@@ -389,7 +389,9 @@ impl<S, A: Array<Item = (ItemId, Rect<S>)>> QuadNode<S, A> {
                 self.insert(child_id, child_aabb, config);
             }
         }
-
+        if !did_insert {
+            panic!("didn't insert {:?}", item_aabb);
+        }
         did_insert
     }
 
@@ -494,7 +496,7 @@ fn midpoint<S>(rect: Rect<S>) -> Point<S> {
 }
 
 fn my_intersects<S>(a: Rect<S>, b: Rect<S>) -> bool {
-    a.intersects(&b) || a.min_x() == b.min_x() || a.min_y() == b.min_y() || a.max_x() == b.max_x() || a.max_y() == b.max_y()
+    a.intersects(&b) || a.contains(&b.origin)
 }
 
 fn split_quad<S>(rect: Rect<S>) -> [Rect<S>; 4] {
@@ -516,6 +518,14 @@ fn close_to_rect<S>(a: Rect<S>, b: Rect<S>, epsilon: f32) -> bool {
 }
 
 #[test]
+fn weird_case() {
+    use euclid::*;
+    let bb = Rect::new(point2(0.0, 0.0), vec2(10.0, 10.0).to_size());
+    let query = Rect::new(point2(20.0, 0.0), vec2(1.0, 0.0).to_size());
+    assert!(!my_intersects(bb, query));
+}
+
+#[test]
 fn test_boundary_conditions() {
     use euclid::*;
 
@@ -529,9 +539,9 @@ fn test_boundary_conditions() {
         epsilon: 0.001,
     };
 
-    let mut branch = QuadNode::Branch {
+    let mut branch: QuadNode<_, [(ItemId, Rect<_>); 32]> = QuadNode::Branch {
         aabb: total,
-        in_all: vec![],
+        in_all: SmallVec::new(),
         element_count: 0,
         depth: 1,
         children: [
@@ -539,7 +549,7 @@ fn test_boundary_conditions() {
                 quads[0],
                 Box::new(QuadNode::Leaf {
                     aabb: quads[0],
-                    elements: vec![],
+                    elements: SmallVec::new(),
                     depth: 2,
                 }),
             ),
@@ -547,7 +557,7 @@ fn test_boundary_conditions() {
                 quads[1],
                 Box::new(QuadNode::Leaf {
                     aabb: quads[1],
-                    elements: vec![],
+                    elements: SmallVec::new(),
                     depth: 2,
                 }),
             ),
@@ -555,7 +565,7 @@ fn test_boundary_conditions() {
                 quads[2],
                 Box::new(QuadNode::Leaf {
                     aabb: quads[2],
-                    elements: vec![],
+                    elements: SmallVec::new(),
                     depth: 2,
                 }),
             ),
@@ -563,7 +573,7 @@ fn test_boundary_conditions() {
                 quads[3],
                 Box::new(QuadNode::Leaf {
                     aabb: quads[3],
-                    elements: vec![],
+                    elements: SmallVec::new(),
                     depth: 2,
                 }),
             ),
