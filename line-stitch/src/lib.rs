@@ -1,5 +1,5 @@
 #![deny(missing_docs)]
-//! A crate for optimizing line drawing for plotters and
+//! A crate for optimizing line drawing for plotters and laser cutters.
 
 extern crate aabb_quadtree;
 extern crate euclid;

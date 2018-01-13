@@ -36,6 +36,7 @@ where
 fn chain_single<S: 'static>(
     start: PathSegment<S>, dual_qt: &mut DualQuadTree<S>, epsilon: f32, only_starts: bool, allow_ambiguous: bool
 ) -> Option<Vec<PathSegment<S>>> {
+    let _guard = ::flame::start_guard("chain_single");
     let mut last_going_forward = start.last();
     let mut first_going_backwards = start.first();
     let mut combined: Vec<_> = vec![start];

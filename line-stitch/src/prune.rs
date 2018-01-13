@@ -21,7 +21,10 @@ where
 }
 
 fn prune_one_iter<S: Send + Sync + 'static>(dual_qt: &mut DualQuadTree<S>, epsilon: f32, only_starts: bool) -> bool {
+    let _guard = ::flame::start_guard("prune_one_iter");
     let mut made_progress = false;
+
+    ::flame::start("finding items to remove");
     let to_remove: Vec<_> = dual_qt
         .id_to_segment
         .par_iter()
@@ -42,11 +45,14 @@ fn prune_one_iter<S: Send + Sync + 'static>(dual_qt: &mut DualQuadTree<S>, epsil
             }
         })
         .collect();
+    ::flame::end("finding items to remove");
 
+    ::flame::start("removing");
     for id in to_remove {
         dual_qt.remove(id);
         made_progress = true;
     }
+    ::flame::end("removing");
 
     made_progress
 }
