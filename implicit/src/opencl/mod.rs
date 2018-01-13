@@ -120,11 +120,13 @@ impl OpenClContext {
     }
 
     pub fn field_buffer_inf(&self, width: usize, height: usize) -> FieldBuffer {
+        let _guard = ::flame::start_guard("OpenClContext::field_buffer_inf");
         let buffer = vec![::std::f32::INFINITY; width * height];
         self.field_buffer(width, height, Some(&buffer))
     }
 
     pub fn field_buffer_neg_inf(&self, width: usize, height: usize) -> FieldBuffer {
+        let _guard = ::flame::start_guard("OpenClContext::field_buffer_neg_inf");
         let buffer = vec![::std::f32::NEG_INFINITY; width * height];
         self.field_buffer(width, height, Some(&buffer))
     }
@@ -165,7 +167,10 @@ impl OpenClContext {
         }
     }
 
-    pub fn empty_queue(&self) { self.queue.finish().unwrap(); }
+    pub fn empty_queue(&self) {
+        let _guard = ::flame::start_guard("OpenClContext::empty_queue");
+        self.queue.finish().unwrap();
+    }
 
     pub fn platform(&self) -> &Platform { &self.platform }
 

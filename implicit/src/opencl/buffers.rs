@@ -34,6 +34,7 @@ impl FieldBuffer {
     pub fn height(&self) -> usize { self.dims.1 }
 
     pub fn values(&self) -> Vec<f32> {
+        let _guard = ::flame::start_guard("field buffer values");
         let mut out = vec![0.0; self.width() * self.height()];
         self.internal.read(&mut out).enq().unwrap();
         out
@@ -46,12 +47,14 @@ impl LineBuffer {
     pub fn size(&self) -> usize { self.size }
 
     pub fn values(&self) -> Vec<f32> {
+        let _guard = ::flame::start_guard("line buffer values");
         let mut out = vec![0.0; self.size()];
         self.internal.read(&mut out).enq().unwrap();
         out
     }
 
     pub fn non_nans_at_front(&self) -> bool {
+        let _guard = ::flame::start_guard("line buffer non-nans-at-front");
         let mut seen_nan = false;
         for v in self.values() {
             if v.is_nan() {
@@ -70,6 +73,7 @@ impl MaskBuffer {
     pub fn size(&self) -> usize { self.size }
 
     pub fn values(&self) -> Vec<u32> {
+        let _guard = ::flame::start_guard("mask buffer values");
         let mut out = vec![0; self.size()];
         self.internal.read(&mut out).enq().unwrap();
         out
