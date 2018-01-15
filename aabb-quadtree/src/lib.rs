@@ -390,7 +390,7 @@ impl<S, A: Array<Item = (ItemId, Rect<S>)>> QuadNode<S, A> {
             }
         }
         if !did_insert {
-            panic!("didn't insert {:?}", item_aabb);
+            panic!("didn't insert {:?} into {:?}", item_aabb, self.bounding_box());
         }
         did_insert
     }
@@ -496,7 +496,7 @@ fn midpoint<S>(rect: Rect<S>) -> Point<S> {
 }
 
 fn my_intersects<S>(a: Rect<S>, b: Rect<S>) -> bool {
-    a.intersects(&b) || a.contains(&b.origin)
+    a.intersects(&b) || a.contains(&b.origin) || a.contains(&b.bottom_right())
 }
 
 fn split_quad<S>(rect: Rect<S>) -> [Rect<S>; 4] {
