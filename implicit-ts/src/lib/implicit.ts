@@ -1,4 +1,4 @@
-export type Implicit = Circle | Rect | And | Or | Not | Modulate | Break | Freeze | Translate;
+export type Implicit = Circle | Rect | And | Or | Not | Modulate | Break | Freeze | Translate | JSX.Element;
 
 export interface Scene {
     figures: Figure[],
@@ -129,8 +129,8 @@ export function scene(figures: Figure[], opts?: scene_opts): Scene {
     };
 }
 
-export function singleton_scene(implicit: Implicit) {
-    return scene([figure(shape(implicit))]);
+export function singleton_scene(implicit: Implicit | JSX.Element) {
+    return scene([figure(shape(implicit as Implicit))]);
 }
 
 export function circle(x: number, y: number, r: number): Implicit {
