@@ -20,7 +20,7 @@ mod zero_area_loop;
 pub(crate) mod util;
 
 use aabb_quadtree::*;
-pub use connect_obvious::connect_obvious;
+pub use connect_obvious::{connect_obvious, connect_obvious_from_dual_qt};
 use dual_quad_tree::*;
 pub use graph_stitch::connect_unconnected as graph_stitch;
 pub use prune::prune;

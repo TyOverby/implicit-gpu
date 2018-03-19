@@ -1,0 +1,11 @@
+Translate {
+    dx: 2,
+    dy: 2,
+    target: NodeRef {
+        node: Circle {
+            x: 50,
+            y: 50,
+            r: 50
+        }
+    }
+}

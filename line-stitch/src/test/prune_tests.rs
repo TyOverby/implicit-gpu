@@ -28,7 +28,7 @@ fn default_problem() -> Problem {
 fn run(mut p: Problem) {
     let new_p = p.clone();
     permute(&mut p.input, |input| {
-        let output = prune(input.to_vec(), new_p.epsilon, new_p.only_starts);
+        let output: Vec<_> = prune(input.to_vec(), new_p.epsilon, new_p.only_starts).into_iter().collect();
         if let Err(e) = assert_same(&output, &new_p.expected, !new_p.only_starts) {
             panic!("{}", e);
         }

@@ -1,0 +1,27 @@
+And {
+    children: [
+        NodeRef {
+            node: OtherGroup {
+                group_id: GroupId(
+                    0
+                )
+            }
+        },
+        NodeRef {
+            node: Not {
+                target: NodeRef {
+                    node: Modulate {
+                        how_much: -50,
+                        target: NodeRef {
+                            node: OtherGroup {
+                                group_id: GroupId(
+                                    1
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}

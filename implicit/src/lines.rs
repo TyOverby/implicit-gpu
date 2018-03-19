@@ -34,12 +34,17 @@ where
     telemetry.lines_1_zero_area_removed(tloc, &lines);
 
     // 2: Prune Disconected Edges
-    let lines = ::flame::span_of("prune", || prune(lines.into_iter().map(|(p1, p2)| [p1, p2]), EPSILON, true));
-    telemetry.lines_2_pruned(tloc, &lines);
+    let dual_qt = ::flame::span_of("prune", || prune(lines.into_iter().map(|(p1, p2)| [p1, p2]), EPSILON, true));
+    // TODO: add this back
+    // telemetry.lines_2_pruned(tloc, &lines);
 
     // 3: Connect Obvious
-    // TODO: fix this hack with the first parameter to connect_obvious
-    let lines = ::flame::span_of("connect obvious", || connect_obvious(lines.into_iter().map(|segment| segment.path), EPSILON, true, false));
+    // TODO: fix this hack with the first parameter to
+    // connect_obvious
+    let lines = ::flame::span_of(
+        "connect obvious",
+        || connect_obvious_from_dual_qt(dual_qt, EPSILON, true, false),
+    );
     telemetry.lines_3_obvious_connected(tloc, &lines);
 
     // 4: Graph Stitch

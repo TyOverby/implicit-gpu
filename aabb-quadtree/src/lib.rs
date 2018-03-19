@@ -25,6 +25,9 @@ pub trait Spatial<S> {
     fn aabb(&self) -> Rect<S>;
 }
 
+/// Used to determine if a query should keep going or not
+pub type QueryResult = Result<(), ()>;
+
 /// An ID unique to a single QuadTree.  This is the object that is
 /// returned from queries, and can be used to access the elements stored
 /// in the quad tree.
@@ -230,12 +233,20 @@ impl<T, S, A: Array<Item = (ItemId, Rect<S>)>> QuadTree<T, S, A> {
     pub fn query(&self, bounding_box: Rect<S>) -> SmallVec<[(&T, Rect<S>, ItemId); 3]>
     where T: ::std::fmt::Debug {
         let mut out: SmallVec<[(_, _, _); 3]> = Default::default();
-        self.root.query(bounding_box, &self.config, &mut |id, bb| {
-            out.push((&self.elements.get(&id).unwrap().0, bb, id))
+        let _ = self.root.query(bounding_box, &self.config, &mut |id, bb| {
+            out.push((&self.elements.get(&id).unwrap().0, bb, id));
+            Ok(())
         });
         out.sort_by_key(|&(_, _, id)| id);
         out.dedup_by_key(|&mut (_, _, id)| id);
         out
+    }
+
+    /// Executes 'on_find' for every element found in the
+    /// bounding-box
+    pub fn custom_query<'a, F>(&'a self, query_aabb: Rect<S>, on_find: &mut F) -> QueryResult
+    where F: FnMut(ItemId, Rect<S>) -> QueryResult {
+        self.root.query(query_aabb, &self.config, on_find)
     }
 
     /// Attempts to remove the item with id `item_id` from the tree.  If that
@@ -441,7 +452,10 @@ impl<S, A: Array<Item = (ItemId, Rect<S>)>> QuadNode<S, A> {
 
         if let Some((size, aabb, depth)) = compact {
             let mut elements: SmallVec<A> = SmallVec::with_capacity(size);
-            self.query(aabb, config, &mut |id, bb| elements.push((id, bb)));
+            self.query(aabb, config, &mut |id, bb| {
+                elements.push((id, bb));
+                Ok(())
+            }).ok();
             elements.sort_by(|&(id1, _), &(ref id2, _)| id1.cmp(id2));
             elements.dedup();
             *self = QuadNode::Leaf {
@@ -453,31 +467,34 @@ impl<S, A: Array<Item = (ItemId, Rect<S>)>> QuadNode<S, A> {
         removed
     }
 
-    fn query<F>(&self, query_aabb: Rect<S>, config: &QuadTreeConfig, on_find: &mut F)
-    where F: FnMut(ItemId, Rect<S>) {
+    fn query<F>(&self, query_aabb: Rect<S>, config: &QuadTreeConfig, on_find: &mut F) -> QueryResult
+    where F: FnMut(ItemId, Rect<S>) -> QueryResult {
         fn match_all<S, F, A: Array<Item = (ItemId, Rect<S>)>>(
             elements: &SmallVec<A>, query_aabb: Rect<S>, on_find: &mut F, config: &QuadTreeConfig
-        ) where
-            F: FnMut(ItemId, Rect<S>), {
+        ) -> QueryResult
+        where
+            F: FnMut(ItemId, Rect<S>) -> QueryResult, {
             for &(child_id, child_aabb) in elements {
                 if my_intersects(query_aabb, child_aabb) || close_to_rect(query_aabb, child_aabb, config.epsilon) {
-                    on_find(child_id, child_aabb);
+                    on_find(child_id, child_aabb)?;
                 }
             }
+            Ok(())
         }
 
         match self {
             &QuadNode::Branch { ref in_all, ref children, .. } => {
-                match_all(in_all, query_aabb, on_find, config);
+                match_all(in_all, query_aabb, on_find, config)?;
 
                 for &(child_aabb, ref child_tree) in children {
                     if my_intersects(query_aabb, child_aabb) {
-                        child_tree.query(query_aabb, config, on_find);
+                        child_tree.query(query_aabb, config, on_find)?;
                     }
                 }
             }
-            &QuadNode::Leaf { ref elements, .. } => match_all(elements, query_aabb, on_find, config),
+            &QuadNode::Leaf { ref elements, .. } => match_all(elements, query_aabb, on_find, config)?,
         }
+        Ok(())
     }
 }
 
@@ -495,9 +512,7 @@ fn midpoint<S>(rect: Rect<S>) -> Point<S> {
     origin + half
 }
 
-fn my_intersects<S>(a: Rect<S>, b: Rect<S>) -> bool {
-    a.intersects(&b) || a.contains(&b.origin) || a.contains(&b.bottom_right())
-}
+fn my_intersects<S>(a: Rect<S>, b: Rect<S>) -> bool { a.intersects(&b) || a.contains(&b.origin) || a.contains(&b.bottom_right()) }
 
 fn split_quad<S>(rect: Rect<S>) -> [Rect<S>; 4] {
     use euclid::vec2;

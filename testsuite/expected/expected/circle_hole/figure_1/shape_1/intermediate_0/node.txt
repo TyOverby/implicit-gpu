@@ -1,0 +1,41 @@
+Translate {
+    dx: 2,
+    dy: 2,
+    target: NodeRef {
+        node: Or {
+            children: [
+                NodeRef {
+                    node: And {
+                        children: [
+                            NodeRef {
+                                node: Circle {
+                                    x: 50,
+                                    y: 50,
+                                    r: 50
+                                }
+                            },
+                            NodeRef {
+                                node: Not {
+                                    target: NodeRef {
+                                        node: Circle {
+                                            x: 50,
+                                            y: 50,
+                                            r: 25
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                NodeRef {
+                    node: Circle {
+                        x: 50,
+                        y: 50,
+                        r: 10
+                    }
+                }
+            ]
+        }
+    }
+}

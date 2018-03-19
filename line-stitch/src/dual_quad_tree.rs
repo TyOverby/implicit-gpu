@@ -74,20 +74,30 @@ impl<S: 'static> DualQuadTree<S> {
 
     pub fn has_forward_neighbor(&self, id: DqtId, point: Point<S>, epsilon: f32) -> bool {
         let query_aabb = point.aabb().inflate(epsilon * 2.0, epsilon * 2.0);
+        let id = self.id_to_segment[&id].1;
         self.ends
-            .query(query_aabb)
-            .into_iter()
-            .filter(|&(&qid, _, _)| qid != id)
-            .count() != 0
+            .custom_query(query_aabb, &mut |qid, _| {
+                if qid != id {
+                    Err(())
+                } else {
+                    Ok(())
+                }
+            })
+            .is_err()
     }
 
     pub fn has_backward_neighbor(&self, id: DqtId, point: Point<S>, epsilon: f32) -> bool {
         let query_aabb = point.aabb().inflate(epsilon * 2.0, epsilon * 2.0);
+        let id = self.id_to_segment[&id].2;
         self.starts
-            .query(query_aabb)
-            .into_iter()
-            .filter(|&(&qid, _, _)| qid != id)
-            .count() != 0
+            .custom_query(query_aabb, &mut |qid, _| {
+                if qid != id {
+                    Err(())
+                } else {
+                    Ok(())
+                }
+            })
+            .is_err()
     }
 
     pub fn query_forward(&mut self, point: Point<S>, epsilon: f32, only_starts: bool, allow_ambiguous: bool) -> Option<PathSegment<S>> {

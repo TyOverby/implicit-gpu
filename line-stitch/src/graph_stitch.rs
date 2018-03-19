@@ -216,8 +216,7 @@ fn try_solve<S>(mut graph: Graph<S>) -> Vec<PathSegment<S>> {
 pub fn connect_unconnected<S>(joined: Vec<PathSegment<S>>) -> Vec<PathSegment<S>> {
     let (mut good, bad) = joined.into_iter().partition::<Vec<_>, _>(|a| a.closed);
 
-    let graph = Graph::new(bad);
-    let solved = try_solve(graph);
+    let solved = try_solve(Graph::new(bad));
 
     good.extend(solved.into_iter());
 

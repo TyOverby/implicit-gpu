@@ -1,0 +1,140 @@
+Translate {
+    dx: 7,
+    dy: 7,
+    target: NodeRef {
+        node: And {
+            children: [
+                NodeRef {
+                    node: Rect {
+                        x: -5,
+                        y: -5,
+                        w: 160,
+                        h: 160
+                    }
+                },
+                NodeRef {
+                    node: Not {
+                        target: NodeRef {
+                            node: Or {
+                                children: [
+                                    NodeRef {
+                                        node: Circle {
+                                            x: 0,
+                                            y: 0,
+                                            r: 10
+                                        }
+                                    },
+                                    NodeRef {
+                                        node: Circle {
+                                            x: 0,
+                                            y: 30,
+                                            r: 10
+                                        }
+                                    },
+                                    NodeRef {
+                                        node: Circle {
+                                            x: 0,
+                                            y: 60,
+                                            r: 10
+                                        }
+                                    },
+                                    NodeRef {
+                                        node: Circle {
+                                            x: 0,
+                                            y: 90,
+                                            r: 10
+                                        }
+                                    },
+                                    NodeRef {
+                                        node: Circle {
+                                            x: 30,
+                                            y: 0,
+                                            r: 10
+                                        }
+                                    },
+                                    NodeRef {
+                                        node: Circle {
+                                            x: 30,
+                                            y: 30,
+                                            r: 10
+                                        }
+                                    },
+                                    NodeRef {
+                                        node: Circle {
+                                            x: 30,
+                                            y: 60,
+                                            r: 10
+                                        }
+                                    },
+                                    NodeRef {
+                                        node: Circle {
+                                            x: 30,
+                                            y: 90,
+                                            r: 10
+                                        }
+                                    },
+                                    NodeRef {
+                                        node: Circle {
+                                            x: 60,
+                                            y: 0,
+                                            r: 10
+                                        }
+                                    },
+                                    NodeRef {
+                                        node: Circle {
+                                            x: 60,
+                                            y: 30,
+                                            r: 10
+                                        }
+                                    },
+                                    NodeRef {
+                                        node: Circle {
+                                            x: 60,
+                                            y: 60,
+                                            r: 10
+                                        }
+                                    },
+                                    NodeRef {
+                                        node: Circle {
+                                            x: 60,
+                                            y: 90,
+                                            r: 10
+                                        }
+                                    },
+                                    NodeRef {
+                                        node: Circle {
+                                            x: 90,
+                                            y: 0,
+                                            r: 10
+                                        }
+                                    },
+                                    NodeRef {
+                                        node: Circle {
+                                            x: 90,
+                                            y: 30,
+                                            r: 10
+                                        }
+                                    },
+                                    NodeRef {
+                                        node: Circle {
+                                            x: 90,
+                                            y: 60,
+                                            r: 10
+                                        }
+                                    },
+                                    NodeRef {
+                                        node: Circle {
+                                            x: 90,
+                                            y: 90,
+                                            r: 10
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}

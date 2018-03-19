@@ -9,7 +9,16 @@ where
     I: IntoIterator<Item = P>,
     P: Into<smallvec::SmallVec<[Point<S>; 2]>>,
 {
-    let dual_qt = RefCell::new(populate(segments, epsilon));
+    connect_obvious_from_dual_qt(populate(segments, epsilon), epsilon, only_starts, allow_ambiguous)
+}
+
+/// todo: doc
+pub fn connect_obvious_from_dual_qt<S: 'static>(
+    dual_qt: DualQuadTree<S>, epsilon: f32, only_starts: bool, allow_ambiguous: bool
+) -> Vec<PathSegment<S>>
+where
+{
+    let dual_qt = RefCell::new(dual_qt);
 
     return repeat_call(|| dual_qt.borrow_mut().pop())
         .while_some()

@@ -23,7 +23,7 @@ fn circles_99_prune() {
     let data = process(CIRCLES_99_DATA);
 
     let input_count = data.len();
-    let out = prune(data.iter().map(Clone::clone), EPSILON, true);
+    let out: Vec<_> = prune(data.iter().map(Clone::clone), EPSILON, true).into_iter().collect();
     assert_eq!(out.len(), input_count);
 }
 
@@ -43,7 +43,7 @@ fn circles_99_connect() {
 fn one_circle_prune() {
     let data = process(ONE_CIRCLE_DATA);
     let input_count = data.len();
-    let out = prune(data, EPSILON, true);
+    let out: Vec<_> = prune(data, EPSILON, true).into_iter().collect();
     assert_eq!(out.len(), input_count);
 }
 
