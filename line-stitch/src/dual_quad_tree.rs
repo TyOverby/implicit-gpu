@@ -36,6 +36,12 @@ impl<S: 'static> DualQuadTree<S> {
         Box::new(iterator) as Box<Iterator<Item = PathSegment<S>>>
     }
 
+    pub fn slow_iter(&self) -> Vec<PathSegment<S>>
+    where S: Clone {
+        let iterator = self.id_to_segment.iter().map(|(_, &(ref p, _, _))| p.clone());
+        iterator.collect()
+    }
+
     pub fn insert(&mut self, segment: PathSegment<S>) {
         let id = self.id;
         self.id += 1;

@@ -1,5 +1,5 @@
 use debug::*;
-use geometry::{Point, PathSegment};
+use geometry::{PathSegment, Point};
 use nodes::Node;
 use opencl::FieldBuffer;
 use output::{OutputScene, OutputShape};
@@ -93,11 +93,11 @@ impl Telemetry for DumpTelemetry {
         output_svg_lines(file, lines.iter().cloned());
     }
 
-    fn lines_2_pruned(&mut self, tloc: TelemetryLocation, lines: &[PathSegment]) {
+    fn lines_2_pruned(&mut self, tloc: TelemetryLocation, lines: &Fn() -> Vec<PathSegment>) {
         use std::fs::File;
         let _guard = ::flame::start_guard("telemetry lines_2_pruned");
         let file = File::create(self.shape_path(tloc, "lines_2_pruned.svg")).unwrap();
-        output_svg_linetype(file, lines.iter());
+        output_svg_linetype(file, lines().iter());
     }
 
     fn lines_3_obvious_connected(&mut self, tloc: TelemetryLocation, lines: &[PathSegment]) {

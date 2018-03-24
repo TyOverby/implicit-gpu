@@ -35,8 +35,7 @@ where
 
     // 2: Prune Disconected Edges
     let dual_qt = ::flame::span_of("prune", || prune(lines.into_iter().map(|(p1, p2)| [p1, p2]), EPSILON, true));
-    // TODO: add this back
-    // telemetry.lines_2_pruned(tloc, &lines);
+    telemetry.lines_2_pruned(tloc, &|| dual_qt.slow_iter());
 
     // 3: Connect Obvious
     // TODO: fix this hack with the first parameter to

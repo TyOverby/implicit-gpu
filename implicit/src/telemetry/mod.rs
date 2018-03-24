@@ -68,7 +68,7 @@ pub trait Telemetry {
 
     fn lines_0_input(&mut self, _t: TelemetryLocation, _lines: &[(Point, Point)]) {}
     fn lines_1_zero_area_removed(&mut self, _t: TelemetryLocation, _lines: &[(Point, Point)]) {}
-    fn lines_2_pruned(&mut self, _t: TelemetryLocation, _lines: &[PathSegment]) {}
+    fn lines_2_pruned<'b>(&mut self, _t: TelemetryLocation, _lines: &'b Fn() -> Vec<PathSegment>) {}
     fn lines_3_obvious_connected(&mut self, _t: TelemetryLocation, _lines: &[PathSegment]) {}
     fn lines_4_graph_stitched(&mut self, _t: TelemetryLocation, _lines: &[PathSegment]) {}
 
