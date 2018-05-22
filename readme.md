@@ -2,17 +2,8 @@
 
 Implicit-GPU is an implementation of 2d-implicit surfaces using Rust and OpenCL.
 
-## Example
+It is very early stages, so there's no real documentation yet.
 
-**Input**
+That said, it's good enough to make pretty simple scenes!
 
-```
-(and
-  (circle {x:50  y:50  r:50})
-  (circle {x:100 y:100 r:50}))
-```
-
-
-**Output**
-
-![circles and](./circles_and.png)
+![implicit](http://tyoverby.com/images/implicit.png)
