@@ -14,17 +14,31 @@ pub struct LineBuffer {
 
 #[derive(Debug, Clone)]
 pub struct SyncBuffer {
-    pub internal : Buffer<u32>,
+    pub internal: Buffer<u32>,
 }
 
 impl SyncBuffer {
-    pub fn buffer(&self) -> &Buffer<u32> { &self.internal }
+    pub fn buffer(&self) -> &Buffer<u32> {
+        &self.internal
+    }
+    pub fn value(&self) -> u32 {
+        let _guard = ::flame::start_guard("sync buffer value");
+        let mut out = vec![0];
+        self.internal.read(&mut out).enq().unwrap();
+        out[0] * 4 // Multiply by 4 because there are 4 floats in a line
+    }
 }
 
 impl FieldBuffer {
-    pub fn size(&self) -> (usize, usize) { (self.width(), self.height()) }
-    pub fn width(&self) -> usize { self.dims.0 }
-    pub fn height(&self) -> usize { self.dims.1 }
+    pub fn size(&self) -> (usize, usize) {
+        (self.width(), self.height())
+    }
+    pub fn width(&self) -> usize {
+        self.dims.0
+    }
+    pub fn height(&self) -> usize {
+        self.dims.1
+    }
 
     pub fn values(&self) -> Vec<f32> {
         let _guard = ::flame::start_guard("field buffer values");
@@ -33,15 +47,27 @@ impl FieldBuffer {
         out
     }
 
-    pub fn buffer(&self) -> &Buffer<f32> { &self.internal }
+    pub fn buffer(&self) -> &Buffer<f32> {
+        &self.internal
+    }
 }
 
 impl LineBuffer {
-    pub fn size(&self) -> usize { self.size }
+    pub fn size(&self) -> usize {
+        self.size
+    }
 
-    pub fn values(&self) -> Vec<f32> {
+    pub fn values(&self, count: Option<u32>) -> Vec<f32> {
         let _guard = ::flame::start_guard("line buffer values");
-        let mut out = vec![0.0; self.size()];
+        println!("{:?}", count);
+        {
+            let mut out = vec![0.0; self.size()];
+            self.internal.read(&mut out).enq().unwrap();
+            let realcount = out.into_iter().take_while(|a| !a.is_nan()).count();
+            println!("{:?}", realcount);
+        }
+        let count = count.map(|a| a as usize).unwrap_or_else(|| self.size());
+        let mut out = vec![0.0; count];
         self.internal.read(&mut out).enq().unwrap();
         out
     }
@@ -49,7 +75,7 @@ impl LineBuffer {
     pub fn non_nans_at_front(&self) -> bool {
         let _guard = ::flame::start_guard("line buffer non-nans-at-front");
         let mut seen_nan = false;
-        for v in self.values() {
+        for v in self.values(None) {
             if v.is_nan() {
                 seen_nan = true;
             } else if seen_nan {
@@ -59,5 +85,7 @@ impl LineBuffer {
         return true;
     }
 
-    pub fn buffer(&self) -> &Buffer<f32> { &self.internal }
+    pub fn buffer(&self) -> &Buffer<f32> {
+        &self.internal
+    }
 }

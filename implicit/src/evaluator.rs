@@ -88,8 +88,8 @@ impl Evaluator {
             &NodeGroup::Freeze(ref root) => {
                 let field_buf = eval_basic_group(root, telemetry, tloc);
                 let (width, height) = field_buf.size();
-                let lines = ::marching::run_marching(&field_buf, ctx);
-                let (lines, _) = line_buffer_to_poly(&lines, telemetry, tloc, true);
+                let (lines, count) = ::marching::run_marching(&field_buf, ctx);
+                let (lines, _) = line_buffer_to_poly(&lines, count, telemetry, tloc, true);
                 let lines = lines.into_iter().flat_map(grouping_to_segments);
                 let res = ::polygon::run_poly(lines, None, width, height, None, ctx);
                 match res {
@@ -109,22 +109,20 @@ impl Evaluator {
     }
 
     pub fn get_polylines(&self, buffer: &FieldBuffer, ctx: &OpenClContext) -> Vec<((f32, f32), (f32, f32))> {
-        let lines = ::marching::run_marching(buffer, ctx);
-        let lines = lines.values().into_iter().tuples::<(_, _, _, _)>();
-        lines
-            .map(|(a, b, c, d)| ((a, b), (c, d)))
-            .filter(|&((x1, y1), (x2, y2))| !(x1.is_nan() || x2.is_nan() || y1.is_nan() || y2.is_nan()))
-            .collect()
+        let (lines, lines_count) = ::marching::run_marching(buffer, ctx);
+        let lines = lines.values(Some(lines_count)).into_iter().tuples::<(_, _, _, _)>();
+        lines.map(|(a, b, c, d)| ((a, b), (c, d))).collect()
     }
 }
 
 pub fn line_buffer_to_poly(
     buffer: &LineBuffer,
+    count: u32,
     telemetry: &mut Telemetry,
     tloc: TelemetryLocation,
     simplify: bool,
 ) -> (Vec<Vec<Point>>, Vec<Vec<Point>>) {
-    let lines = buffer.values();
+    let lines = buffer.values(Some(count));
 
     let lines = lines
         .into_iter()

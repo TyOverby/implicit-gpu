@@ -18,19 +18,19 @@ extern crate typed_arena;
 extern crate vecmath;
 extern crate vectorphile;
 
-pub mod nodes;
 pub mod compiler;
-pub mod opencl;
 pub mod debug;
-pub mod polygon;
-pub mod marching;
 pub mod evaluator;
 pub mod export;
-pub mod scene;
-pub mod output;
-pub mod lines;
-pub mod telemetry;
 pub mod geometry;
+pub mod lines;
+pub mod marching;
+pub mod nodes;
+pub mod opencl;
+pub mod output;
+pub mod polygon;
+pub mod scene;
+pub mod telemetry;
 
 use geometry::Rect;
 use opencl::OpenClContext;
@@ -53,7 +53,9 @@ pub fn run_single(node: nodes::NodeRef, width: usize, height: usize) -> ::opencl
 }
 
 pub fn run_scene(
-    mut scene: scene::Scene, telemetry: &mut telemetry::Telemetry, ctx: Option<opencl::OpenClContext>
+    mut scene: scene::Scene,
+    telemetry: &mut telemetry::Telemetry,
+    ctx: Option<opencl::OpenClContext>,
 ) -> (output::OutputScene, OpenClContext) {
     use compiler::Nest;
     use evaluator::Evaluator;
@@ -148,8 +150,8 @@ pub fn run_scene(
             let id = treemap.get(&shape).unwrap();
             let result = evaluator.evaluate(*id, &ctx, telemetry, shape_telemetry);
 
-            let line_buffer = ::marching::run_marching(&result, &ctx);
-            let (additive, subtractive) = evaluator::line_buffer_to_poly(&line_buffer, telemetry, tloc, scene.simplify);
+            let (line_buffer, line_count) = ::marching::run_marching(&result, &ctx);
+            let (additive, subtractive) = evaluator::line_buffer_to_poly(&line_buffer, line_count, telemetry, tloc, scene.simplify);
 
             let output_shape = match shape.draw_mode {
                 DrawMode::Filled => OutputShape {

@@ -47,8 +47,6 @@ pub fn compile(node: &Node) -> (String, SharedInfo) {
 "#,
     );
 
-    println!("{}{}", preamble, buffer);
-
     let shared_ref = shared.deref().borrow();
     (format!("{}{}", preamble, buffer), shared_ref.clone())
 }

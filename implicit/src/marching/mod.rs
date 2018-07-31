@@ -2,11 +2,14 @@ use opencl::{FieldBuffer, LineBuffer, OpenClContext};
 
 const PROGRAM: &'static str = include_str!("marching.c");
 
-pub fn run_marching(input: &FieldBuffer, ctx: &OpenClContext) -> LineBuffer {
+pub fn run_marching(input: &FieldBuffer, ctx: &OpenClContext) -> (LineBuffer, u32) {
     let _guard = ::flame::start_guard("opencl marching [run_marching]");
 
     let (width, height) = (input.width(), input.height());
     let kernel = ctx.compile("apply", PROGRAM);
+
+    // TODO: Now that you have the number of lines produced by reading the sync_buffer, you don't need
+    //       to allocate any of this here.
     let from = ::flame::span_of("opencl marching [build vec]", || vec![::std::f32::NAN; width * height * 4]);
 
     let line_buffer = ctx.line_buffer(&from);
@@ -27,14 +30,15 @@ pub fn run_marching(input: &FieldBuffer, ctx: &OpenClContext) -> LineBuffer {
         ::flame::span_of("opencl marching [execution]", || exec.enq().unwrap());
     }
 
-    line_buffer
+    let count = sync_buffer.value();
+    (line_buffer, count)
 }
 
 #[test]
 fn basic() {
     fn test_this(a: f32, b: f32, c: f32, d: f32, ctx: &OpenClContext) -> ((f32, f32), (f32, f32)) {
         let buf = ctx.field_buffer(2, 2, Some(&[a, b, d, c]));
-        let lines = run_marching(&buf, &ctx).values();
+        let lines = run_marching(&buf, &ctx).0.values(None);
 
         return ((lines[0], lines[1]), (lines[2], lines[3]));
     }
