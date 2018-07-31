@@ -1,6 +1,6 @@
-use ocl::{Buffer, Context, Device, Kernel, Platform, Program, Queue};
 use ocl::enums::{DeviceInfo, DeviceInfoResult};
 use ocl::flags::{MEM_COPY_HOST_PTR, MEM_READ_WRITE};
+use ocl::{Buffer, Context, Device, Kernel, Platform, Program, Queue};
 use std::sync::Mutex;
 
 mod buffers;
@@ -41,11 +41,7 @@ pub fn all_devices() -> Vec<(Platform, Device)> {
 
 impl OpenClContext {
     pub fn new(platform: Platform, device: Device) -> OpenClContext {
-        let context = Context::builder()
-            .platform(platform)
-            .devices(device)
-            .build()
-            .unwrap();
+        let context = Context::builder().platform(platform).devices(device).build().unwrap();
         let queue = Queue::new(&context, device, None).unwrap();
 
         OpenClContext {
@@ -57,7 +53,9 @@ impl OpenClContext {
         }
     }
 
-    pub fn max_workgroup_size(&self) -> usize { self.device.max_wg_size().unwrap() }
+    pub fn max_workgroup_size(&self) -> usize {
+        self.device.max_wg_size().unwrap()
+    }
 
     pub fn default() -> OpenClContext {
         let (pt, dv) = all_devices().into_iter().nth(0).unwrap();
@@ -74,21 +72,13 @@ impl OpenClContext {
 
         {
             let program_cache = self.program_cache.lock().unwrap();
-            if let Some(&(_, ref p)) = program_cache
-                .iter()
-                .filter(|&&(ref s, _)| s == &source)
-                .next()
-            {
+            if let Some(&(_, ref p)) = program_cache.iter().filter(|&&(ref s, _)| s == &source).next() {
                 let _guard = ::flame::start_guard("Kernel::new");
                 return Kernel::new(name, p).unwrap();
             }
         }
 
-        let program = Program::builder()
-            .src(source.clone())
-            .devices(self.device)
-            .build(&self.context)
-            .unwrap();
+        let program = Program::builder().src(source.clone()).devices(self.device).build(&self.context).unwrap();
 
         {
             let mut program_cache = self.program_cache.lock().unwrap();
@@ -102,12 +92,7 @@ impl OpenClContext {
         let _guard = ::flame::start_guard("OpenClContext::field_buffer");
         let buffer = if let Some(fill) = fill {
             assert_eq!(fill.len(), width * height);
-            Buffer::new(
-                self.queue.clone(),
-                Some(MEM_COPY_HOST_PTR | MEM_READ_WRITE),
-                &[width, height],
-                Some(fill),
-            ).unwrap()
+            Buffer::new(self.queue.clone(), Some(MEM_COPY_HOST_PTR | MEM_READ_WRITE), &[width, height], Some(fill)).unwrap()
         } else {
             Buffer::new(self.queue.clone(), Some(MEM_READ_WRITE), &[width, height], None).unwrap()
         };
@@ -116,6 +101,12 @@ impl OpenClContext {
             dims: (width, height),
             internal: buffer,
         }
+    }
+
+    pub fn field_buffer_nan(&self, width: usize, height: usize) -> FieldBuffer {
+        let _guard = ::flame::start_guard("OpenClContext::field_buffer_inf");
+        let buffer = vec![::std::f32::NAN; width * height];
+        self.field_buffer(width, height, Some(&buffer))
     }
 
     pub fn field_buffer_inf(&self, width: usize, height: usize) -> FieldBuffer {
@@ -150,11 +141,19 @@ impl OpenClContext {
         self.queue.finish().unwrap();
     }
 
-    pub fn platform(&self) -> &Platform { &self.platform }
+    pub fn platform(&self) -> &Platform {
+        &self.platform
+    }
 
-    pub fn device(&self) -> &Device { &self.device }
+    pub fn device(&self) -> &Device {
+        &self.device
+    }
 
-    pub fn context(&self) -> &Context { &self.context }
+    pub fn context(&self) -> &Context {
+        &self.context
+    }
 
-    pub fn queue(&self) -> &Queue { &self.queue }
+    pub fn queue(&self) -> &Queue {
+        &self.queue
+    }
 }

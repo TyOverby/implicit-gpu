@@ -41,6 +41,10 @@ declare var Freeze: Impl.SFC;
  */
 declare var Translate: Impl.SFC<{ dx: number, dy: number }>;
 /**
+ * Scales its child nodes by `(dx, dy)`.
+ */
+declare var Scale: Impl.SFC<{ dx: number, dy: number }>;
+/**
  * Grows the shape by `by`.
  */
 declare var Modulate: Impl.SFC<{ by: number }>;

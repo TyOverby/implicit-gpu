@@ -23,7 +23,9 @@ impl GroupId {
 }
 
 impl Nest {
-    pub fn new() -> Nest { Nest { groups: vec![] } }
+    pub fn new() -> Nest {
+        Nest { groups: vec![] }
+    }
 
     fn add(&mut self, group: NodeGroup) -> GroupId {
         if let Some(pos) = self.groups.iter().position(|g| g == &group) {
@@ -44,7 +46,11 @@ impl Nest {
         };
 
         let group = match &*node {
-            &Node::Polygon { ref group, dx, dy } => NodeGroup::Polygon { group: group.clone(), dx, dy },
+            &Node::Polygon { ref group, dx, dy } => NodeGroup::Polygon {
+                group: group.clone(),
+                dx,
+                dy,
+            },
             &Node::Freeze { ref target } => {
                 // TODO: track dx and dy here too
                 NodeGroup::Freeze(do_group(target.clone(), self))
@@ -83,13 +89,20 @@ fn do_group(node: NodeRef, nest: &mut Nest) -> NodeRef {
             dy,
             target: do_group(target.clone(), nest),
         }),
+        &Node::Scale { dx, dy, ref target } => NodeRef::new(Node::Scale {
+            dx,
+            dy,
+            target: do_group(target.clone(), nest),
+        }),
         &Node::And { ref children } => NodeRef::new(Node::And {
             children: children.iter().map(|c| do_group(c.clone(), nest)).collect(),
         }),
         &Node::Or { ref children } => NodeRef::new(Node::Or {
             children: children.iter().map(|c| do_group(c.clone(), nest)).collect(),
         }),
-        &Node::Not { ref target } => NodeRef::new(Node::Not { target: do_group(target.clone(), nest) }),
+        &Node::Not { ref target } => NodeRef::new(Node::Not {
+            target: do_group(target.clone(), nest),
+        }),
         &Node::Modulate { how_much, ref target } => NodeRef::new(Node::Modulate {
             how_much,
             target: do_group(target.clone(), nest),

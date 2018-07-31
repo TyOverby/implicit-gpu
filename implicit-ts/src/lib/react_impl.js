@@ -53,6 +53,8 @@ var Freeze = __forward_all__(impl.freeze);
 
 var Translate = (props, children) =>
     impl.translate(props.dx, props.dy, ...children);
+var Scale = (props, children) =>
+    impl.scale(props.dx, props.dy, ...children);
 
 
 var Modulate = (props, children) =>

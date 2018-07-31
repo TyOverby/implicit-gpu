@@ -17,11 +17,7 @@ pub struct SharedInfo {
 #[derive(Clone)]
 enum CompilationContext {
     Base(Rc<RefCell<SharedInfo>>),
-    PositionMod {
-        x: String,
-        y: String,
-        shared: Rc<RefCell<SharedInfo>>,
-    },
+    PositionMod { x: String, y: String, shared: Rc<RefCell<SharedInfo>> },
 }
 
 pub fn compile(node: &Node) -> (String, SharedInfo) {
@@ -35,9 +31,7 @@ pub fn compile(node: &Node) -> (String, SharedInfo) {
     buffer.push('\n');
     writeln!(&mut buffer, "  buffer[pos] = {}; \n}}", final_result).unwrap();
 
-    let mut preamble = format!("{}\n{}",
-        DIST_TO_LINE,
-        r"__kernel void apply(__global float* buffer, ulong width");
+    let mut preamble = format!("{}\n{}", DIST_TO_LINE, r"__kernel void apply(__global float* buffer, ulong width");
 
     for b in cc.dep_strings() {
         preamble.push_str(&format!(", __global float* {}", b));
@@ -52,6 +46,8 @@ pub fn compile(node: &Node) -> (String, SharedInfo) {
   float y_s = (float) y;
 "#,
     );
+
+    println!("{}{}", preamble, buffer);
 
     let shared_ref = shared.deref().borrow();
     (format!("{}{}", preamble, buffer), shared_ref.clone())
@@ -111,7 +107,7 @@ fn comp(node: &Node, mut cc: CompilationContext, buff: &mut String) -> String {
 ",
                 result = res,
                 temp_val = cc.get_id("temp"),
-                temp_sign= cc.get_id("temp_sign"),
+                temp_sign = cc.get_id("temp_sign"),
                 x = cc.get_x(),
                 y = cc.get_y(),
                 a = x,
@@ -143,58 +139,42 @@ fn comp(node: &Node, mut cc: CompilationContext, buff: &mut String) -> String {
 
             res
         }
-        Node::And { ref children } => {
-            match children.len() {
-                0 => panic!("And([])"),
-                1 => comp(&children[0], cc, buff),
-                n => {
-                    let mut left = children.clone();
-                    let right = left.split_off(n / 2);
+        Node::And { ref children } => match children.len() {
+            0 => panic!("And([])"),
+            1 => comp(&children[0], cc, buff),
+            n => {
+                let mut left = children.clone();
+                let right = left.split_off(n / 2);
 
-                    let res_left = comp(&Node::And { children: left }, cc.clone(), buff);
-                    let res_right = comp(&Node::And { children: right }, cc.clone(), buff);
+                let res_left = comp(&Node::And { children: left }, cc.clone(), buff);
+                let res_right = comp(&Node::And { children: right }, cc.clone(), buff);
 
-                    let res = cc.get_id("and");
+                let res = cc.get_id("and");
 
-                    buff.push('\n');
-                    writeln!(
-                        buff,
-                        "  float {result} = max({a}, {b});",
-                        result = res,
-                        a = res_left,
-                        b = res_right,
-                    ).unwrap();
+                buff.push('\n');
+                writeln!(buff, "  float {result} = max({a}, {b});", result = res, a = res_left, b = res_right,).unwrap();
 
-                    res
-                }
+                res
             }
-        }
-        Node::Or { ref children } => {
-            match children.len() {
-                0 => panic!("Or([])"),
-                1 => comp(&children[0], cc, buff),
-                n => {
-                    let mut left = children.clone();
-                    let right = left.split_off(n / 2);
+        },
+        Node::Or { ref children } => match children.len() {
+            0 => panic!("Or([])"),
+            1 => comp(&children[0], cc, buff),
+            n => {
+                let mut left = children.clone();
+                let right = left.split_off(n / 2);
 
-                    let res_left = comp(&Node::Or { children: left }, cc.clone(), buff);
-                    let res_right = comp(&Node::Or { children: right }, cc.clone(), buff);
+                let res_left = comp(&Node::Or { children: left }, cc.clone(), buff);
+                let res_right = comp(&Node::Or { children: right }, cc.clone(), buff);
 
-                    let res = cc.get_id("or");
+                let res = cc.get_id("or");
 
-                    buff.push('\n');
-                    writeln!(
-                        buff,
-                        "  float {result} = min({a}, {b});",
-                        result = res,
-                        a = res_left,
-                        b = res_right,
-                    ).unwrap();
+                buff.push('\n');
+                writeln!(buff, "  float {result} = min({a}, {b});", result = res, a = res_left, b = res_right,).unwrap();
 
-                    res
-                }
+                res
             }
-        }
+        },
         Node::Not { ref target } => {
             let child_result = comp(target, cc.clone(), buff);
             let res = cc.get_id("not");
@@ -206,20 +186,16 @@ fn comp(node: &Node, mut cc: CompilationContext, buff: &mut String) -> String {
         Node::Translate { dx, dy, ref target } => {
             let (new_x, new_y) = (cc.get_id("x"), cc.get_id("y"));
             buff.push('\n');
-            writeln!(
-                buff,
-                "  float {new_x} = {old_x} - {dx};",
-                new_x = new_x,
-                old_x = cc.get_x(),
-                dx = dx
-            ).unwrap();
-            writeln!(
-                buff,
-                "  float {new_y} = {old_y} - {dy};",
-                new_y = new_y,
-                old_y = cc.get_y(),
-                dy = dy
-            ).unwrap();
+            writeln!(buff, "  float {new_x} = {old_x} - {dx};", new_x = new_x, old_x = cc.get_x(), dx = dx).unwrap();
+            writeln!(buff, "  float {new_y} = {old_y} - {dy};", new_y = new_y, old_y = cc.get_y(), dy = dy).unwrap();
+
+            comp(target, cc.with_xy(new_x, new_y), buff)
+        }
+        Node::Scale { dx, dy, ref target } => {
+            let (new_x, new_y) = (cc.get_id("x"), cc.get_id("y"));
+            buff.push('\n');
+            writeln!(buff, "  float {new_x} = {old_x} / {dx};", new_x = new_x, old_x = cc.get_x(), dx = dx).unwrap();
+            writeln!(buff, "  float {new_y} = {old_y} / {dy};", new_y = new_y, old_y = cc.get_y(), dy = dy).unwrap();
 
             comp(target, cc.with_xy(new_x, new_y), buff)
         }
@@ -241,12 +217,7 @@ fn comp(node: &Node, mut cc: CompilationContext, buff: &mut String) -> String {
             let buffer_ref = cc.buffer_ref(group_id);
             let res = cc.get_id("other_group");
 
-            writeln!(
-                buff,
-                "float {result} = {buffer_ref}[pos];",
-                result = res,
-                buffer_ref = buffer_ref,
-            ).unwrap();
+            writeln!(buff, "float {result} = {buffer_ref}[pos];", result = res, buffer_ref = buffer_ref,).unwrap();
             res
         }
 
@@ -274,7 +245,9 @@ impl CompilationContext {
         }
     }
 
-    pub fn with_xy(&self, x: String, y: String) -> CompilationContext { CompilationContext::PositionMod { x, y, shared: self.shared() } }
+    pub fn with_xy(&self, x: String, y: String) -> CompilationContext {
+        CompilationContext::PositionMod { x, y, shared: self.shared() }
+    }
 
     pub fn buffer_ref(&mut self, group_id: GroupId) -> String {
         let shared = self.shared();
@@ -309,7 +282,6 @@ impl CompilationContext {
             &PositionMod { ref y, .. } => Cow::Owned(y.clone()),
         }
     }
-
 
     pub fn get_id(&mut self, prefix: &str) -> String {
         let shared = self.shared();

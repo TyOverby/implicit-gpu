@@ -3,10 +3,10 @@ use euclid::point2;
 use geometry::Point;
 use itertools::Itertools;
 use lines::connect_lines;
-use nodes::{Node, PolyGroup};
 use nodes::poly::separate_polygons;
-use opencl::{FieldBuffer, LineBuffer};
+use nodes::{Node, PolyGroup};
 use opencl::OpenClContext;
+use opencl::{FieldBuffer, LineBuffer};
 use polygon::run_poly;
 use std::collections::HashMap;
 use std::sync::Mutex;
@@ -19,7 +19,6 @@ pub struct Evaluator {
     height: usize,
     nest: Nest,
 }
-
 
 impl Evaluator {
     pub fn new(nest: Nest, width: usize, height: usize, _prev: Option<Evaluator>) -> Evaluator {
@@ -76,7 +75,7 @@ impl Evaluator {
             let additive_field = {
                 let _guard = ::flame::start_guard("additive field");
                 let points_all = poly.additive.iter().flat_map(|a| a.points.iter().cloned());
-                run_poly(points_all, self.width, self.height, Some((dx, dy)), ctx).unwrap()
+                run_poly(points_all, None, self.width, self.height, Some((dx, dy)), ctx).unwrap()
             };
 
             telemetry.intermediate_eval_poly(tloc, &additive_field);
@@ -92,7 +91,7 @@ impl Evaluator {
                 let lines = ::marching::run_marching(&field_buf, ctx);
                 let (lines, _) = line_buffer_to_poly(&lines, telemetry, tloc, true);
                 let lines = lines.into_iter().flat_map(grouping_to_segments);
-                let res = ::polygon::run_poly(lines, width, height, None, ctx);
+                let res = ::polygon::run_poly(lines, None, width, height, None, ctx);
                 match res {
                     Some(res) => res,
                     None => ctx.field_buffer_inf(self.width, self.height),
@@ -114,15 +113,16 @@ impl Evaluator {
         let lines = lines.values().into_iter().tuples::<(_, _, _, _)>();
         lines
             .map(|(a, b, c, d)| ((a, b), (c, d)))
-            .filter(|&((x1, y1), (x2, y2))| {
-                !(x1.is_nan() || x2.is_nan() || y1.is_nan() || y2.is_nan())
-            })
+            .filter(|&((x1, y1), (x2, y2))| !(x1.is_nan() || x2.is_nan() || y1.is_nan() || y2.is_nan()))
             .collect()
     }
 }
 
 pub fn line_buffer_to_poly(
-    buffer: &LineBuffer, telemetry: &mut Telemetry, tloc: TelemetryLocation, simplify: bool
+    buffer: &LineBuffer,
+    telemetry: &mut Telemetry,
+    tloc: TelemetryLocation,
+    simplify: bool,
 ) -> (Vec<Vec<Point>>, Vec<Vec<Point>>) {
     let lines = buffer.values();
 
@@ -132,7 +132,6 @@ pub fn line_buffer_to_poly(
         .filter(|&(a, b, c, d)| !(a.is_nan() || b.is_nan() || c.is_nan() || d.is_nan()))
         .map(|(a, b, c, d)| (point2(a, b), point2(c, d)))
         .collect::<Vec<_>>();
-
 
     let lines = connect_lines(lines, simplify, telemetry, tloc);
     let (additive, subtractive) = separate_polygons(lines);

@@ -1,4 +1,4 @@
-export type Implicit = Circle | Rect | And | Or | Not | Modulate | Break | Freeze | Translate | JSX.Element;
+export type Implicit = Circle | Rect | And | Or | Not | Modulate | Break | Freeze | Translate | Scale | JSX.Element;
 
 export interface Scene {
     figures: Figure[],
@@ -45,6 +45,13 @@ interface Or {
 
 interface Translate {
     kind: "translate",
+    dx: number,
+    dy: number,
+    target: Implicit,
+}
+
+interface Scale {
+    kind: "scale",
     dx: number,
     dy: number,
     target: Implicit,
@@ -188,6 +195,14 @@ export function modulate(how_much: number, target: Implicit): Implicit {
 export function translate(dx: number, dy: number, target: Implicit): Implicit {
     return {
         kind: "translate",
+        dx: dx,
+        dy: dy,
+        target: target,
+    }
+}
+export function scale(dx: number, dy: number, target: Implicit): Implicit {
+    return {
+        kind: "scale",
         dx: dx,
         dy: dy,
         target: target,

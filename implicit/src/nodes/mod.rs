@@ -3,7 +3,7 @@ pub mod poly;
 pub use self::poly::*;
 use compiler::GroupId;
 use euclid::{point2, vec2};
-use geometry::{centered_with_radius, Point, Rect, compute_bounding_box};
+use geometry::{centered_with_radius, compute_bounding_box, Point, Rect};
 use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq, PartialOrd)]
@@ -16,11 +16,15 @@ unsafe impl Send for NodeRef {}
 
 impl ::std::ops::Deref for NodeRef {
     type Target = Node;
-    fn deref(&self) -> &Node { &*self.node }
+    fn deref(&self) -> &Node {
+        &*self.node
+    }
 }
 
 impl NodeRef {
-    pub fn new(node: Node) -> NodeRef { NodeRef { node: Arc::new(node) } }
+    pub fn new(node: Node) -> NodeRef {
+        NodeRef { node: Arc::new(node) }
+    }
 
     pub fn take(self) -> Node {
         use std::ops::Deref;
@@ -33,14 +37,18 @@ impl NodeRef {
 
 impl<'de> ::serde::Deserialize<'de> for NodeRef {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where D: ::serde::Deserializer<'de> {
+    where
+        D: ::serde::Deserializer<'de>,
+    {
         <Node as ::serde::Deserialize>::deserialize(deserializer).map(|res| NodeRef { node: Arc::new(res) })
     }
 }
 
 impl<'de> ::serde::Serialize for NodeRef {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where S: ::serde::Serializer {
+    where
+        S: ::serde::Serializer,
+    {
         self.node.serialize(serializer)
     }
 }
@@ -57,6 +65,7 @@ pub enum Node {
     Polygon { dx: f32, dy: f32, group: PolyGroup },
     Modulate { how_much: f32, target: NodeRef },
     Translate { dx: f32, dy: f32, target: NodeRef },
+    Scale { dx: f32, dy: f32, target: NodeRef },
     Break { target: NodeRef },
     OtherGroup { group_id: GroupId },
     Freeze { target: NodeRef },
@@ -66,12 +75,8 @@ impl Node {
     pub fn eq_ignore_group(&self, other: &Node) -> bool {
         match (self, other) {
             (&Node::Circle { x: mx, y: my, r: mr }, &Node::Circle { x: ox, y: oy, r: or }) => mx == ox && my == oy && mr == or,
-            (&Node::And { children: ref mch }, &Node::And { children: ref och }) => mch.iter()
-                .zip(och.iter())
-                .all(|(a, b)| a.eq_ignore_group(&*b)),
-            (&Node::Or { children: ref mch }, &Node::Or { children: ref och }) => mch.iter()
-                .zip(och.iter())
-                .all(|(a, b)| a.eq_ignore_group(&*b)),
+            (&Node::And { children: ref mch }, &Node::And { children: ref och }) => mch.iter().zip(och.iter()).all(|(a, b)| a.eq_ignore_group(&*b)),
+            (&Node::Or { children: ref mch }, &Node::Or { children: ref och }) => mch.iter().zip(och.iter()).all(|(a, b)| a.eq_ignore_group(&*b)),
             (&Node::Not { target: ref mc }, &Node::Not { target: ref oc }) => mc.eq_ignore_group(&*oc),
             (
                 &Node::Polygon {
@@ -150,6 +155,11 @@ impl Node {
                 target: NodeRef::new(target.take().propagate_translates(dx, dy)),
             },
             Translate { target, dx: tdx, dy: tdy } => target.take().propagate_translates(tdx + dx, tdy + dy),
+            Scale { target, dx, dy } => Scale {
+                dx,
+                dy,
+                target: NodeRef::new(target.take().propagate_translates(dx, dy)),
+            },
             OtherGroup { .. } => panic!("OtherGroup in propagate_translates"),
         }
     }
@@ -167,6 +177,7 @@ impl Node {
             Not { ref target } => target.contains_break(),
             Modulate { ref target, .. } => target.contains_break(),
             Translate { ref target, .. } => target.contains_break(),
+            Scale { ref target, .. } => target.contains_break(),
             OtherGroup { .. } => panic!("contains_break on OtherGroup"),
         }
     }
@@ -202,8 +213,7 @@ impl Node {
             &Node::Polygon { dx, dy, ref group } => {
                 let mut rect = Rect::new(point2(0.0, 0.0), vec2(0.0, 0.0).to_size());
                 for polygon in &group.additive {
-                    let p_rect = compute_bounding_box(
-                        polygon.points.iter().cloned().map(|Point{x, y, ..}| point2(x + dx, y + dy)));
+                    let p_rect = compute_bounding_box(polygon.points.iter().cloned().map(|Point { x, y, .. }| point2(x + dx, y + dy)));
                     rect = rect.union(&p_rect);
                 }
                 (Some(rect), None)
@@ -215,8 +225,11 @@ impl Node {
             }
             &Node::Translate { dx, dy, ref target } => {
                 let (a, s) = target.bounding_box();
-                (a.map(|b| b.translate(&vec2(dx, dy))),
-                 s.map(|b| b.translate(&vec2(dx, dy))))
+                (a.map(|b| b.translate(&vec2(dx, dy))), s.map(|b| b.translate(&vec2(dx, dy))))
+            }
+            &Node::Scale { dx, dy, ref target } => {
+                let (a, s) = target.bounding_box();
+                (a.map(|b| b.scale(dx, dy)), s.map(|b| b.scale(dx, dy)))
             }
             &Node::And { ref children } => (
                 intersection(children.iter().map(|n| n.bounding_box().0)),
@@ -243,9 +256,15 @@ pub struct Anchor<'a, T: 'a> {
 }
 
 impl<'a, T: 'a> Anchor<'a, T> {
-    pub fn new() -> Anchor<'a, T> { Anchor { _p: ::std::marker::PhantomData } }
+    pub fn new() -> Anchor<'a, T> {
+        Anchor {
+            _p: ::std::marker::PhantomData,
+        }
+    }
 
-    pub fn hold<'b: 'a>(&'a self, obj: &'b T) -> &'a T { obj }
+    pub fn hold<'b: 'a>(&'a self, obj: &'b T) -> &'a T {
+        obj
+    }
 }
 
 #[test]
