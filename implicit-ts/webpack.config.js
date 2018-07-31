@@ -24,8 +24,8 @@ module.exports = {
             { from: "./src/scripts/runworker.js" },
             { from: "./src/lib/", to: 'lib' },
             { from: "./src/styles/", to: "styles" },
-            { from: "./node_modules/react/dist/react.js", to: "deps" },
-            { from: "./node_modules/react-dom/dist/react-dom.js", to: "deps" },
+            { from: "./node_modules/react/umd/react.production.min.js", to: "deps/react.js" },
+            { from: "./node_modules/react-dom/umd/react-dom.production.min.js", to: "deps/react-dom.js" },
             { from: "./node_modules/typescript/lib/lib.es5.d.ts", to: "deps/typescript" },
             { from: "./res/", to: "res" },
             { from: 'node_modules/monaco-editor', to: 'monaco-editor' }

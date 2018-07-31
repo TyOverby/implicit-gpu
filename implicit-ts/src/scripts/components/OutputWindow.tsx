@@ -8,10 +8,10 @@ export interface OutputState { }
 // 'HelloProps' describes the shape of props.
 // State is never set so we use the 'undefined' type.
 export class OutputWindow extends React.Component<OutputProps, OutputState> {
-    me: Element | null = null;
+    me: Element | Text | null = null;
 
-    constructor() {
-        super()
+    constructor(props: OutputProps) {
+        super(props)
         this.state = { width: 0, height: 0 };
     }
 

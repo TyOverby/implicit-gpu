@@ -52,7 +52,6 @@ lazy_static!(static ref CONTEXT: Mutex<Option<implicit::opencl::OpenClContext>> 
 
 fn process(_: RequestInfo, scene: SceneRequest) -> Result<Output, SceneError> {
     catch_unwind(|| {
-        flame::start("request");
         let ctx = { CONTEXT.lock().unwrap().take() };
         let current_timestamp = chrono::Local::now();
         let dump_dir = format!("dumps/{:?}", current_timestamp);
@@ -80,7 +79,6 @@ fn process(_: RequestInfo, scene: SceneRequest) -> Result<Output, SceneError> {
             })
             .collect::<Vec<_>>();
 
-        flame::end("request");
         let perf = flame::threads();
         flame::clear();
         Output { figures: figures, perf: perf }

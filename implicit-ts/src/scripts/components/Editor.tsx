@@ -11,8 +11,8 @@ export interface EditorProps {
 }
 
 export class Editor extends React.Component<EditorProps> {
-    me: HTMLElement;
-    editor: monaco.editor.IEditor;
+    me: HTMLElement | undefined;
+    editor: monaco.editor.IEditor | undefined;
 
     async componentDidMount() {
         this.me = ReactDOM.findDOMNode(this) as HTMLElement;
@@ -63,6 +63,10 @@ export class Editor extends React.Component<EditorProps> {
             text = "";
         }
 
+        if (!this.me) {
+            return;
+        }
+
         this.editor = monaco.editor.create(this.me, {
             folding: true,
             showFoldingControls: 'always',
@@ -74,6 +78,7 @@ export class Editor extends React.Component<EditorProps> {
             automaticLayout: true,
             model: monaco.editor.createModel(text, "typescript", monaco.Uri.file("./test.tsx")),
         });
+
 
         const model = this.editor.getModel() as monaco.editor.IModel;
         this.modelUpdated(model);

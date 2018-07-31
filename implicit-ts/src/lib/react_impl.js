@@ -51,10 +51,9 @@ var Not = __forward_all__(impl.not);
 var Break = __forward_all__(impl.break);
 var Freeze = __forward_all__(impl.freeze);
 
-var Translate = (props, children) => {
+var Translate = (props, children) =>
     impl.translate(props.dx, props.dy, ...children);
-};
 
-var Modulate = (props, children) => {
-    impl.translate(props.by, ...children);
-};
+
+var Modulate = (props, children) =>
+    impl.modulate(props.by, ...children);
