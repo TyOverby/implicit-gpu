@@ -1,13 +1,15 @@
-use ::*;
 use euclid::approxeq::ApproxEq;
 use util::*;
+use *;
 
 type Rect<S> = euclid::TypedRect<f32, S>;
 
 /// TODO: Document
 ///
 pub fn remove_zero_area_loops<I, S: 'static>(segments: I, epsilon: f32) -> Vec<(Point<S>, Point<S>)>
-where I: Into<Vec<(Point<S>, Point<S>)>> {
+where
+    I: Into<Vec<(Point<S>, Point<S>)>>,
+{
     let collected = segments.into();
     let size_hint = collected.len();
     let aabb = compute_bounding_box(collected.iter().flat_map(|&(p1, p2)| vec![p1, p2]));
@@ -21,11 +23,7 @@ where I: Into<Vec<(Point<S>, Point<S>)>> {
         }
 
         let query = Rect::from_points(&[p1a, p2a]);
-        let q_result: Vec<_> = quad_tree
-            .query(query)
-            .into_iter()
-            .map(|(&line, _, id)| (line, id))
-            .collect();
+        let q_result: Vec<_> = quad_tree.query(query).into_iter().map(|(&line, _, id)| (line, id)).collect();
 
         for ((p1b, p2b), id) in q_result {
             // We are already in the tree TODO: should we remove these duplicates?
@@ -36,7 +34,9 @@ where I: Into<Vec<(Point<S>, Point<S>)>> {
 
             */
             // Our inverse is already in the tree
-            if p1a.approx_eq_eps(&p2b, &eps) && p2a.approx_eq_eps(&p1b, &eps) {
+            //if p1a.approx_eq_eps(&p2b, &eps) &&
+            // p2a.approx_eq_eps(&p1b, &eps) {
+            if p1a == p2b && p2a == p1b {
                 quad_tree.remove(id);
                 continue 'outer;
             }
