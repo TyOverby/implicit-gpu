@@ -2,14 +2,16 @@ use euclid;
 use fnv::FnvHashMap as HashMap;
 use *;
 
+const QUAD_TREE_LEAF_SIZE: usize = 128;
+
 #[derive(Clone, Copy, Hash, Eq, PartialEq, Debug)]
 pub struct DqtId(u32);
 pub struct DualQuadTree<S> {
     id: u32,
     pub id_to_segment: HashMap<DqtId, (PathSegment<S>, ItemId, ItemId)>,
-    pub starts: QuadTree<DqtId, S, [(ItemId, euclid::TypedRect<f32, S>); 32]>,
-    pub ends: QuadTree<DqtId, S, [(ItemId, euclid::TypedRect<f32, S>); 32]>,
-    pub ambiguity_points: QuadTree<Point<S>, S, [(ItemId, euclid::TypedRect<f32, S>); 32]>,
+    pub starts: QuadTree<DqtId, S, [(ItemId, euclid::TypedRect<f32, S>); QUAD_TREE_LEAF_SIZE]>,
+    pub ends: QuadTree<DqtId, S, [(ItemId, euclid::TypedRect<f32, S>); QUAD_TREE_LEAF_SIZE]>,
+    pub ambiguity_points: QuadTree<Point<S>, S, [(ItemId, euclid::TypedRect<f32, S>); QUAD_TREE_LEAF_SIZE]>,
 }
 
 impl<S: 'static> DualQuadTree<S> {
@@ -22,12 +24,12 @@ impl<S: 'static> DualQuadTree<S> {
                 aabb,
                 true,
                 /* min children */ 0,
-                /* max_children */ 64,
-                /* max-depth */ 64,
+                /* max_children */ QUAD_TREE_LEAF_SIZE,
+                /* max-depth */ 8,
                 size_hint,
             ),
-            ends: QuadTree::new(aabb, true, 0, 64, 64, size_hint),
-            ambiguity_points: QuadTree::new(aabb, true, 0, 64, 64, size_hint / 100),
+            ends: QuadTree::new(aabb, true, 0, QUAD_TREE_LEAF_SIZE, 8, size_hint),
+            ambiguity_points: QuadTree::new(aabb, true, 0, QUAD_TREE_LEAF_SIZE, 8, size_hint / 100),
         }
     }
 

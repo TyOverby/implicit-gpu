@@ -58,49 +58,6 @@ pub struct QuadTree<T, S, A: Array<Item = (ItemId, Rect<S>)>> {
     elements: FnvHashMap<ItemId, (T, Rect<S>)>,
 }
 
-impl<T: ::std::fmt::Debug, S, A: Array<Item = (ItemId, Rect<S>)>> ::std::fmt::Debug for QuadTree<T, S, A> {
-    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-        formatter
-            .debug_struct("QuadTree")
-            .field("root", &self.root)
-            .field("config", &self.config)
-            .field("id", &self.id)
-            .field("elements", &self.elements)
-            .finish()
-    }
-}
-
-impl<S, A: Array<Item = (ItemId, Rect<S>)>> ::std::fmt::Debug for QuadNode<S, A> {
-    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-        match self {
-            &QuadNode::Branch {
-                ref aabb,
-                ref children,
-                ref in_all,
-                ref element_count,
-                ref depth,
-            } => formatter
-                .debug_struct("QuadNode")
-                .field("aabb", aabb)
-                .field("children", children)
-                .field("in_all", in_all)
-                .field("element_count", element_count)
-                .field("depth", depth)
-                .finish(),
-
-            &QuadNode::Leaf {
-                ref aabb,
-                ref elements,
-                ref depth,
-            } => formatter
-                .debug_struct("QuadNode")
-                .field("aabb", aabb)
-                .field("elements", elements)
-                .field("depth", depth)
-                .finish(),
-        }
-    }
-}
 
 enum QuadNode<S, A: Array<Item = (ItemId, Rect<S>)>> {
     Branch {
@@ -611,4 +568,48 @@ fn test_boundary_conditions() {
     assert!(branch.insert(ItemId(0), Rect::new(point2(0.0, 0.0), vec2(0.0, 0.0).to_size()), &config));
     // Middle
     assert!(branch.insert(ItemId(0), Rect::new(point2(5.0, 5.0), vec2(0.0, 0.0).to_size()), &config));
+}
+
+impl<T: ::std::fmt::Debug, S, A: Array<Item = (ItemId, Rect<S>)>> ::std::fmt::Debug for QuadTree<T, S, A> {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("QuadTree")
+            .field("root", &self.root)
+            .field("config", &self.config)
+            .field("id", &self.id)
+            .field("elements", &self.elements)
+            .finish()
+    }
+}
+
+impl<S, A: Array<Item = (ItemId, Rect<S>)>> ::std::fmt::Debug for QuadNode<S, A> {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        match self {
+            &QuadNode::Branch {
+                ref aabb,
+                ref children,
+                ref in_all,
+                ref element_count,
+                ref depth,
+            } => formatter
+                .debug_struct("QuadNode")
+                .field("aabb", aabb)
+                .field("children", children)
+                .field("in_all", in_all)
+                .field("element_count", element_count)
+                .field("depth", depth)
+                .finish(),
+
+            &QuadNode::Leaf {
+                ref aabb,
+                ref elements,
+                ref depth,
+            } => formatter
+                .debug_struct("QuadNode")
+                .field("aabb", aabb)
+                .field("elements", elements)
+                .field("depth", depth)
+                .finish(),
+        }
+    }
 }

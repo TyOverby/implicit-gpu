@@ -21,8 +21,7 @@ fn prune_one_iter<S: Send + Sync + 'static>(dual_qt: &mut DualQuadTree<S>, epsil
     ::flame::start("finding items to remove");
     let to_remove: Vec<_> = dual_qt
         .id_to_segment
-        //.par_iter()
-        .iter()
+        .par_iter()
         .filter_map(|(&id, &(ref path, _, _))| {
             let (start, end) = (path.first(), path.last());
 
