@@ -71,7 +71,6 @@ __kernel void apply_with_sign(__global float *buffer, __global float *signbuffer
         return;
     }
 
-    float minimum = INFINITY;
     float minimum_abs = INFINITY;
 
     for (size_t i = 0; i < count; i += 4)
@@ -94,13 +93,11 @@ __kernel void apply_with_sign(__global float *buffer, __global float *signbuffer
 
         float new = dist_to_line(x_s, y_s, x1, y1, x2, y2);
         float new_abs = fabs(new);
-        float sig = sign(position(x_s, y_s, x1, y1, x2, y2));
 
         if (new_abs < minimum_abs) {
-            minimum = copysign(new, signbuffer[pos]);
             minimum_abs = new_abs;
         }
     }
 
-    buffer[pos] = -minimum;
+    buffer[pos] = -copysign(minimum_abs, signbuffer[pos]);
 }
