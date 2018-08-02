@@ -1,5 +1,5 @@
-use ::*;
 use rayon::prelude::*;
+use *;
 
 /// Remoes all line segments that can't possibly be part of
 /// a cycle.
@@ -21,7 +21,8 @@ fn prune_one_iter<S: Send + Sync + 'static>(dual_qt: &mut DualQuadTree<S>, epsil
     ::flame::start("finding items to remove");
     let to_remove: Vec<_> = dual_qt
         .id_to_segment
-        .par_iter()
+        //.par_iter()
+        .iter()
         .filter_map(|(&id, &(ref path, _, _))| {
             let (start, end) = (path.first(), path.last());
 
@@ -31,11 +32,11 @@ fn prune_one_iter<S: Send + Sync + 'static>(dual_qt: &mut DualQuadTree<S>, epsil
             let c = dual_qt.has_backward_neighbor(id, end, epsilon);
             let d = || dual_qt.has_forward_neighbor(id, end, epsilon);
 
-            let should_be_kept = (a || (!only_starts && b())) && (c || (!only_starts && d()));
-            if !(should_be_kept) {
-                Some(id)
-            } else {
+            let should_be_removed = (a || (!only_starts && b())) && (c || (!only_starts && d()));
+            if should_be_removed{
                 None
+            } else {
+                Some(id)
             }
         })
         .collect();

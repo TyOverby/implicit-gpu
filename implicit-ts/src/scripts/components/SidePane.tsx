@@ -6,7 +6,7 @@ import { TabBar, Divider } from "./TabBar";
 import { ErrorWindow } from "./ErrorWindow";
 import { Editor } from "./Editor";
 import { WorkspaceState } from './Workspace'
-import { Fireplace } from '../../../../../fireplace/src/scripts/components/Fireplace';
+import { Fireplace } from '../../../../../../web/fireplace/src/scripts/components/Fireplace'
 
 export class SidePane extends React.Component<WorkspaceState> {
     render() {

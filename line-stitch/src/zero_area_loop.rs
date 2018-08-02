@@ -17,29 +17,22 @@ where
     let mut quad_tree: QuadTree<_, _, [_; 32]> = QuadTree::new(aabb, true, 0, 64, 64, size_hint);
     let eps = Point::new(epsilon, epsilon);
 
-    'outer: for (p1a, p2a) in collected {
+    for (p1a, p2a) in collected {
         if p1a.approx_eq_eps(&p2a, &eps) {
             continue;
         }
 
         let query = Rect::from_points(&[p1a, p2a]);
-        let q_result: Vec<_> = quad_tree.query(query).into_iter().map(|(&line, _, id)| (line, id)).collect();
-
-        for ((p1b, p2b), id) in q_result {
-            // We are already in the tree TODO: should we remove these duplicates?
-            /*
-            if p1a.approx_eq_eps(&p1b, &eps) && p2a.approx_eq_eps(&p2b, &eps) {
-                continue 'outer;
+        let result = quad_tree.custom_query(query, &mut |id, _| {
+            if quad_tree.get(id) == Some(&(p1a, p2a)) {
+                Err(id)
+            } else {
+                Ok(())
             }
+        });
 
-            */
-            // Our inverse is already in the tree
-            //if p1a.approx_eq_eps(&p2b, &eps) &&
-            // p2a.approx_eq_eps(&p1b, &eps) {
-            if p1a == p2b && p2a == p1b {
-                quad_tree.remove(id);
-                continue 'outer;
-            }
+        if let Err(id) = result {
+            quad_tree.remove(id);
         }
 
         quad_tree.insert_with_box((p1a, p2a), query);
