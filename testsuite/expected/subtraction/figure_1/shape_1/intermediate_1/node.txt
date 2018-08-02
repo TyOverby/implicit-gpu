@@ -2,9 +2,9 @@ And {
     children: [
         NodeRef {
             node: Circle {
-                x: 52,
-                y: 52,
-                r: 50
+                x: 52.0,
+                y: 52.0,
+                r: 50.0
             }
         },
         NodeRef {
@@ -14,9 +14,9 @@ And {
                         children: [
                             NodeRef {
                                 node: Circle {
-                                    x: 52,
-                                    y: 52,
-                                    r: 25
+                                    x: 52.0,
+                                    y: 52.0,
+                                    r: 25.0
                                 }
                             },
                             NodeRef {

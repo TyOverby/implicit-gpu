@@ -18,9 +18,7 @@ pub struct SyncBuffer {
 }
 
 impl SyncBuffer {
-    pub fn buffer(&self) -> &Buffer<u32> {
-        &self.internal
-    }
+    pub fn buffer(&self) -> &Buffer<u32> { &self.internal }
     pub fn value(&self) -> u32 {
         let _guard = ::flame::start_guard("sync buffer value");
         let mut out = vec![0];
@@ -30,15 +28,9 @@ impl SyncBuffer {
 }
 
 impl FieldBuffer {
-    pub fn size(&self) -> (usize, usize) {
-        (self.width(), self.height())
-    }
-    pub fn width(&self) -> usize {
-        self.dims.0
-    }
-    pub fn height(&self) -> usize {
-        self.dims.1
-    }
+    pub fn size(&self) -> (usize, usize) { (self.width(), self.height()) }
+    pub fn width(&self) -> usize { self.dims.0 }
+    pub fn height(&self) -> usize { self.dims.1 }
 
     pub fn values(&self) -> Vec<f32> {
         let _guard = ::flame::start_guard("field buffer values");
@@ -47,28 +39,21 @@ impl FieldBuffer {
         out
     }
 
-    pub fn buffer(&self) -> &Buffer<f32> {
-        &self.internal
-    }
+    pub fn buffer(&self) -> &Buffer<f32> { &self.internal }
 }
 
 impl LineBuffer {
-    pub fn size(&self) -> usize {
-        self.size
-    }
+    pub fn size(&self) -> usize { self.size }
 
-    pub fn values(&self, count: Option<u32>) -> Vec<f32> {
+    pub fn values(&self, _count: Option<u32>) -> Vec<f32> {
         let _guard = ::flame::start_guard("line buffer values");
-        println!("{:?}", count);
-        {
-            let mut out = vec![0.0; self.size()];
-            self.internal.read(&mut out).enq().unwrap();
-            let realcount = out.into_iter().take_while(|a| !a.is_nan()).count();
-            println!("{:?}", realcount);
-        }
-        let count = count.map(|a| a as usize).unwrap_or_else(|| self.size());
+        let count = self.size();
         let mut out = vec![0.0; count];
         self.internal.read(&mut out).enq().unwrap();
+        if let Some(count) = _count {
+            let count = count as usize;
+            out.drain(count..);
+        }
         out
     }
 
@@ -85,7 +70,5 @@ impl LineBuffer {
         return true;
     }
 
-    pub fn buffer(&self) -> &Buffer<f32> {
-        &self.internal
-    }
+    pub fn buffer(&self) -> &Buffer<f32> { &self.internal }
 }

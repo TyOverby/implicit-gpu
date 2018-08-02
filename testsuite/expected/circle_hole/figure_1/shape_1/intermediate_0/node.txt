@@ -1,6 +1,6 @@
 Translate {
-    dx: 2,
-    dy: 2,
+    dx: 2.0,
+    dy: 2.0,
     target: NodeRef {
         node: Or {
             children: [
@@ -9,18 +9,18 @@ Translate {
                         children: [
                             NodeRef {
                                 node: Circle {
-                                    x: 50,
-                                    y: 50,
-                                    r: 50
+                                    x: 50.0,
+                                    y: 50.0,
+                                    r: 50.0
                                 }
                             },
                             NodeRef {
                                 node: Not {
                                     target: NodeRef {
                                         node: Circle {
-                                            x: 50,
-                                            y: 50,
-                                            r: 25
+                                            x: 50.0,
+                                            y: 50.0,
+                                            r: 25.0
                                         }
                                     }
                                 }
@@ -30,9 +30,9 @@ Translate {
                 },
                 NodeRef {
                     node: Circle {
-                        x: 50,
-                        y: 50,
-                        r: 10
+                        x: 50.0,
+                        y: 50.0,
+                        r: 10.0
                     }
                 }
             ]

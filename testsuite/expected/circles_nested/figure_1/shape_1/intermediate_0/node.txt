@@ -12,8 +12,8 @@ Translate {
                                     children: [
                                         NodeRef {
                                             node: Circle {
-                                                x: 400,
-                                                y: 0,
+                                                x: 400.0,
+                                                y: 0.0,
                                                 r: 52.034225
                                             }
                                         },
@@ -22,8 +22,8 @@ Translate {
                                                 children: [
                                                     NodeRef {
                                                         node: Circle {
-                                                            x: 300,
-                                                            y: 0,
+                                                            x: 300.0,
+                                                            y: 0.0,
                                                             r: 82.853546
                                                         }
                                                     },
@@ -31,11 +31,11 @@ Translate {
                                                         node: Not {
                                                             target: NodeRef {
                                                                 node: Modulate {
-                                                                    how_much: -10,
+                                                                    how_much: -10.0,
                                                                     target: NodeRef {
                                                                         node: Circle {
-                                                                            x: 400,
-                                                                            y: 0,
+                                                                            x: 400.0,
+                                                                            y: 0.0,
                                                                             r: 52.034225
                                                                         }
                                                                     }
@@ -54,8 +54,8 @@ Translate {
                                     children: [
                                         NodeRef {
                                             node: Circle {
-                                                x: 240,
-                                                y: 0,
+                                                x: 240.0,
+                                                y: 0.0,
                                                 r: 130.47241
                                             }
                                         },
@@ -63,14 +63,14 @@ Translate {
                                             node: Not {
                                                 target: NodeRef {
                                                     node: Modulate {
-                                                        how_much: -10,
+                                                        how_much: -10.0,
                                                         target: NodeRef {
                                                             node: Or {
                                                                 children: [
                                                                     NodeRef {
                                                                         node: Circle {
-                                                                            x: 400,
-                                                                            y: 0,
+                                                                            x: 400.0,
+                                                                            y: 0.0,
                                                                             r: 52.034225
                                                                         }
                                                                     },
@@ -79,8 +79,8 @@ Translate {
                                                                             children: [
                                                                                 NodeRef {
                                                                                     node: Circle {
-                                                                                        x: 300,
-                                                                                        y: 0,
+                                                                                        x: 300.0,
+                                                                                        y: 0.0,
                                                                                         r: 82.853546
                                                                                     }
                                                                                 },
@@ -88,11 +88,11 @@ Translate {
                                                                                     node: Not {
                                                                                         target: NodeRef {
                                                                                             node: Modulate {
-                                                                                                how_much: -10,
+                                                                                                how_much: -10.0,
                                                                                                 target: NodeRef {
                                                                                                     node: Circle {
-                                                                                                        x: 400,
-                                                                                                        y: 0,
+                                                                                                        x: 400.0,
+                                                                                                        y: 0.0,
                                                                                                         r: 52.034225
                                                                                                     }
                                                                                                 }
@@ -121,8 +121,8 @@ Translate {
                         children: [
                             NodeRef {
                                 node: Circle {
-                                    x: 200,
-                                    y: 0,
+                                    x: 200.0,
+                                    y: 0.0,
                                     r: 208.1369
                                 }
                             },
@@ -130,7 +130,7 @@ Translate {
                                 node: Not {
                                     target: NodeRef {
                                         node: Modulate {
-                                            how_much: -10,
+                                            how_much: -10.0,
                                             target: NodeRef {
                                                 node: Or {
                                                     children: [
@@ -139,8 +139,8 @@ Translate {
                                                                 children: [
                                                                     NodeRef {
                                                                         node: Circle {
-                                                                            x: 400,
-                                                                            y: 0,
+                                                                            x: 400.0,
+                                                                            y: 0.0,
                                                                             r: 52.034225
                                                                         }
                                                                     },
@@ -149,8 +149,8 @@ Translate {
                                                                             children: [
                                                                                 NodeRef {
                                                                                     node: Circle {
-                                                                                        x: 300,
-                                                                                        y: 0,
+                                                                                        x: 300.0,
+                                                                                        y: 0.0,
                                                                                         r: 82.853546
                                                                                     }
                                                                                 },
@@ -158,11 +158,11 @@ Translate {
                                                                                     node: Not {
                                                                                         target: NodeRef {
                                                                                             node: Modulate {
-                                                                                                how_much: -10,
+                                                                                                how_much: -10.0,
                                                                                                 target: NodeRef {
                                                                                                     node: Circle {
-                                                                                                        x: 400,
-                                                                                                        y: 0,
+                                                                                                        x: 400.0,
+                                                                                                        y: 0.0,
                                                                                                         r: 52.034225
                                                                                                     }
                                                                                                 }
@@ -181,8 +181,8 @@ Translate {
                                                                 children: [
                                                                     NodeRef {
                                                                         node: Circle {
-                                                                            x: 240,
-                                                                            y: 0,
+                                                                            x: 240.0,
+                                                                            y: 0.0,
                                                                             r: 130.47241
                                                                         }
                                                                     },
@@ -190,14 +190,14 @@ Translate {
                                                                         node: Not {
                                                                             target: NodeRef {
                                                                                 node: Modulate {
-                                                                                    how_much: -10,
+                                                                                    how_much: -10.0,
                                                                                     target: NodeRef {
                                                                                         node: Or {
                                                                                             children: [
                                                                                                 NodeRef {
                                                                                                     node: Circle {
-                                                                                                        x: 400,
-                                                                                                        y: 0,
+                                                                                                        x: 400.0,
+                                                                                                        y: 0.0,
                                                                                                         r: 52.034225
                                                                                                     }
                                                                                                 },
@@ -206,8 +206,8 @@ Translate {
                                                                                                         children: [
                                                                                                             NodeRef {
                                                                                                                 node: Circle {
-                                                                                                                    x: 300,
-                                                                                                                    y: 0,
+                                                                                                                    x: 300.0,
+                                                                                                                    y: 0.0,
                                                                                                                     r: 82.853546
                                                                                                                 }
                                                                                                             },
@@ -215,11 +215,11 @@ Translate {
                                                                                                                 node: Not {
                                                                                                                     target: NodeRef {
                                                                                                                         node: Modulate {
-                                                                                                                            how_much: -10,
+                                                                                                                            how_much: -10.0,
                                                                                                                             target: NodeRef {
                                                                                                                                 node: Circle {
-                                                                                                                                    x: 400,
-                                                                                                                                    y: 0,
+                                                                                                                                    x: 400.0,
+                                                                                                                                    y: 0.0,
                                                                                                                                     r: 52.034225
                                                                                                                                 }
                                                                                                                             }

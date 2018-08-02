@@ -1,15 +1,15 @@
 Translate {
-    dx: 7,
-    dy: 7,
+    dx: 7.0,
+    dy: 7.0,
     target: NodeRef {
         node: And {
             children: [
                 NodeRef {
                     node: Rect {
-                        x: -5,
-                        y: -5,
-                        w: 160,
-                        h: 160
+                        x: -5.0,
+                        y: -5.0,
+                        w: 160.0,
+                        h: 160.0
                     }
                 },
                 NodeRef {
@@ -19,114 +19,114 @@ Translate {
                                 children: [
                                     NodeRef {
                                         node: Circle {
-                                            x: 0,
-                                            y: 0,
-                                            r: 10
+                                            x: 0.0,
+                                            y: 0.0,
+                                            r: 10.0
                                         }
                                     },
                                     NodeRef {
                                         node: Circle {
-                                            x: 0,
-                                            y: 30,
-                                            r: 10
+                                            x: 0.0,
+                                            y: 30.0,
+                                            r: 10.0
                                         }
                                     },
                                     NodeRef {
                                         node: Circle {
-                                            x: 0,
-                                            y: 60,
-                                            r: 10
+                                            x: 0.0,
+                                            y: 60.0,
+                                            r: 10.0
                                         }
                                     },
                                     NodeRef {
                                         node: Circle {
-                                            x: 0,
-                                            y: 90,
-                                            r: 10
+                                            x: 0.0,
+                                            y: 90.0,
+                                            r: 10.0
                                         }
                                     },
                                     NodeRef {
                                         node: Circle {
-                                            x: 30,
-                                            y: 0,
-                                            r: 10
+                                            x: 30.0,
+                                            y: 0.0,
+                                            r: 10.0
                                         }
                                     },
                                     NodeRef {
                                         node: Circle {
-                                            x: 30,
-                                            y: 30,
-                                            r: 10
+                                            x: 30.0,
+                                            y: 30.0,
+                                            r: 10.0
                                         }
                                     },
                                     NodeRef {
                                         node: Circle {
-                                            x: 30,
-                                            y: 60,
-                                            r: 10
+                                            x: 30.0,
+                                            y: 60.0,
+                                            r: 10.0
                                         }
                                     },
                                     NodeRef {
                                         node: Circle {
-                                            x: 30,
-                                            y: 90,
-                                            r: 10
+                                            x: 30.0,
+                                            y: 90.0,
+                                            r: 10.0
                                         }
                                     },
                                     NodeRef {
                                         node: Circle {
-                                            x: 60,
-                                            y: 0,
-                                            r: 10
+                                            x: 60.0,
+                                            y: 0.0,
+                                            r: 10.0
                                         }
                                     },
                                     NodeRef {
                                         node: Circle {
-                                            x: 60,
-                                            y: 30,
-                                            r: 10
+                                            x: 60.0,
+                                            y: 30.0,
+                                            r: 10.0
                                         }
                                     },
                                     NodeRef {
                                         node: Circle {
-                                            x: 60,
-                                            y: 60,
-                                            r: 10
+                                            x: 60.0,
+                                            y: 60.0,
+                                            r: 10.0
                                         }
                                     },
                                     NodeRef {
                                         node: Circle {
-                                            x: 60,
-                                            y: 90,
-                                            r: 10
+                                            x: 60.0,
+                                            y: 90.0,
+                                            r: 10.0
                                         }
                                     },
                                     NodeRef {
                                         node: Circle {
-                                            x: 90,
-                                            y: 0,
-                                            r: 10
+                                            x: 90.0,
+                                            y: 0.0,
+                                            r: 10.0
                                         }
                                     },
                                     NodeRef {
                                         node: Circle {
-                                            x: 90,
-                                            y: 30,
-                                            r: 10
+                                            x: 90.0,
+                                            y: 30.0,
+                                            r: 10.0
                                         }
                                     },
                                     NodeRef {
                                         node: Circle {
-                                            x: 90,
-                                            y: 60,
-                                            r: 10
+                                            x: 90.0,
+                                            y: 60.0,
+                                            r: 10.0
                                         }
                                     },
                                     NodeRef {
                                         node: Circle {
-                                            x: 90,
-                                            y: 90,
-                                            r: 10
+                                            x: 90.0,
+                                            y: 90.0,
+                                            r: 10.0
                                         }
                                     }
                                 ]

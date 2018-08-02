@@ -1,12 +1,12 @@
 Translate {
-    dx: 0,
-    dy: 0,
+    dx: 0.0,
+    dy: 0.0,
     target: NodeRef {
         node: Rect {
-            x: 2,
-            y: 2,
-            w: 10,
-            h: 10
+            x: 2.0,
+            y: 2.0,
+            w: 10.0,
+            h: 10.0
         }
     }
 }

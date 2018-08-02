@@ -1,22 +1,22 @@
 Translate {
-    dx: -8,
-    dy: -8,
+    dx: -8.0,
+    dy: -8.0,
     target: NodeRef {
         node: And {
             children: [
                 NodeRef {
                     node: Circle {
-                        x: 20,
-                        y: 20,
-                        r: 10
+                        x: 20.0,
+                        y: 20.0,
+                        r: 10.0
                     }
                 },
                 NodeRef {
                     node: Rect {
-                        x: 0,
-                        y: 0,
-                        w: 50,
-                        h: 50
+                        x: 0.0,
+                        y: 0.0,
+                        w: 50.0,
+                        h: 50.0
                     }
                 }
             ]

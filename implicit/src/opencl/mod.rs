@@ -1,6 +1,6 @@
+use ocl::builders::BufferBuilder;
 use ocl::enums::{DeviceInfo, DeviceInfoResult};
-use ocl::flags::{MEM_COPY_HOST_PTR, MEM_READ_WRITE};
-use ocl::{Buffer, Context, Device, Kernel, Platform, Program, Queue};
+use ocl::{Context, Device, Kernel, Platform, Program, Queue};
 use std::sync::Mutex;
 
 mod buffers;
@@ -16,6 +16,7 @@ pub struct OpenClContext {
 }
 
 pub fn all_devices() -> Vec<(Platform, Device)> {
+    use std::cmp::Ordering;
     let mut out = vec![];
     for plat in Platform::list() {
         if let Ok(all_devices) = Device::list_all(&plat) {
@@ -29,10 +30,11 @@ pub fn all_devices() -> Vec<(Platform, Device)> {
     out.sort_by(|&(_, ref a), &(_, ref b)| {
         let a_type = a.info(DeviceInfo::Type);
         let b_type = b.info(DeviceInfo::Type);
-        if let (DeviceInfoResult::Type(a_type), DeviceInfoResult::Type(b_type)) = (a_type, b_type) {
-            b_type.cmp(&a_type)
-        } else {
-            (0).cmp(&0)
+        match (a_type, b_type) {
+            (Ok(DeviceInfoResult::Type(a)), Ok(DeviceInfoResult::Type(b))) => b.cmp(&a),
+            (Ok(_), Err(_)) => Ordering::Less,
+            (Err(_), Ok(_)) => Ordering::Greater,
+            _ => Ordering::Equal,
         }
     });
 
@@ -53,9 +55,7 @@ impl OpenClContext {
         }
     }
 
-    pub fn max_workgroup_size(&self) -> usize {
-        self.device.max_wg_size().unwrap()
-    }
+    pub fn max_workgroup_size(&self) -> usize { self.device.max_wg_size().unwrap() }
 
     pub fn default() -> OpenClContext {
         let (pt, dv) = all_devices().into_iter().nth(0).unwrap();
@@ -90,49 +90,62 @@ impl OpenClContext {
 
     pub fn field_buffer(&self, width: usize, height: usize, fill: Option<&[f32]>) -> FieldBuffer {
         let _guard = ::flame::start_guard("OpenClContext::field_buffer");
-        let buffer = if let Some(fill) = fill {
-            assert_eq!(fill.len(), width * height);
-            Buffer::new(self.queue.clone(), Some(MEM_COPY_HOST_PTR | MEM_READ_WRITE), &[width, height], Some(fill)).unwrap()
+
+        let builder: BufferBuilder<f32> = BufferBuilder::new().queue(self.queue.clone()).len(&[width, height]);
+
+        let internal = if let Some(fill) = fill {
+            if fill.len() == 1 {
+                builder.fill_val(fill[0]).build().unwrap()
+            } else {
+                let built = builder.build().unwrap();
+                built.write(fill).enq().unwrap();
+                built
+            }
         } else {
-            Buffer::new(self.queue.clone(), Some(MEM_READ_WRITE), &[width, height], None).unwrap()
+            builder.build().unwrap()
         };
 
         FieldBuffer {
             dims: (width, height),
-            internal: buffer,
+            internal,
         }
     }
 
     pub fn field_buffer_nan(&self, width: usize, height: usize) -> FieldBuffer {
         let _guard = ::flame::start_guard("OpenClContext::field_buffer_inf");
-        let buffer = vec![::std::f32::NAN; width * height];
-        self.field_buffer(width, height, Some(&buffer))
+        let buffer = &[::std::f32::NAN][..];
+        self.field_buffer(width, height, Some(buffer))
     }
 
     pub fn field_buffer_inf(&self, width: usize, height: usize) -> FieldBuffer {
         let _guard = ::flame::start_guard("OpenClContext::field_buffer_inf");
-        let buffer = vec![::std::f32::INFINITY; width * height];
-        self.field_buffer(width, height, Some(&buffer))
+        let buffer = &[::std::f32::INFINITY][..];
+        self.field_buffer(width, height, Some(buffer))
     }
 
     pub fn field_buffer_neg_inf(&self, width: usize, height: usize) -> FieldBuffer {
         let _guard = ::flame::start_guard("OpenClContext::field_buffer_neg_inf");
-        let buffer = vec![::std::f32::NEG_INFINITY; width * height];
-        self.field_buffer(width, height, Some(&buffer))
+        let buffer = &[::std::f32::NEG_INFINITY][..];
+        self.field_buffer(width, height, Some(buffer))
+    }
+
+    pub fn line_buffer_uninit(&self, len: usize) -> LineBuffer {
+        let _guard = ::flame::start_guard("OpenClContext::linear_buffer");
+        let internal = BufferBuilder::new().queue(self.queue.clone()).len(&[len]).build().unwrap();
+        LineBuffer { size: len, internal }
     }
 
     pub fn line_buffer(&self, fill: &[f32]) -> LineBuffer {
         let _guard = ::flame::start_guard("OpenClContext::linear_buffer");
-        LineBuffer {
-            size: fill.len(),
-            internal: Buffer::new(self.queue.clone(), Some(MEM_COPY_HOST_PTR), &[fill.len()], Some(fill)).unwrap(),
-        }
+        let internal = BufferBuilder::new().queue(self.queue.clone()).len(&[fill.len()]).build().unwrap();
+        internal.write(fill).enq().unwrap();
+        LineBuffer { size: fill.len(), internal }
     }
 
     pub fn sync_buffer(&self) -> SyncBuffer {
         let _guard = ::flame::start_guard("OpenClContext::sync_buffer");
         SyncBuffer {
-            internal: Buffer::new(self.queue.clone(), Some(MEM_COPY_HOST_PTR), &[1], Some(&[0])).unwrap(),
+            internal: BufferBuilder::new().queue(self.queue.clone()).len(&[1]).fill_val(0u32).build().unwrap(),
         }
     }
 
@@ -141,19 +154,11 @@ impl OpenClContext {
         self.queue.finish().unwrap();
     }
 
-    pub fn platform(&self) -> &Platform {
-        &self.platform
-    }
+    pub fn platform(&self) -> &Platform { &self.platform }
 
-    pub fn device(&self) -> &Device {
-        &self.device
-    }
+    pub fn device(&self) -> &Device { &self.device }
 
-    pub fn context(&self) -> &Context {
-        &self.context
-    }
+    pub fn context(&self) -> &Context { &self.context }
 
-    pub fn queue(&self) -> &Queue {
-        &self.queue
-    }
+    pub fn queue(&self) -> &Queue { &self.queue }
 }

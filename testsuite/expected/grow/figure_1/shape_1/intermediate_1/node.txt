@@ -1,5 +1,5 @@
 Modulate {
-    how_much: -20,
+    how_much: -20.0,
     target: NodeRef {
         node: OtherGroup {
             group_id: GroupId(

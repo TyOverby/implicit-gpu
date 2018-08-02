@@ -1,11 +1,11 @@
 Translate {
-    dx: 2,
-    dy: 2,
+    dx: 2.0,
+    dy: 2.0,
     target: NodeRef {
         node: Circle {
-            x: 0,
-            y: 0,
-            r: 0
+            x: 0.0,
+            y: 0.0,
+            r: 0.0
         }
     }
 }

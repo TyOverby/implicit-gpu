@@ -1,20 +1,20 @@
 Modulate {
-    how_much: 10,
+    how_much: 10.0,
     target: NodeRef {
         node: Or {
             children: [
                 NodeRef {
                     node: Circle {
-                        x: 22,
-                        y: 22,
-                        r: 30
+                        x: 22.0,
+                        y: 22.0,
+                        r: 30.0
                     }
                 },
                 NodeRef {
                     node: Circle {
-                        x: 52,
-                        y: 22,
-                        r: 30
+                        x: 52.0,
+                        y: 22.0,
+                        r: 30.0
                     }
                 }
             ]

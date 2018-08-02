@@ -5,7 +5,7 @@ authors = ["Ty Overby <ty@pre-alpha.com>"]
 workspace = "../"
 
 [dependencies]
-ocl = "0.16.*"
+ocl = "0.17.*"
 flame = "0.2.0"
 lazy_static = "0.2.*"
 image = "0.10.*"

@@ -8,11 +8,7 @@ pub fn run_marching(input: &FieldBuffer, ctx: &OpenClContext) -> (LineBuffer, u3
     let (width, height) = (input.width(), input.height());
     let kernel = ctx.compile("apply", PROGRAM);
 
-    // TODO: Now that you have the number of lines produced by reading the sync_buffer, you don't need
-    //       to allocate any of this here.
-    let from = ::flame::span_of("opencl marching [build vec]", || vec![::std::f32::NAN; width * height * 4]);
-
-    let line_buffer = ctx.line_buffer(&from);
+    let line_buffer = ctx.line_buffer_uninit(width * height * 4);
     let sync_buffer = ctx.sync_buffer();
 
     ::flame::start("setup kernel");

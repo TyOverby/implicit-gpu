@@ -1,22 +1,3 @@
-<svg xmlns="http://www.w3.org/2000/svg">
-    <path fill-rule="evenodd" style="fill: none; stroke: rgb(0, 0, 0); stroke-width: 0.2;" d="M2.00000,2.00000 L2.00000,2.00000 M2.00000,2.00000 L2.00000,2.00000 M2.00000,2.00000 L2.00000,2.00000 M2.00000,2.00000 L2.00000,2.00000 "/>
-
-<script>
-let svgs = document.children[0];
-let paths = Array.from(svgs.children).filter(function(c) {
-    var orig = c.style.stroke;
-    c.onmouseover = function() {
-        c.style.stroke = "rgb(0, 0, 255)";
-    };
-    c.onmouseout = function () {
-        c.style.stroke = orig;
-    };
-    c.onclick = function () {
-        svgs.removeChild()
-    }
-});
-
-for (let path of paths) {
-    console.log(path);
-}
-</script></svg>
+version https://git-lfs.github.com/spec/v1
+oid sha256:60fdb8bbeb22ef58e5383d3bc885bb3fdfb7f3100487976a983e707b6b5cc06a
+size 696

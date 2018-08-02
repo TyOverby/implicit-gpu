@@ -127,7 +127,7 @@ pub fn line_buffer_to_poly(
     let lines = lines
         .into_iter()
         .tuples::<(_, _, _, _)>()
-        .filter(|&(a, b, c, d)| !(a.is_nan() || b.is_nan() || c.is_nan() || d.is_nan()))
+        .take_while(|&(a, b, c, d)| !(a.is_nan() || b.is_nan() || c.is_nan() || d.is_nan()))
         .map(|(a, b, c, d)| (point2(a, b), point2(c, d)))
         .collect::<Vec<_>>();
 
