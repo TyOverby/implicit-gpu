@@ -96,8 +96,8 @@ __kernel void apply_with_sign(__global float *buffer, __global float *signbuffer
         float new_abs = fabs(new);
         float sig = sign(position(x_s, y_s, x1, y1, x2, y2));
 
-        if (sig == sign(signbuffer[pos]) && new_abs < minimum_abs) {
-            minimum = copysign(new, sig);
+        if (new_abs < minimum_abs) {
+            minimum = copysign(new, signbuffer[pos]);
             minimum_abs = new_abs;
         }
     }

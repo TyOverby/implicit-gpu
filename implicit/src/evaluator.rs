@@ -91,9 +91,12 @@ impl Evaluator {
                 let (lines, count) = ::marching::run_marching(&field_buf, ctx);
                 let (lines, _) = line_buffer_to_poly(&lines, count, telemetry, tloc, true);
                 let lines = lines.into_iter().flat_map(grouping_to_segments);
-                let res = ::polygon::run_poly(lines, None, width, height, None, ctx);
+                let res = ::polygon::run_poly(lines, Some(field_buf), width, height, None, ctx);
                 match res {
-                    Some(res) => res,
+                    Some(res) => {
+                        telemetry.intermediate_eval_poly(tloc, &res);
+                        res
+                    }
                     None => ctx.field_buffer_inf(self.width, self.height),
                 }
             }
@@ -116,11 +119,7 @@ impl Evaluator {
 }
 
 pub fn line_buffer_to_poly(
-    buffer: &LineBuffer,
-    count: u32,
-    telemetry: &mut Telemetry,
-    tloc: TelemetryLocation,
-    simplify: bool,
+    buffer: &LineBuffer, count: u32, telemetry: &mut Telemetry, tloc: TelemetryLocation, simplify: bool,
 ) -> (Vec<Vec<Point>>, Vec<Vec<Point>>) {
     let lines = buffer.values(Some(count));
 
