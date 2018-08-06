@@ -85,7 +85,10 @@ impl OpenClContext {
             program_cache.push((source, program.clone()));
         }
 
-        Kernel::new(name, &program).unwrap()
+        {
+            let _guard = ::flame::start_guard("Kernel::new");
+            Kernel::new(name, &program).unwrap()
+        }
     }
 
     pub fn field_buffer(&self, width: usize, height: usize, fill: Option<&[f32]>) -> FieldBuffer {
