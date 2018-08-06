@@ -106,6 +106,7 @@ and remove list target =
 (* Assumes that simplify has been run
    and there are no Translates or Scales present
 *)
+(*
 let rec compute_bb = function
   | Intersection [] -> failwith "empty intersection in compute_bb"
   | Union [] -> failwith "empty union in compute_bb"
@@ -139,84 +140,87 @@ let rec compute_bb = function
     | (Some box, None) -> (Some (increase box how_much), None)
     | (None, Some box) -> (None, Some(decrease box how_much))
     | (Some a, Some b) -> (Some (increase a how_much), Some (decrease b how_much))
+    *)
 
-let simplify_test a =
-  a
-  |> Sexp.of_string
-  |> shape_of_sexp
-  |> simplify
-  |> sexp_of_shape
-  |> Sexp.to_string_hum
-  |> print_endline
+module ShapeExpectTests = struct
+  let simplify_test a =
+    a
+    |> Sexp.of_string
+    |> shape_of_sexp
+    |> simplify
+    |> sexp_of_shape
+    |> Sexp.to_string_hum
+    |> print_endline
 
-let%expect_test _ =
-  simplify_test "Nothing";
-  [%expect "Nothing"]
+  let%expect_test _ =
+    simplify_test "Nothing";
+    [%expect "Nothing"]
 
-let%expect_test _ =
-  simplify_test "Everything";
-  [%expect "Everything"]
+  let%expect_test _ =
+    simplify_test "Everything";
+    [%expect "Everything"]
 
-let%expect_test _ =
-  simplify_test "(Circle (x 1) (y 1) (r 1))";
-  [%expect "(Circle (x 1) (y 1) (r 1))"]
+  let%expect_test _ =
+    simplify_test "(Circle (x 1) (y 1) (r 1))";
+    [%expect "(Circle (x 1) (y 1) (r 1))"]
 
-let%expect_test _ =
-  simplify_test "(Circle (x 1) (y 1) (r 0))";
-  [%expect "Nothing"]
+  let%expect_test _ =
+    simplify_test "(Circle (x 1) (y 1) (r 0))";
+    [%expect "Nothing"]
 
-let%expect_test _ =
-  simplify_test "(Not Everything)";
-  [%expect "Nothing"]
+  let%expect_test _ =
+    simplify_test "(Not Everything)";
+    [%expect "Nothing"]
 
-let%expect_test _ =
-  simplify_test "(Not Nothing)";
-  [%expect "Everything"]
+  let%expect_test _ =
+    simplify_test "(Not Nothing)";
+    [%expect "Everything"]
 
-let%expect_test _ =
-  simplify_test "(Not (Not (Circle (x 1) (y 1) (r 1))))";
-  [%expect "(Circle (x 1) (y 1) (r 1))"]
+  let%expect_test _ =
+    simplify_test "(Not (Not (Circle (x 1) (y 1) (r 1))))";
+    [%expect "(Circle (x 1) (y 1) (r 1))"]
 
-let%expect_test _ =
-  simplify_test "(Poly ())";
-  [%expect "Nothing"]
+  let%expect_test _ =
+    simplify_test "(Poly ())";
+    [%expect "Nothing"]
 
-let%expect_test _ =
-  simplify_test "(Union (Everything Nothing))";
-  [%expect "Everything"]
+  let%expect_test _ =
+    simplify_test "(Union (Everything Nothing))";
+    [%expect "Everything"]
 
-let%expect_test _ =
-  simplify_test "(Intersection (Everything Nothing))";
-  [%expect "Nothing"]
+  let%expect_test _ =
+    simplify_test "(Intersection (Everything Nothing))";
+    [%expect "Nothing"]
 
-let%expect_test _ =
-  simplify_test "(Intersection ((Circle (x 10) (y 10) (r 10))))";
-  [%expect "(Circle (x 10) (y 10) (r 10))"]
+  let%expect_test _ =
+    simplify_test "(Intersection ((Circle (x 10) (y 10) (r 10))))";
+    [%expect "(Circle (x 10) (y 10) (r 10))"]
 
-let%expect_test _ =
-  simplify_test "(Union ((Circle (x 10) (y 10) (r 10))))";
-  [%expect "(Circle (x 10) (y 10) (r 10))"]
+  let%expect_test _ =
+    simplify_test "(Union ((Circle (x 10) (y 10) (r 10))))";
+    [%expect "(Circle (x 10) (y 10) (r 10))"]
 
-let%expect_test _ =
-  simplify_test "(Intersection ((Circle (x 20) (y 20) (r 20)) (Circle (x 10) (y 10) (r 10))))";
-  [%expect "(Intersection ((Circle (x 20) (y 20) (r 20)) (Circle (x 10) (y 10) (r 10))))"]
+  let%expect_test _ =
+    simplify_test "(Intersection ((Circle (x 20) (y 20) (r 20)) (Circle (x 10) (y 10) (r 10))))";
+    [%expect "(Intersection ((Circle (x 20) (y 20) (r 20)) (Circle (x 10) (y 10) (r 10))))"]
 
-let%expect_test _ =
-  simplify_test "(Union ((Circle (x 20) (y 20) (r 20)) (Circle (x 10) (y 10) (r 10))))";
-  [%expect "(Union ((Circle (x 20) (y 20) (r 20)) (Circle (x 10) (y 10) (r 10))))"]
+  let%expect_test _ =
+    simplify_test "(Union ((Circle (x 20) (y 20) (r 20)) (Circle (x 10) (y 10) (r 10))))";
+    [%expect "(Union ((Circle (x 20) (y 20) (r 20)) (Circle (x 10) (y 10) (r 10))))"]
 
-let%expect_test _ =
-  simplify_test "(Union (Nothing (Circle (x 20) (y 20) (r 20)) (Circle (x 10) (y 10) (r 10))))";
-  [%expect "(Union ((Circle (x 20) (y 20) (r 20)) (Circle (x 10) (y 10) (r 10))))"]
+  let%expect_test _ =
+    simplify_test "(Union (Nothing (Circle (x 20) (y 20) (r 20)) (Circle (x 10) (y 10) (r 10))))";
+    [%expect "(Union ((Circle (x 20) (y 20) (r 20)) (Circle (x 10) (y 10) (r 10))))"]
 
-let%expect_test _ =
-  simplify_test "(Intersection (Everything (Circle (x 20) (y 20) (r 20)) (Circle (x 10) (y 10) (r 10))))";
-  [%expect "(Intersection ((Circle (x 20) (y 20) (r 20)) (Circle (x 10) (y 10) (r 10))))"]
+  let%expect_test _ =
+    simplify_test "(Intersection (Everything (Circle (x 20) (y 20) (r 20)) (Circle (x 10) (y 10) (r 10))))";
+    [%expect "(Intersection ((Circle (x 20) (y 20) (r 20)) (Circle (x 10) (y 10) (r 10))))"]
 
-let%expect_test _ =
-  simplify_test "(Union (Everything (Circle (x 10) (y 10) (r 10))))";
-  [%expect "Everything"]
+  let%expect_test _ =
+    simplify_test "(Union (Everything (Circle (x 10) (y 10) (r 10))))";
+    [%expect "Everything"]
 
-let%expect_test _ =
-  simplify_test "(Union (Nothing (Circle (x 10) (y 10) (r 10))))";
-  [%expect "(Circle (x 10) (y 10) (r 10))"]
+  let%expect_test _ =
+    simplify_test "(Union (Nothing (Circle (x 10) (y 10) (r 10))))";
+    [%expect "(Circle (x 10) (y 10) (r 10))"]
+end
