@@ -1,14 +1,7 @@
 open Core
-open Math
+include Math
 
-type point = Math.point
-type vec = Math.vec
 type polygon = point list [@@deriving sexp]
-
-let point_of_sexp = Math.point_of_sexp
-let sexp_of_point = Math.sexp_of_point
-let vec_of_sexp = Math.vec_of_sexp
-let sexp_of_vec = Math.sexp_of_vec
 
 type shape =
   (* Terminals *)
@@ -63,6 +56,7 @@ let rec simplify = function
     )
 
   (* modulate *)
+  | Modulate(Modulate(target, a), b) -> Modulate(simplify target, a +. b)
   | Modulate (target, how_much)  -> (
       match simplify target with
       | Nothing -> Nothing
@@ -108,6 +102,43 @@ and simplify_easy_lists = function
 and remove list target =
   let filter a = phys_equal a target |> Core.not in
   List.filter ~f:filter list
+
+(* Assumes that simplify has been run
+   and there are no Translates or Scales present
+*)
+let rec compute_bb = function
+  | Intersection [] -> failwith "empty intersection in compute_bb"
+  | Union [] -> failwith "empty union in compute_bb"
+  | Everything -> failwith "Everything found in compute_bb"
+  | Nothing -> failwith "Nothing found in compute_bb"
+  | Translate _ -> failwith "Translate in compute_bb"
+  | Scale _ -> failwith "Scale in compute_bb"
+  | Poly [] -> failwith "empty polygon in compute_bb"
+  | Circle { r=0.0; _ } -> failwith "zero radius circle in compute_bb"
+
+  | Circle { x; y; r } -> (Some (bbox ~x:(x -. r) ~y:(y -. r) ~h:(2.0 *. r) ~w:(2.0 *. r)), None)
+  | Rect { x; y; w; h } -> (Some (bbox ~x:x ~y:y ~w:w ~h:h), None)
+  | Poly pts -> (Math.bbox_of_poly pts, None)
+  | Not target -> let (a, b) = compute_bb target in (b, a)
+  | Union children ->
+    let (c_left, c_right) = children |> List.map ~f:compute_bb |> List.unzip in
+    (Math.box_union_all c_left, Math.box_intersect_all c_right)
+  | Intersection children ->
+    let (c_left, c_right) = children |> List.map ~f:compute_bb |> List.unzip in
+    (Math.box_intersect_all c_left, Math.box_union_all c_right)
+  | Modulate (target, how_much) ->
+    let increase { x; y; w; h } how_much = {
+      x=x -. how_much;
+      y=y -. how_much;
+      w=w +. how_much *. 2.0;
+      h=h +. how_much *. 2.0;
+    } in
+    let decrease a how_much = increase a (how_much *. -1.0) in
+    match compute_bb target with
+    | (None, None) -> (None, None)
+    | (Some box, None) -> (Some (increase box how_much), None)
+    | (None, Some box) -> (None, Some(decrease box how_much))
+    | (Some a, Some b) -> (Some (increase a how_much), Some (decrease b how_much))
 
 let simplify_test a =
   a
