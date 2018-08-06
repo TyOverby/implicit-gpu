@@ -10,7 +10,5 @@ val union: shape list -> shape
 val intersection: shape list -> shape
 
 val compute_bb: shape -> bbox option * bbox option
-
 val simplify: shape -> shape
-
 val shape_eq: shape -> shape -> bool
