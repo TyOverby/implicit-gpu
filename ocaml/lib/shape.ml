@@ -1,22 +1,40 @@
 open Core
 
-type polygon = Point.t list [@@deriving sexp]
+type vec = { dx: float; dy: float} [@@deriving sexp]
+type polygon = {
+  points: Point.t list;
+  mat: Matrix.t [@default Matrix.id] [@sexp_drop_default];
+} [@@deriving sexp]
 
-type shape =
+type t =
   (* Terminals *)
-  | Circle of { x: float; y: float; r: float }
-  | Rect of { x: float; y: float; w: float; h: float }
-  | Poly of polygon
+  | Circle of {
+      x: float;
+      y: float;
+      r: float;
+      mat: Matrix.t [@default Matrix.id] [@sexp_drop_default];
+    }
+  | Rect of {
+      x: float;
+      y: float;
+      w: float;
+      h: float;
+      mat: Matrix.t [@default Matrix.id] [@sexp_drop_default];
+    }
+  | Poly of {
+      points: Point.t list;
+      mat: Matrix.t [@default Matrix.id] [@sexp_drop_default];
+    }
   | Nothing
   | Everything
 
   (* Combinators *)
-  | Not of shape
-  | Union of shape list
-  | Intersection of shape list
-  | Modulate of shape * float
-  | Translate of shape * vec
-  | Scale of shape * vec
+  | Not of t
+  | Union of t list
+  | Intersection of t list
+  | Modulate of t * float
+  | Translate of t * vec
+  | Scale of t * vec
 [@@deriving sexp]
 
 let rec fold_shape shape init f =
@@ -32,11 +50,11 @@ let rec fold_shape shape init f =
 let _contains f shape =
   fold_shape shape false (fun cur shape -> cur || f shape)
 
-let circle ~x ~y ~r = Circle { x; y; r }
-let rect ~x ~y ~w ~h = Rect { x; y; w; h }
-let poly points = Poly points
+let circle ~x ~y ~r = Circle { x; y; r; mat = Matrix.id }
+let rect ~x ~y ~w ~h = Rect { x; y; w; h; mat = Matrix.id }
+let poly points = Poly { points; mat = Matrix.id }
 let not a = Not a
 let union children = Union children
 let intersection children = Intersection children
 
-let shape_eq (a: shape) (b: shape) = a = b
+let shape_eq (a: t) (b: t) = a = b

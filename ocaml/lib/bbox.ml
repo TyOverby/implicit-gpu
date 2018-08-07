@@ -10,6 +10,27 @@ type bounding =
   | Negative of bbox
 [@@deriving sexp]
 
+let from_extrema min_x min_y max_x max_y = {
+  x = min_x;
+  y = min_y;
+  w = max_x -. min_x;
+  h = max_y -. min_y;
+}
+
+let bbox_of_points = function
+  | [] -> None
+  | points ->
+    let extract f g = points |> List.map ~f:f |> g |> Option.value_exn in
+    let get_x (p: Point.t) = p.x in
+    let get_y (p: Point.t) = p.x in
+    let minimum l = List.min_elt l ~compare:Float.compare in
+    let maximum l = List.max_elt l ~compare:Float.compare in
+    let min_x = extract get_x minimum in
+    let min_y = extract get_y minimum in
+    let max_x = extract get_x maximum in
+    let max_y = extract get_y maximum in
+    Some (from_extrema min_x min_y max_x max_y)
+
 let intersects (a: bbox) (b: bbox)  =
   a.x < b.x +. b.w
   && b.x < a.x +. a.w
@@ -26,13 +47,7 @@ let box_union a b =
   let min_y = Float.min_inan ya yb in
   let max_x = Float.max_inan (left_side a) (left_side b) in
   let max_y = Float.max_inan (bottom_side a) (bottom_side b) in
-  {
-    x = min_x;
-    y = min_y;
-    w = max_x -. min_x;
-    h = max_y -. min_y;
-  }
-
+  from_extrema min_x min_y max_x max_y
 
 let box_intersection a b =
   let  {x=xa; y=ya; _}: bbox = a in
@@ -50,13 +65,6 @@ let box_intersection a b =
       w = max_x -. min_x;
       h = max_y -. min_y;
     }
-
-let bbox_of_poly (poly: Point.t list) =
-  List.fold poly ~init:None ~f:(fun a b -> match (a, b) with
-      | (None, { x; y }) -> Some({ x=x; y=y; w=0.0; h=0.0 })
-      | (Some prev, {x; y}) -> let new_box = { x=x; y=y; w=0.0; h=0.0 } in
-        Some(box_union prev new_box)
-    )
 
 let inverse = function
   | Everything -> Nothing
@@ -95,11 +103,11 @@ let rec grow bounding how_much = match bounding with
   | Positive b -> Positive (increase b how_much)
   | Negative b -> Negative (decrease b how_much)
 and increase { x; y; w; h } how_much = {
-      x=x -. how_much;
-      y=y -. how_much;
-      w=w +. how_much *. 2.0;
-      h=h +. how_much *. 2.0;
-    }
+  x=x -. how_much;
+  y=y -. how_much;
+  w=w +. how_much *. 2.0;
+  h=h +. how_much *. 2.0;
+}
 and decrease a how_much = increase a (how_much *. -1.0)
 
 module BboxExpectTests = struct

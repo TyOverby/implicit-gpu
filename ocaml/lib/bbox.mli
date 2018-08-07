@@ -11,5 +11,5 @@ val union: bounding -> bounding -> bounding
 val intersection: bounding -> bounding -> bounding
 val inverse: bounding -> bounding
 
-val bbox_of_poly: Point.t list -> bbox option
+val bbox_of_points: Point.t list -> bbox option
 val grow: bounding -> float -> bounding

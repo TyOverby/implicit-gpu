@@ -11,7 +11,7 @@ let rec simplify = function
   | Rect _ as a -> a
 
   (* poly *)
-  | Poly [] -> Nothing
+  | Poly { points = []; _ } -> Nothing
   | Poly _ as a -> a
 
   (* everything and nothing *)
@@ -77,9 +77,9 @@ module SimplifyExpectTests = struct
   let simplify_test a =
     a
     |> Sexp.of_string
-    |> shape_of_sexp
+    |> Shape.t_of_sexp
     |> simplify
-    |> sexp_of_shape
+    |> Shape.sexp_of_t
     |> Sexp.to_string_hum
     |> print_endline
 
@@ -112,7 +112,7 @@ module SimplifyExpectTests = struct
     [%expect "(Circle (x 1) (y 1) (r 1))"]
 
   let%expect_test _ =
-    simplify_test "(Poly ())";
+    simplify_test "(Poly (points ()))";
     [%expect "Nothing"]
 
   let%expect_test _ =

@@ -1,2 +1,2 @@
 
-val compute_bb: Shape.shape -> Bbox.bounding
+val compute_bounding_box: Shape.t -> Bbox.bounding
