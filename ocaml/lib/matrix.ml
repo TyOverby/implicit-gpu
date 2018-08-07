@@ -6,7 +6,6 @@ type t = {
   m31: float; m32: float;
 } [@@deriving sexp]
 
-
 let row_major m11 m12 m21 m22 m31 m32 = { m11; m12; m21; m22; m31; m32 }
 
 let id =
