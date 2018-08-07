@@ -20,6 +20,19 @@ type shape =
   | Scale of shape * vec
 [@@deriving sexp]
 
+let rec fold_shape shape init f =
+  let next = f init shape in
+  match shape with
+  | Not target -> fold_shape target next f
+  | Union c | Intersection c -> List.fold c ~init:next ~f:(fun i n -> fold_shape n i f)
+  | Modulate (target, _) -> fold_shape target next f
+  | Translate (target, _) -> fold_shape target next f
+  | Scale (target, _) -> fold_shape target next f
+  | _ -> next
+
+let _contains f shape =
+  fold_shape shape false (fun cur shape -> cur || f shape)
+
 let circle ~x ~y ~r = Circle { x; y; r }
 let rect ~x ~y ~w ~h = Rect { x; y; w; h }
 let poly points = Poly points
@@ -94,10 +107,8 @@ let rec simplify = function
 
 and simplify_all = List.map ~f:simplify
 and simplify_easy_lists = function
-  | Intersection [] -> Nothing
-  | Intersection [a] -> a
-  | Union [] -> Nothing
-  | Union [a] -> a
+  | Intersection []  | Union [] -> Nothing
+  | Intersection [a] | Union [a] -> a
   | other -> other
 and remove list target =
   let filter a = phys_equal a target |> Core.not in

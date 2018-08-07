@@ -54,15 +54,13 @@ let box_intersection a b =
 
 let box_intersect_all list =
   List.fold list ~init:None ~f:(fun a b -> match (a, b) with
-      | (None, _) -> None
-      | (_, None) -> None
+      | (None, _) | (_, None) -> None
       | (Some a, Some b) -> box_intersection a b
     )
 
 let box_union_all list =
   List.fold list ~init:None ~f:(fun a b -> match (a, b) with
-      | (None, _) -> None
-      | (_, None) -> None
+      | (None, _) | (_, None) -> None
       | (Some a, Some b) -> Some (box_union a b)
     )
 
@@ -90,10 +88,9 @@ let inverse = function
   | Negative a -> Positive a
 
 let rec union a b = match (a, b) with
-  | (Everything, _) -> Everything
-  | (_, Everything) -> Everything
-  | (Nothing, b) -> b
-  | (a, Nothing) -> a
+  | (Everything, _) | (_, Everything) -> Everything
+  | (Nothing, o) | (o, Nothing) -> o
+
   | (Positive a, Positive b) -> Positive (box_union a b)
   | (Negative a, Negative b) -> (match box_intersection a b with
       | Some box ->  Negative box
@@ -102,10 +99,9 @@ let rec union a b = match (a, b) with
   | (Negative _, Positive _) -> union b a
 
 let rec intersection a b = match (a, b) with
-  | (a, Everything) -> a
-  | (Everything, b) -> b
-  | (Nothing, _) -> Nothing
-  | (_, Nothing) -> Nothing
+  | (o, Everything) | (Everything, o) -> o
+  | (Nothing, _) | (_, Nothing) -> Nothing
+
   | (Positive a, Positive b) -> (match box_intersection a b with
       | Some box -> Positive box
       | None -> Nothing)

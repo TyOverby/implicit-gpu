@@ -1,4 +1,4 @@
-# dune runtest lib
+# dune exec bin/main.exe
 # OCAMLPARAM: unset
-$ /usr/bin/getconf _NPROCESSORS_ONLN > /var/folders/px/rg9772s53j1170t_ghvw4pqr0000gn/T/dune779584.output
-$ /usr/local/bin/ocamlc.opt -config > /var/folders/px/rg9772s53j1170t_ghvw4pqr0000gn/T/duneea3cc3.output
+$ /usr/bin/getconf _NPROCESSORS_ONLN > /var/folders/px/rg9772s53j1170t_ghvw4pqr0000gn/T/dune19e83f.output
+$ /usr/local/bin/ocamlc.opt -config > /var/folders/px/rg9772s53j1170t_ghvw4pqr0000gn/T/dunee3f37a.output
