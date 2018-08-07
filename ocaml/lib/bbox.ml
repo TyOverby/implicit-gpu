@@ -1,8 +1,7 @@
 open Core
+open Point
 
 type bbox = { x: float; y: float; w: float; h: float} [@@deriving sexp]
-type point = { x: float; y: float } [@@deriving sexp]
-type vec = { dx: float; dy: float } [@@deriving sexp]
 
 type bounding =
   | Everything
@@ -52,29 +51,7 @@ let box_intersection a b =
       h = max_y -. min_y;
     }
 
-let box_intersect_all list =
-  List.fold list ~init:None ~f:(fun a b -> match (a, b) with
-      | (None, _) | (_, None) -> None
-      | (Some a, Some b) -> box_intersection a b
-    )
-
-let box_union_all list =
-  List.fold list ~init:None ~f:(fun a b -> match (a, b) with
-      | (None, _) | (_, None) -> None
-      | (Some a, Some b) -> Some (box_union a b)
-    )
-
-let point ~x ~y = { x; y }
-let vec ~dx ~dy = { dx; dy }
-
-let point_sub a b = { dx = a.x -. b.x; dy = a.y -. b.y }
-
-let v_add a b = { dx = a.dx +. b.dx; dy = a.dy +. b.dy }
-let v_sub a b = { dx = a.dx -. b.dx; dy = a.dy -. b.dy }
-let v_mul a b = { dx = a.dx *. b.dx; dy = a.dy *. b.dy }
-let v_div a b = { dx = a.dx /. b.dx; dy = a.dy /. b.dy }
-
-let bbox_of_poly poly =
+let bbox_of_poly (poly: Point.t list) =
   List.fold poly ~init:None ~f:(fun a b -> match (a, b) with
       | (None, { x; y }) -> Some({ x=x; y=y; w=0.0; h=0.0 })
       | (Some prev, {x; y}) -> let new_box = { x=x; y=y; w=0.0; h=0.0 } in
@@ -112,7 +89,20 @@ let rec intersection a b = match (a, b) with
   | (Positive a, Negative _) -> Positive a
   | (Negative _, Positive _) -> intersection b a
 
-module MathExpectTests = struct
+let rec grow bounding how_much = match bounding with
+  | Everything  -> Everything
+  | Nothing -> Nothing
+  | Positive b -> Positive (increase b how_much)
+  | Negative b -> Negative (decrease b how_much)
+and increase { x; y; w; h } how_much = {
+      x=x -. how_much;
+      y=y -. how_much;
+      w=w +. how_much *. 2.0;
+      h=h +. how_much *. 2.0;
+    }
+and decrease a how_much = increase a (how_much *. -1.0)
+
+module BboxExpectTests = struct
   let box_test_stub f a b =
     let decode a = a |> Sexp.of_string |>  bbox_of_sexp in
     let a = decode a in
@@ -204,4 +194,24 @@ module MathExpectTests = struct
   let%expect_test _ =
     union_test "(Positive ((x 10) (y 10) (w 10) (h 10)))" "(Negative ((x 5) (y 5) (w 10) (h 10)))";
     [%expect "(Negative ((x 5) (y 5) (w 10) (h 10)))"]
+
+  let%expect_test _ =
+    intersection_test "Everything" "Everything";
+    [%expect "Everything"]
+
+  let%expect_test _ =
+    intersection_test "Everything" "Nothing";
+    [%expect "Nothing"]
+
+  let%expect_test _ =
+    intersection_test "(Positive ((x 10) (y 10) (w 10) (h 10)))" "Nothing";
+    [%expect "Nothing"]
+
+  let%expect_test _ =
+    intersection_test "(Positive ((x 10) (y 10) (w 10) (h 10)))" "(Negative ((x 50) (y 50) (w 10) (h 10)))";
+    [%expect "(Positive ((x 10) (y 10) (w 10) (h 10)))"]
+
+  let%expect_test _ =
+    intersection_test "(Positive ((x 10) (y 10) (w 10) (h 10)))" "(Negative ((x 5) (y 5) (w 10) (h 10)))";
+    [%expect "(Positive ((x 10) (y 10) (w 10) (h 10)))"]
 end

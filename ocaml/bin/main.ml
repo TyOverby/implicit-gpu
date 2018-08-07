@@ -1,5 +1,5 @@
 open Core
-open Shape
+open Implicit
 
 
 let () =
