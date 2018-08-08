@@ -2,9 +2,8 @@ open Core
 open Shape
 open Bbox
 
-let rec compute_bounding_box = function
-  | Translate _ -> failwith "Translate in compute_bb"
-  | Scale _ -> failwith "Scale in compute_bb"
+let rec compute_bounding_box: (Shape.allTerminals, Nothing.t) Shape.t -> Bbox.bounding = function
+  | Transform n -> Nothing.unreachable_code n
   | Intersection [] -> Nothing
   | Union [] -> Nothing
   | Terminal (Everything: Shape.allTerminals) -> Everything

@@ -40,30 +40,28 @@ type justConcreteTerminals =
   | Poly of poly
 [@@deriving sexp]
 
-type 'term t =
+
+type ('term, 'trans) t =
+  (* terminals *)
   | Terminal of 'term
 
-  (* Combinators *)
-  | Not of 'term t
-  | Union of 'term t list
-  | Intersection of 'term t list
-  | Modulate of 'term t * float
-  | Translate of 'term t * vec
-  | Scale of 'term t * vec
+  (* transformations *)
+  | Transform of 'trans
+
+  (* combinators *)
+  | Not of ('term, 'trans) t
+  | Union of ('term, 'trans) t list
+  | Intersection of ('term, 'trans) t list
+  | Modulate of ('term, 'trans) t * float
 [@@deriving sexp, map]
 
-let rec fold_shape shape init f =
-  let next = f init shape in
-  match shape with
-  | Not target -> fold_shape target next f
-  | Union c | Intersection c -> List.fold c ~init:next ~f:(fun i n -> fold_shape n i f)
-  | Modulate (target, _) -> fold_shape target next f
-  | Translate (target, _) -> fold_shape target next f
-  | Scale (target, _) -> fold_shape target next f
-  | _ -> next
+type 'a allTransforms =
+  | Translate of ('a, 'a allTransforms) t * vec
+  | Scale of ('a, 'a allTransforms) t * vec
+[@@deriving sexp, map]
 
-let _contains f shape =
-  fold_shape shape false (fun cur shape -> cur || f shape)
+type 'a allTShape = ('a, 'a allTransforms) t
+[@@deriving sexp]
 
 let circle ~x ~y ~r = Circle { x; y; r; mat = Matrix.id }
 let rect ~x ~y ~w ~h = Rect { x; y; w; h; mat = Matrix.id }

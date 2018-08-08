@@ -1,1 +1,4 @@
-val remove_transformations: Shape.allTerminals Shape.t -> Shape.allTerminals Shape.t
+open Core
+val remove_transformations:
+  Shape.allTerminals Shape.allTShape ->
+  (Shape.allTerminals, Nothing.t) Shape.t

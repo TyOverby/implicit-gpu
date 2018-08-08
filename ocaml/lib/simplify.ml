@@ -4,9 +4,10 @@ open Shape
 type simplified =
   | SNothing
   | SEverything
-  | SShape of Shape.justConcreteTerminals Shape.t
+  | SShape of Shape.justConcreteTerminals Shape.allTShape
 
-let rec simplify: Shape.allTerminals Shape.t -> Shape.allTerminals Shape.t= function
+
+let rec simplify: Shape.allTerminals Shape.allTShape -> Shape.allTerminals Shape.allTShape = function
   (* circle *)
   | Terminal Circle { r; _ } when r <= 0.0  -> Terminal Nothing
   | Terminal Circle _ as a -> a
@@ -42,19 +43,19 @@ let rec simplify: Shape.allTerminals Shape.t -> Shape.allTerminals Shape.t= func
     )
 
   (* scale *)
-  | Scale(target, vec)  -> (
+  | Transform Scale(target, vec)  -> (
       match simplify target with
       | Terminal Nothing -> Terminal Nothing
       | Terminal Everything -> Terminal Everything
-      | target -> Scale(target, vec)
+      | target -> Transform (Scale(target, vec))
     )
 
   (* translate *)
-  | Translate(target, vec)  -> (
+  | Transform Translate(target, vec)  -> (
       match simplify target with
       | Terminal Nothing -> Terminal Nothing
       | Terminal Everything -> Terminal Everything
-      | target -> Translate(target, vec)
+      | target -> Transform (Translate(target, vec))
     )
 
   (* union *)
@@ -82,21 +83,23 @@ let rec simplify_top = function
   | Terminal Everything -> SEverything
   | Terminal Nothing -> SNothing
   | other -> SShape (simplify_bot other)
-and simplify_bot shape = shape |> Shape.map (function
+and simplify_bot shape : Shape.justConcreteTerminals Shape.allTShape = shape |> Shape.map (function
     | Everything -> failwith "Everything found after simplification"
     | Nothing -> failwith "Nothing found after simplification"
     | Circle c -> Circle c
     | Rect r -> Rect r
     | Poly p -> Poly p
-  )
+  ) (function
+    | Scale (target, v) -> Scale (simplify_bot target, v)
+    | Translate (target, v) -> Translate (simplify_bot target, v))
 
 module SimplifyExpectTests = struct
   let simplify_test a =
     a
     |> Sexp.of_string
-    |> Shape.t_of_sexp Shape.allTerminals_of_sexp
+    |> Shape.allTShape_of_sexp Shape.allTerminals_of_sexp
     |> simplify
-    |> Shape.sexp_of_t Shape.sexp_of_allTerminals
+    |> Shape.sexp_of_allTShape Shape.sexp_of_allTerminals
     |> Sexp.to_string_hum
     |> print_endline
 
