@@ -6,36 +6,51 @@ type polygon = {
   mat: Matrix.t [@default Matrix.id] [@sexp_drop_default];
 } [@@deriving sexp]
 
-type t =
-  (* Terminals *)
-  | Circle of {
-      x: float;
-      y: float;
-      r: float;
-      mat: Matrix.t [@default Matrix.id] [@sexp_drop_default];
-    }
-  | Rect of {
-      x: float;
-      y: float;
-      w: float;
-      h: float;
-      mat: Matrix.t [@default Matrix.id] [@sexp_drop_default];
-    }
-  | Poly of {
-      points: Point.t list;
-      mat: Matrix.t [@default Matrix.id] [@sexp_drop_default];
-    }
+type circle = {
+  x: float;
+  y: float;
+  r: float;
+  mat: Matrix.t [@default Matrix.id] [@sexp_drop_default];
+} [@@deriving sexp]
+
+type rect ={
+  x: float;
+  y: float;
+  w: float;
+  h: float;
+  mat: Matrix.t [@default Matrix.id] [@sexp_drop_default];
+} [@@deriving sexp]
+
+type poly = {
+  points: Point.t list;
+  mat: Matrix.t [@default Matrix.id] [@sexp_drop_default];
+} [@@deriving sexp]
+
+type allTerminals =
+  | Circle of circle
+  | Rect of rect
+  | Poly of poly
   | Nothing
   | Everything
+[@@deriving sexp]
+
+type justConcreteTerminals =
+  | Circle of circle
+  | Rect of rect
+  | Poly of poly
+[@@deriving sexp]
+
+type 'term t =
+  | Terminal of 'term
 
   (* Combinators *)
-  | Not of t
-  | Union of t list
-  | Intersection of t list
-  | Modulate of t * float
-  | Translate of t * vec
-  | Scale of t * vec
-[@@deriving sexp]
+  | Not of 'term t
+  | Union of 'term t list
+  | Intersection of 'term t list
+  | Modulate of 'term t * float
+  | Translate of 'term t * vec
+  | Scale of 'term t * vec
+[@@deriving sexp, map]
 
 let rec fold_shape shape init f =
   let next = f init shape in
@@ -56,5 +71,3 @@ let poly points = Poly { points; mat = Matrix.id }
 let not a = Not a
 let union children = Union children
 let intersection children = Intersection children
-
-let shape_eq (a: t) (b: t) = a = b

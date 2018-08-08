@@ -1,29 +1,34 @@
 open Core
 open Shape
 
-let rec simplify = function
+type simplified =
+  | SNothing
+  | SEverything
+  | SShape of Shape.justConcreteTerminals Shape.t
+
+let rec simplify: Shape.allTerminals Shape.t -> Shape.allTerminals Shape.t= function
   (* circle *)
-  | Circle { r; _ } when r <= 0.0  -> Nothing
-  | Circle _ as a -> a
+  | Terminal Circle { r; _ } when r <= 0.0  -> Terminal Nothing
+  | Terminal Circle _ as a -> a
 
   (* rect *)
-  | Rect { w; h; _ } when w <= 0.0 || h <= 0.0 -> Nothing
-  | Rect _ as a -> a
+  | Terminal Rect { w; h; _ } when w <= 0.0 || h <= 0.0 -> Terminal Nothing
+  | Terminal Rect _ as a -> a
 
   (* poly *)
-  | Poly { points = []; _ } -> Nothing
-  | Poly _ as a -> a
+  | Terminal Poly { points = []; _ } -> Terminal Nothing
+  | Terminal Poly _ as a -> a
 
   (* everything and nothing *)
-  | Everything -> Everything
-  | Nothing -> Nothing
+  | Terminal Everything -> Terminal Everything
+  | Terminal Nothing -> Terminal Nothing
 
   (* not *)
   | Not Not x -> simplify x
   | Not inner -> (
       match simplify inner with
-      | Nothing -> Everything
-      | Everything -> Nothing
+      | Terminal Nothing -> Terminal Everything
+      | Terminal Everything -> Terminal Nothing
       | rest -> Not rest
     )
 
@@ -31,127 +36,151 @@ let rec simplify = function
   | Modulate(Modulate(target, a), b) -> Modulate(simplify target, a +. b)
   | Modulate (target, how_much)  -> (
       match simplify target with
-      | Nothing -> Nothing
-      | Everything -> Everything
+      | Terminal Nothing -> Terminal Nothing
+      | Terminal Everything -> Terminal Everything
       | target -> Modulate (target, how_much)
     )
 
   (* scale *)
   | Scale(target, vec)  -> (
       match simplify target with
-      | Nothing -> Nothing
-      | Everything -> Everything
+      | Terminal Nothing -> Terminal Nothing
+      | Terminal Everything -> Terminal Everything
       | target -> Scale(target, vec)
     )
 
   (* translate *)
   | Translate(target, vec)  -> (
       match simplify target with
-      | Nothing -> Nothing
-      | Everything -> Everything
+      | Terminal Nothing -> Terminal Nothing
+      | Terminal Everything -> Terminal Everything
       | target -> Translate(target, vec)
     )
 
   (* union *)
   | Union list -> let list = simplify_all list in
-    if List.exists list ~f:(phys_equal Everything)
-    then Everything
-    else simplify_easy_lists (Union (remove list Nothing))
+    if List.exists list ~f:(phys_equal (Terminal Everything))
+    then Terminal Everything
+    else simplify_easy_lists (Union (remove list (Terminal Nothing)))
 
   (* intersection *)
   | Intersection list -> let list = simplify_all list in
-    if List.exists list ~f:(phys_equal Nothing)
-    then Nothing
-    else simplify_easy_lists (Intersection (remove list Everything))
+    if List.exists list ~f:(phys_equal (Terminal Nothing))
+    then Terminal Nothing
+    else simplify_easy_lists (Intersection (remove list (Terminal Everything)))
 
 and simplify_all = List.map ~f:simplify
 and simplify_easy_lists = function
-  | Intersection []  | Union [] -> Nothing
+  | Intersection []  | Union [] -> Terminal Nothing
   | Intersection [a] | Union [a] -> a
   | other -> other
 and remove list target =
   let filter a = phys_equal a target |> Core.not in
   List.filter ~f:filter list
 
+let rec simplify_top = function
+  | Terminal Everything -> SEverything
+  | Terminal Nothing -> SNothing
+  | other -> SShape (simplify_bot other)
+and simplify_bot shape = shape |> Shape.map (function
+    | Everything -> failwith "Everything found after simplification"
+    | Nothing -> failwith "Nothing found after simplification"
+    | Circle c -> Circle c
+    | Rect r -> Rect r
+    | Poly p -> Poly p
+  )
+
 module SimplifyExpectTests = struct
   let simplify_test a =
     a
     |> Sexp.of_string
-    |> Shape.t_of_sexp
+    |> Shape.t_of_sexp Shape.allTerminals_of_sexp
     |> simplify
-    |> Shape.sexp_of_t
+    |> Shape.sexp_of_t Shape.sexp_of_allTerminals
     |> Sexp.to_string_hum
     |> print_endline
 
   let%expect_test _ =
-    simplify_test "Nothing";
-    [%expect "Nothing"]
+    simplify_test "(Terminal Nothing)";
+    [%expect "(Terminal Nothing)"]
 
   let%expect_test _ =
-    simplify_test "Everything";
-    [%expect "Everything"]
+    simplify_test "(Terminal Everything)";
+    [%expect "(Terminal Everything)"]
 
   let%expect_test _ =
-    simplify_test "(Circle (x 1) (y 1) (r 1))";
-    [%expect "(Circle (x 1) (y 1) (r 1))"]
+    simplify_test "(Terminal (Circle ((x 1) (y 1) (r 1))))";
+    [%expect "(Terminal (Circle ((x 1) (y 1) (r 1))))"]
 
   let%expect_test _ =
-    simplify_test "(Circle (x 1) (y 1) (r 0))";
-    [%expect "Nothing"]
+    simplify_test "(Terminal (Circle ((x 1) (y 1) (r 0))))";
+    [%expect "(Terminal Nothing)"]
 
   let%expect_test _ =
-    simplify_test "(Not Everything)";
-    [%expect "Nothing"]
+    simplify_test "(Not (Terminal Everything))";
+    [%expect "(Terminal Nothing)"]
 
   let%expect_test _ =
-    simplify_test "(Not Nothing)";
-    [%expect "Everything"]
+    simplify_test "(Not (Terminal Nothing))";
+    [%expect "(Terminal Everything)"]
 
   let%expect_test _ =
-    simplify_test "(Not (Not (Circle (x 1) (y 1) (r 1))))";
-    [%expect "(Circle (x 1) (y 1) (r 1))"]
+    simplify_test "(Not (Not (Terminal (Circle ((x 1) (y 1) (r 1))))))";
+    [%expect "(Terminal (Circle ((x 1) (y 1) (r 1))))"]
 
   let%expect_test _ =
-    simplify_test "(Poly (points ()))";
-    [%expect "Nothing"]
+    simplify_test "(Terminal (Poly ((points ()))))";
+    [%expect "(Terminal Nothing)"]
 
   let%expect_test _ =
-    simplify_test "(Union (Everything Nothing))";
-    [%expect "Everything"]
+    simplify_test "(Union ((Terminal Everything) (Terminal Nothing)))";
+    [%expect "(Terminal Everything)"]
 
   let%expect_test _ =
-    simplify_test "(Intersection (Everything Nothing))";
-    [%expect "Nothing"]
+    simplify_test "(Intersection ((Terminal Everything) (Terminal Nothing)))";
+    [%expect "(Terminal Nothing)"]
 
   let%expect_test _ =
-    simplify_test "(Intersection ((Circle (x 10) (y 10) (r 10))))";
-    [%expect "(Circle (x 10) (y 10) (r 10))"]
+    simplify_test "(Intersection ((Terminal (Circle ((x 10) (y 10) (r 10))))))";
+    [%expect "(Terminal (Circle ((x 10) (y 10) (r 10))))"]
 
   let%expect_test _ =
-    simplify_test "(Union ((Circle (x 10) (y 10) (r 10))))";
-    [%expect "(Circle (x 10) (y 10) (r 10))"]
+    simplify_test "(Union ((Terminal (Circle ((x 10) (y 10) (r 10))))))";
+    [%expect "(Terminal (Circle ((x 10) (y 10) (r 10))))"]
 
   let%expect_test _ =
-    simplify_test "(Intersection ((Circle (x 20) (y 20) (r 20)) (Circle (x 10) (y 10) (r 10))))";
-    [%expect "(Intersection ((Circle (x 20) (y 20) (r 20)) (Circle (x 10) (y 10) (r 10))))"]
+    simplify_test "(Intersection ((Terminal (Circle ((x 20) (y 20) (r 20)))) (Terminal (Circle ((x 10) (y 10) (r 10))))))";
+    [%expect "
+      (Intersection
+       ((Terminal (Circle ((x 20) (y 20) (r 20))))
+        (Terminal (Circle ((x 10) (y 10) (r 10))))))"]
 
   let%expect_test _ =
-    simplify_test "(Union ((Circle (x 20) (y 20) (r 20)) (Circle (x 10) (y 10) (r 10))))";
-    [%expect "(Union ((Circle (x 20) (y 20) (r 20)) (Circle (x 10) (y 10) (r 10))))"]
+    simplify_test "(Union ((Terminal (Circle ((x 20) (y 20) (r 20)))) (Terminal (Circle ((x 10) (y 10) (r 10))))))";
+    [%expect "
+      (Union
+       ((Terminal (Circle ((x 20) (y 20) (r 20))))
+        (Terminal (Circle ((x 10) (y 10) (r 10))))))"]
 
   let%expect_test _ =
-    simplify_test "(Union (Nothing (Circle (x 20) (y 20) (r 20)) (Circle (x 10) (y 10) (r 10))))";
-    [%expect "(Union ((Circle (x 20) (y 20) (r 20)) (Circle (x 10) (y 10) (r 10))))"]
+    simplify_test "(Union ((Terminal Nothing) (Terminal (Circle ((x 20) (y 20) (r 20)))) (Terminal (Circle ((x 10) (y 10) (r 10))))))";
+    [%expect "
+      (Union
+       ((Terminal (Circle ((x 20) (y 20) (r 20))))
+        (Terminal (Circle ((x 10) (y 10) (r 10))))))"]
 
   let%expect_test _ =
-    simplify_test "(Intersection (Everything (Circle (x 20) (y 20) (r 20)) (Circle (x 10) (y 10) (r 10))))";
-    [%expect "(Intersection ((Circle (x 20) (y 20) (r 20)) (Circle (x 10) (y 10) (r 10))))"]
+    simplify_test "(Intersection ((Terminal Everything) (Terminal (Circle ((x 20) (y 20) (r 20)))) (Terminal (Circle ((x 10) (y 10) (r 10))))))";
+    [%expect "
+      (Intersection
+       ((Terminal (Circle ((x 20) (y 20) (r 20))))
+        (Terminal (Circle ((x 10) (y 10) (r 10))))))"]
 
   let%expect_test _ =
-    simplify_test "(Union (Everything (Circle (x 10) (y 10) (r 10))))";
-    [%expect "Everything"]
+    simplify_test "(Union ((Terminal Everything) (Terminal (Circle ((x 10) (y 10) (r 10))))))";
+    [%expect "(Terminal Everything)"]
 
   let%expect_test _ =
-    simplify_test "(Union (Nothing (Circle (x 10) (y 10) (r 10))))";
-    [%expect "(Circle (x 10) (y 10) (r 10))"]
+    simplify_test "(Union ((Terminal Nothing) (Terminal (Circle ((x 10) (y 10) (r 10))))))";
+    [%expect "(Terminal (Circle ((x 10) (y 10) (r 10))))"]
 end

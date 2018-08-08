@@ -2,13 +2,12 @@ open Core
 open Shape
 open Matrix
 
-
-let rec propagate shape (incoming: Matrix.t) = match shape with
-  | Nothing -> Nothing
-  | Everything -> Everything
-  | Circle { x; y; r; mat} -> Circle { x; y; r; mat=(mul incoming mat)}
-  | Rect { x; y; w; h; mat} -> Rect { x; y; w; h; mat=(mul incoming mat)}
-  | Poly { points; mat} -> Poly { points; mat=(mul incoming mat)}
+let rec propagate shape incoming = match shape with
+  | Terminal Nothing -> Terminal Nothing
+  | Terminal Everything -> Terminal Everything
+  | Terminal Circle { x; y; r; mat} -> Terminal (Circle { x; y; r; mat=(mul incoming mat)})
+  | Terminal Rect { x; y; w; h; mat} -> Terminal (Rect { x; y; w; h; mat=(mul incoming mat)})
+  | Terminal Poly { points; mat} -> Terminal (Poly { points; mat=(mul incoming mat)})
   | Not target -> Not (propagate target incoming)
   | Union targets -> Union (propagate_all targets incoming)
   | Intersection targets -> Intersection (propagate_all targets incoming)
