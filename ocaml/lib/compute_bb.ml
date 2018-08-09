@@ -2,12 +2,10 @@ open Core
 open Shape
 open Bbox
 
-let rec compute_bounding_box: (Shape.allTerminals, Nothing.t) Shape.t -> Bbox.bounding = function
+let rec compute_bounding_box = function
   | Transform n -> Nothing.unreachable_code n
   | Intersection [] -> Nothing
   | Union [] -> Nothing
-  | Terminal (Everything: Shape.allTerminals) -> Everything
-  | Terminal Nothing -> Nothing
   | Terminal Poly { points = []; _ } -> Nothing
   | Terminal Circle { r=0.0; _ } -> Nothing
 

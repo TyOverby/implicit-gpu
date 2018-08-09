@@ -3,8 +3,6 @@ open Shape
 open Matrix
 
 let rec propagate shape incoming = match shape with
-  | Terminal Nothing -> Terminal Nothing
-  | Terminal Everything -> Terminal Everything
   | Terminal Circle { x; y; r; mat} -> Terminal (Circle { x; y; r; mat=(mul incoming mat)})
   | Terminal Rect { x; y; w; h; mat} -> Terminal (Rect { x; y; w; h; mat=(mul incoming mat)})
   | Terminal Poly { points; mat} -> Terminal (Poly { points; mat=(mul incoming mat)})

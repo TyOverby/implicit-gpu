@@ -8,8 +8,16 @@ module Bbox = struct
   include Bbox
 end
 module Operations = struct
-  let simplify = Simplify.simplify
-  let remove_transformations = Prop.remove_transformations
+  let compile shape =
+    let simplified = Simplify.simplify_top shape in
+    match simplified with
+    | Simplify.SNothing
+    | Simplify.SEverything -> None
+    | Simplify.SShape shape ->
+      let propagated = Prop.remove_transformations shape in
+      let bb = Compute_bb.compute_bounding_box propagated in
+      let compiled = Command.compile propagated in
+      Some (compiled, bb)
 end
 
 module Ops = struct

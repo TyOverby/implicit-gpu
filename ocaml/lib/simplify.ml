@@ -6,7 +6,6 @@ type simplified =
   | SEverything
   | SShape of Shape.justConcreteTerminals Shape.allTShape
 
-
 let rec simplify: Shape.allTerminals Shape.allTShape -> Shape.allTerminals Shape.allTShape = function
   (* circle *)
   | Terminal Circle { r; _ } when r <= 0.0  -> Terminal Nothing

@@ -1,4 +1,4 @@
 open Core
 val remove_transformations:
-  Shape.allTerminals Shape.allTShape ->
-  (Shape.allTerminals, Nothing.t) Shape.t
+  Shape.justConcreteTerminals Shape.allTShape ->
+  (Shape.justConcreteTerminals, Nothing.t) Shape.t
