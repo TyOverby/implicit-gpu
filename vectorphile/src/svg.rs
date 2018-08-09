@@ -1,6 +1,9 @@
 use super::backend::*;
 use std::io::{Error, Write};
 
+#[cfg(test)]
+use euclid::point2;
+
 pub struct SvgBackend<W> {
     pub out: W,
     pub float_precision: usize,
@@ -24,55 +27,17 @@ impl<W: Write> DrawBackend for SvgBackend<W> {
 
         match command {
             StartShape(options) => {
-                let style = match (
-                    options.fill_color,
-                    options.stroke_color,
-                    options.stroke_size,
-                ) {
-                    (Some(fc), Some(sc), sz) => format!(
-                        "fill: rgb{:?}; stroke: rgb{:?}; stroke-width: {:?};",
-                        fc,
-                        sc,
-                        sz
-                    ),
-                    (None, Some(sc), sz) => {
-                        format!("fill: none; stroke: rgb{:?}; stroke-width: {:?};", sc, sz)
-                    }
-                    (Some(fc), None, _) => {
-                        format!("fill: rgb{:?}; stroke: none; stroke-width: none;", fc)
-                    }
-                    (None, None, fc) => {
-                        format!("fill: rgb(0, 0, 0); stroke: none; stroke-width: {};", fc)
-                    }
+                let style = match (options.fill_color, options.stroke_color, options.stroke_size) {
+                    (Some(fc), Some(sc), sz) => format!("fill: rgb{:?}; stroke: rgb{:?}; stroke-width: {:?};", fc, sc, sz),
+                    (None, Some(sc), sz) => format!("fill: none; stroke: rgb{:?}; stroke-width: {:?};", sc, sz),
+                    (Some(fc), None, _) => format!("fill: rgb{:?}; stroke: none; stroke-width: none;", fc),
+                    (None, None, fc) => format!("fill: rgb(0, 0, 0); stroke: none; stroke-width: {};", fc),
                 };
-                write!(
-                    &mut self.out,
-                    r#"    <path fill-rule="evenodd" style="{}" d=""#,
-                    style
-                )
+                write!(&mut self.out, r#"    <path fill-rule="evenodd" style="{}" d=""#, style)
             }
-            MoveTo { x, y } => write!(
-                &mut self.out,
-                "M{:.p$},{:.p$} ",
-                x,
-                y,
-                p = self.float_precision
-            ),
-            LineTo { x, y } => write!(
-                &mut self.out,
-                "L{:.p$},{:.p$} ",
-                x,
-                y,
-                p = self.float_precision
-            ),
-            CubicCurveTo {
-                cx1,
-                cy1,
-                cx2,
-                cy2,
-                x,
-                y,
-            } => unimplemented!(),
+            MoveTo { x, y } => write!(&mut self.out, "M{:.p$},{:.p$} ", x, y, p = self.float_precision),
+            LineTo { x, y } => write!(&mut self.out, "L{:.p$},{:.p$} ", x, y, p = self.float_precision),
+            CubicCurveTo { cx1, cy1, cx2, cy2, x, y } => unimplemented!(),
             QuadraticCurveTo { cx, cy, x, y } => unimplemented!(),
             ArcTo {
                 rx,
@@ -120,8 +85,7 @@ mod test {
 
     fn run_in_canvas<F>(f: F) -> String
     where
-        F: FnOnce(&mut Canvas<SvgBackend<&mut Vec<u8>>>)
-            -> Result<(), std::io::Error>,
+        F: FnOnce(&mut Canvas<SvgBackend<&mut Vec<u8>>>) -> Result<(), std::io::Error>,
     {
         let mut buffer: Vec<u8> = Vec::new();
         {
@@ -135,7 +99,7 @@ mod test {
     #[test]
     fn empty() {
         assert_eq!(
-            run_in_canvas(|canvas| { Ok(()) }).trim(),
+            run_in_canvas(|canvas| Ok(())).trim(),
             r#"
 <svg xmlns="http://www.w3.org/2000/svg">
 </svg>
@@ -147,7 +111,7 @@ mod test {
     fn empty_polygon() {
         assert_eq!(
             run_in_canvas(|canvas| {
-                canvas.draw_closed_polygon(&[], DrawOptions::default())?;
+                canvas.draw_closed_polygon::<_, ()>(vec![], DrawOptions::default())?;
                 Ok(())
             }).trim(),
             r#"
@@ -161,10 +125,7 @@ mod test {
     fn triangle_polygon() {
         assert_eq!(
             run_in_canvas(|canvas| {
-                canvas.draw_closed_polygon(
-                    &[(0.0, 0.0), (0.0, 50.0), (50.0, 0.0)],
-                    DrawOptions::default(),
-                )?;
+                canvas.draw_closed_polygon::<_, ()>(vec![point2(0.0, 0.0), point2(0.0, 50.0), point2(50.0, 0.0)], DrawOptions::default())?;
                 Ok(())
             }).trim(),
             r#"
@@ -179,10 +140,7 @@ mod test {
     fn triangle_polygon_reversed() {
         assert_eq!(
             run_in_canvas(|canvas| {
-                canvas.draw_closed_polygon(
-                    &[(50.0, 0.0), (0.0, 50.0), (0.0, 0.0)],
-                    DrawOptions::default(),
-                )?;
+                canvas.draw_closed_polygon::<_, ()>(vec![point2(50.0, 0.0), point2(0.0, 50.0), point2(0.0, 0.0)], DrawOptions::default())?;
                 Ok(())
             }).trim(),
             r#"
@@ -196,13 +154,11 @@ mod test {
     #[test]
     fn triangle_polygon_reversed_with_holes() {
         assert_eq!(
-            run_in_canvas(|canvas| {
-                canvas.draw_holy_polygon(
-                    vec![&[(50.0, 0.0), (0.0, 50.0), (0.0, 0.0)] as &[_]],
-                    vec![&[(30.0, 10.0), (10.0, 30.0), (10.0, 10.0)] as &[_]],
-                    DrawOptions::default(),
-                )
-            }).trim(),
+            run_in_canvas(|canvas| canvas.draw_holy_polygon::<_, _, ()>(
+                vec![vec![point2(50.0, 0.0), point2(0.0, 50.0), point2(0.0, 0.0)]],
+                vec![vec![point2(30.0, 10.0), point2(10.0, 30.0), point2(10.0, 10.0)]],
+                DrawOptions::default(),
+            )).trim(),
             r#"
 <svg xmlns="http://www.w3.org/2000/svg">
     <path fill-rule="evenodd" d="M50,0 L0,0 L0,50 L50,0 M30,10 L10,30 L10,10 L30,10 "/>

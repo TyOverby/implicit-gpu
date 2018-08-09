@@ -24,7 +24,8 @@ where
 
         let query = Rect::from_points(&[p1a, p2a]);
         let result = quad_tree.custom_query(query, &mut |id, _| {
-            if quad_tree.get(id) == Some(&(p1a, p2a)) {
+            let fetched = quad_tree.get(id);
+            if fetched == Some(&(p2a, p1a)) {
                 Err(id)
             } else {
                 Ok(())
@@ -33,9 +34,9 @@ where
 
         if let Err(id) = result {
             quad_tree.remove(id);
+        } else {
+            quad_tree.insert_with_box((p1a, p2a), query);
         }
-
-        quad_tree.insert_with_box((p1a, p2a), query);
     }
 
     quad_tree.iter().map(|(_, &(l, _))| l).collect()

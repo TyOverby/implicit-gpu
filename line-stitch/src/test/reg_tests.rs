@@ -1,5 +1,5 @@
-use ::*;
-use euclid::{Point2D, UnknownUnit, point2};
+use euclid::{point2, Point2D, UnknownUnit};
+use *;
 
 const EPSILON: f32 = 0.001;
 // CIRCLES 99 actually has 97 circles
@@ -9,12 +9,7 @@ const ONE_CIRCLE_DATA: &'static [((f32, f32), (f32, f32))] = include!("./regress
 fn process(input: &[((f32, f32), (f32, f32))]) -> Vec<[Point2D<f32>; 2]> {
     input
         .iter()
-        .map(|&((x1, y1), (x2, y2))| {
-            [
-                point2::<_, UnknownUnit>(x1, y1),
-                point2::<_, UnknownUnit>(x2, y2),
-            ]
-        })
+        .map(|&((x1, y1), (x2, y2))| [point2::<_, UnknownUnit>(x1, y1), point2::<_, UnknownUnit>(x2, y2)])
         .collect::<Vec<_>>()
 }
 
@@ -30,7 +25,7 @@ fn circles_99_prune() {
 #[test]
 fn circles_99_connect() {
     let data = process(CIRCLES_99_DATA);
-    let out = connect_obvious(data, EPSILON, true, false);
+    let out = connect_obvious(data, EPSILON, true);
     for segment in &out {
         assert!(segment.closed);
     }
@@ -50,7 +45,7 @@ fn one_circle_prune() {
 #[test]
 fn one_circle_connect() {
     let data = process(ONE_CIRCLE_DATA);
-    let out = connect_obvious(data, EPSILON, true, false);
+    let out = connect_obvious(data, EPSILON, true);
     assert_eq!(out.len(), 1);
     assert!(out[0].closed);
 }
