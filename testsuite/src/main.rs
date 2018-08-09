@@ -1,9 +1,9 @@
-extern crate implicit;
-extern crate regex;
 extern crate colored;
-extern crate latin;
-extern crate walkdir;
 extern crate flame;
+extern crate implicit;
+extern crate latin;
+extern crate regex;
+extern crate walkdir;
 #[macro_use]
 extern crate snoot;
 #[macro_use]
@@ -24,16 +24,21 @@ pub struct Paths {
     expected_dump: PathBuf,
 }
 
-
 fn main() {
-    use std::io::{Write, stdout};
-    fn ends_with_json(e: &DirEntry) -> bool { e.path().extension().map(|e| e == "json").unwrap_or(false) }
+    use std::io::{stdout, Write};
+    fn ends_with_json(e: &DirEntry) -> bool {
+        e.path().extension().map(|e| e == "json").unwrap_or(false)
+    }
     fn clear(size: usize) {
         print!(
             "{}{}{}",
-            ::std::iter::repeat(8 as char).take(size).collect::<String>(),
+            ::std::iter::repeat(8 as char)
+                .take(size)
+                .collect::<String>(),
             ::std::iter::repeat(' ').take(size).collect::<String>(),
-            ::std::iter::repeat(8 as char).take(size).collect::<String>(),
+            ::std::iter::repeat(8 as char)
+                .take(size)
+                .collect::<String>(),
         );
     }
 
@@ -77,7 +82,6 @@ fn main() {
         .max()
         .unwrap_or(0);
 
-
     let mut any_failures = false;
     for entry in test_files {
         let json = entry;
@@ -106,7 +110,12 @@ fn main() {
         let old_hook = ::std::panic::take_hook();
         let result = ::std::panic::catch_unwind(|| run_test::run_test(&paths))
             .map_err(|e| e.downcast::<String>())
-            .map_err(|e| e.or_else(|e| e.downcast::<&'static str>().map(|s| Box::new(s.to_string()))));
+            .map_err(|e| {
+                e.or_else(|e| {
+                    e.downcast::<&'static str>()
+                        .map(|s| Box::new(s.to_string()))
+                })
+            });
         ::std::panic::set_hook(old_hook);
 
         match result {

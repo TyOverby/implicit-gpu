@@ -31,7 +31,9 @@ pub struct PolyGroup {
 
 impl ::std::iter::FromIterator<(f32, f32)> for Polygon {
     fn from_iter<T>(iterator: T) -> Polygon
-    where T: IntoIterator<Item = (f32, f32)> {
+    where
+        T: IntoIterator<Item = (f32, f32)>,
+    {
         let mut iterator = iterator.into_iter();
         let mut out: Vec<Point> = vec![];
 
@@ -67,7 +69,9 @@ impl PolyGroup {
 pub fn separate_polygons(bag: Vec<PathSegment>) -> (Vec<PathSegment>, Vec<PathSegment>) {
     let _guard = ::flame::start_guard("separate_polygons");
 
-    fn contains(a: &[Point], b: &[Point]) -> bool { point_in_poly(a, b[0]) }
+    fn contains(a: &[Point], b: &[Point]) -> bool {
+        point_in_poly(a, b[0])
+    }
 
     let mut additive_or_subtractive = vec![];
     for (i, a) in bag.iter().enumerate() {

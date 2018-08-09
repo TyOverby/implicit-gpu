@@ -151,7 +151,13 @@ pub fn run_scene(
             let result = evaluator.evaluate(*id, &ctx, telemetry, shape_telemetry);
 
             let (line_buffer, line_count) = ::marching::run_marching(&result, &ctx);
-            let (additive, subtractive) = evaluator::line_buffer_to_poly(&line_buffer, line_count, telemetry, tloc, scene.simplify);
+            let (additive, subtractive) = evaluator::line_buffer_to_poly(
+                &line_buffer,
+                line_count,
+                telemetry,
+                tloc,
+                scene.simplify,
+            );
 
             let output_shape = match shape.draw_mode {
                 DrawMode::Filled => OutputShape {

@@ -36,9 +36,7 @@ pub fn assert_same(
         if !found {
             return Err(format!(
                 "{:?} not found in actual\n actual: {:#?}\n expected: {:#?}",
-                ex,
-                actual,
-                expected
+                ex, actual, expected
             ));
         }
     }

@@ -1,5 +1,5 @@
-use ::*;
 use euclid::*;
+use *;
 
 pub fn populate<I, P, S: 'static>(segments: I, epsilon: f32) -> DualQuadTree<S>
 where
@@ -18,14 +18,16 @@ where
         let first = segment.first();
         let last = segment.last();
 
-
         starts_and_ends.push(first);
         starts_and_ends.push(last);
         all_segments.push(segment);
     }
 
     let rect = TypedRect::from_points(&starts_and_ends[..]);
-    let scene_aabb = rect.inflate(epsilon.max(rect.size.width / 10.0), epsilon.max(rect.size.height / 10.0));
+    let scene_aabb = rect.inflate(
+        epsilon.max(rect.size.width / 10.0),
+        epsilon.max(rect.size.height / 10.0),
+    );
 
     let mut dual_qt = DualQuadTree::new(scene_aabb, size_hint);
     for segment in all_segments {
@@ -58,5 +60,8 @@ pub fn compute_bounding_box<S, I: IntoIterator<Item = Point<S>>>(i: I) -> TypedR
         max_y = max_y.max(pt.y);
     }
 
-    TypedRect::new(point2(min_x, min_y), vec2(max_x - min_x, max_y - min_y).to_size())
+    TypedRect::new(
+        point2(min_x, min_y),
+        vec2(max_x - min_x, max_y - min_y).to_size(),
+    )
 }

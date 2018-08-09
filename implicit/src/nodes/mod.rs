@@ -23,7 +23,9 @@ impl ::std::ops::Deref for NodeRef {
 
 impl NodeRef {
     pub fn new(node: Node) -> NodeRef {
-        NodeRef { node: Arc::new(node) }
+        NodeRef {
+            node: Arc::new(node),
+        }
     }
 
     pub fn take(self) -> Node {
@@ -40,7 +42,9 @@ impl<'de> ::serde::Deserialize<'de> for NodeRef {
     where
         D: ::serde::Deserializer<'de>,
     {
-        <Node as ::serde::Deserialize>::deserialize(deserializer).map(|res| NodeRef { node: Arc::new(res) })
+        <Node as ::serde::Deserialize>::deserialize(deserializer).map(|res| NodeRef {
+            node: Arc::new(res),
+        })
     }
 }
 
@@ -74,10 +78,27 @@ pub enum Node {
 impl Node {
     pub fn eq_ignore_group(&self, other: &Node) -> bool {
         match (self, other) {
-            (&Node::Circle { x: mx, y: my, r: mr }, &Node::Circle { x: ox, y: oy, r: or }) => mx == ox && my == oy && mr == or,
-            (&Node::And { children: ref mch }, &Node::And { children: ref och }) => mch.iter().zip(och.iter()).all(|(a, b)| a.eq_ignore_group(&*b)),
-            (&Node::Or { children: ref mch }, &Node::Or { children: ref och }) => mch.iter().zip(och.iter()).all(|(a, b)| a.eq_ignore_group(&*b)),
-            (&Node::Not { target: ref mc }, &Node::Not { target: ref oc }) => mc.eq_ignore_group(&*oc),
+            (
+                &Node::Circle {
+                    x: mx,
+                    y: my,
+                    r: mr,
+                },
+                &Node::Circle {
+                    x: ox,
+                    y: oy,
+                    r: or,
+                },
+            ) => mx == ox && my == oy && mr == or,
+            (&Node::And { children: ref mch }, &Node::And { children: ref och }) => mch.iter()
+                .zip(och.iter())
+                .all(|(a, b)| a.eq_ignore_group(&*b)),
+            (&Node::Or { children: ref mch }, &Node::Or { children: ref och }) => mch.iter()
+                .zip(och.iter())
+                .all(|(a, b)| a.eq_ignore_group(&*b)),
+            (&Node::Not { target: ref mc }, &Node::Not { target: ref oc }) => {
+                mc.eq_ignore_group(&*oc)
+            }
             (
                 &Node::Polygon {
                     dx: dx1,
@@ -100,8 +121,12 @@ impl Node {
                     target: ref oc,
                 },
             ) => mhm == ohm && mc.eq_ignore_group(&*oc),
-            (&Node::Break { target: ref mc }, &Node::Break { target: ref oc }) => mc.eq_ignore_group(&*oc),
-            (&Node::Freeze { target: ref mc }, &Node::Freeze { target: ref oc }) => mc.eq_ignore_group(&*oc),
+            (&Node::Break { target: ref mc }, &Node::Break { target: ref oc }) => {
+                mc.eq_ignore_group(&*oc)
+            }
+            (&Node::Freeze { target: ref mc }, &Node::Freeze { target: ref oc }) => {
+                mc.eq_ignore_group(&*oc)
+            }
             (&Node::OtherGroup { .. }, &Node::OtherGroup { .. }) => true,
             (
                 &Node::Translate {
@@ -122,9 +147,22 @@ impl Node {
     pub fn propagate_translates(self, dx: f32, dy: f32) -> Self {
         use self::Node::*;
         match self {
-            Circle { x, y, r } => Circle { x: x + dx, y: y + dy, r },
-            Rect { x, y, w, h } => Rect { x: x + dx, y: y + dy, w, h },
-            Polygon { group, dx: pdx, dy: pdy } => Polygon {
+            Circle { x, y, r } => Circle {
+                x: x + dx,
+                y: y + dy,
+                r,
+            },
+            Rect { x, y, w, h } => Rect {
+                x: x + dx,
+                y: y + dy,
+                w,
+                h,
+            },
+            Polygon {
+                group,
+                dx: pdx,
+                dy: pdy,
+            } => Polygon {
                 dx: pdx + dx,
                 dy: pdy + dy,
                 group,
@@ -154,7 +192,11 @@ impl Node {
                 how_much,
                 target: NodeRef::new(target.take().propagate_translates(dx, dy)),
             },
-            Translate { target, dx: tdx, dy: tdy } => target.take().propagate_translates(tdx + dx, tdy + dy),
+            Translate {
+                target,
+                dx: tdx,
+                dy: tdy,
+            } => target.take().propagate_translates(tdx + dx, tdy + dy),
             Scale { target, dx, dy } => Scale {
                 dx,
                 dy,
@@ -209,23 +251,37 @@ impl Node {
 
         match self {
             &Node::Circle { x, y, r } => (Some(centered_with_radius(point2(x, y), r)), None),
-            &Node::Rect { x, y, w, h } => (Some(Rect::new(point2(x, y), vec2(w, h).to_size())), None),
+            &Node::Rect { x, y, w, h } => {
+                (Some(Rect::new(point2(x, y), vec2(w, h).to_size())), None)
+            }
             &Node::Polygon { dx, dy, ref group } => {
                 let mut rect = Rect::new(point2(0.0, 0.0), vec2(0.0, 0.0).to_size());
                 for polygon in &group.additive {
-                    let p_rect = compute_bounding_box(polygon.points.iter().cloned().map(|Point { x, y, .. }| point2(x + dx, y + dy)));
+                    let p_rect = compute_bounding_box(
+                        polygon
+                            .points
+                            .iter()
+                            .cloned()
+                            .map(|Point { x, y, .. }| point2(x + dx, y + dy)),
+                    );
                     rect = rect.union(&p_rect);
                 }
                 (Some(rect), None)
             }
-            &Node::Modulate { how_much, ref target } => {
+            &Node::Modulate {
+                how_much,
+                ref target,
+            } => {
                 let v = how_much;
                 let (a, s) = target.bounding_box();
                 (a.map(|b| b.inflate(-v, -v)), s.map(|b| b.inflate(v, v)))
             }
             &Node::Translate { dx, dy, ref target } => {
                 let (a, s) = target.bounding_box();
-                (a.map(|b| b.translate(&vec2(dx, dy))), s.map(|b| b.translate(&vec2(dx, dy))))
+                (
+                    a.map(|b| b.translate(&vec2(dx, dy))),
+                    s.map(|b| b.translate(&vec2(dx, dy))),
+                )
             }
             &Node::Scale { dx, dy, ref target } => {
                 let (a, s) = target.bounding_box();
@@ -271,7 +327,11 @@ impl<'a, T: 'a> Anchor<'a, T> {
 fn ser_de() {
     use serde_json::*;
 
-    let node = Node::Circle { x: 10.0, y: 30.0, r: 10.0 };
+    let node = Node::Circle {
+        x: 10.0,
+        y: 30.0,
+        r: 10.0,
+    };
     let as_str = to_string_pretty(&node).unwrap();
     assert_eq!(
         as_str,

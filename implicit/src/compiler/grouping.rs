@@ -103,7 +103,10 @@ fn do_group(node: NodeRef, nest: &mut Nest) -> NodeRef {
         &Node::Not { ref target } => NodeRef::new(Node::Not {
             target: do_group(target.clone(), nest),
         }),
-        &Node::Modulate { how_much, ref target } => NodeRef::new(Node::Modulate {
+        &Node::Modulate {
+            how_much,
+            ref target,
+        } => NodeRef::new(Node::Modulate {
             how_much,
             target: do_group(target.clone(), nest),
         }),

@@ -58,7 +58,6 @@ pub struct QuadTree<T, S, A: Array<Item = (ItemId, Rect<S>)>> {
     elements: FnvHashMap<ItemId, (T, Rect<S>)>,
 }
 
-
 enum QuadNode<S, A: Array<Item = (ItemId, Rect<S>)>> {
     Branch {
         aabb: Rect<S>,
@@ -84,7 +83,12 @@ impl<S, A: Array<Item = (ItemId, Rect<S>)>> Clone for QuadNode<S, A> {
                 ref element_count,
                 ref depth,
             } => {
-                let children = [children[0].clone(), children[1].clone(), children[2].clone(), children[3].clone()];
+                let children = [
+                    children[0].clone(),
+                    children[1].clone(),
+                    children[2].clone(),
+                    children[3].clone(),
+                ];
                 QuadNode::Branch {
                     aabb: aabb.clone(),
                     children: children,
@@ -119,7 +123,12 @@ impl<T, S, A: Array<Item = (ItemId, Rect<S>)>> QuadTree<T, S, A> {
     /// the maximum depth that the tree can grow before it
     /// stops.
     pub fn new(
-        size: Rect<S>, allow_duplicates: bool, min_children: usize, max_children: usize, max_depth: usize, size_hint: usize,
+        size: Rect<S>,
+        allow_duplicates: bool,
+        min_children: usize,
+        max_children: usize,
+        max_depth: usize,
+        size_hint: usize,
     ) -> QuadTree<T, S, A> {
         QuadTree {
             root: QuadNode::Leaf {
@@ -135,7 +144,10 @@ impl<T, S, A: Array<Item = (ItemId, Rect<S>)>> QuadTree<T, S, A> {
                 epsilon: 0.0001,
             },
             id: 0,
-            elements: std::collections::HashMap::with_capacity_and_hasher(size_hint, Default::default()),
+            elements: std::collections::HashMap::with_capacity_and_hasher(
+                size_hint,
+                Default::default(),
+            ),
         }
     }
 
@@ -147,7 +159,9 @@ impl<T, S, A: Array<Item = (ItemId, Rect<S>)>> QuadTree<T, S, A> {
     /// * `min_children`: 4
     /// * `max_children`: 16
     /// * `max_depth`: 8
-    pub fn default(size: Rect<S>, size_hint: usize) -> QuadTree<T, S, A> { QuadTree::new(size, true, 4, 16, 8, size_hint) }
+    pub fn default(size: Rect<S>, size_hint: usize) -> QuadTree<T, S, A> {
+        QuadTree::new(size, true, 4, 16, 8, size_hint)
+    }
 
     /// Inserts an element with the provided bounding box.
     pub fn insert_with_box(&mut self, t: T, aabb: Rect<S>) -> Option<ItemId> {
@@ -174,7 +188,9 @@ impl<T, S, A: Array<Item = (ItemId, Rect<S>)>> QuadTree<T, S, A> {
 
     /// Returns an ItemId for the first element that was
     /// inserted into the tree.
-    pub fn first(&self) -> Option<ItemId> { self.elements.iter().next().map(|(id, _)| *id) }
+    pub fn first(&self) -> Option<ItemId> {
+        self.elements.iter().next().map(|(id, _)| *id)
+    }
 
     /// Inserts an element into the tree.
     pub fn insert(&mut self, t: T) -> Option<ItemId>
@@ -187,7 +203,9 @@ impl<T, S, A: Array<Item = (ItemId, Rect<S>)>> QuadTree<T, S, A> {
 
     /// Retrieves an element by looking it up from the
     /// ItemId.
-    pub fn get(&self, id: ItemId) -> Option<&T> { self.elements.get(&id).map(|&(ref a, _)| a) }
+    pub fn get(&self, id: ItemId) -> Option<&T> {
+        self.elements.get(&id).map(|&(ref a, _)| a)
+    }
 
     /// Returns an iterator of (element, bounding-box, id)
     /// for each element whose bounding box intersects
@@ -197,10 +215,11 @@ impl<T, S, A: Array<Item = (ItemId, Rect<S>)>> QuadTree<T, S, A> {
         T: ::std::fmt::Debug,
     {
         let mut out: SmallVec<[(_, _, _); 3]> = Default::default();
-        let _ = self.root.query::<(), _>(bounding_box, &self.config, &mut |id, bb| {
-            out.push((&self.elements.get(&id).unwrap().0, bb, id));
-            Ok(())
-        });
+        let _ = self.root
+            .query::<(), _>(bounding_box, &self.config, &mut |id, bb| {
+                out.push((&self.elements.get(&id).unwrap().0, bb, id));
+                Ok(())
+            });
         out.sort_by_key(|&(_, _, id)| id);
         out.dedup_by_key(|&mut (_, _, id)| id);
         out
@@ -229,7 +248,9 @@ impl<T, S, A: Array<Item = (ItemId, Rect<S>)>> QuadTree<T, S, A> {
     }
 
     /// Returns an iterator over all the items in the tree.
-    pub fn iter(&self) -> ::std::collections::hash_map::Iter<ItemId, (T, Rect<S>)> { self.elements.iter() }
+    pub fn iter(&self) -> ::std::collections::hash_map::Iter<ItemId, (T, Rect<S>)> {
+        self.elements.iter()
+    }
 
     /// Calls `f` repeatedly for every node in the tree
     /// with these arguments
@@ -238,17 +259,25 @@ impl<T, S, A: Array<Item = (ItemId, Rect<S>)>> QuadTree<T, S, A> {
     /// * `usize`: The current depth
     /// * `bool`: True if the node is a leaf-node, False if
     /// the node is a branch node.
-    pub fn inspect<F: FnMut(&Rect<S>, usize, bool)>(&self, mut f: F) { self.root.inspect(&mut f); }
+    pub fn inspect<F: FnMut(&Rect<S>, usize, bool)>(&self, mut f: F) {
+        self.root.inspect(&mut f);
+    }
 
     /// Returns the number of elements in the tree
-    pub fn len(&self) -> usize { self.elements.len() }
+    pub fn len(&self) -> usize {
+        self.elements.len()
+    }
 
     /// Returns true if the tree is empty.
-    pub fn is_empty(&self) -> bool { self.elements.is_empty() }
+    pub fn is_empty(&self) -> bool {
+        self.elements.is_empty()
+    }
 
     /// Returns the enclosing bounding-box for the entire
     /// tree.
-    pub fn bounding_box(&self) -> Rect<S> { self.root.bounding_box() }
+    pub fn bounding_box(&self) -> Rect<S> {
+        self.root.bounding_box()
+    }
 }
 
 impl<S, A: Array<Item = (ItemId, Rect<S>)>> QuadNode<S, A> {
@@ -280,7 +309,9 @@ impl<S, A: Array<Item = (ItemId, Rect<S>)>> QuadNode<S, A> {
                     child.1.inspect(f);
                 }
             }
-            &QuadNode::Leaf { depth, ref aabb, .. } => {
+            &QuadNode::Leaf {
+                depth, ref aabb, ..
+            } => {
                 f(aabb, depth, true);
             }
         }
@@ -300,14 +331,20 @@ impl<S, A: Array<Item = (ItemId, Rect<S>)>> QuadNode<S, A> {
                 if item_aabb.contains(&midpoint(*aabb)) {
                     // Only insert if there isn't another item with a very
                     // similar aabb.
-                    if config.allow_duplicates || !in_all.iter().any(|&(_, e_bb)| close_to_rect(e_bb, item_aabb, config.epsilon)) {
+                    if config.allow_duplicates
+                        || !in_all
+                            .iter()
+                            .any(|&(_, e_bb)| close_to_rect(e_bb, item_aabb, config.epsilon))
+                    {
                         in_all.push((item_id, item_aabb));
                         did_insert = true;
                         *element_count += 1;
                     }
                 } else {
                     for &mut (aabb, ref mut child) in children {
-                        if my_intersects(aabb, item_aabb) || close_to_rect(aabb, item_aabb, config.epsilon) {
+                        if my_intersects(aabb, item_aabb)
+                            || close_to_rect(aabb, item_aabb, config.epsilon)
+                        {
                             if child.insert(item_id, item_aabb, config) {
                                 *element_count += 1;
                                 did_insert = true;
@@ -346,7 +383,11 @@ impl<S, A: Array<Item = (ItemId, Rect<S>)>> QuadNode<S, A> {
                         },
                     ));
                 } else {
-                    if config.allow_duplicates || !elements.iter().any(|&(_, e_bb)| close_to_rect(e_bb, item_aabb, config.epsilon)) {
+                    if config.allow_duplicates
+                        || !elements
+                            .iter()
+                            .any(|&(_, e_bb)| close_to_rect(e_bb, item_aabb, config.epsilon))
+                    {
                         elements.push((item_id, item_aabb));
                         did_insert = true;
                     }
@@ -365,13 +406,20 @@ impl<S, A: Array<Item = (ItemId, Rect<S>)>> QuadNode<S, A> {
             }
         }
         if !did_insert {
-            panic!("didn't insert {:?} into {:?}", item_aabb, self.bounding_box());
+            panic!(
+                "didn't insert {:?} into {:?}",
+                item_aabb,
+                self.bounding_box()
+            );
         }
         did_insert
     }
 
     fn remove(&mut self, item_id: ItemId, item_aabb: Rect<S>, config: &QuadTreeConfig) -> bool {
-        fn remove_from<S, A: Array<Item = (ItemId, Rect<S>)>>(v: &mut SmallVec<A>, item: ItemId) -> bool {
+        fn remove_from<S, A: Array<Item = (ItemId, Rect<S>)>>(
+            v: &mut SmallVec<A>,
+            item: ItemId,
+        ) -> bool {
             if let Some(index) = v.iter().position(|a| a.0 == item) {
                 v.swap_remove(index);
                 true
@@ -396,7 +444,9 @@ impl<S, A: Array<Item = (ItemId, Rect<S>)>> QuadNode<S, A> {
                     did_remove = remove_from(in_all, item_id);
                 } else {
                     for &mut (child_aabb, ref mut child_tree) in children {
-                        if my_intersects(child_aabb, item_aabb) || close_to_rect(child_aabb, item_aabb, config.epsilon) {
+                        if my_intersects(child_aabb, item_aabb)
+                            || close_to_rect(child_aabb, item_aabb, config.epsilon)
+                        {
                             did_remove |= child_tree.remove(item_id, item_aabb, config);
                         }
                     }
@@ -411,7 +461,9 @@ impl<S, A: Array<Item = (ItemId, Rect<S>)>> QuadNode<S, A> {
                 did_remove
             }
 
-            &mut QuadNode::Leaf { ref mut elements, .. } => remove_from(elements, item_id),
+            &mut QuadNode::Leaf {
+                ref mut elements, ..
+            } => remove_from(elements, item_id),
         };
 
         if let Some((size, aabb, depth)) = compact {
@@ -431,18 +483,28 @@ impl<S, A: Array<Item = (ItemId, Rect<S>)>> QuadNode<S, A> {
         removed
     }
 
-    fn query<B, F>(&self, query_aabb: Rect<S>, config: &QuadTreeConfig, on_find: &mut F) -> QueryResult<B>
+    fn query<B, F>(
+        &self,
+        query_aabb: Rect<S>,
+        config: &QuadTreeConfig,
+        on_find: &mut F,
+    ) -> QueryResult<B>
     where
         F: FnMut(ItemId, Rect<S>) -> QueryResult<B>,
     {
         fn match_all<B, S, F, A: Array<Item = (ItemId, Rect<S>)>>(
-            elements: &SmallVec<A>, query_aabb: Rect<S>, on_find: &mut F, config: &QuadTreeConfig,
+            elements: &SmallVec<A>,
+            query_aabb: Rect<S>,
+            on_find: &mut F,
+            config: &QuadTreeConfig,
         ) -> QueryResult<B>
         where
             F: FnMut(ItemId, Rect<S>) -> QueryResult<B>,
         {
             for &(child_id, child_aabb) in elements {
-                if my_intersects(query_aabb, child_aabb) || close_to_rect(query_aabb, child_aabb, config.epsilon) {
+                if my_intersects(query_aabb, child_aabb)
+                    || close_to_rect(query_aabb, child_aabb, config.epsilon)
+                {
                     on_find(child_id, child_aabb)?;
                 }
             }
@@ -451,7 +513,9 @@ impl<S, A: Array<Item = (ItemId, Rect<S>)>> QuadNode<S, A> {
 
         match self {
             &QuadNode::Branch {
-                ref in_all, ref children, ..
+                ref in_all,
+                ref children,
+                ..
             } => {
                 match_all(in_all, query_aabb, on_find, config)?;
 
@@ -461,18 +525,24 @@ impl<S, A: Array<Item = (ItemId, Rect<S>)>> QuadNode<S, A> {
                     }
                 }
             }
-            &QuadNode::Leaf { ref elements, .. } => match_all(elements, query_aabb, on_find, config)?,
+            &QuadNode::Leaf { ref elements, .. } => {
+                match_all(elements, query_aabb, on_find, config)?
+            }
         }
         Ok(())
     }
 }
 
 impl<S> Spatial<S> for Rect<S> {
-    fn aabb(&self) -> Rect<S> { *self }
+    fn aabb(&self) -> Rect<S> {
+        *self
+    }
 }
 
 impl<S> Spatial<S> for Point<S> {
-    fn aabb(&self) -> Rect<S> { Rect::new(*self, TypedSize2D::new(0.0, 0.0)) }
+    fn aabb(&self) -> Rect<S> {
+        Rect::new(*self, TypedSize2D::new(0.0, 0.0))
+    }
 }
 
 fn midpoint<S>(rect: Rect<S>) -> Point<S> {
@@ -481,7 +551,9 @@ fn midpoint<S>(rect: Rect<S>) -> Point<S> {
     origin + half
 }
 
-fn my_intersects<S>(a: Rect<S>, b: Rect<S>) -> bool { a.intersects(&b) || a.contains(&b.origin) || a.contains(&b.bottom_right()) }
+fn my_intersects<S>(a: Rect<S>, b: Rect<S>) -> bool {
+    a.intersects(&b) || a.contains(&b.origin) || a.contains(&b.bottom_right())
+}
 
 fn split_quad<S>(rect: Rect<S>) -> [Rect<S>; 4] {
     use euclid::vec2;
@@ -496,9 +568,12 @@ fn split_quad<S>(rect: Rect<S>) -> [Rect<S>; 4] {
     ]
 }
 
-fn close_to_point<S>(a: Point<S>, b: Point<S>, epsilon: f32) -> bool { (a.x - b.x).abs() < epsilon && (a.y - b.y).abs() < epsilon }
+fn close_to_point<S>(a: Point<S>, b: Point<S>, epsilon: f32) -> bool {
+    (a.x - b.x).abs() < epsilon && (a.y - b.y).abs() < epsilon
+}
 fn close_to_rect<S>(a: Rect<S>, b: Rect<S>, epsilon: f32) -> bool {
-    close_to_point(a.origin, b.origin, epsilon) && close_to_point(a.bottom_right(), b.bottom_right(), epsilon)
+    close_to_point(a.origin, b.origin, epsilon)
+        && close_to_point(a.bottom_right(), b.bottom_right(), epsilon)
 }
 
 #[test]
@@ -565,12 +640,22 @@ fn test_boundary_conditions() {
     };
 
     // Top left corner
-    assert!(branch.insert(ItemId(0), Rect::new(point2(0.0, 0.0), vec2(0.0, 0.0).to_size()), &config));
+    assert!(branch.insert(
+        ItemId(0),
+        Rect::new(point2(0.0, 0.0), vec2(0.0, 0.0).to_size()),
+        &config
+    ));
     // Middle
-    assert!(branch.insert(ItemId(0), Rect::new(point2(5.0, 5.0), vec2(0.0, 0.0).to_size()), &config));
+    assert!(branch.insert(
+        ItemId(0),
+        Rect::new(point2(5.0, 5.0), vec2(0.0, 0.0).to_size()),
+        &config
+    ));
 }
 
-impl<T: ::std::fmt::Debug, S, A: Array<Item = (ItemId, Rect<S>)>> ::std::fmt::Debug for QuadTree<T, S, A> {
+impl<T: ::std::fmt::Debug, S, A: Array<Item = (ItemId, Rect<S>)>> ::std::fmt::Debug
+    for QuadTree<T, S, A>
+{
     fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         formatter
             .debug_struct("QuadTree")

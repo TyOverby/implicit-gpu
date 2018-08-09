@@ -1,4 +1,4 @@
-use image_crate::{ImageBuffer, ImageRgb8, PNG, Rgb};
+use image_crate::{ImageBuffer, ImageRgb8, Rgb, PNG};
 
 use opencl::FieldBuffer;
 use std::f32::{INFINITY, NEG_INFINITY};
@@ -18,7 +18,12 @@ pub fn save_field_buffer<P: AsRef<Path>>(buffer: &FieldBuffer, name: P, color_mo
     save_image(&samples, buffer.width(), name, color_mode);
 }
 
-pub fn save_image<P: AsRef<Path>>(samples: &[f32], width: usize, file_name: P, color_mode: ColorMode) {
+pub fn save_image<P: AsRef<Path>>(
+    samples: &[f32],
+    width: usize,
+    file_name: P,
+    color_mode: ColorMode,
+) {
     let _guard = ::flame::start_guard("save_image");
     let mut min = INFINITY;
     let mut max = NEG_INFINITY;
@@ -43,9 +48,7 @@ pub fn save_image<P: AsRef<Path>>(samples: &[f32], width: usize, file_name: P, c
             }
             (ColorMode::BlackAndWhite, true, false) => [0, 0, 0],
             (ColorMode::BlackAndWhite, false, false) => [255, 255, 255],
-            (ColorMode::Debug, _, _) if sample == 0.0 => {
-                [0, 255, 0]
-            }
+            (ColorMode::Debug, _, _) if sample == 0.0 => [0, 255, 0],
             (ColorMode::Debug, true, _) => {
                 let compressed = sample / max;
                 let rounded = (compressed * 255.0) as u8;

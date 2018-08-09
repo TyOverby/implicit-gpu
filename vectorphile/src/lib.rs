@@ -3,11 +3,11 @@
 extern crate euclid;
 
 pub mod backend;
-mod util;
 pub mod svg;
+mod util;
 
-use euclid::TypedPoint2D;
 use backend::{Command, DrawOptions};
+use euclid::TypedPoint2D;
 use std::ops::{Deref, DerefMut};
 
 pub struct Canvas<T> {

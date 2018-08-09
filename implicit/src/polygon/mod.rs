@@ -1,7 +1,10 @@
 use geometry::Point;
 use opencl::{FieldBuffer, LineBuffer, OpenClContext};
 
-const PROGRAM: &'static str = concat!(include_str!("./dist_to_line.c"), include_str!("./polygon.c"));
+const PROGRAM: &'static str = concat!(
+    include_str!("./dist_to_line.c"),
+    include_str!("./polygon.c")
+);
 
 // TODO: rewrite this function so that it just takes &[f32]
 pub fn run_poly<I>(
@@ -35,12 +38,20 @@ where
     let buffer = ctx.line_buffer(&buffer[..]);
 
     match signfield {
-        Some(sf) => Some(run_poly_raw_with_sign(buffer, sf, width, height, pos_mod, ctx)),
+        Some(sf) => Some(run_poly_raw_with_sign(
+            buffer, sf, width, height, pos_mod, ctx,
+        )),
         None => Some(run_poly_raw_no_sign(buffer, width, height, pos_mod, ctx)),
     }
 }
 
-pub fn run_poly_raw_no_sign(lines: LineBuffer, width: usize, height: usize, pos_mod: Option<(f32, f32)>, ctx: &OpenClContext) -> FieldBuffer {
+pub fn run_poly_raw_no_sign(
+    lines: LineBuffer,
+    width: usize,
+    height: usize,
+    pos_mod: Option<(f32, f32)>,
+    ctx: &OpenClContext,
+) -> FieldBuffer {
     let _guard = ::flame::start_guard("run_poly_raw");
     let out = ctx.field_buffer(width, height, None);
     let kernel = ctx.compile("apply_no_sign", PROGRAM);

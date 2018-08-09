@@ -11,13 +11,13 @@ extern crate permutohedron;
 extern crate rayon;
 extern crate smallvec;
 
+mod connect_obvious;
 mod dual_quad_tree;
 mod graph_stitch;
-mod connect_obvious;
-mod test;
 mod prune;
-mod zero_area_loop;
+mod test;
 pub(crate) mod util;
+mod zero_area_loop;
 
 use aabb_quadtree::*;
 pub use connect_obvious::{connect_obvious, connect_obvious_from_dual_qt};
@@ -44,7 +44,7 @@ pub struct PathSegment<S> {
     length: Cell<f32>,
 }
 
-unsafe impl <S> Sync for PathSegment<S> {}
+unsafe impl<S> Sync for PathSegment<S> {}
 
 impl<S> ::std::fmt::Debug for PathSegment<S> {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
@@ -57,7 +57,10 @@ impl<S> ::std::fmt::Debug for PathSegment<S> {
 
 impl<S> PathSegment<S> {
     /// TODO: doc
-    pub fn new_and_potentially_close<P: Into<SmallVec<[Point<S>; 2]>>>(path: P, epsilon: f32) -> PathSegment<S> {
+    pub fn new_and_potentially_close<P: Into<SmallVec<[Point<S>; 2]>>>(
+        path: P,
+        epsilon: f32,
+    ) -> PathSegment<S> {
         let mut path = path.into();
 
         assert!(path.len() > 1);
@@ -92,9 +95,13 @@ impl<S> PathSegment<S> {
         }
     }
 
-    fn first(&self) -> Point<S> { *self.path.first().unwrap() }
+    fn first(&self) -> Point<S> {
+        *self.path.first().unwrap()
+    }
 
-    fn last(&self) -> Point<S> { *self.path.last().unwrap() }
+    fn last(&self) -> Point<S> {
+        *self.path.last().unwrap()
+    }
 
     /// TODO: document
     pub fn length_2(&self) -> f32 {
@@ -133,12 +140,16 @@ impl<S> PathSegment<S> {
 impl<S> IntoIterator for PathSegment<S> {
     type Item = Point<S>;
     type IntoIter = smallvec::IntoIter<[Point<S>; 2]>;
-    fn into_iter(self) -> Self::IntoIter { self.path.into_iter() }
+    fn into_iter(self) -> Self::IntoIter {
+        self.path.into_iter()
+    }
 }
 
 impl<S> FromIterator<Point<S>> for PathSegment<S> {
     fn from_iter<T>(iter: T) -> Self
-    where T: IntoIterator<Item = Point<S>> {
+    where
+        T: IntoIterator<Item = Point<S>>,
+    {
         PathSegment::new(iter.into_iter().collect::<Vec<_>>())
     }
 }

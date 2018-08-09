@@ -1,7 +1,7 @@
-use graph_stitch;
 use super::util::*;
+use euclid::{point2, UnknownUnit};
+use graph_stitch;
 use permutohedron::heap_recursive as permute;
-use euclid::{UnknownUnit, point2};
 
 type PathSegment = ::PathSegment<UnknownUnit>;
 
@@ -49,28 +49,24 @@ fn no_segments() {
 #[test]
 fn one_segment_that_is_closed() {
     run(Problem {
-        input: vec![
-            PathSegment::new_and_potentially_close(
-                vec![
-                    point2(0.0, 0.0),
-                    point2(0.0, 1.0),
-                    point2(1.0, 1.0),
-                    point2(0.0, 0.0),
-                ],
-                EPSILON,
-            ),
-        ],
-        expected: vec![
-            PathSegment::new_and_potentially_close(
-                vec![
-                    point2(0.0, 0.0),
-                    point2(0.0, 1.0),
-                    point2(1.0, 1.0),
-                    point2(0.0, 0.0),
-                ],
-                EPSILON,
-            ),
-        ],
+        input: vec![PathSegment::new_and_potentially_close(
+            vec![
+                point2(0.0, 0.0),
+                point2(0.0, 1.0),
+                point2(1.0, 1.0),
+                point2(0.0, 0.0),
+            ],
+            EPSILON,
+        )],
+        expected: vec![PathSegment::new_and_potentially_close(
+            vec![
+                point2(0.0, 0.0),
+                point2(0.0, 1.0),
+                point2(1.0, 1.0),
+                point2(0.0, 0.0),
+            ],
+            EPSILON,
+        )],
         ..default_problem()
     });
 }
@@ -80,32 +76,23 @@ fn two_segments_that_are_close_to_each_other() {
     run(Problem {
         input: vec![
             PathSegment::new_and_potentially_close(
-                vec![
-                    point2(0.0, 0.0),
-                    point2(0.0, 1.0),
-                ],
+                vec![point2(0.0, 0.0), point2(0.0, 1.0)],
                 EPSILON,
             ),
             PathSegment::new_and_potentially_close(
-                vec![
-                    point2(0.0, 1.0),
-                    point2(1.0, 1.0),
-                    point2(0.0, 0.0),
-                ],
+                vec![point2(0.0, 1.0), point2(1.0, 1.0), point2(0.0, 0.0)],
                 EPSILON,
             ),
         ],
-        expected: vec![
-            PathSegment::new_and_potentially_close(
-                vec![
-                    point2(0.0, 0.0),
-                    point2(0.0, 1.0),
-                    point2(1.0, 1.0),
-                    point2(0.0, 0.0),
-                ],
-                EPSILON,
-            ),
-        ],
+        expected: vec![PathSegment::new_and_potentially_close(
+            vec![
+                point2(0.0, 0.0),
+                point2(0.0, 1.0),
+                point2(1.0, 1.0),
+                point2(0.0, 0.0),
+            ],
+            EPSILON,
+        )],
         ..default_problem()
     });
 }

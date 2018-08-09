@@ -30,7 +30,13 @@ impl Evaluator {
         }
     }
 
-    pub fn evaluate(&self, which: GroupId, ctx: &OpenClContext, telemetry: &mut Telemetry, tloc: TelemetryLocation) -> FieldBuffer {
+    pub fn evaluate(
+        &self,
+        which: GroupId,
+        ctx: &OpenClContext,
+        telemetry: &mut Telemetry,
+        tloc: TelemetryLocation,
+    ) -> FieldBuffer {
         let _guard = ::flame::start_guard(format!("evaluate {:?}", which));
         {
             let finished = self.finished.lock().unwrap();
@@ -39,48 +45,57 @@ impl Evaluator {
             }
         }
 
-        let eval_basic_group = |root: &Node, telemetry: &mut Telemetry, mut tloc: TelemetryLocation| -> FieldBuffer {
-            let _guard = ::flame::start_guard(format!("eval_basic_group"));
-            let (program, compilation_info) = ::compiler::compile(root);
-            let deps: Vec<FieldBuffer> = compilation_info
-                .dependencies
-                .iter()
-                .map(|&g| {
-                    tloc.new_intermediate();
-                    self.evaluate(g, ctx, telemetry, tloc)
-                })
-                .collect();
+        let eval_basic_group =
+            |root: &Node, telemetry: &mut Telemetry, mut tloc: TelemetryLocation| -> FieldBuffer {
+                let _guard = ::flame::start_guard(format!("eval_basic_group"));
+                let (program, compilation_info) = ::compiler::compile(root);
+                let deps: Vec<FieldBuffer> = compilation_info
+                    .dependencies
+                    .iter()
+                    .map(|&g| {
+                        tloc.new_intermediate();
+                        self.evaluate(g, ctx, telemetry, tloc)
+                    })
+                    .collect();
 
-            let out = ctx.field_buffer(self.width, self.height, None);
-            let kernel = ctx.compile("apply", program.clone());
+                let out = ctx.field_buffer(self.width, self.height, None);
+                let kernel = ctx.compile("apply", program.clone());
 
-            let mut kc = kernel
-                .queue(ctx.queue().clone())
-                .gws([self.width, self.height])
-                .arg_buf(out.buffer())
-                .arg_scl(self.width as u64);
+                let mut kc = kernel
+                    .queue(ctx.queue().clone())
+                    .gws([self.width, self.height])
+                    .arg_buf(out.buffer())
+                    .arg_scl(self.width as u64);
 
-            for dep in &deps {
-                kc = kc.arg_buf(dep.buffer());
-            }
+                for dep in &deps {
+                    kc = kc.arg_buf(dep.buffer());
+                }
 
-            ::flame::span_of("eval", || unsafe { kc.enq().unwrap() });
+                ::flame::span_of("eval", || unsafe { kc.enq().unwrap() });
 
-            telemetry.intermediate_eval_basic(tloc, &out, &program, root);
-            out
-        };
-
-        let eval_polygon = |poly: &PolyGroup, dx: f32, dy: f32, telemetry: &mut Telemetry| -> FieldBuffer {
-            let _guard = ::flame::start_guard(format!("eval_poylgon"));
-            let additive_field = {
-                let _guard = ::flame::start_guard("additive field");
-                let points_all = poly.additive.iter().flat_map(|a| a.points.iter().cloned());
-                run_poly(points_all, None, self.width, self.height, Some((dx, dy)), ctx).unwrap()
+                telemetry.intermediate_eval_basic(tloc, &out, &program, root);
+                out
             };
 
-            telemetry.intermediate_eval_poly(tloc, &additive_field);
-            additive_field
-        };
+        let eval_polygon =
+            |poly: &PolyGroup, dx: f32, dy: f32, telemetry: &mut Telemetry| -> FieldBuffer {
+                let _guard = ::flame::start_guard(format!("eval_poylgon"));
+                let additive_field = {
+                    let _guard = ::flame::start_guard("additive field");
+                    let points_all = poly.additive.iter().flat_map(|a| a.points.iter().cloned());
+                    run_poly(
+                        points_all,
+                        None,
+                        self.width,
+                        self.height,
+                        Some((dx, dy)),
+                        ctx,
+                    ).unwrap()
+                };
+
+                telemetry.intermediate_eval_poly(tloc, &additive_field);
+                additive_field
+            };
 
         let group = self.nest.get(which);
         let out = match group {
@@ -111,15 +126,26 @@ impl Evaluator {
         out
     }
 
-    pub fn get_polylines(&self, buffer: &FieldBuffer, ctx: &OpenClContext) -> Vec<((f32, f32), (f32, f32))> {
+    pub fn get_polylines(
+        &self,
+        buffer: &FieldBuffer,
+        ctx: &OpenClContext,
+    ) -> Vec<((f32, f32), (f32, f32))> {
         let (lines, lines_count) = ::marching::run_marching(buffer, ctx);
-        let lines = lines.values(Some(lines_count)).into_iter().tuples::<(_, _, _, _)>();
+        let lines = lines
+            .values(Some(lines_count))
+            .into_iter()
+            .tuples::<(_, _, _, _)>();
         lines.map(|(a, b, c, d)| ((a, b), (c, d))).collect()
     }
 }
 
 pub fn line_buffer_to_poly(
-    buffer: &LineBuffer, count: u32, telemetry: &mut Telemetry, tloc: TelemetryLocation, simplify: bool,
+    buffer: &LineBuffer,
+    count: u32,
+    telemetry: &mut Telemetry,
+    tloc: TelemetryLocation,
+    simplify: bool,
 ) -> (Vec<Vec<Point>>, Vec<Vec<Point>>) {
     let lines = buffer.values(Some(count));
 

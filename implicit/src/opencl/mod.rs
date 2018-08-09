@@ -43,7 +43,11 @@ pub fn all_devices() -> Vec<(Platform, Device)> {
 
 impl OpenClContext {
     pub fn new(platform: Platform, device: Device) -> OpenClContext {
-        let context = Context::builder().platform(platform).devices(device).build().unwrap();
+        let context = Context::builder()
+            .platform(platform)
+            .devices(device)
+            .build()
+            .unwrap();
         let queue = Queue::new(&context, device, None).unwrap();
 
         OpenClContext {
@@ -55,7 +59,9 @@ impl OpenClContext {
         }
     }
 
-    pub fn max_workgroup_size(&self) -> usize { self.device.max_wg_size().unwrap() }
+    pub fn max_workgroup_size(&self) -> usize {
+        self.device.max_wg_size().unwrap()
+    }
 
     pub fn default() -> OpenClContext {
         let (pt, dv) = all_devices().into_iter().nth(0).unwrap();
@@ -72,13 +78,21 @@ impl OpenClContext {
 
         {
             let program_cache = self.program_cache.lock().unwrap();
-            if let Some(&(_, ref p)) = program_cache.iter().filter(|&&(ref s, _)| s == &source).next() {
+            if let Some(&(_, ref p)) = program_cache
+                .iter()
+                .filter(|&&(ref s, _)| s == &source)
+                .next()
+            {
                 let _guard = ::flame::start_guard("Kernel::new");
                 return Kernel::new(name, p).unwrap();
             }
         }
 
-        let program = Program::builder().src(source.clone()).devices(self.device).build(&self.context).unwrap();
+        let program = Program::builder()
+            .src(source.clone())
+            .devices(self.device)
+            .build(&self.context)
+            .unwrap();
 
         {
             let mut program_cache = self.program_cache.lock().unwrap();
@@ -94,7 +108,9 @@ impl OpenClContext {
     pub fn field_buffer(&self, width: usize, height: usize, fill: Option<&[f32]>) -> FieldBuffer {
         let _guard = ::flame::start_guard("OpenClContext::field_buffer");
 
-        let builder: BufferBuilder<f32> = BufferBuilder::new().queue(self.queue.clone()).len(&[width, height]);
+        let builder: BufferBuilder<f32> = BufferBuilder::new()
+            .queue(self.queue.clone())
+            .len(&[width, height]);
 
         let internal = if let Some(fill) = fill {
             if fill.len() == 1 {
@@ -134,21 +150,40 @@ impl OpenClContext {
 
     pub fn line_buffer_uninit(&self, len: usize) -> LineBuffer {
         let _guard = ::flame::start_guard("OpenClContext::linear_buffer");
-        let internal = BufferBuilder::new().queue(self.queue.clone()).len(&[len]).build().unwrap();
-        LineBuffer { size: len, internal }
+        let internal = BufferBuilder::new()
+            .queue(self.queue.clone())
+            .len(&[len])
+            .build()
+            .unwrap();
+        LineBuffer {
+            size: len,
+            internal,
+        }
     }
 
     pub fn line_buffer(&self, fill: &[f32]) -> LineBuffer {
         let _guard = ::flame::start_guard("OpenClContext::linear_buffer");
-        let internal = BufferBuilder::new().queue(self.queue.clone()).len(&[fill.len()]).build().unwrap();
+        let internal = BufferBuilder::new()
+            .queue(self.queue.clone())
+            .len(&[fill.len()])
+            .build()
+            .unwrap();
         internal.write(fill).enq().unwrap();
-        LineBuffer { size: fill.len(), internal }
+        LineBuffer {
+            size: fill.len(),
+            internal,
+        }
     }
 
     pub fn sync_buffer(&self) -> SyncBuffer {
         let _guard = ::flame::start_guard("OpenClContext::sync_buffer");
         SyncBuffer {
-            internal: BufferBuilder::new().queue(self.queue.clone()).len(&[1]).fill_val(0u32).build().unwrap(),
+            internal: BufferBuilder::new()
+                .queue(self.queue.clone())
+                .len(&[1])
+                .fill_val(0u32)
+                .build()
+                .unwrap(),
         }
     }
 
@@ -157,11 +192,19 @@ impl OpenClContext {
         self.queue.finish().unwrap();
     }
 
-    pub fn platform(&self) -> &Platform { &self.platform }
+    pub fn platform(&self) -> &Platform {
+        &self.platform
+    }
 
-    pub fn device(&self) -> &Device { &self.device }
+    pub fn device(&self) -> &Device {
+        &self.device
+    }
 
-    pub fn context(&self) -> &Context { &self.context }
+    pub fn context(&self) -> &Context {
+        &self.context
+    }
 
-    pub fn queue(&self) -> &Queue { &self.queue }
+    pub fn queue(&self) -> &Queue {
+        &self.queue
+    }
 }

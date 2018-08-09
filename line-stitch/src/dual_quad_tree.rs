@@ -11,7 +11,8 @@ pub struct DualQuadTree<S> {
     pub id_to_segment: HashMap<DqtId, (PathSegment<S>, ItemId, ItemId)>,
     pub starts: QuadTree<DqtId, S, [(ItemId, euclid::TypedRect<f32, S>); QUAD_TREE_LEAF_SIZE]>,
     pub ends: QuadTree<DqtId, S, [(ItemId, euclid::TypedRect<f32, S>); QUAD_TREE_LEAF_SIZE]>,
-    pub ambiguity_points: QuadTree<Point<S>, S, [(ItemId, euclid::TypedRect<f32, S>); QUAD_TREE_LEAF_SIZE]>,
+    pub ambiguity_points:
+        QuadTree<Point<S>, S, [(ItemId, euclid::TypedRect<f32, S>); QUAD_TREE_LEAF_SIZE]>,
 }
 
 impl<S: 'static> DualQuadTree<S> {
@@ -42,7 +43,9 @@ impl<S: 'static> DualQuadTree<S> {
     where
         S: Clone,
     {
-        let iterator = self.id_to_segment.iter().map(|(_, &(ref p, _, _))| p.clone());
+        let iterator = self.id_to_segment
+            .iter()
+            .map(|(_, &(ref p, _, _))| p.clone());
         iterator.collect()
     }
 
@@ -80,7 +83,9 @@ impl<S: 'static> DualQuadTree<S> {
     }
 
     #[allow(dead_code)]
-    pub fn is_empty(&self) -> bool { self.id_to_segment.is_empty() }
+    pub fn is_empty(&self) -> bool {
+        self.id_to_segment.is_empty()
+    }
 
     pub fn has_forward_neighbor(&self, id: DqtId, point: Point<S>, epsilon: f32) -> bool {
         let query_aabb = point.aabb().inflate(epsilon * 2.0, epsilon * 2.0);
@@ -110,15 +115,31 @@ impl<S: 'static> DualQuadTree<S> {
             .is_err()
     }
 
-    pub fn query_forward(&mut self, point: Point<S>, epsilon: f32, only_starts: bool) -> Option<PathSegment<S>> {
+    pub fn query_forward(
+        &mut self,
+        point: Point<S>,
+        epsilon: f32,
+        only_starts: bool,
+    ) -> Option<PathSegment<S>> {
         self.query_direction(false, point, epsilon, only_starts)
     }
 
-    pub fn query_backward(&mut self, point: Point<S>, epsilon: f32, only_starts: bool) -> Option<PathSegment<S>> {
+    pub fn query_backward(
+        &mut self,
+        point: Point<S>,
+        epsilon: f32,
+        only_starts: bool,
+    ) -> Option<PathSegment<S>> {
         self.query_direction(true, point, epsilon, only_starts)
     }
 
-    fn query_direction(&mut self, should_swap: bool, point: Point<S>, epsilon: f32, only_starts: bool) -> Option<PathSegment<S>> {
+    fn query_direction(
+        &mut self,
+        should_swap: bool,
+        point: Point<S>,
+        epsilon: f32,
+        only_starts: bool,
+    ) -> Option<PathSegment<S>> {
         let (mut start, mut end) = self.query_impl(point, epsilon);
         if should_swap {
             std::mem::swap(&mut start, &mut end);
@@ -158,7 +179,11 @@ impl<S: 'static> DualQuadTree<S> {
         }
     }
 
-    fn query_impl(&mut self, point: Point<S>, epsilon: f32) -> (Result<Option<DqtId>, ()>, Result<Option<DqtId>, ()>) {
+    fn query_impl(
+        &mut self,
+        point: Point<S>,
+        epsilon: f32,
+    ) -> (Result<Option<DqtId>, ()>, Result<Option<DqtId>, ()>) {
         let query_aabb = point.aabb().inflate(epsilon * 2.0, epsilon * 2.0);
         if self.ambiguity_points.query(query_aabb).len() > 0 {
             return (Ok(None), Ok(None));
@@ -194,7 +219,14 @@ impl<S: 'static> DualQuadTree<S> {
     }
 
     fn take_nearest<'a, 'o>(
-        &self, point: Point<S>, is_start: bool, points: &mut [(&dual_quad_tree::DqtId, euclid::TypedRect<f32, S>, aabb_quadtree::ItemId)],
+        &self,
+        point: Point<S>,
+        is_start: bool,
+        points: &mut [(
+            &dual_quad_tree::DqtId,
+            euclid::TypedRect<f32, S>,
+            aabb_quadtree::ItemId,
+        )],
     ) -> usize {
         use std::cmp::Ordering;
         if points.len() == 0 {
@@ -202,7 +234,11 @@ impl<S: 'static> DualQuadTree<S> {
         }
         let dist_for_id = |id| {
             let elem = &self.id_to_segment.get(id).unwrap().0;
-            let pa = if is_start { elem.first() } else { elem.last() };
+            let pa = if is_start {
+                elem.first()
+            } else {
+                elem.last()
+            };
 
             let dist = (point - pa).square_length();
             dist

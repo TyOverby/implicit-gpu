@@ -1,7 +1,7 @@
-use ::prune;
 use super::util::*;
-use permutohedron::heap_recursive as permute;
 use euclid::{point2, UnknownUnit};
+use permutohedron::heap_recursive as permute;
+use prune;
 
 type Point = ::Point<UnknownUnit>;
 type PathSegment = ::PathSegment<UnknownUnit>;
@@ -28,7 +28,9 @@ fn default_problem() -> Problem {
 fn run(mut p: Problem) {
     let new_p = p.clone();
     permute(&mut p.input, |input| {
-        let output: Vec<_> = prune(input.to_vec(), new_p.epsilon, new_p.only_starts).into_iter().collect();
+        let output: Vec<_> = prune(input.to_vec(), new_p.epsilon, new_p.only_starts)
+            .into_iter()
+            .collect();
         if let Err(e) = assert_same(&output, &new_p.expected, !new_p.only_starts) {
             panic!("{}", e);
         }
@@ -74,8 +76,14 @@ pub fn prune_doesnt_remove_two_duplicate_lines_if_only_starts_is_off() {
             vec![point2(0.0, 0.0), point2(1.0, 1.0)],
         ],
         expected: vec![
-            PathSegment::new_and_potentially_close(vec![point2(0.0, 0.0), point2(1.0, 1.0)], EPSILON),
-            PathSegment::new_and_potentially_close(vec![point2(0.0, 0.0), point2(1.0, 1.0)], EPSILON),
+            PathSegment::new_and_potentially_close(
+                vec![point2(0.0, 0.0), point2(1.0, 1.0)],
+                EPSILON,
+            ),
+            PathSegment::new_and_potentially_close(
+                vec![point2(0.0, 0.0), point2(1.0, 1.0)],
+                EPSILON,
+            ),
         ],
         only_starts: false,
         ..default_problem()
@@ -113,9 +121,18 @@ pub fn prune_doesnt_remove_a_triangle() {
             vec![point2(1.0, 0.0), point2(0.0, 0.0)],
         ],
         expected: vec![
-            PathSegment::new_and_potentially_close(vec![point2(0.0, 0.0), point2(1.0, 1.0)], EPSILON),
-            PathSegment::new_and_potentially_close(vec![point2(1.0, 1.0), point2(1.0, 0.0)], EPSILON),
-            PathSegment::new_and_potentially_close(vec![point2(1.0, 0.0), point2(0.0, 0.0)], EPSILON),
+            PathSegment::new_and_potentially_close(
+                vec![point2(0.0, 0.0), point2(1.0, 1.0)],
+                EPSILON,
+            ),
+            PathSegment::new_and_potentially_close(
+                vec![point2(1.0, 1.0), point2(1.0, 0.0)],
+                EPSILON,
+            ),
+            PathSegment::new_and_potentially_close(
+                vec![point2(1.0, 0.0), point2(0.0, 0.0)],
+                EPSILON,
+            ),
         ],
         ..default_problem()
     };
@@ -138,8 +155,14 @@ fn prune_doesnt_remove_a_cycle_between_two_lines() {
             vec![point2(1.0, 1.0), point2(0.0, 0.0)],
         ],
         expected: vec![
-            PathSegment::new_and_potentially_close(vec![point2(0.0, 0.0), point2(1.0, 1.0)], EPSILON),
-            PathSegment::new_and_potentially_close(vec![point2(1.0, 1.0), point2(0.0, 0.0)], EPSILON),
+            PathSegment::new_and_potentially_close(
+                vec![point2(0.0, 0.0), point2(1.0, 1.0)],
+                EPSILON,
+            ),
+            PathSegment::new_and_potentially_close(
+                vec![point2(1.0, 1.0), point2(0.0, 0.0)],
+                EPSILON,
+            ),
         ],
         ..default_problem()
     };
@@ -163,8 +186,14 @@ fn removes_a_dangling_line_off_the_front_of_a_cycle() {
             vec![point2(-1.0, -1.0), point2(0.0, 0.0)],
         ],
         expected: vec![
-            PathSegment::new_and_potentially_close(vec![point2(0.0, 0.0), point2(1.0, 1.0)], EPSILON),
-            PathSegment::new_and_potentially_close(vec![point2(1.0, 1.0), point2(0.0, 0.0)], EPSILON),
+            PathSegment::new_and_potentially_close(
+                vec![point2(0.0, 0.0), point2(1.0, 1.0)],
+                EPSILON,
+            ),
+            PathSegment::new_and_potentially_close(
+                vec![point2(1.0, 1.0), point2(0.0, 0.0)],
+                EPSILON,
+            ),
         ],
         ..default_problem()
     };
@@ -185,8 +214,14 @@ fn removes_a_dangling_line_off_the_front_of_a_cycle() {
             vec![point2(0.0, 0.0), point2(-1.0, -1.0)],
         ],
         expected: vec![
-            PathSegment::new_and_potentially_close(vec![point2(0.0, 0.0), point2(1.0, 1.0)], EPSILON),
-            PathSegment::new_and_potentially_close(vec![point2(1.0, 1.0), point2(0.0, 0.0)], EPSILON),
+            PathSegment::new_and_potentially_close(
+                vec![point2(0.0, 0.0), point2(1.0, 1.0)],
+                EPSILON,
+            ),
+            PathSegment::new_and_potentially_close(
+                vec![point2(1.0, 1.0), point2(0.0, 0.0)],
+                EPSILON,
+            ),
         ],
         ..default_problem()
     };
@@ -210,8 +245,14 @@ fn removes_a_dangling_line_off_the_back_of_a_cycle() {
             vec![point2(2.0, 2.0), point2(1.0, 1.0)],
         ],
         expected: vec![
-            PathSegment::new_and_potentially_close(vec![point2(0.0, 0.0), point2(1.0, 1.0)], EPSILON),
-            PathSegment::new_and_potentially_close(vec![point2(1.0, 1.0), point2(0.0, 0.0)], EPSILON),
+            PathSegment::new_and_potentially_close(
+                vec![point2(0.0, 0.0), point2(1.0, 1.0)],
+                EPSILON,
+            ),
+            PathSegment::new_and_potentially_close(
+                vec![point2(1.0, 1.0), point2(0.0, 0.0)],
+                EPSILON,
+            ),
         ],
         ..default_problem()
     };
@@ -232,8 +273,14 @@ fn removes_a_dangling_line_off_the_back_of_a_cycle() {
             vec![point2(1.0, 1.0), point2(2.0, 2.0)],
         ],
         expected: vec![
-            PathSegment::new_and_potentially_close(vec![point2(0.0, 0.0), point2(1.0, 1.0)], EPSILON),
-            PathSegment::new_and_potentially_close(vec![point2(1.0, 1.0), point2(0.0, 0.0)], EPSILON),
+            PathSegment::new_and_potentially_close(
+                vec![point2(0.0, 0.0), point2(1.0, 1.0)],
+                EPSILON,
+            ),
+            PathSegment::new_and_potentially_close(
+                vec![point2(1.0, 1.0), point2(0.0, 0.0)],
+                EPSILON,
+            ),
         ],
         ..default_problem()
     };

@@ -34,11 +34,11 @@ pub enum Command {
     StartShape(DrawOptions),
     MoveTo {
         x: f64,
-        y: f64
+        y: f64,
     },
     LineTo {
         x: f64,
-        y: f64
+        y: f64,
     },
     CubicCurveTo {
         // Control Point 1
@@ -81,7 +81,7 @@ pub trait DrawBackend {
     type Error;
 
     fn apply(&mut self, command: Command) -> Result<(), Self::Error>;
-    fn apply_all<I: Iterator<Item=Command>>(&mut self, commands: I) -> Result<(), Self::Error> {
+    fn apply_all<I: Iterator<Item = Command>>(&mut self, commands: I) -> Result<(), Self::Error> {
         for command in commands {
             self.apply(command)?;
         }

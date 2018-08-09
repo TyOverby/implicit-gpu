@@ -1,5 +1,5 @@
 use aabb_quadtree;
-use euclid::{self, UnknownUnit, point2};
+use euclid::{self, point2, UnknownUnit};
 use line_stitch;
 
 pub type Point = euclid::Point2D<f32>;
@@ -9,7 +9,10 @@ pub type PathSegment = line_stitch::PathSegment<euclid::UnknownUnit>;
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Line(pub Point, pub Point);
 
-pub fn compare_points(Point { x: x1, y: y1, .. }: Point, Point { x: x2, y: y2, .. }: Point) -> Option<::std::cmp::Ordering> {
+pub fn compare_points(
+    Point { x: x1, y: y1, .. }: Point,
+    Point { x: x2, y: y2, .. }: Point,
+) -> Option<::std::cmp::Ordering> {
     let xc = x1.partial_cmp(&x2);
     let yc = y1.partial_cmp(&y2);
     match (xc, yc) {
@@ -31,7 +34,9 @@ impl ::std::cmp::PartialOrd for Line {
 }
 
 impl aabb_quadtree::Spatial<UnknownUnit> for Line {
-    fn aabb(&self) -> Rect { bb_for_line(*self, 0.001) }
+    fn aabb(&self) -> Rect {
+        bb_for_line(*self, 0.001)
+    }
 }
 
 pub fn point_in_poly(polygon: &[Point], p: Point) -> bool {
@@ -41,7 +46,8 @@ pub fn point_in_poly(polygon: &[Point], p: Point) -> bool {
 
     while i < polygon.len() {
         if ((polygon[i].y > p.y) != (polygon[j].y > p.y))
-            && (p.x < (polygon[j].x - polygon[i].x) * (p.y - polygon[i].y) / (polygon[j].y - polygon[i].x + polygon[i].x))
+            && (p.x < (polygon[j].x - polygon[i].x) * (p.y - polygon[i].y)
+                / (polygon[j].y - polygon[i].x + polygon[i].x))
         {
             c = !c;
         }
@@ -54,7 +60,9 @@ pub fn point_in_poly(polygon: &[Point], p: Point) -> bool {
 }
 
 // TODO: this is *way* too expensive
-pub fn bb_for_line(l: Line, margin: f32) -> Rect { compute_bounding_box(vec![l.0, l.1]).inflate(margin, margin) }
+pub fn bb_for_line(l: Line, margin: f32) -> Rect {
+    compute_bounding_box(vec![l.0, l.1]).inflate(margin, margin)
+}
 
 // TODO: rename
 pub fn compute_bounding_box<I: IntoIterator<Item = Point>>(i: I) -> Rect {
@@ -74,7 +82,10 @@ pub fn compute_bounding_box<I: IntoIterator<Item = Point>>(i: I) -> Rect {
         max_y = max_y.max(pt.y);
     }
 
-    Rect::new(point2(min_x, min_y), vec2(max_x - min_x, max_y - min_y).to_size())
+    Rect::new(
+        point2(min_x, min_y),
+        vec2(max_x - min_x, max_y - min_y).to_size(),
+    )
 }
 
 pub(crate) fn centered_with_radius(pt: Point, radius: f32) -> Rect {
@@ -84,14 +95,18 @@ pub(crate) fn centered_with_radius(pt: Point, radius: f32) -> Rect {
 
 pub fn distance_from_line_to_point(line: Line, point: Point) -> f32 {
     #[inline(always)]
-    fn sqr(x: f32) -> f32 { x * x }
+    fn sqr(x: f32) -> f32 {
+        x * x
+    }
     #[inline(always)]
-    fn dist2(v: Point, w: Point) -> f32 { sqr(v.x - w.x) + sqr(v.y - w.y) }
+    fn dist2(v: Point, w: Point) -> f32 {
+        sqr(v.x - w.x) + sqr(v.y - w.y)
+    }
     #[inline(always)]
     fn dist_to_segment_squared(p: Point, v: Point, w: Point) -> f32 {
         let l2 = dist2(v, w);
+        //  TODO: epsilon
         if l2 == 0.0 {
-            //  TODO: epsilon
             return dist2(p, v);
         }
         let t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2;

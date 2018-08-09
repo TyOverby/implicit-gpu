@@ -17,7 +17,11 @@ pub struct SharedInfo {
 #[derive(Clone)]
 enum CompilationContext {
     Base(Rc<RefCell<SharedInfo>>),
-    PositionMod { x: String, y: String, shared: Rc<RefCell<SharedInfo>> },
+    PositionMod {
+        x: String,
+        y: String,
+        shared: Rc<RefCell<SharedInfo>>,
+    },
 }
 
 pub fn compile(node: &Node) -> (String, SharedInfo) {
@@ -31,7 +35,10 @@ pub fn compile(node: &Node) -> (String, SharedInfo) {
     buffer.push('\n');
     writeln!(&mut buffer, "  buffer[pos] = {}; \n}}", final_result).unwrap();
 
-    let mut preamble = format!("{}\n{}", DIST_TO_LINE, r"__kernel void apply(__global float* buffer, ulong width");
+    let mut preamble = format!(
+        "{}\n{}",
+        DIST_TO_LINE, r"__kernel void apply(__global float* buffer, ulong width"
+    );
 
     for b in cc.dep_strings() {
         preamble.push_str(&format!(", __global float* {}", b));
@@ -54,10 +61,19 @@ pub fn compile(node: &Node) -> (String, SharedInfo) {
 fn comp(node: &Node, mut cc: CompilationContext, buff: &mut String) -> String {
     match *node {
         Node::Rect { x, y, w, h } => {
-            let (res, _dx, _dy, _out) = (cc.get_id("rect"), cc.get_id("dx"), cc.get_id("dy"), cc.get_id("out"));
+            let (res, _dx, _dy, _out) = (
+                cc.get_id("rect"),
+                cc.get_id("dx"),
+                cc.get_id("dy"),
+                cc.get_id("out"),
+            );
 
             buff.push('\n');
-            writeln!(buff, "  float {result} = INFINITY; float {result}_sign = 0.0;", result = res).unwrap();
+            writeln!(
+                buff,
+                "  float {result} = INFINITY; float {result}_sign = 0.0;",
+                result = res
+            ).unwrap();
             writeln!(buff, "  {{").unwrap();
             writeln!(
                 buff,
@@ -123,8 +139,20 @@ fn comp(node: &Node, mut cc: CompilationContext, buff: &mut String) -> String {
             buff.push('\n');
             writeln!(buff, "  float {result};", result = res).unwrap();
             writeln!(buff, "  {{").unwrap();
-            writeln!(buff, "    float {dx} = {x} - {cx};", dx = dx, x = cc.get_x(), cx = x).unwrap();
-            writeln!(buff, "    float {dy} = {y} - {cy};", dy = dy, y = cc.get_y(), cy = y).unwrap();
+            writeln!(
+                buff,
+                "    float {dx} = {x} - {cx};",
+                dx = dx,
+                x = cc.get_x(),
+                cx = x
+            ).unwrap();
+            writeln!(
+                buff,
+                "    float {dy} = {y} - {cy};",
+                dy = dy,
+                y = cc.get_y(),
+                cy = y
+            ).unwrap();
             writeln!(
                 buff,
                 "    {result} = sqrt({dx} * {dx} + {dy} * {dy}) - {radius};",
@@ -150,7 +178,13 @@ fn comp(node: &Node, mut cc: CompilationContext, buff: &mut String) -> String {
                 let res = cc.get_id("and");
 
                 buff.push('\n');
-                writeln!(buff, "  float {result} = max({a}, {b});", result = res, a = res_left, b = res_right,).unwrap();
+                writeln!(
+                    buff,
+                    "  float {result} = max({a}, {b});",
+                    result = res,
+                    a = res_left,
+                    b = res_right,
+                ).unwrap();
 
                 res
             }
@@ -168,7 +202,13 @@ fn comp(node: &Node, mut cc: CompilationContext, buff: &mut String) -> String {
                 let res = cc.get_id("or");
 
                 buff.push('\n');
-                writeln!(buff, "  float {result} = min({a}, {b});", result = res, a = res_left, b = res_right,).unwrap();
+                writeln!(
+                    buff,
+                    "  float {result} = min({a}, {b});",
+                    result = res,
+                    a = res_left,
+                    b = res_right,
+                ).unwrap();
 
                 res
             }
@@ -177,27 +217,59 @@ fn comp(node: &Node, mut cc: CompilationContext, buff: &mut String) -> String {
             let child_result = comp(target, cc.clone(), buff);
             let res = cc.get_id("not");
             buff.push('\n');
-            writeln!(buff, "  float {result} = -{val};", result = res, val = child_result).unwrap();
+            writeln!(
+                buff,
+                "  float {result} = -{val};",
+                result = res,
+                val = child_result
+            ).unwrap();
             res
         }
 
         Node::Translate { dx, dy, ref target } => {
             let (new_x, new_y) = (cc.get_id("x"), cc.get_id("y"));
             buff.push('\n');
-            writeln!(buff, "  float {new_x} = {old_x} - {dx};", new_x = new_x, old_x = cc.get_x(), dx = dx).unwrap();
-            writeln!(buff, "  float {new_y} = {old_y} - {dy};", new_y = new_y, old_y = cc.get_y(), dy = dy).unwrap();
+            writeln!(
+                buff,
+                "  float {new_x} = {old_x} - {dx};",
+                new_x = new_x,
+                old_x = cc.get_x(),
+                dx = dx
+            ).unwrap();
+            writeln!(
+                buff,
+                "  float {new_y} = {old_y} - {dy};",
+                new_y = new_y,
+                old_y = cc.get_y(),
+                dy = dy
+            ).unwrap();
 
             comp(target, cc.with_xy(new_x, new_y), buff)
         }
         Node::Scale { dx, dy, ref target } => {
             let (new_x, new_y) = (cc.get_id("x"), cc.get_id("y"));
             buff.push('\n');
-            writeln!(buff, "  float {new_x} = {old_x} / {dx};", new_x = new_x, old_x = cc.get_x(), dx = dx).unwrap();
-            writeln!(buff, "  float {new_y} = {old_y} / {dy};", new_y = new_y, old_y = cc.get_y(), dy = dy).unwrap();
+            writeln!(
+                buff,
+                "  float {new_x} = {old_x} / {dx};",
+                new_x = new_x,
+                old_x = cc.get_x(),
+                dx = dx
+            ).unwrap();
+            writeln!(
+                buff,
+                "  float {new_y} = {old_y} / {dy};",
+                new_y = new_y,
+                old_y = cc.get_y(),
+                dy = dy
+            ).unwrap();
 
             comp(target, cc.with_xy(new_x, new_y), buff)
         }
-        Node::Modulate { how_much, ref target } => {
+        Node::Modulate {
+            how_much,
+            ref target,
+        } => {
             let child_result = comp(target, cc.clone(), buff);
             let res = cc.get_id("modulate");
             buff.push('\n');
@@ -215,7 +287,12 @@ fn comp(node: &Node, mut cc: CompilationContext, buff: &mut String) -> String {
             let buffer_ref = cc.buffer_ref(group_id);
             let res = cc.get_id("other_group");
 
-            writeln!(buff, "float {result} = {buffer_ref}[pos];", result = res, buffer_ref = buffer_ref,).unwrap();
+            writeln!(
+                buff,
+                "float {result} = {buffer_ref}[pos];",
+                result = res,
+                buffer_ref = buffer_ref,
+            ).unwrap();
             res
         }
 
@@ -244,7 +321,11 @@ impl CompilationContext {
     }
 
     pub fn with_xy(&self, x: String, y: String) -> CompilationContext {
-        CompilationContext::PositionMod { x, y, shared: self.shared() }
+        CompilationContext::PositionMod {
+            x,
+            y,
+            shared: self.shared(),
+        }
     }
 
     pub fn buffer_ref(&mut self, group_id: GroupId) -> String {
@@ -284,7 +365,10 @@ impl CompilationContext {
     pub fn get_id(&mut self, prefix: &str) -> String {
         let shared = self.shared();
         let mut shared = shared.borrow_mut();
-        let &mut SharedInfo { ref mut identifier_id, .. } = &mut *shared;
+        let &mut SharedInfo {
+            ref mut identifier_id,
+            ..
+        } = &mut *shared;
 
         let r = format!("{}_{}", prefix, identifier_id);
         *identifier_id += 1;
@@ -294,7 +378,9 @@ impl CompilationContext {
     pub fn dep_strings(&self) -> Vec<String> {
         let shared = self.shared();
         let shared = shared.borrow();
-        let &SharedInfo { ref dep_strings, .. } = &*shared;
+        let &SharedInfo {
+            ref dep_strings, ..
+        } = &*shared;
         dep_strings.clone()
     }
 }

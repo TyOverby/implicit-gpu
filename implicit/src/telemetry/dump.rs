@@ -29,7 +29,10 @@ impl DumpTelemetry {
         }
     }
 
-    pub fn with_line_writer<F: 'static + Fn(PathBuf, &[((f32, f32), (f32, f32))])>(self, f: F) -> DumpTelemetry {
+    pub fn with_line_writer<F: 'static + Fn(PathBuf, &[((f32, f32), (f32, f32))])>(
+        self,
+        f: F,
+    ) -> DumpTelemetry {
         DumpTelemetry {
             line_writer: Some(Box::new(f)),
             ..self
@@ -60,11 +63,17 @@ impl DumpTelemetry {
     }
 }
 
-
 impl Telemetry for DumpTelemetry {
-    fn scene_started(&mut self) { ::flame::start("scene"); }
+    fn scene_started(&mut self) {
+        ::flame::start("scene");
+    }
 
-    fn shape_finished(&mut self, tloc: TelemetryLocation, buffer: &FieldBuffer, lines: &[((f32, f32), (f32, f32))]) {
+    fn shape_finished(
+        &mut self,
+        tloc: TelemetryLocation,
+        buffer: &FieldBuffer,
+        lines: &[((f32, f32), (f32, f32))],
+    ) {
         let _guard = ::flame::start_guard("telemetry shape_finished");
 
         save_field_buffer(buffer, self.shape_path(tloc, "field.png"), ColorMode::Debug);
@@ -116,22 +125,39 @@ impl Telemetry for DumpTelemetry {
         output_svg_linetype(file, lines.iter());
     }
 
-    fn intermediate_eval_basic(&mut self, tloc: TelemetryLocation, buffer: &FieldBuffer, program: &str, node: &Node) {
+    fn intermediate_eval_basic(
+        &mut self,
+        tloc: TelemetryLocation,
+        buffer: &FieldBuffer,
+        program: &str,
+        node: &Node,
+    ) {
         let _guard = ::flame::start_guard("telemetry intermediate_eval_basic");
 
-        save_field_buffer(buffer, self.intermediate_path(tloc, "field.png"), ColorMode::Debug);
+        save_field_buffer(
+            buffer,
+            self.intermediate_path(tloc, "field.png"),
+            ColorMode::Debug,
+        );
         if let Some(field_writer) = self.field_writer.as_ref() {
             (field_writer)(self.intermediate_path(tloc, "field.values"), buffer);
         }
 
         ::latin::file::write(self.intermediate_path(tloc, "shader.c"), program).unwrap();
-        ::latin::file::write(self.intermediate_path(tloc, "node.txt"), format!("{:#?}", node)).unwrap();
+        ::latin::file::write(
+            self.intermediate_path(tloc, "node.txt"),
+            format!("{:#?}", node),
+        ).unwrap();
     }
 
     fn intermediate_eval_poly(&mut self, tloc: TelemetryLocation, buffer: &FieldBuffer) {
         let _guard = ::flame::start_guard("telemetry intermediate_eval_poly");
 
-        save_field_buffer(buffer, self.intermediate_path(tloc, "field.png"), ColorMode::Debug);
+        save_field_buffer(
+            buffer,
+            self.intermediate_path(tloc, "field.png"),
+            ColorMode::Debug,
+        );
         if let Some(field_writer) = self.field_writer.as_ref() {
             (field_writer)(self.intermediate_path(tloc, "field.values"), buffer);
         }
@@ -161,8 +187,10 @@ impl Telemetry for DumpTelemetry {
         ::flame::end("scene");
         assert!(scene.figures.len() == 1);
         svg::write_to_file(self.scene_path(tloc, "scene.svg"), scene.figures[0].clone()).unwrap();
-        ::flame::dump_text_to_writer(File::create(self.scene_path(tloc, "scene.perf")).unwrap()).unwrap();
-        ::flame::dump_json(&mut File::create(self.scene_path(tloc, "scene.perfjson")).unwrap()).unwrap();
+        ::flame::dump_text_to_writer(File::create(self.scene_path(tloc, "scene.perf")).unwrap())
+            .unwrap();
+        ::flame::dump_json(&mut File::create(self.scene_path(tloc, "scene.perfjson")).unwrap())
+            .unwrap();
     }
 
     fn scene_bounding_box(&mut self, tloc: TelemetryLocation, x: f32, y: f32, w: f32, h: f32) {

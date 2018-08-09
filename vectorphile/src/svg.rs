@@ -27,17 +27,53 @@ impl<W: Write> DrawBackend for SvgBackend<W> {
 
         match command {
             StartShape(options) => {
-                let style = match (options.fill_color, options.stroke_color, options.stroke_size) {
-                    (Some(fc), Some(sc), sz) => format!("fill: rgb{:?}; stroke: rgb{:?}; stroke-width: {:?};", fc, sc, sz),
-                    (None, Some(sc), sz) => format!("fill: none; stroke: rgb{:?}; stroke-width: {:?};", sc, sz),
-                    (Some(fc), None, _) => format!("fill: rgb{:?}; stroke: none; stroke-width: none;", fc),
-                    (None, None, fc) => format!("fill: rgb(0, 0, 0); stroke: none; stroke-width: {};", fc),
+                let style = match (
+                    options.fill_color,
+                    options.stroke_color,
+                    options.stroke_size,
+                ) {
+                    (Some(fc), Some(sc), sz) => format!(
+                        "fill: rgb{:?}; stroke: rgb{:?}; stroke-width: {:?};",
+                        fc, sc, sz
+                    ),
+                    (None, Some(sc), sz) => {
+                        format!("fill: none; stroke: rgb{:?}; stroke-width: {:?};", sc, sz)
+                    }
+                    (Some(fc), None, _) => {
+                        format!("fill: rgb{:?}; stroke: none; stroke-width: none;", fc)
+                    }
+                    (None, None, fc) => {
+                        format!("fill: rgb(0, 0, 0); stroke: none; stroke-width: {};", fc)
+                    }
                 };
-                write!(&mut self.out, r#"    <path fill-rule="evenodd" style="{}" d=""#, style)
+                write!(
+                    &mut self.out,
+                    r#"    <path fill-rule="evenodd" style="{}" d=""#,
+                    style
+                )
             }
-            MoveTo { x, y } => write!(&mut self.out, "M{:.p$},{:.p$} ", x, y, p = self.float_precision),
-            LineTo { x, y } => write!(&mut self.out, "L{:.p$},{:.p$} ", x, y, p = self.float_precision),
-            CubicCurveTo { cx1, cy1, cx2, cy2, x, y } => unimplemented!(),
+            MoveTo { x, y } => write!(
+                &mut self.out,
+                "M{:.p$},{:.p$} ",
+                x,
+                y,
+                p = self.float_precision
+            ),
+            LineTo { x, y } => write!(
+                &mut self.out,
+                "L{:.p$},{:.p$} ",
+                x,
+                y,
+                p = self.float_precision
+            ),
+            CubicCurveTo {
+                cx1,
+                cy1,
+                cx2,
+                cy2,
+                x,
+                y,
+            } => unimplemented!(),
             QuadraticCurveTo { cx, cy, x, y } => unimplemented!(),
             ArcTo {
                 rx,
@@ -125,7 +161,10 @@ mod test {
     fn triangle_polygon() {
         assert_eq!(
             run_in_canvas(|canvas| {
-                canvas.draw_closed_polygon::<_, ()>(vec![point2(0.0, 0.0), point2(0.0, 50.0), point2(50.0, 0.0)], DrawOptions::default())?;
+                canvas.draw_closed_polygon::<_, ()>(
+                    vec![point2(0.0, 0.0), point2(0.0, 50.0), point2(50.0, 0.0)],
+                    DrawOptions::default(),
+                )?;
                 Ok(())
             }).trim(),
             r#"
@@ -140,7 +179,10 @@ mod test {
     fn triangle_polygon_reversed() {
         assert_eq!(
             run_in_canvas(|canvas| {
-                canvas.draw_closed_polygon::<_, ()>(vec![point2(50.0, 0.0), point2(0.0, 50.0), point2(0.0, 0.0)], DrawOptions::default())?;
+                canvas.draw_closed_polygon::<_, ()>(
+                    vec![point2(50.0, 0.0), point2(0.0, 50.0), point2(0.0, 0.0)],
+                    DrawOptions::default(),
+                )?;
                 Ok(())
             }).trim(),
             r#"
@@ -156,7 +198,11 @@ mod test {
         assert_eq!(
             run_in_canvas(|canvas| canvas.draw_holy_polygon::<_, _, ()>(
                 vec![vec![point2(50.0, 0.0), point2(0.0, 50.0), point2(0.0, 0.0)]],
-                vec![vec![point2(30.0, 10.0), point2(10.0, 30.0), point2(10.0, 10.0)]],
+                vec![vec![
+                    point2(30.0, 10.0),
+                    point2(10.0, 30.0),
+                    point2(10.0, 10.0),
+                ]],
                 DrawOptions::default(),
             )).trim(),
             r#"

@@ -3,7 +3,11 @@ use *;
 
 /// Remoes all line segments that can't possibly be part of
 /// a cycle.
-pub fn prune<P, I, S: Send + Sync + 'static>(segments: I, epsilon: f32, only_starts: bool) -> DualQuadTree<S>
+pub fn prune<P, I, S: Send + Sync + 'static>(
+    segments: I,
+    epsilon: f32,
+    only_starts: bool,
+) -> DualQuadTree<S>
 where
     I: IntoIterator<Item = P>,
     P: Into<smallvec::SmallVec<[Point<S>; 2]>>,
@@ -14,7 +18,11 @@ where
     dual_qt
 }
 
-fn prune_one_iter<S: Send + Sync + 'static>(dual_qt: &mut DualQuadTree<S>, epsilon: f32, only_starts: bool) -> bool {
+fn prune_one_iter<S: Send + Sync + 'static>(
+    dual_qt: &mut DualQuadTree<S>,
+    epsilon: f32,
+    only_starts: bool,
+) -> bool {
     let _guard = ::flame::start_guard("prune_one_iter");
     let mut made_progress = false;
 
@@ -32,7 +40,7 @@ fn prune_one_iter<S: Send + Sync + 'static>(dual_qt: &mut DualQuadTree<S>, epsil
             let d = || dual_qt.has_forward_neighbor(id, end, epsilon);
 
             let should_be_removed = (a || (!only_starts && b())) && (c || (!only_starts && d()));
-            if should_be_removed{
+            if should_be_removed {
                 None
             } else {
                 Some(id)

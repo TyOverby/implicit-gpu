@@ -1,23 +1,39 @@
-use super::Paths;
 use super::formats;
-use {flame, implicit, latin};
+use super::Paths;
 use implicit::telemetry;
 use std::path::PathBuf;
 use walkdir::WalkDir;
+use {flame, implicit, latin};
 
 pub enum Error {
     NoExpectedFiles,
-    CouldNotFind { file: String },
-    UnexpectedFile { file: String },
-    AabbMismatch { expected: String, actual: String },
-    SvgMismatch { expected: String, actual: String },
+    CouldNotFind {
+        file: String,
+    },
+    UnexpectedFile {
+        file: String,
+    },
+    AabbMismatch {
+        expected: String,
+        actual: String,
+    },
+    SvgMismatch {
+        expected: String,
+        actual: String,
+    },
     LineMismatch {
         expected: String,
         actual: String,
         message: String,
     },
-    CMismatch { expected: String, actual: String },
-    NodesMismatch { expected: String, actual: String },
+    CMismatch {
+        expected: String,
+        actual: String,
+    },
+    NodesMismatch {
+        expected: String,
+        actual: String,
+    },
     FieldMismatch {
         expected: String,
         actual: String,
@@ -29,28 +45,44 @@ impl ::std::fmt::Display for Error {
     fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> Result<(), ::std::fmt::Error> {
         match *self {
             Error::NoExpectedFiles => writeln!(formatter, "  • No Expected files found")?,
-            Error::CouldNotFind { ref file } => writeln!(formatter, "  • Could not find file {}", file)?,
-            Error::SvgMismatch { ref expected, ref actual } => {
+            Error::CouldNotFind { ref file } => {
+                writeln!(formatter, "  • Could not find file {}", file)?
+            }
+            Error::SvgMismatch {
+                ref expected,
+                ref actual,
+            } => {
                 writeln!(formatter, "  • svg files are not the same")?;
                 writeln!(formatter, "    expected file : {}", expected)?;
                 writeln!(formatter, "    actual file   : {}", actual)?;
             }
-            Error::AabbMismatch { ref expected, ref actual } => {
+            Error::AabbMismatch {
+                ref expected,
+                ref actual,
+            } => {
                 writeln!(formatter, "  • bounding box files are not the same")?;
                 writeln!(formatter, "    expected file : {}", expected)?;
                 writeln!(formatter, "    actual file   : {}", actual)?;
             }
-            Error::CMismatch { ref expected, ref actual } => {
+            Error::CMismatch {
+                ref expected,
+                ref actual,
+            } => {
                 writeln!(formatter, "  • c files are not the same")?;
                 writeln!(formatter, "    expected file : {}", expected)?;
                 writeln!(formatter, "    actual file   : {}", actual)?;
             }
-            Error::NodesMismatch { ref expected, ref actual } => {
+            Error::NodesMismatch {
+                ref expected,
+                ref actual,
+            } => {
                 writeln!(formatter, "  • nodes files are not the same")?;
                 writeln!(formatter, "    expected file : {}", expected)?;
                 writeln!(formatter, "    actual file   : {}", actual)?;
             }
-            Error::UnexpectedFile { ref file } => writeln!(formatter, "  • unexpected file {}", file)?,
+            Error::UnexpectedFile { ref file } => {
+                writeln!(formatter, "  • unexpected file {}", file)?
+            }
             Error::LineMismatch {
                 ref expected,
                 ref actual,
@@ -65,7 +97,11 @@ impl ::std::fmt::Display for Error {
                 ref actual,
                 ref message,
             } => {
-                writeln!(formatter, "  • field files are not the same ({})", message)?;
+                writeln!(
+                    formatter,
+                    "  • field files are not the same ({})",
+                    message
+                )?;
                 writeln!(formatter, "    expected file : {}", expected)?;
                 writeln!(formatter, "    actual file   : {}", actual)?;
             }
@@ -151,25 +187,33 @@ pub fn run_test(paths: &Paths) -> Result<(), Vec<Error>> {
                     message: e,
                 });
             },
-            "c" => if latin::file::read_string_utf8(&actual).unwrap() != latin::file::read_string_utf8(&expected).unwrap() {
+            "c" => if latin::file::read_string_utf8(&actual).unwrap()
+                != latin::file::read_string_utf8(&expected).unwrap()
+            {
                 errors.push(Error::CMismatch {
                     expected: expected.to_string_lossy().into_owned(),
                     actual: actual.to_string_lossy().into_owned(),
                 })
             },
-            "txt" => if latin::file::read_string_utf8(&actual).unwrap() != latin::file::read_string_utf8(&expected).unwrap() {
+            "txt" => if latin::file::read_string_utf8(&actual).unwrap()
+                != latin::file::read_string_utf8(&expected).unwrap()
+            {
                 errors.push(Error::NodesMismatch {
                     expected: expected.to_string_lossy().into_owned(),
                     actual: actual.to_string_lossy().into_owned(),
                 })
             },
-            "svg" => if latin::file::read_string_utf8(&actual).unwrap() != latin::file::read_string_utf8(&expected).unwrap() {
+            "svg" => if latin::file::read_string_utf8(&actual).unwrap()
+                != latin::file::read_string_utf8(&expected).unwrap()
+            {
                 errors.push(Error::SvgMismatch {
                     expected: expected.to_string_lossy().into_owned(),
                     actual: actual.to_string_lossy().into_owned(),
                 })
             },
-            "aabb" => if latin::file::read_string_utf8(&actual).unwrap() != latin::file::read_string_utf8(&expected).unwrap() {
+            "aabb" => if latin::file::read_string_utf8(&actual).unwrap()
+                != latin::file::read_string_utf8(&expected).unwrap()
+            {
                 errors.push(Error::AabbMismatch {
                     expected: expected.to_string_lossy().into_owned(),
                     actual: actual.to_string_lossy().into_owned(),

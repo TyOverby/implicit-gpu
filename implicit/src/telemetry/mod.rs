@@ -8,8 +8,8 @@ use opencl::FieldBuffer;
 use output::{OutputScene, OutputShape};
 use std::path::PathBuf;
 
-mod null;
 mod dump;
+mod null;
 mod svg_helpers;
 
 #[derive(Clone, Copy)]
@@ -39,7 +39,9 @@ impl TelemetryLocation {
         self.intermediate = 0;
     }
 
-    pub fn new_intermediate(&mut self) { self.intermediate += 1; }
+    pub fn new_intermediate(&mut self) {
+        self.intermediate += 1;
+    }
 
     fn t_figure_path(&self) -> PathBuf {
         let mut r = PathBuf::new();
@@ -64,7 +66,13 @@ impl TelemetryLocation {
 }
 
 pub trait Telemetry {
-    fn shape_finished(&mut self, _t: TelemetryLocation, _buffer: &FieldBuffer, _lines: &[((f32, f32), (f32, f32))]) {}
+    fn shape_finished(
+        &mut self,
+        _t: TelemetryLocation,
+        _buffer: &FieldBuffer,
+        _lines: &[((f32, f32), (f32, f32))],
+    ) {
+    }
 
     fn lines_0_input(&mut self, _t: TelemetryLocation, _lines: &[(Point, Point)]) {}
     fn lines_1_zero_area_removed(&mut self, _t: TelemetryLocation, _lines: &[(Point, Point)]) {}
@@ -72,7 +80,14 @@ pub trait Telemetry {
     fn lines_3_obvious_connected(&mut self, _t: TelemetryLocation, _lines: &[PathSegment]) {}
     fn lines_4_graph_stitched(&mut self, _t: TelemetryLocation, _lines: &[PathSegment]) {}
 
-    fn intermediate_eval_basic(&mut self, _t: TelemetryLocation, _buffer: &FieldBuffer, _program: &str, _node: &Node) {}
+    fn intermediate_eval_basic(
+        &mut self,
+        _t: TelemetryLocation,
+        _buffer: &FieldBuffer,
+        _program: &str,
+        _node: &Node,
+    ) {
+    }
     fn intermediate_eval_poly(&mut self, _t: TelemetryLocation, _buffer: &FieldBuffer) {}
     fn figure_finished(&mut self, _t: TelemetryLocation, _figure: &[OutputShape]) {}
 
