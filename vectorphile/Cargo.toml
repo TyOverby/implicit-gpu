@@ -6,4 +6,4 @@ license = "MIT/Apache-2.0"
 description = "A library for vector drawing with multiple output types"
 
 [dependencies]
-euclid = "0.16.0"
+euclid = "0.19.0"

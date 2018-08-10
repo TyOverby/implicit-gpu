@@ -26,6 +26,7 @@ pub mod geometry;
 pub mod lines;
 pub mod marching;
 pub mod nodes;
+pub mod ocaml_compat;
 pub mod opencl;
 pub mod output;
 pub mod polygon;

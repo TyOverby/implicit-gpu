@@ -18,8 +18,13 @@ serde_derive = "1.*.*"
 latin = "0.1.5"
 rand = "0.3.15"
 serde_json = "1.*.*"
-snoot = "0.1.*"
-euclid = "0.16.0"
+
+[dependencies.euclid]
+version = "0.19.0"
+features = ["serde"]
+
+[dependencies.snoot]
+path = "../../snoot"
 
 [dependencies.line-stitch]
 path = "../line-stitch"

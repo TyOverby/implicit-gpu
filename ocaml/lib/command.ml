@@ -19,7 +19,7 @@ type command =
   | Concurrently of command list
   | Serially of command list
   | Define of id * value
-  | Freeze of id * id
+  | Freeze of { target: id; id: id }
   | Export of id
 [@@deriving sexp]
 
