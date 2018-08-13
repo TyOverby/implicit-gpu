@@ -1,0 +1,60 @@
+{
+  "figures": [
+    {
+      "shapes": [
+        {
+          "implicit": {
+            "kind": "modulate",
+            "how_much": 1,
+            "target": {
+              "kind": "freeze",
+              "target": {
+                "kind": "and",
+                "children": [
+                  {
+                    "kind": "and",
+                    "children": [
+                      {
+                        "kind": "circle",
+                        "x": 0,
+                        "y": 0,
+                        "r": 20
+                      },
+                      {
+                        "kind": "not",
+                        "target": {
+                          "kind": "circle",
+                          "x": 0,
+                          "y": 0,
+                          "r": 10
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "not",
+                    "target": {
+                      "kind": "rect",
+                      "x": 0,
+                      "y": 0,
+                      "w": 20,
+                      "h": 20
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "color": [
+            0,
+            0,
+            0
+          ],
+          "draw_mode": "filled"
+        }
+      ]
+    }
+  ],
+  "unit": "px",
+  "simplify": false
+}
