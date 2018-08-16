@@ -163,3 +163,11 @@ expectation_test!{
         compile(&shape, w);
     }
 }
+
+expectation_test!{
+    fn expectation_test_cl_for_field(provider: &mut ::expectation::Provider) {
+        let w = provider.text_writer("out.c");
+        let shape = Shape::Terminal(BasicTerminals::Field(5));
+        compile(&shape, w);
+    }
+}
