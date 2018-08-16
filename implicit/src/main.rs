@@ -2,7 +2,7 @@ extern crate implicit;
 extern crate serde;
 extern crate snoot;
 
-use implicit::ocaml_compat::*;
+use implicit::ocaml::*;
 use snoot::serde_serialization::{deserialize, DeserializeResult};
 use std::io::stdin;
 use std::io::Read;

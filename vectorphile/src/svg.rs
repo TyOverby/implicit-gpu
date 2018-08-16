@@ -114,6 +114,7 @@ for (let path of paths) {
     }
 }
 
+/*
 #[cfg(test)]
 mod test {
     use super::super::*;
@@ -213,3 +214,4 @@ mod test {
         )
     }
 }
+*/

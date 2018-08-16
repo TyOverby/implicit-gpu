@@ -34,3 +34,6 @@ path = "../aabb-quadtree"
 
 [dependencies.vectorphile]
 path = "../vectorphile"
+
+[dependencies.expectation]
+path = "../../expectation/expectation"

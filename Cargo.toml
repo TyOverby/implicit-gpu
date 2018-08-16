@@ -1,8 +1,7 @@
 [workspace]
 members = [
     "./implicit",
-    "./testsuite",
     "./aabb-quadtree",
     "./line-stitch",
-    "vectorphile"
+    "./vectorphile"
 ]
