@@ -2,9 +2,11 @@
 use expectation::extensions::*;
 use ocaml::*;
 use std::cell::Cell;
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 use std::io::{Result as IoResult, Write};
 use std::rc::Rc;
+
+const DIST_TO_LINE: &'static str = include_str!("./polygon/dist_to_line.c");
 
 pub struct CompileResult<W> {
     dependencies: Vec<Id>,
@@ -34,26 +36,52 @@ impl NameGen {
     }
 }
 
-pub fn compile<W: Write>(shape: &Shape, mut writer: W) -> CompileResult<W> {
-    let mut deps = HashSet::new();
-    let _result = compile_impl(shape, &mut writer, &mut deps, &NameGen::new()).unwrap();
-    CompileResult {
-        text: writer,
-        dependencies: deps.into_iter().collect(),
+pub fn compile<W: Write>(shape: &Shape, mut writer: W) -> IoResult<CompileResult<W>> {
+    let mut deps = BTreeSet::new();
+    let mut program_body: Vec<u8> = vec![];
+    let mut uses_dist_to_line = false;
+    let result = compile_impl(shape, &mut program_body, &mut uses_dist_to_line, &mut deps, &NameGen::new())?;
+    let deps = deps.into_iter().collect();
+
+    if uses_dist_to_line {
+        writeln!(writer, "{}", DIST_TO_LINE);
     }
+    write!(writer, "{}", r"__kernel void apply(__global float* buffer, ulong width")?;
+
+    for b in &deps {
+        write!(writer, ", __global float* field__{}", b)?;
+    }
+    write!(writer, r#") {{
+  size_t x = get_global_id(0);
+  size_t y = get_global_id(1);
+  size_t pos = x + y * width;
+  float x_s = (float) x;
+  float y_s = (float) y;
+"#)?;
+
+    writer.write_all(&program_body)?;
+    writeln!(writer, "buffer[pos] = {};", result)?;
+    writeln!(writer, "}}");
+
+
+    Ok(CompileResult {
+        text: writer,
+        dependencies: deps,
+    })
 }
 
 pub fn get_xy(matrix: &Matrix) -> (String, String) {
     if !matrix.approx_eq(&Matrix::identity()) {
         panic!("Only identity matrixes in circles are supported at the moment");
     }
-    return ("x".into(), "y".into());
+    return ("x_s".into(), "y_s".into());
 }
 
 fn compile_impl<W: Write>(
     shape: &Shape,
     mut out: &mut W,
-    deps: &mut HashSet<Id>,
+    uses_dist_to_line: &mut bool,
+    deps: &mut BTreeSet<Id>,
     namegen: &NameGen,
 ) -> IoResult<String> {
     use ocaml::Shape::*;
@@ -78,6 +106,7 @@ fn compile_impl<W: Write>(
             Ok(res)
         }
         Terminal(BasicTerminals::Rect(Rect { x, y, w, h, mat })) => {
+            *uses_dist_to_line = true;
             let (x, y, w, h) = (*x, *y, *w, *h);
             let res = namegen.gen("rect");
             let (mx, my) = get_xy(mat);
@@ -141,7 +170,7 @@ fn compile_impl<W: Write>(
 
             writeln!(out, "float {} = -INFINITY;", result)?;
             for shape in shapes {
-                let intermediate = compile_impl(shape, out, deps, namegen)?;
+                let intermediate = compile_impl(shape, out,uses_dist_to_line, deps, namegen)?;
                 writeln!(out, "{res} = max({res}, {int})", res=result, int=intermediate)?;
             }
             writeln!(out, "// End Intersection {}", result);
@@ -155,7 +184,7 @@ fn compile_impl<W: Write>(
             writeln!(out, "// Union {}", result);
             writeln!(out, "float {} = INFINITY;", result)?;
             for shape in shapes {
-                let intermediate = compile_impl(shape, out, deps, namegen)?;
+                let intermediate = compile_impl(shape, out,uses_dist_to_line, deps, namegen)?;
                 writeln!(out, "{res} = min({res}, {int})", res=result, int=intermediate)?;
             }
             writeln!(out, "// End Union {}", result);
@@ -164,7 +193,7 @@ fn compile_impl<W: Write>(
         Not(shape) => {
             let result = namegen.gen("negate");
             writeln!(out, "// Not {}", result);
-            let intermediate = compile_impl(shape, out, deps, namegen)?;
+            let intermediate = compile_impl(shape, out, uses_dist_to_line, deps, namegen)?;
             writeln!(out, "float {} = -{};", result, intermediate)?;
             writeln!(out, "// End Not {}", result);
             Ok(result)
@@ -172,7 +201,7 @@ fn compile_impl<W: Write>(
         Modulate(shape, how_much) => {
             let result = namegen.gen("modulate");
             writeln!(out, "// Modulate {}", result);
-            let intermediate = compile_impl(shape, out, deps, namegen)?;
+            let intermediate = compile_impl(shape, out, uses_dist_to_line, deps, namegen)?;
             writeln!(out, "float {} = {} + {};", result, intermediate, how_much)?;
             writeln!(out, "// End Modulate {}", result);
             Ok(result)
