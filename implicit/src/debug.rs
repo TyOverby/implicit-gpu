@@ -1,10 +1,11 @@
-use image_crate::{ImageBuffer, ImageRgb8, Rgb, PNG};
+use image_crate::{ImageBuffer, ImageRgb8, Rgb, PNG, DynamicImage};
 
 use opencl::FieldBuffer;
 use std::f32::{INFINITY, NEG_INFINITY};
 use std::fs::File;
 use std::io::BufWriter;
 use std::path::Path;
+use std::io::Write;
 
 #[derive(Copy, Clone)]
 pub enum ColorMode {
@@ -12,16 +13,16 @@ pub enum ColorMode {
     Debug,
 }
 
-pub fn save_field_buffer<P: AsRef<Path>>(buffer: &FieldBuffer, name: P, color_mode: ColorMode) {
+pub fn save_field_buffer<W: Write>(buffer: &FieldBuffer, writer: W, color_mode: ColorMode) {
     let _guard = ::flame::start_guard("save_field_buffer");
     let samples = ::flame::span_of("fetch values", || buffer.values());
-    save_image(&samples, buffer.width(), name, color_mode);
+    save_image(&samples, buffer.width(), writer, color_mode);
 }
 
-pub fn save_image<P: AsRef<Path>>(
+fn save_image<W: Write>(
     samples: &[f32],
     width: usize,
-    file_name: P,
+    mut writer: W,
     color_mode: ColorMode,
 ) {
     let _guard = ::flame::start_guard("save_image");
@@ -64,12 +65,6 @@ pub fn save_image<P: AsRef<Path>>(
         *pixel = Rgb(color);
     }
 
-    ::std::fs::create_dir_all({
-        let mut dir = file_name.as_ref().to_path_buf();
-        dir.pop();
-        dir
-    }).unwrap();
-    let fout = File::create(file_name).unwrap();
-    let mut fout = BufWriter::new(fout);
-    ImageRgb8(buf).save(&mut fout, PNG).unwrap();
+    let d: DynamicImage = ImageRgb8(buf);
+    d.write_to(&mut writer, PNG).unwrap();
 }

@@ -29,5 +29,6 @@ pub mod lines;
 pub mod marching;
 pub mod ocaml;
 pub mod opencl;
+pub mod exec;
 pub mod output;
 pub mod polygon;

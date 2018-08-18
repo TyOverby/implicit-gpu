@@ -9,8 +9,8 @@ use std::rc::Rc;
 const DIST_TO_LINE: &'static str = include_str!("./polygon/dist_to_line.c");
 
 pub struct CompileResult<W> {
-    dependencies: Vec<Id>,
-    text: W,
+    pub dependencies: Vec<Id>,
+    pub text: W,
 }
 
 struct NameGen {
@@ -70,7 +70,7 @@ pub fn compile<W: Write>(shape: &Shape, mut writer: W) -> IoResult<CompileResult
     })
 }
 
-pub fn get_xy(matrix: &Matrix) -> (String, String) {
+fn get_xy(matrix: &Matrix) -> (String, String) {
     if !matrix.approx_eq(&Matrix::identity()) {
         panic!("Only identity matrixes in circles are supported at the moment");
     }
@@ -79,7 +79,7 @@ pub fn get_xy(matrix: &Matrix) -> (String, String) {
 
 fn compile_impl<W: Write>(
     shape: &Shape,
-    mut out: &mut W,
+    out: &mut W,
     uses_dist_to_line: &mut bool,
     deps: &mut BTreeSet<Id>,
     namegen: &NameGen,
@@ -116,7 +116,7 @@ fn compile_impl<W: Write>(
                 let mut dist_to_line = |ax: f32, ay: f32, bx: f32, by: f32| {
                     writeln!(
                         out,
-                        "{res} = min({res}, dist_to_line({mx}, {my}, {ax}, {ay}, {bx}, {by}))",
+                        "{res} = min({res}, dist_to_line({mx}, {my}, {ax}, {ay}, {bx}, {by}));",
                         res = res,
                         mx = mx,
                         my = my,

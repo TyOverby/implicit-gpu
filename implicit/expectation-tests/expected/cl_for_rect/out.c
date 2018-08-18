@@ -53,10 +53,10 @@ __kernel void apply(__global float* buffer, ulong width) {
 
 // Rect _rect_0
 float _rect_0 = INFINITY;
-_rect_0 = min(_rect_0, dist_to_line(x_s, y_s, 0, 5, 10, 5))
-_rect_0 = min(_rect_0, dist_to_line(x_s, y_s, 10, 5, 10, 25))
-_rect_0 = min(_rect_0, dist_to_line(x_s, y_s, 10, 25, 0, 25))
-_rect_0 = min(_rect_0, dist_to_line(x_s, y_s, 0, 25, 0, 5))
+_rect_0 = min(_rect_0, dist_to_line(x_s, y_s, 0, 5, 10, 5));
+_rect_0 = min(_rect_0, dist_to_line(x_s, y_s, 10, 5, 10, 25));
+_rect_0 = min(_rect_0, dist_to_line(x_s, y_s, 10, 25, 0, 25));
+_rect_0 = min(_rect_0, dist_to_line(x_s, y_s, 0, 25, 0, 5));
 if (x_s > 0 && y_s > 5 && x_s < (0 + 10) && y_s < (5 + 20))
 _rect_0 = -_rect_0;
 // End Rect _rect_0
