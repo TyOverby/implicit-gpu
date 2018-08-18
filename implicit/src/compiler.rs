@@ -1,3 +1,4 @@
+#[cfg(test)]
 use expectation::extensions::*;
 use ocaml::*;
 use std::cell::Cell;
@@ -35,7 +36,7 @@ impl NameGen {
 
 pub fn compile<W: Write>(shape: &Shape, mut writer: W) -> CompileResult<W> {
     let mut deps = HashSet::new();
-    let result = compile_impl(shape, &mut writer, &mut deps, &NameGen::new()).unwrap();
+    let _result = compile_impl(shape, &mut writer, &mut deps, &NameGen::new()).unwrap();
     CompileResult {
         text: writer,
         dependencies: deps.into_iter().collect(),
@@ -51,7 +52,7 @@ pub fn get_xy(matrix: &Matrix) -> (String, String) {
 
 fn compile_impl<W: Write>(
     shape: &Shape,
-    mut out: W,
+    mut out: &mut W,
     deps: &mut HashSet<Id>,
     namegen: &NameGen,
 ) -> IoResult<String> {
@@ -130,7 +131,52 @@ fn compile_impl<W: Write>(
             writeln!(out, "float {res} = field__{id}[x][y];", res = res, id = id)?;
             Ok(res)
         }
-        _ => unimplemented!(),
+        Intersection(shapes) => {
+            if shapes.is_empty() {
+                panic!("empty intersection");
+            }
+
+            let result = namegen.gen("intersection");
+            writeln!(out, "// Intersection {}", result);
+
+            writeln!(out, "float {} = -INFINITY;", result)?;
+            for shape in shapes {
+                let intermediate = compile_impl(shape, out, deps, namegen)?;
+                writeln!(out, "{res} = max({res}, {int})", res=result, int=intermediate)?;
+            }
+            writeln!(out, "// End Intersection {}", result);
+            Ok(result)
+        }
+        Union(shapes) => {
+            if shapes.is_empty() {
+                panic!("empty union");
+            }
+            let result = namegen.gen("union");
+            writeln!(out, "// Union {}", result);
+            writeln!(out, "float {} = INFINITY;", result)?;
+            for shape in shapes {
+                let intermediate = compile_impl(shape, out, deps, namegen)?;
+                writeln!(out, "{res} = min({res}, {int})", res=result, int=intermediate)?;
+            }
+            writeln!(out, "// End Union {}", result);
+            Ok(result)
+        }
+        Not(shape) => {
+            let result = namegen.gen("negate");
+            writeln!(out, "// Not {}", result);
+            let intermediate = compile_impl(shape, out, deps, namegen)?;
+            writeln!(out, "float {} = -{};", result, intermediate)?;
+            writeln!(out, "// End Not {}", result);
+            Ok(result)
+        }
+        Modulate(shape, how_much) => {
+            let result = namegen.gen("modulate");
+            writeln!(out, "// Modulate {}", result);
+            let intermediate = compile_impl(shape, out, deps, namegen)?;
+            writeln!(out, "float {} = {} + {};", result, intermediate, how_much)?;
+            writeln!(out, "// End Modulate {}", result);
+            Ok(result)
+        }
     }
 }
 
@@ -168,6 +214,45 @@ expectation_test!{
     fn expectation_test_cl_for_field(provider: &mut ::expectation::Provider) {
         let w = provider.text_writer("out.c");
         let shape = Shape::Terminal(BasicTerminals::Field(5));
+        compile(&shape, w);
+    }
+}
+
+expectation_test!{
+    fn expectation_test_cl_for_intersection(provider: &mut ::expectation::Provider) {
+        let w = provider.text_writer("out.c");
+        let shape = Shape::Intersection(vec![
+            Shape::Terminal(BasicTerminals::Field(5)),
+            Shape::Terminal(BasicTerminals::Field(6))]);
+        compile(&shape, w);
+    }
+}
+
+expectation_test!{
+    fn expectation_test_cl_for_union(provider: &mut ::expectation::Provider) {
+        let w = provider.text_writer("out.c");
+        let shape = Shape::Union(vec![
+            Shape::Terminal(BasicTerminals::Field(5)),
+            Shape::Terminal(BasicTerminals::Field(6))]);
+        compile(&shape, w);
+    }
+}
+
+expectation_test!{
+    fn expectation_test_cl_for_not(provider: &mut ::expectation::Provider) {
+        let w = provider.text_writer("out.c");
+        let shape = Shape::Not(Box::new(
+            Shape::Terminal(BasicTerminals::Field(5))));
+        compile(&shape, w);
+    }
+}
+
+expectation_test!{
+    fn expectation_test_cl_for_modulate(provider: &mut ::expectation::Provider) {
+        let w = provider.text_writer("out.c");
+        let shape = Shape::Modulate(Box::new(
+            Shape::Terminal(BasicTerminals::Field(5))),
+            23.53);
         compile(&shape, w);
     }
 }
