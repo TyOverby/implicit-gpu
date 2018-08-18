@@ -5,6 +5,6 @@ __kernel void apply(__global float* buffer, ulong width, __global float* field__
   float x_s = (float) x;
   float y_s = (float) y;
 
-float _field_0 = field__5[x][y];
+float _field_0 = field__5[pos];
 buffer[pos] = _field_0;
 }

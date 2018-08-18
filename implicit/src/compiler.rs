@@ -1,5 +1,5 @@
 #[cfg(test)]
-use expectation::extensions::*;
+use expectation::{Provider, extensions::*};
 use ocaml::*;
 use std::cell::Cell;
 use std::collections::BTreeSet;
@@ -157,7 +157,7 @@ fn compile_impl<W: Write>(
         Terminal(BasicTerminals::Field(id)) => {
             deps.insert(*id);
             let res = namegen.gen("field");
-            writeln!(out, "float {res} = field__{id}[x][y];", res = res, id = id)?;
+            writeln!(out, "float {res} = field__{id}[pos];", res = res, id = id)?;
             Ok(res)
         }
         Intersection(shapes) => {
@@ -210,7 +210,7 @@ fn compile_impl<W: Write>(
 }
 
 expectation_test!{
-    fn expectation_test_cl_for_circle(provider: &mut ::expectation::Provider) {
+    fn expectation_test_cl_for_circle(mut provider: Provider) {
         use euclid::*;
         let w = provider.text_writer("out.c");
         let shape = Shape::Terminal(BasicTerminals::Circle(Circle {
@@ -224,7 +224,7 @@ expectation_test!{
 }
 
 expectation_test!{
-    fn expectation_test_cl_for_rect(provider: &mut ::expectation::Provider) {
+    fn expectation_test_cl_for_rect(mut provider: Provider) {
         use euclid::*;
         use ocaml::Rect;
         let w = provider.text_writer("out.c");
@@ -240,7 +240,7 @@ expectation_test!{
 }
 
 expectation_test!{
-    fn expectation_test_cl_for_field(provider: &mut ::expectation::Provider) {
+    fn expectation_test_cl_for_field(mut provider: Provider) {
         let w = provider.text_writer("out.c");
         let shape = Shape::Terminal(BasicTerminals::Field(5));
         compile(&shape, w);
@@ -248,7 +248,7 @@ expectation_test!{
 }
 
 expectation_test!{
-    fn expectation_test_cl_for_intersection(provider: &mut ::expectation::Provider) {
+    fn expectation_test_cl_for_intersection(mut provider: Provider) {
         let w = provider.text_writer("out.c");
         let shape = Shape::Intersection(vec![
             Shape::Terminal(BasicTerminals::Field(5)),
@@ -258,7 +258,7 @@ expectation_test!{
 }
 
 expectation_test!{
-    fn expectation_test_cl_for_union(provider: &mut ::expectation::Provider) {
+    fn expectation_test_cl_for_union(mut provider: Provider) {
         let w = provider.text_writer("out.c");
         let shape = Shape::Union(vec![
             Shape::Terminal(BasicTerminals::Field(5)),
@@ -268,7 +268,7 @@ expectation_test!{
 }
 
 expectation_test!{
-    fn expectation_test_cl_for_not(provider: &mut ::expectation::Provider) {
+    fn expectation_test_cl_for_not(mut provider: Provider) {
         let w = provider.text_writer("out.c");
         let shape = Shape::Not(Box::new(
             Shape::Terminal(BasicTerminals::Field(5))));
@@ -277,7 +277,7 @@ expectation_test!{
 }
 
 expectation_test!{
-    fn expectation_test_cl_for_modulate(provider: &mut ::expectation::Provider) {
+    fn expectation_test_cl_for_modulate(mut provider: Provider) {
         let w = provider.text_writer("out.c");
         let shape = Shape::Modulate(Box::new(
             Shape::Terminal(BasicTerminals::Field(5))),
