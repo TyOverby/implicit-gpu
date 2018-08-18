@@ -4,3 +4,4 @@ Cargo.lock
 .vscode
 *.log
 **/*.rs.bk
+.idea
