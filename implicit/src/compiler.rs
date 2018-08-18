@@ -1,5 +1,5 @@
 #[cfg(test)]
-use expectation::{Provider, extensions::*};
+use expectation::{extensions::*, Provider};
 use ocaml::*;
 use std::cell::Cell;
 use std::collections::BTreeSet;
@@ -23,14 +23,13 @@ impl NameGen {
             id: Rc::new(Cell::new(0)),
         }
     }
+
     fn gen(&self, n: &str) -> String {
         let id = self.id.get();
         self.id.set(id + 1);
         format!("_{}_{}", n, id)
     }
-    fn gen_2(&self, n1: &str, n2: &str) -> (String, String) {
-        (self.gen(n1), self.gen(n2))
-    }
+
     fn gen_3(&self, n1: &str, n2: &str, n3: &str) -> (String, String, String) {
         (self.gen(n1), self.gen(n2), self.gen(n3))
     }
@@ -40,29 +39,41 @@ pub fn compile<W: Write>(shape: &Shape, mut writer: W) -> IoResult<CompileResult
     let mut deps = BTreeSet::new();
     let mut program_body: Vec<u8> = vec![];
     let mut uses_dist_to_line = false;
-    let result = compile_impl(shape, &mut program_body, &mut uses_dist_to_line, &mut deps, &NameGen::new())?;
+    let result = compile_impl(
+        shape,
+        &mut program_body,
+        &mut uses_dist_to_line,
+        &mut deps,
+        &NameGen::new(),
+    )?;
     let deps = deps.into_iter().collect();
 
     if uses_dist_to_line {
         writeln!(writer, "{}", DIST_TO_LINE);
     }
-    write!(writer, "{}", r"__kernel void apply(__global float* buffer, ulong width")?;
+    write!(
+        writer,
+        "{}",
+        r"__kernel void apply(__global float* buffer, ulong width"
+    )?;
 
     for b in &deps {
         write!(writer, ", __global float* field__{}", b)?;
     }
-    write!(writer, r#") {{
+    write!(
+        writer,
+        r#") {{
   size_t x = get_global_id(0);
   size_t y = get_global_id(1);
   size_t pos = x + y * width;
   float x_s = (float) x;
   float y_s = (float) y;
-"#)?;
+"#
+    )?;
 
     writer.write_all(&program_body)?;
     writeln!(writer, "buffer[pos] = {};", result)?;
     writeln!(writer, "}}");
-
 
     Ok(CompileResult {
         text: writer,
@@ -170,8 +181,13 @@ fn compile_impl<W: Write>(
 
             writeln!(out, "float {} = -INFINITY;", result)?;
             for shape in shapes {
-                let intermediate = compile_impl(shape, out,uses_dist_to_line, deps, namegen)?;
-                writeln!(out, "{res} = max({res}, {int})", res=result, int=intermediate)?;
+                let intermediate = compile_impl(shape, out, uses_dist_to_line, deps, namegen)?;
+                writeln!(
+                    out,
+                    "{res} = max({res}, {int});",
+                    res = result,
+                    int = intermediate
+                )?;
             }
             writeln!(out, "// End Intersection {}", result);
             Ok(result)
@@ -184,8 +200,13 @@ fn compile_impl<W: Write>(
             writeln!(out, "// Union {}", result);
             writeln!(out, "float {} = INFINITY;", result)?;
             for shape in shapes {
-                let intermediate = compile_impl(shape, out,uses_dist_to_line, deps, namegen)?;
-                writeln!(out, "{res} = min({res}, {int})", res=result, int=intermediate)?;
+                let intermediate = compile_impl(shape, out, uses_dist_to_line, deps, namegen)?;
+                writeln!(
+                    out,
+                    "{res} = min({res}, {int})",
+                    res = result,
+                    int = intermediate
+                )?;
             }
             writeln!(out, "// End Union {}", result);
             Ok(result)
@@ -219,7 +240,7 @@ expectation_test!{
             r: 10.0,
             mat: Transform2D::identity(),
         }));
-        compile(&shape, w);
+        compile(&shape, w).unwrap();
     }
 }
 
@@ -235,7 +256,7 @@ expectation_test!{
             h: 20.0,
             mat: Transform2D::identity(),
         }));
-        compile(&shape, w);
+        compile(&shape, w).unwrap();
     }
 }
 
@@ -243,7 +264,7 @@ expectation_test!{
     fn expectation_test_cl_for_field(mut provider: Provider) {
         let w = provider.text_writer("out.c");
         let shape = Shape::Terminal(BasicTerminals::Field(5));
-        compile(&shape, w);
+        compile(&shape, w).unwrap();
     }
 }
 
@@ -253,7 +274,7 @@ expectation_test!{
         let shape = Shape::Intersection(vec![
             Shape::Terminal(BasicTerminals::Field(5)),
             Shape::Terminal(BasicTerminals::Field(6))]);
-        compile(&shape, w);
+        compile(&shape, w).unwrap();
     }
 }
 
@@ -263,7 +284,7 @@ expectation_test!{
         let shape = Shape::Union(vec![
             Shape::Terminal(BasicTerminals::Field(5)),
             Shape::Terminal(BasicTerminals::Field(6))]);
-        compile(&shape, w);
+        compile(&shape, w).unwrap();
     }
 }
 
@@ -272,7 +293,7 @@ expectation_test!{
         let w = provider.text_writer("out.c");
         let shape = Shape::Not(Box::new(
             Shape::Terminal(BasicTerminals::Field(5))));
-        compile(&shape, w);
+        compile(&shape, w).unwrap();
     }
 }
 
@@ -282,6 +303,6 @@ expectation_test!{
         let shape = Shape::Modulate(Box::new(
             Shape::Terminal(BasicTerminals::Field(5))),
             23.53);
-        compile(&shape, w);
+        compile(&shape, w).unwrap();
     }
 }

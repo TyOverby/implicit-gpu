@@ -2,9 +2,6 @@ use image_crate::{ImageBuffer, ImageRgb8, Rgb, PNG, DynamicImage};
 
 use opencl::FieldBuffer;
 use std::f32::{INFINITY, NEG_INFINITY};
-use std::fs::File;
-use std::io::BufWriter;
-use std::path::Path;
 use std::io::Write;
 
 #[derive(Copy, Clone)]

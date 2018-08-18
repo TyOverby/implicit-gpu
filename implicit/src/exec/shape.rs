@@ -96,3 +96,35 @@ expectation_test!{
         run_shape_helper(&ctx, shape, 22, 22, provider, &[circle_field]);
     }
 }
+
+expectation_test!{
+    fn expectation_test_exec_field_intersection(provider: Provider) {
+        use euclid::*;
+        use ocaml::*;
+
+        let ctx = OpenClContext::default();
+        let circle_1 = Shape::Terminal(BasicTerminals::Circle(Circle {
+            x: 11.0,
+            y: 11.0,
+            r: 10.0,
+            mat: Transform2D::identity(),
+        }));
+        let circle_2 = Shape::Terminal(BasicTerminals::Circle(Circle {
+            x: 15.0,
+            y: 15.0,
+            r: 10.0,
+            mat: Transform2D::identity(),
+        }));
+
+        let circle_field_1 = run_shape_helper(&ctx, circle_1, 22, 22, provider.subdir("c1"), &[]);
+        let circle_field_2 = run_shape_helper(&ctx, circle_2, 22, 22, provider.subdir("c2"), &[]);
+
+        let shape =
+            Shape::Intersection(vec![
+                Shape::Terminal(BasicTerminals::Field(0)),
+                Shape::Terminal(BasicTerminals::Field(1)),
+            ]);
+
+        run_shape_helper(&ctx, shape, 22, 22, provider, &[circle_field_1, circle_field_2]);
+    }
+}

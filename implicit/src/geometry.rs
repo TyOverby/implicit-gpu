@@ -46,8 +46,9 @@ pub fn point_in_poly(polygon: &[Point], p: Point) -> bool {
 
     while i < polygon.len() {
         if ((polygon[i].y > p.y) != (polygon[j].y > p.y))
-            && (p.x < (polygon[j].x - polygon[i].x) * (p.y - polygon[i].y)
-                / (polygon[j].y - polygon[i].x + polygon[i].x))
+            && (p.x
+                < (polygon[j].x - polygon[i].x) * (p.y - polygon[i].y)
+                    / (polygon[j].y - polygon[i].x + polygon[i].x))
         {
             c = !c;
         }
@@ -88,6 +89,7 @@ pub fn compute_bounding_box<I: IntoIterator<Item = Point>>(i: I) -> Rect {
     )
 }
 
+#[allow(dead_code)]
 pub(crate) fn centered_with_radius(pt: Point, radius: f32) -> Rect {
     let half = euclid::vec2(radius, radius);
     euclid::TypedRect::new(pt - half, (half * 2.0).to_size())
