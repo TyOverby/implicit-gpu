@@ -1,35 +1,35 @@
+// Local crates
 extern crate aabb_quadtree;
-extern crate euclid;
-extern crate flame;
-extern crate fnv;
-extern crate image as image_crate;
-extern crate itertools;
-extern crate latin;
-extern crate lazy_static;
 extern crate line_stitch;
-extern crate ocl;
-extern crate rand;
-extern crate serde;
-#[macro_use]
-extern crate serde_derive;
-extern crate typed_arena;
-extern crate vecmath;
 extern crate vectorphile;
 
+// My crates
 #[macro_use]
 extern crate expectation;
+
+// External Crates
+extern crate euclid;
+extern crate flame;
+extern crate image;
+extern crate itertools;
+extern crate lazy_static;
+extern crate ocl;
+extern crate serde;
+extern crate vecmath;
+
+#[macro_use]
+extern crate serde_derive;
 #[cfg(test)]
 extern crate serde_json;
 
-pub mod compiler;
-pub mod debug;
-pub mod export;
-pub mod geometry;
-pub mod lines;
-pub mod marching;
-pub mod ocaml;
-pub mod opencl;
+mod compiler;
+mod debug;
+mod geometry;
+mod inspector;
+mod lines;
+mod marching;
+mod opencl;
+mod polygon;
+
 pub mod exec;
-pub mod output;
-pub mod polygon;
-pub mod inspector;
+pub mod ocaml;

@@ -1,5 +1,5 @@
 use aabb_quadtree;
-use euclid::{self, point2, UnknownUnit};
+use euclid::{self, UnknownUnit};
 use line_stitch;
 
 pub type Point = euclid::Point2D<f32>;
@@ -39,27 +39,6 @@ impl aabb_quadtree::Spatial<UnknownUnit> for Line {
     }
 }
 
-pub fn point_in_poly(polygon: &[Point], p: Point) -> bool {
-    let mut i = 0;
-    let mut j = polygon.len() - 1;
-    let mut c = false;
-
-    while i < polygon.len() {
-        if ((polygon[i].y > p.y) != (polygon[j].y > p.y))
-            && (p.x
-                < (polygon[j].x - polygon[i].x) * (p.y - polygon[i].y)
-                    / (polygon[j].y - polygon[i].x + polygon[i].x))
-        {
-            c = !c;
-        }
-
-        j = i;
-        i += 1;
-    }
-
-    return c;
-}
-
 // TODO: this is *way* too expensive
 pub fn bb_for_line(l: Line, margin: f32) -> Rect {
     compute_bounding_box(vec![l.0, l.1]).inflate(margin, margin)
@@ -93,33 +72,4 @@ pub fn compute_bounding_box<I: IntoIterator<Item = Point>>(i: I) -> Rect {
 pub(crate) fn centered_with_radius(pt: Point, radius: f32) -> Rect {
     let half = euclid::vec2(radius, radius);
     euclid::TypedRect::new(pt - half, (half * 2.0).to_size())
-}
-
-pub fn distance_from_line_to_point(line: Line, point: Point) -> f32 {
-    #[inline(always)]
-    fn sqr(x: f32) -> f32 {
-        x * x
-    }
-    #[inline(always)]
-    fn dist2(v: Point, w: Point) -> f32 {
-        sqr(v.x - w.x) + sqr(v.y - w.y)
-    }
-    #[inline(always)]
-    fn dist_to_segment_squared(p: Point, v: Point, w: Point) -> f32 {
-        let l2 = dist2(v, w);
-        //  TODO: epsilon
-        if l2 == 0.0 {
-            return dist2(p, v);
-        }
-        let t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2;
-        if t < 0.0 {
-            dist2(p, v)
-        } else if t > 1.0 {
-            dist2(p, w)
-        } else {
-            dist2(p, point2(v.x + t * (w.x - v.x), v.y + t * (w.y - v.y)))
-        }
-    }
-
-    dist_to_segment_squared(point, line.0, line.1).sqrt()
 }

@@ -1,6 +1,8 @@
+#![cfg_attr(not(test), allow(dead_code))]
+
 use euclid::TypedPoint2D;
 use geometry::PathSegment;
-use image_crate::{DynamicImage, ImageBuffer, ImageRgb8, Rgb, PNG};
+use image::{DynamicImage, ImageBuffer, ImageRgb8, Rgb, PNG};
 
 use opencl::FieldBuffer;
 use std::f32::{INFINITY, NEG_INFINITY};
