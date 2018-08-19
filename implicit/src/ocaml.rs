@@ -1,7 +1,8 @@
-use euclid::Transform2D;
+use euclid::{Point2D, Transform2D};
 
 pub type Id = u32;
 pub type Matrix = Transform2D<f32>;
+pub type Point = Point2D<f32>;
 
 #[derive(Deserialize, Debug)]
 #[allow(dead_code)]
@@ -26,12 +27,6 @@ pub struct Rect {
     pub mat: Matrix,
 }
 
-#[derive(Deserialize, Debug)]
-#[allow(dead_code)]
-pub struct Point {
-    pub x: f32,
-    pub y: f32,
-}
 #[derive(Deserialize, Debug)]
 #[allow(dead_code)]
 pub struct Polygon {

@@ -83,7 +83,7 @@ pub fn compile<W: Write>(shape: &Shape, mut writer: W) -> IoResult<CompileResult
 
 fn get_xy(matrix: &Matrix) -> (String, String) {
     if !matrix.approx_eq(&Matrix::identity()) {
-        panic!("Only identity matrixes in circles are supported at the moment");
+        panic!("Only identity matrixes are supported at the moment");
     }
     return ("x_s".into(), "y_s".into());
 }
