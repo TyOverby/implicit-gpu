@@ -9,7 +9,7 @@ const PROGRAM: &'static str = concat!(
 // TODO: rewrite this function so that it just takes &[f32]
 pub fn run_poly<I>(
     points: I,
-    signfield: Option<FieldBuffer>,
+    signfield: Option<&FieldBuffer>,
     width: usize,
     height: usize,
     pos_mod: Option<(f32, f32)>,
@@ -75,7 +75,7 @@ pub fn run_poly_raw_no_sign(
 
 pub fn run_poly_raw_with_sign(
     lines: LineBuffer,
-    signfield: FieldBuffer,
+    signfield: &FieldBuffer,
     width: usize,
     height: usize,
     pos_mod: Option<(f32, f32)>,

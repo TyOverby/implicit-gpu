@@ -99,5 +99,5 @@ __kernel void apply_with_sign(__global float *buffer, __global float *signbuffer
         }
     }
 
-    buffer[pos] = -copysign(minimum_abs, signbuffer[pos]);
+    buffer[pos] = copysign(minimum_abs, signbuffer[pos]);
 }

@@ -203,7 +203,7 @@ fn compile_impl<W: Write>(
                 let intermediate = compile_impl(shape, out, uses_dist_to_line, deps, namegen)?;
                 writeln!(
                     out,
-                    "{res} = min({res}, {int})",
+                    "{res} = min({res}, {int});",
                     res = result,
                     int = intermediate
                 )?;
