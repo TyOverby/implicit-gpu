@@ -8,8 +8,15 @@ use ocaml::Shape;
 
 pub fn exec_freeze(ctx: &OpenClContext, field: &FieldBuffer) -> FieldBuffer {
     let (width, height) = field.size();
-    let (lines_buffer, _count) = ::marching::run_marching(&field, ctx);
-    run_poly_raw_with_sign(lines_buffer, field, width, height, None, ctx)
+    let (lines_buffer, count) = ::marching::run_marching(&field, ctx);
+    run_poly_raw_with_sign(
+        lines_buffer,
+        field,
+        width,
+        height,
+        count as usize,
+        ctx,
+    )
 }
 
 #[cfg(test)]

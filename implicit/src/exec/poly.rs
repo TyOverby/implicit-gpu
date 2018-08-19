@@ -11,7 +11,7 @@ pub fn exec_poly(ctx: &OpenClContext, poly: Polygon, width: usize, height: usize
     if !poly.mat.approx_eq(&Transform2D::identity()) {
         panic!("Only identity matrixes in polygons are supported at the moment");
     }
-    run_poly(poly.points, None, width, height, None, ctx).unwrap()
+    run_poly(poly.points, None, width, height, ctx).unwrap()
 }
 
 expectation_test!{

@@ -1,12 +1,12 @@
 
-__kernel void apply_no_sign(__global float *buffer, ulong width, __global float *lines, ulong count, float dx, float dy)
+__kernel void apply_no_sign(__global float *buffer, ulong width, __global float *lines, ulong count)
 {
     size_t x = get_global_id(0);
     size_t y = get_global_id(1);
     size_t pos = x + y * width;
 
-    float x_s = (float)x - dx;
-    float y_s = (float)y - dy;
+    float x_s = (float)x;
+    float y_s = (float)y;
 
     if (count < 2)
     {
@@ -56,14 +56,14 @@ __kernel void apply_no_sign(__global float *buffer, ulong width, __global float 
     buffer[pos] = -minimum;
 }
 
-__kernel void apply_with_sign(__global float *buffer, __global float *signbuffer, ulong width, __global float *lines, ulong count, float dx, float dy)
+__kernel void apply_with_sign(__global float *buffer, __global float *signbuffer, ulong width, __global float *lines, ulong count)
 {
     size_t x = get_global_id(0);
     size_t y = get_global_id(1);
     size_t pos = x + y * width;
 
-    float x_s = (float)x - dx;
-    float y_s = (float)y - dy;
+    float x_s = (float)x;
+    float y_s = (float)y;
 
     if (count < 2)
     {

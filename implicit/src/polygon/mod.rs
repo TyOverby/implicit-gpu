@@ -12,7 +12,6 @@ pub fn run_poly<I>(
     signfield: Option<&FieldBuffer>,
     width: usize,
     height: usize,
-    pos_mod: Option<(f32, f32)>,
     ctx: &OpenClContext,
 ) -> Option<FieldBuffer>
 where
@@ -36,12 +35,13 @@ where
     }
 
     let buffer = ctx.line_buffer(&buffer[..]);
+    let buffer_len = buffer.size();
 
     match signfield {
         Some(sf) => Some(run_poly_raw_with_sign(
-            buffer, sf, width, height, pos_mod, ctx,
+            buffer, sf, width, height, buffer_len, ctx,
         )),
-        None => Some(run_poly_raw_no_sign(buffer, width, height, pos_mod, ctx)),
+        None => Some(run_poly_raw_no_sign(buffer, width, height, ctx)),
     }
 }
 
@@ -49,14 +49,11 @@ pub fn run_poly_raw_no_sign(
     lines: LineBuffer,
     width: usize,
     height: usize,
-    pos_mod: Option<(f32, f32)>,
     ctx: &OpenClContext,
 ) -> FieldBuffer {
     let _guard = ::flame::start_guard("run_poly_raw");
     let out = ctx.field_buffer(width, height, None);
     let kernel = ctx.compile("apply_no_sign", PROGRAM);
-
-    let pos_mod = pos_mod.unwrap_or((0.0, 0.0));
 
     let exec = kernel
         .queue(ctx.queue().clone())
@@ -64,9 +61,7 @@ pub fn run_poly_raw_no_sign(
         .arg_buf(out.buffer())
         .arg_scl(width as u64)
         .arg_buf(lines.buffer())
-        .arg_scl(lines.size())
-        .arg_scl(pos_mod.0)
-        .arg_scl(pos_mod.1);
+        .arg_scl(lines.size());
     unsafe {
         exec.enq().unwrap();
     }
@@ -78,14 +73,12 @@ pub fn run_poly_raw_with_sign(
     signfield: &FieldBuffer,
     width: usize,
     height: usize,
-    pos_mod: Option<(f32, f32)>,
+    count: usize,
     ctx: &OpenClContext,
 ) -> FieldBuffer {
     let _guard = ::flame::start_guard("run_poly_raw");
     let out = ctx.field_buffer(width, height, None);
     let kernel = ctx.compile("apply_with_sign", PROGRAM);
-
-    let pos_mod = pos_mod.unwrap_or((0.0, 0.0));
 
     let exec = kernel
         .queue(ctx.queue().clone())
@@ -94,9 +87,7 @@ pub fn run_poly_raw_with_sign(
         .arg_buf(signfield.buffer())
         .arg_scl(width as u64)
         .arg_buf(lines.buffer())
-        .arg_scl(lines.size())
-        .arg_scl(pos_mod.0)
-        .arg_scl(pos_mod.1);
+        .arg_scl(count);
     unsafe {
         exec.enq().unwrap();
     }
