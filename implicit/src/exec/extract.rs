@@ -5,6 +5,8 @@ use opencl::{FieldBuffer, OpenClContext};
 use expectation::{extensions::TextDiffExtension, Provider};
 #[cfg(test)]
 use ocaml::Shape;
+#[cfg(test)]
+use std::io::Write;
 
 pub fn extract_lines(ctx: &OpenClContext, field: &FieldBuffer) -> Vec<PathSegment> {
     use euclid::point2;
@@ -24,12 +26,8 @@ pub fn extract_lines(ctx: &OpenClContext, field: &FieldBuffer) -> Vec<PathSegmen
 }
 
 #[cfg(test)]
-fn run_shape_paths(shape: Shape, width: usize, height: usize, mut provider: Provider) {
+pub fn print_path_segments<W: Write>(mut out: W, extracted: Vec<PathSegment>) {
     use euclid::TypedPoint2D;
-    use exec::exec_shape;
-    use opencl::OpenClContext;
-    use std::io::Write;
-
     pub fn is_clockwise<K>(pts: &[TypedPoint2D<f32, K>]) -> bool {
         assert!(pts.len() > 0);
         let mut total = 0.0f32;
@@ -46,12 +44,6 @@ fn run_shape_paths(shape: Shape, width: usize, height: usize, mut provider: Prov
         total > 0.0
     }
 
-    let ctx = OpenClContext::default();
-    let buffer = exec_shape(&ctx, shape, width, height, |_| unimplemented!());
-    let mut extracted = extract_lines(&ctx, &buffer);
-    extracted.sort();
-
-    let mut out = provider.text_writer("out.lines.txt");
     writeln!(out, "{} line segments", extracted.len());
     for (i, segment) in extracted.into_iter().enumerate() {
         writeln!(out);
@@ -62,6 +54,20 @@ fn run_shape_paths(shape: Shape, width: usize, height: usize, mut provider: Prov
             writeln!(out, "{:?}", point);
         }
     }
+}
+
+#[cfg(test)]
+fn run_shape_paths(shape: Shape, width: usize, height: usize, mut provider: Provider) {
+    use exec::exec_shape;
+    use opencl::OpenClContext;
+
+    let ctx = OpenClContext::default();
+    let buffer = exec_shape(&ctx, shape, width, height, |_| unimplemented!());
+    let mut extracted = extract_lines(&ctx, &buffer);
+    extracted.sort();
+
+    let mut out = provider.text_writer("out.lines.txt");
+    print_path_segments(out, extracted);
 }
 
 expectation_test!{

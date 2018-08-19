@@ -9,7 +9,7 @@ use polygon::run_poly;
 
 pub fn exec_poly(ctx: &OpenClContext, poly: Polygon, width: usize, height: usize) -> FieldBuffer {
     if !poly.mat.approx_eq(&Transform2D::identity()) {
-        panic!("Only identity matrixes in circles are supported at the moment");
+        panic!("Only identity matrixes in polygons are supported at the moment");
     }
     run_poly(poly.points, None, width, height, None, ctx).unwrap()
 }
