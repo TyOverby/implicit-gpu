@@ -42,7 +42,7 @@ fn run_shape_helper(
     shape: Shape,
     width: usize,
     height: usize,
-    mut provider: Provider,
+    provider: Provider,
     fields: &[FieldBuffer],
 ) -> FieldBuffer {
     use debug::*;

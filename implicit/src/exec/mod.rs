@@ -9,6 +9,7 @@ pub use self::poly::*;
 pub use self::shape::*;
 
 use geometry::PathSegment;
+use inspector::*;
 use ocaml::*;
 use opencl::{FieldBuffer, OpenClContext};
 use std::collections::HashMap;
@@ -16,11 +17,24 @@ use std::collections::HashMap;
 #[cfg(test)]
 use expectation::{extensions::TextDiffExtension, Provider};
 
-pub fn exec(command: Command, width: usize, height: usize) -> HashMap<Id, Vec<PathSegment>> {
+pub fn exec(
+    command: Command,
+    inspector: BoxedInspector,
+    width: usize,
+    height: usize,
+) -> HashMap<Id, Vec<PathSegment>> {
     let ctx = OpenClContext::default();
     let mut mapping = HashMap::new();
     let mut output = HashMap::new();
-    exec_inner(&ctx, command, &mut mapping, &mut output, width, height);
+    exec_inner(
+        &ctx,
+        command,
+        &mut mapping,
+        &mut output,
+        inspector,
+        width,
+        height,
+    );
     output
 }
 
@@ -29,29 +43,41 @@ fn exec_inner(
     command: Command,
     mapping: &mut HashMap<Id, FieldBuffer>,
     output: &mut HashMap<Id, Vec<PathSegment>>,
+    inspector: BoxedInspector,
     width: usize,
     height: usize,
 ) {
     match command {
         Command::Define(id, Value::BasicShape(shape)) => {
             let field = exec_shape(ctx, shape, width, height, |id| mapping[&id].clone());
+            inspector.write_field(&format!("shape_{}", id), &field);
             mapping.insert(id, field);
         }
         Command::Define(id, Value::Polygon(poly)) => {
             let field = exec_poly(ctx, poly, width, height);
+            inspector.write_field(&format!("poly_{}", id), &field);
             mapping.insert(id, field);
         }
         Command::Freeze { target, id } => {
             let field = exec_freeze(ctx, &mapping[&target]);
+            inspector.write_field(&format!("freeze_{}", id), &field);
             mapping.insert(id, field);
         }
         Command::Concurrently(commands) | Command::Serially(commands) => {
-            for command in commands {
-                exec_inner(ctx, command, mapping, output, width, height);
+            for (i, command) in commands.into_iter().enumerate() {
+                exec_inner(
+                    ctx,
+                    command,
+                    mapping,
+                    output,
+                    inspector.specialize(&format!("instr_{}", i)),
+                    width,
+                    height,
+                );
             }
         }
         Command::Export(id) => {
-            let lines = extract_lines(ctx, &mapping[&id]);
+            let lines = extract_lines(ctx, inspector, &mapping[&id]);
             output.insert(id, lines);
         }
     }
@@ -74,10 +100,10 @@ expectation_test!{
             Command::Export(0)
         ]);
 
-        let out = exec(program, 22, 22);
+        let out = exec(program, provider.duplicate(), 22, 22);
         for (id, lines) in out {
-            let writer = provider.text_writer(format!("id_{}.lines.txt", id));
-            print_path_segments(writer, lines);
+            let writer = provider.text_writer(format!("export_{}.lines.txt", id));
+            print_path_segments(writer, &lines);
         }
     }
 }
@@ -122,10 +148,10 @@ expectation_test!{
             Command::Export(2),
         ]);
 
-        let out = exec(program, 22, 22);
+        let out = exec(program, provider.duplicate(), 22, 22);
         for (id, lines) in out {
-            let writer = provider.text_writer(format!("id_{}.lines.txt", id));
-            print_path_segments(writer, lines);
+            let writer = provider.text_writer(format!("export_{}.lines.txt", id));
+            print_path_segments(writer, &lines);
         }
     }
 }

@@ -13,7 +13,7 @@ pub fn exec_freeze(ctx: &OpenClContext, field: &FieldBuffer) -> FieldBuffer {
 }
 
 #[cfg(test)]
-fn freeze_shape_helper(shape: Shape, width: usize, height: usize, mut provider: Provider) {
+fn freeze_shape_helper(shape: Shape, width: usize, height: usize, provider: Provider) {
     use debug::*;
     use exec::exec_shape;
 

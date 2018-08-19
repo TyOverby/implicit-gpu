@@ -1,4 +1,5 @@
 use geometry::PathSegment;
+use inspector::*;
 use opencl::{FieldBuffer, OpenClContext};
 
 #[cfg(test)]
@@ -8,7 +9,11 @@ use ocaml::Shape;
 #[cfg(test)]
 use std::io::Write;
 
-pub fn extract_lines(ctx: &OpenClContext, field: &FieldBuffer) -> Vec<PathSegment> {
+pub fn extract_lines(
+    ctx: &OpenClContext,
+    inspector: BoxedInspector,
+    field: &FieldBuffer,
+) -> Vec<PathSegment> {
     use euclid::point2;
     use itertools::Itertools;
     use lines::connect_lines;
@@ -22,11 +27,11 @@ pub fn extract_lines(ctx: &OpenClContext, field: &FieldBuffer) -> Vec<PathSegmen
         .map(|(a, b, c, d)| (point2(a, b), point2(c, d)))
         .collect::<Vec<_>>();
 
-    connect_lines(lines)
+    connect_lines(lines, inspector)
 }
 
 #[cfg(test)]
-pub fn print_path_segments<W: Write>(mut out: W, extracted: Vec<PathSegment>) {
+pub fn print_path_segments<W: Write>(mut out: W, extracted: &[PathSegment]) {
     use euclid::TypedPoint2D;
     pub fn is_clockwise<K>(pts: &[TypedPoint2D<f32, K>]) -> bool {
         assert!(pts.len() > 0);
@@ -45,29 +50,29 @@ pub fn print_path_segments<W: Write>(mut out: W, extracted: Vec<PathSegment>) {
     }
 
     writeln!(out, "{} line segments", extracted.len());
-    for (i, segment) in extracted.into_iter().enumerate() {
+    for (i, segment) in extracted.iter().enumerate() {
         writeln!(out);
         writeln!(out, "Line Segment {} ", i);
         writeln!(out, "{} points", segment.path.len());
         writeln!(out, "Clockwise? {}", is_clockwise(&segment.path[..]));
-        for point in segment {
+        for point in &segment.path[..] {
             writeln!(out, "{:?}", point);
         }
     }
 }
 
 #[cfg(test)]
-fn run_shape_paths(shape: Shape, width: usize, height: usize, mut provider: Provider) {
+fn run_shape_paths(shape: Shape, width: usize, height: usize, provider: Provider) {
     use exec::exec_shape;
     use opencl::OpenClContext;
 
     let ctx = OpenClContext::default();
     let buffer = exec_shape(&ctx, shape, width, height, |_| unimplemented!());
-    let mut extracted = extract_lines(&ctx, &buffer);
+    let mut extracted = extract_lines(&ctx, provider.duplicate(), &buffer);
     extracted.sort();
 
-    let mut out = provider.text_writer("out.lines.txt");
-    print_path_segments(out, extracted);
+    let out = provider.text_writer("out.lines.txt");
+    print_path_segments(out, &extracted);
 }
 
 expectation_test!{
