@@ -5,7 +5,6 @@ pub type Matrix = Transform2D<f32>;
 pub type Point = Point2D<f32>;
 
 #[derive(Deserialize, Debug)]
-#[allow(dead_code)]
 pub struct Circle {
     pub x: f32,
     pub y: f32,
@@ -16,7 +15,6 @@ pub struct Circle {
 }
 
 #[derive(Deserialize, Debug)]
-#[allow(dead_code)]
 pub struct Rect {
     pub x: f32,
     pub y: f32,
@@ -28,7 +26,6 @@ pub struct Rect {
 }
 
 #[derive(Deserialize, Debug)]
-#[allow(dead_code)]
 pub struct Polygon {
     pub points: Vec<Point>,
 
@@ -37,17 +34,15 @@ pub struct Polygon {
 }
 
 #[derive(Deserialize, Debug)]
-#[allow(dead_code)]
-pub enum BasicTerminals {
+pub enum Terminal{
     Circle(Circle),
     Rect(Rect),
     Field(Id),
 }
 
 #[derive(Deserialize, Debug)]
-#[allow(dead_code)]
 pub enum Shape {
-    Terminal(BasicTerminals),
+    Terminal(Terminal),
     Not(Box<Shape>),
     Union(Vec<Shape>),
     Intersection(Vec<Shape>),
@@ -55,14 +50,12 @@ pub enum Shape {
 }
 
 #[derive(Deserialize, Debug)]
-#[allow(dead_code)]
 pub enum Value {
     BasicShape(Shape),
     Polygon(Polygon),
 }
 
 #[derive(Deserialize, Debug)]
-#[allow(dead_code)]
 pub enum Command {
     Concurrently(Vec<Command>),
     Serially(Vec<Command>),

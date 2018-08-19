@@ -63,7 +63,7 @@ expectation_test!{
         use ocaml::*;
 
         let ctx = OpenClContext::default();
-        let shape = Shape::Terminal(BasicTerminals::Circle(Circle {
+        let shape = Shape::Terminal(Terminal::Circle(Circle {
             x: 11.0,
             y: 11.0,
             r: 10.0,
@@ -81,7 +81,7 @@ expectation_test!{
         use ocaml::Rect;
 
         let ctx = OpenClContext::default();
-        let shape = Shape::Terminal(BasicTerminals::Rect(Rect {
+        let shape = Shape::Terminal(Terminal::Rect(Rect {
             x: 1.0,
             y: 1.0,
             w: 20.0,
@@ -99,7 +99,7 @@ expectation_test!{
         use ocaml::*;
 
         let ctx = OpenClContext::default();
-        let circle = Shape::Terminal(BasicTerminals::Circle(Circle {
+        let circle = Shape::Terminal(Terminal::Circle(Circle {
             x: 11.0,
             y: 11.0,
             r: 10.0,
@@ -108,7 +108,7 @@ expectation_test!{
 
         let circle_field = run_shape_helper(&ctx, circle, 22, 22, provider.subdir("inner"), &[]);
 
-        let shape = Shape::Terminal(BasicTerminals::Field(0));
+        let shape = Shape::Terminal(Terminal::Field(0));
 
         run_shape_helper(&ctx, shape, 22, 22, provider, &[circle_field]);
     }
@@ -120,13 +120,13 @@ expectation_test!{
         use ocaml::*;
 
         let ctx = OpenClContext::default();
-        let circle_1 = Shape::Terminal(BasicTerminals::Circle(Circle {
+        let circle_1 = Shape::Terminal(Terminal::Circle(Circle {
             x: 11.0,
             y: 11.0,
             r: 10.0,
             mat: Transform2D::identity(),
         }));
-        let circle_2 = Shape::Terminal(BasicTerminals::Circle(Circle {
+        let circle_2 = Shape::Terminal(Terminal::Circle(Circle {
             x: 15.0,
             y: 15.0,
             r: 10.0,
@@ -138,8 +138,8 @@ expectation_test!{
 
         let shape =
             Shape::Intersection(vec![
-                Shape::Terminal(BasicTerminals::Field(0)),
-                Shape::Terminal(BasicTerminals::Field(1)),
+                Shape::Terminal(Terminal::Field(0)),
+                Shape::Terminal(Terminal::Field(1)),
             ]);
 
         run_shape_helper(&ctx, shape, 22, 22, provider, &[circle_field_1, circle_field_2]);

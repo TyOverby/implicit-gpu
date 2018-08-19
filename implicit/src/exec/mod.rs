@@ -89,7 +89,7 @@ expectation_test!{
         use euclid::*;
         use ocaml::*;
 
-        let shape = Shape::Terminal(BasicTerminals::Circle(Circle {
+        let shape = Shape::Terminal(Terminal::Circle(Circle {
             x: 11.0,
             y: 11.0,
             r: 10.0,
@@ -115,7 +115,7 @@ expectation_test!{
         use ocaml::*;
         use debug::print_path_segments;
 
-        let shape = Shape::Terminal(BasicTerminals::Circle(Circle {
+        let shape = Shape::Terminal(Terminal::Circle(Circle {
             x: 11.0,
             y: 11.0,
             r: 10.0,
@@ -137,8 +137,8 @@ expectation_test!{
         };
 
         let combiner = Shape::Intersection(vec![
-            Shape::Terminal(BasicTerminals::Field(0)),
-            Shape::Terminal(BasicTerminals::Field(1)),
+            Shape::Terminal(Terminal::Field(0)),
+            Shape::Terminal(Terminal::Field(1)),
         ]);
 
         let program = Command::Serially(vec![

@@ -1,5 +1,5 @@
 language: rust
-env: 
+env:
     - RUST_BACKTRACE=1 RUST_TEST_THREADS=1
 rust:
     - stable
@@ -15,5 +15,3 @@ matrix:
 script:
     - cargo test --all
     - cargo test --all --release
-    - cd testsuite && cargo run 
-    - cd testsuite && cargo run --release

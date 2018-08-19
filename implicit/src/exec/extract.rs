@@ -48,7 +48,7 @@ expectation_test!{
         use euclid::*;
         use ocaml::*;
 
-        let shape = Shape::Terminal(BasicTerminals::Circle(Circle {
+        let shape = Shape::Terminal(Terminal::Circle(Circle {
             x: 11.0,
             y: 11.0,
             r: 10.0,
@@ -64,14 +64,14 @@ expectation_test!{
         use euclid::*;
         use ocaml::*;
 
-        let a = Shape::Terminal(BasicTerminals::Circle(Circle {
+        let a = Shape::Terminal(Terminal::Circle(Circle {
             x: 11.0,
             y: 11.0,
             r: 10.0,
             mat: Transform2D::identity(),
         }));
 
-        let b = Shape::Terminal(BasicTerminals::Circle(Circle {
+        let b = Shape::Terminal(Terminal::Circle(Circle {
             x: 11.0,
             y: 11.0,
             r: 5.0,

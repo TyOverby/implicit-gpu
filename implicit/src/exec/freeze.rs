@@ -9,14 +9,7 @@ use ocaml::Shape;
 pub fn exec_freeze(ctx: &OpenClContext, field: &FieldBuffer) -> FieldBuffer {
     let (width, height) = field.size();
     let (lines_buffer, count) = ::marching::run_marching(&field, ctx);
-    run_poly_raw_with_sign(
-        lines_buffer,
-        field,
-        width,
-        height,
-        count as usize,
-        ctx,
-    )
+    run_poly_raw_with_sign(lines_buffer, field, width, height, count as usize, ctx)
 }
 
 #[cfg(test)]
@@ -45,7 +38,7 @@ expectation_test!{
         use euclid::*;
         use ocaml::*;
 
-        let shape = Shape::Terminal(BasicTerminals::Circle(Circle {
+        let shape = Shape::Terminal(Terminal::Circle(Circle {
             x: 11.0,
             y: 11.0,
             r: 10.0,
@@ -61,14 +54,14 @@ expectation_test!{
         use euclid::*;
         use ocaml::*;
 
-        let a = Shape::Terminal(BasicTerminals::Circle(Circle {
+        let a = Shape::Terminal(Terminal::Circle(Circle {
             x: 11.0,
             y: 11.0,
             r: 10.0,
             mat: Transform2D::identity(),
         }));
 
-        let b = Shape::Terminal(BasicTerminals::Circle(Circle {
+        let b = Shape::Terminal(Terminal::Circle(Circle {
             x: 11.0,
             y: 11.0,
             r: 5.0,
@@ -86,14 +79,14 @@ expectation_test!{
         use euclid::*;
         use ocaml::*;
 
-        let a = Shape::Terminal(BasicTerminals::Circle(Circle {
+        let a = Shape::Terminal(Terminal::Circle(Circle {
             x: 11.0,
             y: 11.0,
             r: 10.0,
             mat: Transform2D::identity(),
         }));
 
-        let b = Shape::Terminal(BasicTerminals::Circle(Circle {
+        let b = Shape::Terminal(Terminal::Circle(Circle {
             x: 21.0,
             y: 11.0,
             r: 10.0,

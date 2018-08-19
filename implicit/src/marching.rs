@@ -1,6 +1,6 @@
 use opencl::{FieldBuffer, LineBuffer, OpenClContext};
 
-const PROGRAM: &'static str = include_str!("marching.c");
+const PROGRAM: &'static str = include_str!("shaders/marching.c");
 
 pub fn run_marching(input: &FieldBuffer, ctx: &OpenClContext) -> (LineBuffer, u32) {
     let _guard = ::flame::start_guard("opencl marching [run_marching]");

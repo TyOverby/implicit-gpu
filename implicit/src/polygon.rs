@@ -2,8 +2,8 @@ use geometry::Point;
 use opencl::{FieldBuffer, LineBuffer, OpenClContext};
 
 const PROGRAM: &'static str = concat!(
-    include_str!("./dist_to_line.c"),
-    include_str!("./polygon.c")
+    include_str!("shaders/dist_to_line.c"),
+    include_str!("shaders/polygon.c")
 );
 
 // TODO: rewrite this function so that it just takes &[f32]

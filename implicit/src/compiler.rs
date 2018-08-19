@@ -6,7 +6,7 @@ use std::collections::BTreeSet;
 use std::io::{Result as IoResult, Write};
 use std::rc::Rc;
 
-const DIST_TO_LINE: &'static str = include_str!("./polygon/dist_to_line.c");
+const DIST_TO_LINE: &'static str = include_str!("shaders/dist_to_line.c");
 
 pub struct CompileResult<W> {
     pub dependencies: Vec<Id>,
@@ -95,10 +95,9 @@ fn compile_impl<W: Write>(
     deps: &mut BTreeSet<Id>,
     namegen: &NameGen,
 ) -> IoResult<String> {
-    use ocaml::Shape::*;
     writeln!(out, "")?;
     match shape {
-        Terminal(BasicTerminals::Circle(Circle { x, y, r, mat })) => {
+        Shape::Terminal(Terminal::Circle(Circle { x, y, r, mat })) => {
             let (res, dx, dy) = namegen.gen_3("circle", "dx", "dy");
             let (mx, my) = get_xy(mat);
             writeln!(out, "// Circle {}", res)?;
@@ -116,7 +115,7 @@ fn compile_impl<W: Write>(
 
             Ok(res)
         }
-        Terminal(BasicTerminals::Rect(Rect { x, y, w, h, mat })) => {
+        Shape::Terminal(Terminal::Rect(Rect { x, y, w, h, mat })) => {
             *uses_dist_to_line = true;
             let (x, y, w, h) = (*x, *y, *w, *h);
             let res = namegen.gen("rect");
@@ -165,13 +164,13 @@ fn compile_impl<W: Write>(
 
             Ok(res)
         }
-        Terminal(BasicTerminals::Field(id)) => {
+        Shape::Terminal(Terminal::Field(id)) => {
             deps.insert(*id);
             let res = namegen.gen("field");
             writeln!(out, "float {res} = field__{id}[pos];", res = res, id = id)?;
             Ok(res)
         }
-        Intersection(shapes) => {
+        Shape::Intersection(shapes) => {
             if shapes.is_empty() {
                 panic!("empty intersection");
             }
@@ -192,7 +191,7 @@ fn compile_impl<W: Write>(
             writeln!(out, "// End Intersection {}", result);
             Ok(result)
         }
-        Union(shapes) => {
+        Shape::Union(shapes) => {
             if shapes.is_empty() {
                 panic!("empty union");
             }
@@ -211,7 +210,7 @@ fn compile_impl<W: Write>(
             writeln!(out, "// End Union {}", result);
             Ok(result)
         }
-        Not(shape) => {
+        Shape::Not(shape) => {
             let result = namegen.gen("negate");
             writeln!(out, "// Not {}", result);
             let intermediate = compile_impl(shape, out, uses_dist_to_line, deps, namegen)?;
@@ -219,7 +218,7 @@ fn compile_impl<W: Write>(
             writeln!(out, "// End Not {}", result);
             Ok(result)
         }
-        Modulate(shape, how_much) => {
+        Shape::Modulate(shape, how_much) => {
             let result = namegen.gen("modulate");
             writeln!(out, "// Modulate {}", result);
             let intermediate = compile_impl(shape, out, uses_dist_to_line, deps, namegen)?;
@@ -234,7 +233,7 @@ expectation_test!{
     fn expectation_test_cl_for_circle(mut provider: Provider) {
         use euclid::*;
         let w = provider.text_writer("out.c");
-        let shape = Shape::Terminal(BasicTerminals::Circle(Circle {
+        let shape = Shape::Terminal(Terminal::Circle(Circle {
             x: 0.0,
             y: 5.0,
             r: 10.0,
@@ -249,7 +248,7 @@ expectation_test!{
         use euclid::*;
         use ocaml::Rect;
         let w = provider.text_writer("out.c");
-        let shape = Shape::Terminal(BasicTerminals::Rect(Rect {
+        let shape = Shape::Terminal(Terminal::Rect(Rect {
             x: 0.0,
             y: 5.0,
             w: 10.0,
@@ -263,7 +262,7 @@ expectation_test!{
 expectation_test!{
     fn expectation_test_cl_for_field(mut provider: Provider) {
         let w = provider.text_writer("out.c");
-        let shape = Shape::Terminal(BasicTerminals::Field(5));
+        let shape = Shape::Terminal(Terminal::Field(5));
         compile(&shape, w).unwrap();
     }
 }
@@ -272,8 +271,8 @@ expectation_test!{
     fn expectation_test_cl_for_intersection(mut provider: Provider) {
         let w = provider.text_writer("out.c");
         let shape = Shape::Intersection(vec![
-            Shape::Terminal(BasicTerminals::Field(5)),
-            Shape::Terminal(BasicTerminals::Field(6))]);
+            Shape::Terminal(Terminal::Field(5)),
+            Shape::Terminal(Terminal::Field(6))]);
         compile(&shape, w).unwrap();
     }
 }
@@ -282,8 +281,8 @@ expectation_test!{
     fn expectation_test_cl_for_union(mut provider: Provider) {
         let w = provider.text_writer("out.c");
         let shape = Shape::Union(vec![
-            Shape::Terminal(BasicTerminals::Field(5)),
-            Shape::Terminal(BasicTerminals::Field(6))]);
+            Shape::Terminal(Terminal::Field(5)),
+            Shape::Terminal(Terminal::Field(6))]);
         compile(&shape, w).unwrap();
     }
 }
@@ -292,7 +291,7 @@ expectation_test!{
     fn expectation_test_cl_for_not(mut provider: Provider) {
         let w = provider.text_writer("out.c");
         let shape = Shape::Not(Box::new(
-            Shape::Terminal(BasicTerminals::Field(5))));
+            Shape::Terminal(Terminal::Field(5))));
         compile(&shape, w).unwrap();
     }
 }
@@ -301,7 +300,7 @@ expectation_test!{
     fn expectation_test_cl_for_modulate(mut provider: Provider) {
         let w = provider.text_writer("out.c");
         let shape = Shape::Modulate(Box::new(
-            Shape::Terminal(BasicTerminals::Field(5))),
+            Shape::Terminal(Terminal::Field(5))),
             23.53);
         compile(&shape, w).unwrap();
     }
