@@ -47,9 +47,13 @@ impl Inspector for Provider {
     }
 
     fn write_segments(&self, name: &str, segments: &[PathSegment]) {
-        use exec::print_path_segments;
-        let writer = self.text_writer(format!("{}.txt", name));
-        print_path_segments(writer, segments);
+        use debug::*;
+
+        let tuple_writer = self.text_writer(format!("{}.txt", name));
+        print_path_segments(tuple_writer, segments);
+
+        let svg_writer = self.text_writer(format!("{}.svg", name));
+        svg_path_segments(svg_writer, segments).unwrap();
     }
 
     fn write_lines(&self, name: &str, lines: &[(Point, Point)]) {

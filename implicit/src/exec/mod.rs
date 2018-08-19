@@ -85,6 +85,7 @@ fn exec_inner(
 
 expectation_test!{
     fn expectation_test_exec_program_single(mut provider: Provider) {
+        use debug::print_path_segments;
         use euclid::*;
         use ocaml::*;
 
@@ -112,6 +113,7 @@ expectation_test!{
     fn expectation_test_exec_program_with_multiple(mut provider: Provider) {
         use euclid::*;
         use ocaml::*;
+        use debug::print_path_segments;
 
         let shape = Shape::Terminal(BasicTerminals::Circle(Circle {
             x: 11.0,

@@ -6,8 +6,6 @@ use opencl::{FieldBuffer, OpenClContext};
 use expectation::{extensions::TextDiffExtension, Provider};
 #[cfg(test)]
 use ocaml::Shape;
-#[cfg(test)]
-use std::io::Write;
 
 pub fn extract_lines(
     ctx: &OpenClContext,
@@ -31,38 +29,8 @@ pub fn extract_lines(
 }
 
 #[cfg(test)]
-pub fn print_path_segments<W: Write>(mut out: W, extracted: &[PathSegment]) {
-    use euclid::TypedPoint2D;
-    pub fn is_clockwise<K>(pts: &[TypedPoint2D<f32, K>]) -> bool {
-        assert!(pts.len() > 0);
-        let mut total = 0.0f32;
-        for slice in pts.windows(2) {
-            let a = slice[0];
-            let b = slice[1];
-            total += (b.x - a.x) * (b.y + a.y);
-        }
-        {
-            let a = pts[0];
-            let b = pts[pts.len() - 1];
-            total += (b.x - a.x) * (b.y + a.y);
-        }
-        total > 0.0
-    }
-
-    writeln!(out, "{} line segments", extracted.len());
-    for (i, segment) in extracted.iter().enumerate() {
-        writeln!(out);
-        writeln!(out, "Line Segment {} ", i);
-        writeln!(out, "{} points", segment.path.len());
-        writeln!(out, "Clockwise? {}", is_clockwise(&segment.path[..]));
-        for point in &segment.path[..] {
-            writeln!(out, "{:?}", point);
-        }
-    }
-}
-
-#[cfg(test)]
 fn run_shape_paths(shape: Shape, width: usize, height: usize, provider: Provider) {
+    use debug::print_path_segments;
     use exec::exec_shape;
     use opencl::OpenClContext;
 
