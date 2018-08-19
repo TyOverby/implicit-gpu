@@ -10,7 +10,7 @@ const EPSILON: f32 = 0.001;
 /// 2. Prune Disconnected Edges
 /// 3. Connect Obvious
 /// 4. Graph Stitch
-pub fn connect_lines<I>(lines: I, _simplify: bool) -> Vec<PathSegment>
+pub fn connect_lines<I>(lines: I) -> Vec<PathSegment>
 where
     I: Into<Vec<(Point, Point)>>,
 {

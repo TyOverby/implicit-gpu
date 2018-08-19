@@ -36,8 +36,9 @@ expectation_test!{
         let buffer = exec_poly(&ctx, polygon, 20, 20);
 
         let w_color = provider.png_writer("out.color.png");
-        let w_bw = provider.png_writer("out.bw.png");
         save_field_buffer(&buffer, w_color, ColorMode::Debug);
+
+        let w_bw = provider.png_writer("out.bw.png");
         save_field_buffer(&buffer, w_bw, ColorMode::BlackAndWhite);
     }
 }
@@ -61,8 +62,9 @@ expectation_test!{
         let buffer = exec_poly(&ctx, polygon, 20, 20);
 
         let w_color = provider.png_writer("out.color.png");
-        let w_bw = provider.png_writer("out.bw.png");
         save_field_buffer(&buffer, w_color, ColorMode::Debug);
+
+        let w_bw = provider.png_writer("out.bw.png");
         save_field_buffer(&buffer, w_bw, ColorMode::BlackAndWhite);
     }
 }

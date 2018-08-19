@@ -26,6 +26,7 @@ pub use graph_stitch::connect_unconnected as graph_stitch;
 pub use prune::prune;
 use smallvec::SmallVec;
 use std::cell::Cell;
+use std::cmp::Ordering;
 use std::iter::{FromIterator, IntoIterator};
 pub use zero_area_loop::remove_zero_area_loops;
 
@@ -33,7 +34,7 @@ type Point<S> = euclid::TypedPoint2D<f32, S>;
 
 /// A single path segment that may be merged with other
 /// path segments.
-#[derive(PartialEq, Clone)]
+#[derive(Clone)]
 pub struct PathSegment<S> {
     /// The path of points
     pub path: SmallVec<[Point<S>; 2]>,
@@ -42,6 +43,57 @@ pub struct PathSegment<S> {
     pub closed: bool,
     length_2: Cell<f32>,
     length: Cell<f32>,
+}
+
+impl<S> PartialEq for PathSegment<S> {
+    fn eq(&self, other: &Self) -> bool {
+        if self.closed != other.closed {
+            return false;
+        }
+        if self.path.len() != other.path.len() {
+            return false;
+        }
+
+        for (a, b) in self.path.iter().zip(other.path.iter()) {
+            if a != b {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+impl<S> Eq for PathSegment<S> {}
+
+impl<S> PartialOrd for PathSegment<S> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        use std::cmp::Ordering;
+
+        if self.path.len() < other.path.len() {
+            return Some(Ordering::Less);
+        } else if self.path.len() > other.path.len() {
+            return Some(Ordering::Greater);
+        } else if self.length() < other.length() {
+            return Some(Ordering::Less);
+        } else if self.length() > other.length() {
+            return Some(Ordering::Greater);
+        } else {
+            for (a, b) in self.path.iter().zip(other.path.iter()) {
+                match (a.x.partial_cmp(&b.x), a.y.partial_cmp(&b.y)) {
+                    (None, _) | (_, None) => return None,
+                    (Some(a), Some(b)) => match a.then(b) {
+                        Ordering::Equal => {}
+                        other => return Some(other),
+                    },
+                }
+            }
+        }
+        return Some(Ordering::Equal);
+    }
+}
+impl<S> Ord for PathSegment<S> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.partial_cmp(other).unwrap_or(Ordering::Equal)
+    }
 }
 
 unsafe impl<S> Sync for PathSegment<S> {}
@@ -109,7 +161,8 @@ impl<S> PathSegment<S> {
             return self.length_2.get();
         }
 
-        let length_2 = self.path
+        let length_2 = self
+            .path
             .as_slice()
             .windows(2)
             .map(|s| (s[1] - s[0]).square_length())
@@ -126,7 +179,8 @@ impl<S> PathSegment<S> {
             return self.length.get();
         }
 
-        let length = self.path
+        let length = self
+            .path
             .as_slice()
             .windows(2)
             .map(|s| (s[1] - s[0]).length())
