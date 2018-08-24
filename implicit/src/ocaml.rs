@@ -1,5 +1,5 @@
 use euclid::{Point2D, Transform2D};
-use serde::{Deserialize, Deserializer};
+use serde::Deserializer;
 
 pub type Id = u32;
 pub type Matrix = Transform2D<f32>;

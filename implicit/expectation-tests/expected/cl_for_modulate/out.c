@@ -8,7 +8,7 @@ __kernel void apply(__global float* buffer, ulong width, __global float* field__
 // Modulate _modulate_0
 
 float _field_1 = field__5[pos];
-float _modulate_0 = _field_1 + 23.53;
+float _modulate_0 = _field_1 - 23.53;
 // End Modulate _modulate_0
 buffer[pos] = _modulate_0;
 }

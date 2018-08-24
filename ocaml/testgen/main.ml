@@ -49,6 +49,7 @@ let basic_poly = poly [
     { x = 50.0;  y = 50.0  };
   ]
 
+let expanded_poly = modulate basic_poly 45.0
 
 let tests = [
   "small_circle", small_circle;
@@ -57,6 +58,7 @@ let tests = [
   "circles_intersection", circles_intersection;
   "circles_intersection_freeze", circles_intersection_freeze;
   "basic_poly", basic_poly;
+  "expanded_poly", expanded_poly;
 ]
 
 let () = Out_channel.with_file "../testsuite/tests.txt" ~f:(write_tests tests)

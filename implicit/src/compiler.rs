@@ -222,7 +222,7 @@ fn compile_impl<W: Write>(
             let result = namegen.gen("modulate");
             writeln!(out, "// Modulate {}", result);
             let intermediate = compile_impl(shape, out, uses_dist_to_line, deps, namegen)?;
-            writeln!(out, "float {} = {} + {};", result, intermediate, how_much)?;
+            writeln!(out, "float {} = {} - {};", result, intermediate, how_much)?;
             writeln!(out, "// End Modulate {}", result);
             Ok(result)
         }

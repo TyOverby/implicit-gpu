@@ -30,10 +30,24 @@ where
         )
     });
     inspector.write_lines("0-input", &lines);
+    inspector.do_slow(&|| {
+        let segments: Vec<PathSegment> = lines
+            .iter()
+            .map(|line| PathSegment::new(vec![line.0, line.1]))
+            .collect();
+        inspector.write_segments("0-input", &segments);
+    });
 
     // 1: Remove Zero Area Loops
     let lines = ::flame::span_of("zero area loops", || remove_zero_area_loops(lines, EPSILON));
     inspector.write_lines("1-zero_area_removed", &lines);
+    inspector.do_slow(&|| {
+        let segments: Vec<PathSegment> = lines
+            .iter()
+            .map(|line| PathSegment::new(vec![line.0, line.1]))
+            .collect();
+        inspector.write_segments("1-zero_area_removed", &segments);
+    });
 
     // 2: Prune Disconected Edges
     let dual_qt = ::flame::span_of("prune", || {

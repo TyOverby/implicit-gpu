@@ -4,3 +4,4 @@ circles_union
 circles_intersection
 circles_intersection_freeze
 basic_poly
+expanded_poly
