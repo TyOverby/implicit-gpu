@@ -1,2 +1,2 @@
 type t [@@deriving sexp]
-val compile: Stages.propagated -> t
+val compile: Stages.user ->  (t * Bbox.bounding) option

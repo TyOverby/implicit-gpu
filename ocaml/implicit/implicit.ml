@@ -13,18 +13,6 @@ end
 module Point = Point
 module Command = Command
 module Bbox = Bbox
-module Operations = struct
-  let compile (shape: Stages.user) =
-    let simplified = Simplify.simplify shape in
-    match simplified with
-    | Simplify.SShape shape ->
-      let propagated = Prop.remove_transformations shape in
-      let bb = Compute_bb.compute_bounding_box propagated in
-      let compiled = Command.compile propagated in
-      Some (compiled, bb)
-    | Simplify.SNothing
-    | Simplify.SEverything -> None
-end
 
 module Ops = struct
   let ( && ) a b = Shape.intersection [ a; b; ]
@@ -33,3 +21,5 @@ module Ops = struct
   let ( ++ ) a v = Shape.modulate a v
   let ( !! ) t = Shape.not t
 end
+
+let compile = Command.compile
