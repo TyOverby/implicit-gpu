@@ -1,13 +1,13 @@
 open Core
 open Point
 
-type bbox = { x: float; y: float; w: float; h: float} [@@deriving sexp]
+type t = { x: float; y: float; w: float; h: float} [@@deriving sexp]
 
 type bounding =
   | Everything
   | Nothing
-  | Positive of bbox
-  | Negative of bbox
+  | Positive of t
+  | Negative of t
 [@@deriving sexp]
 
 let from_extrema min_x min_y max_x max_y = {
@@ -31,7 +31,7 @@ let bbox_of_points = function
     let max_y = extract get_y maximum in
     Some (from_extrema min_x min_y max_x max_y)
 
-let intersects (a: bbox) (b: bbox)  =
+let intersects (a: t) (b: t)  =
   a.x < b.x +. b.w
   && b.x < a.x +. a.w
   && a.y < b.y +. b.h
@@ -41,8 +41,8 @@ let left_side { x; w; _ } = x +. w
 let bottom_side { y; h; _ } = y +. h
 
 let box_union a b =
-  let {x=xa; y=ya; _}: bbox = a in
-  let {x=xb; y=yb; _}: bbox = b in
+  let {x=xa; y=ya; _}: t = a in
+  let {x=xb; y=yb; _}: t = b in
   let min_x = Float.min_inan xa xb in
   let min_y = Float.min_inan ya yb in
   let max_x = Float.max_inan (left_side a) (left_side b) in
@@ -50,8 +50,8 @@ let box_union a b =
   from_extrema min_x min_y max_x max_y
 
 let box_intersection a b =
-  let  {x=xa; y=ya; _}: bbox = a in
-  let  {x=xb; y=yb; _}: bbox = b in
+  let  {x=xa; y=ya; _}: t = a in
+  let  {x=xb; y=yb; _}: t = b in
   if not (intersects a b) then
     None
   else
@@ -112,14 +112,14 @@ and decrease a how_much = increase a (how_much *. -1.0)
 
 module BboxExpectTests = struct
   let box_test_stub f a b =
-    let decode a = a |> Sexp.of_string |>  bbox_of_sexp in
+    let decode a = a |> Sexp.of_string |>  t_of_sexp in
     let a = decode a in
     let b = decode b in
     let ab = f a b in
     let ba = f b a in
     assert(ab = ba);
     ab
-    |> sexp_of_bbox
+    |> sexp_of_t
     |> Sexp.to_string_hum
     |> print_endline
 
@@ -174,11 +174,11 @@ module BboxExpectTests = struct
     [%expect "((x 5) (y 0) (w 5) (h 10))"]
 
   let%expect_test _ =
-    let convert s = s |> Sexp.of_string |> bbox_of_sexp in
+    let convert s = s |> Sexp.of_string |> t_of_sexp in
     let a = "((x 0) (y 0) (w 10) (h 10))" |> convert in
     let b = "((x 10) (y 10) (w 10) (h 10))" |> convert in
     (box_intersection a b)
-    |> sexp_of_option sexp_of_bbox
+    |> sexp_of_option sexp_of_t
     |> Sexp.to_string_hum
     |> print_endline;
     [%expect "()"]

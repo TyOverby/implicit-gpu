@@ -48,7 +48,7 @@ let apply_to_point matrix (point: Point.t): Point.t = {
   y=point.x *. matrix.m12 +. point.y *. matrix.m22 +. matrix.m32;
 }
 
-let apply_to_rect matrix (rect: Bbox.bbox) =
+let apply_to_rect matrix (rect: Bbox.t) =
   Bbox.bbox_of_points [
     apply_to_point matrix { x = rect.x; y = rect.y };
     apply_to_point matrix { x = rect.x +. rect.w; y = rect.y };

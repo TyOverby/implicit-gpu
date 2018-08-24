@@ -15,9 +15,9 @@ type value =
   | Polygon of Shape.poly
 [@@deriving sexp]
 
-type command =
-  | Concurrently of command list
-  | Serially of command list
+type t =
+  | Concurrently of t list
+  | Serially of t list
   | Define of id * value
   | Freeze of { target: id; id: id }
   | Export of id

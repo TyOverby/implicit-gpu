@@ -62,10 +62,3 @@ type 'a allTransforms =
 
 type 'a allTShape = ('a, 'a allTransforms) t
 [@@deriving sexp]
-
-let circle ~x ~y ~r = Circle { x; y; r; mat = Matrix.id }
-let rect ~x ~y ~w ~h = Rect { x; y; w; h; mat = Matrix.id }
-let poly points = Poly { points; mat = Matrix.id }
-let not a = Not a
-let union children = Union children
-let intersection children = Intersection children

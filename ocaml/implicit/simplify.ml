@@ -4,38 +4,34 @@ open Shape
 type simplified =
   | SNothing
   | SEverything
-  | SShape of Shape.justConcreteTerminals Shape.allTShape
+  | SShape of Stages.simplified
 
-let rec simplify: Shape.allTerminals Shape.allTShape -> Shape.allTerminals Shape.allTShape = function
+let rec expand: Stages.user -> Stages.expanded = function
   (* circle *)
   | Terminal Circle { r; _ } when r <= 0.0  -> Terminal Nothing
-  | Terminal Circle _ as a -> a
+  | Terminal Circle c -> Terminal (Circle c)
 
   (* rect *)
   | Terminal Rect { w; h; _ } when w <= 0.0 || h <= 0.0 -> Terminal Nothing
-  | Terminal Rect _ as a -> a
+  | Terminal Rect r -> Terminal (Rect r)
 
   (* poly *)
   | Terminal Poly { points = []; _ } -> Terminal Nothing
-  | Terminal Poly _ as a -> a
-
-  (* everything and nothing *)
-  | Terminal Everything -> Terminal Everything
-  | Terminal Nothing -> Terminal Nothing
+  | Terminal Poly p -> Terminal (Poly p)
 
   (* not *)
-  | Not Not x -> simplify x
+  | Not Not x -> expand x
   | Not inner -> (
-      match simplify inner with
+      match expand inner with
       | Terminal Nothing -> Terminal Everything
       | Terminal Everything -> Terminal Nothing
       | rest -> Not rest
     )
 
   (* modulate *)
-  | Modulate(Modulate(target, a), b) -> Modulate(simplify target, a +. b)
+  | Modulate(Modulate(target, a), b) -> Modulate(expand target, a +. b)
   | Modulate (target, how_much)  -> (
-      match simplify target with
+      match expand target with
       | Terminal Nothing -> Terminal Nothing
       | Terminal Everything -> Terminal Everything
       | target -> Modulate (target, how_much)
@@ -43,7 +39,7 @@ let rec simplify: Shape.allTerminals Shape.allTShape -> Shape.allTerminals Shape
 
   (* scale *)
   | Transform Scale(target, vec)  -> (
-      match simplify target with
+      match expand target with
       | Terminal Nothing -> Terminal Nothing
       | Terminal Everything -> Terminal Everything
       | target -> Transform (Scale(target, vec))
@@ -51,26 +47,26 @@ let rec simplify: Shape.allTerminals Shape.allTShape -> Shape.allTerminals Shape
 
   (* translate *)
   | Transform Translate(target, vec)  -> (
-      match simplify target with
+      match expand target with
       | Terminal Nothing -> Terminal Nothing
       | Terminal Everything -> Terminal Everything
       | target -> Transform (Translate(target, vec))
     )
 
   (* union *)
-  | Union list -> let list = simplify_all list in
+  | Union list -> let list = expand_all list in
     if List.exists list ~f:(phys_equal (Terminal Everything))
     then Terminal Everything
-    else simplify_easy_lists (Union (remove list (Terminal Nothing)))
+    else expand_easy_lists (Union (remove list (Terminal Nothing)))
 
   (* intersection *)
-  | Intersection list -> let list = simplify_all list in
+  | Intersection list -> let list = expand_all list in
     if List.exists list ~f:(phys_equal (Terminal Nothing))
     then Terminal Nothing
-    else simplify_easy_lists (Intersection (remove list (Terminal Everything)))
+    else expand_easy_lists (Intersection (remove list (Terminal Everything)))
 
-and simplify_all = List.map ~f:simplify
-and simplify_easy_lists = function
+and expand_all = List.map ~f:expand
+and expand_easy_lists = function
   | Intersection []  | Union [] -> Terminal Nothing
   | Intersection [a] | Union [a] -> a
   | other -> other
@@ -78,11 +74,11 @@ and remove list target =
   let filter a = phys_equal a target |> Core.not in
   List.filter ~f:filter list
 
-let rec simplify_top = function
+let rec simplify (shape: Stages.user) : simplified = match expand shape with
   | Terminal Everything -> SEverything
   | Terminal Nothing -> SNothing
-  | other -> SShape (simplify_bot other)
-and simplify_bot shape : Shape.justConcreteTerminals Shape.allTShape = shape |> Shape.map (function
+  | other -> SShape(simplify_bot other)
+and simplify_bot (shape: Stages.expanded) : Stages.simplified = shape |> Shape.map (function
     | Everything -> failwith "Everything found after simplification"
     | Nothing -> failwith "Nothing found after simplification"
     | Circle c -> Circle c
@@ -93,12 +89,26 @@ and simplify_bot shape : Shape.justConcreteTerminals Shape.allTShape = shape |> 
     | Translate (target, v) -> Translate (simplify_bot target, v))
 
 module SimplifyExpectTests = struct
+  let rec e_to_u (e: Stages.expanded) : Stages.user = match e with
+    | Terminal Nothing -> Terminal (Circle {x = 0.0; y = 0.0; r = 0.0; mat = Matrix.id})
+    | Terminal Everything -> Not (Terminal (Circle {x=0.0; y= 0.0; r= 0.0; mat= Matrix.id}))
+    | Terminal Circle c -> Terminal (Circle c)
+    | Terminal Rect r -> Terminal (Rect r)
+    | Terminal Poly p -> Terminal (Poly p)
+    | Not t -> Not (e_to_u t)
+    | Modulate(t, k) -> Modulate(e_to_u t, k)
+    | Transform Scale(t, v) -> Transform(Scale(e_to_u t, v))
+    | Transform Translate(t, v) -> Transform(Translate(e_to_u t, v))
+    | Union lst -> Union(List.map ~f:e_to_u lst)
+    | Intersection lst -> Intersection (List.map ~f:e_to_u lst)
+
   let simplify_test a =
     a
     |> Sexp.of_string
-    |> Shape.allTShape_of_sexp Shape.allTerminals_of_sexp
-    |> simplify
-    |> Shape.sexp_of_allTShape Shape.sexp_of_allTerminals
+    |> Stages.expanded_of_sexp
+    |> e_to_u
+    |> expand
+    |> Stages.sexp_of_expanded
     |> Sexp.to_string_hum
     |> print_endline
 
