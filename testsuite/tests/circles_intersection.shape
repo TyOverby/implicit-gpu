@@ -1,0 +1,8 @@
+(((Serially
+   ((Define 0
+     (BasicShape
+      (Intersection
+       ((Terminal (Circle ((x 11) (y 11) (r 10))))
+        (Terminal (Circle ((x 21) (y 21) (r 10))))))))
+    (Export 0)))
+  (Positive ((x 11) (y 11) (w 10) (h 10)))))

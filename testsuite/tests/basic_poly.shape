@@ -1,0 +1,10 @@
+(((Serially
+   ((Serially
+     ((Define 0
+       (Polygon
+        ((points
+          (((x 50) (y 50)) ((x 200) (y 50)) ((x 200) (y 50))
+           ((x 250) (y 200)) ((x 250) (y 200)) ((x 150) (y 100))
+           ((x 150) (y 100)) ((x 50) (y 50)))))))))
+    (Define 1 (BasicShape (Terminal (Field 0)))) (Export 1)))
+  (Positive ((x 50) (y 50) (w 200) (h 200)))))

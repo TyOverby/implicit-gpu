@@ -841,6 +841,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "testsuite"
+version = "0.1.0"
+dependencies = [
+ "expectation 0.1.0",
+ "implicit 0.1.0",
+ "serde 1.0.27 (registry+https://github.com/rust-lang/crates.io-index)",
+ "snoot 0.1.3-pre",
+]
+
+[[package]]
 name = "thread-id"
 version = "3.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

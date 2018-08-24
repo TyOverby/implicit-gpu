@@ -3,5 +3,6 @@ members = [
     "./implicit",
     "./aabb-quadtree",
     "./line-stitch",
-    "./vectorphile"
+    "./vectorphile",
+    "./testsuite",
 ]

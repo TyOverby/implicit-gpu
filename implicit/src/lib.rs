@@ -25,7 +25,7 @@ extern crate serde_json;
 mod compiler;
 mod debug;
 mod geometry;
-mod inspector;
+pub mod inspector;
 mod lines;
 mod marching;
 mod opencl;

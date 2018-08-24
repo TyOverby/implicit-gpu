@@ -2,7 +2,6 @@ use geometry::PathSegment;
 use geometry::Point;
 use opencl::FieldBuffer;
 
-#[cfg(test)]
 use expectation::{extensions::*, Provider};
 
 pub type BoxedInspector = Box<Inspector>;
@@ -30,7 +29,6 @@ impl Inspector for () {
     fn do_slow(&self, _f: &Fn()) {}
 }
 
-#[cfg(test)]
 impl Inspector for Provider {
     fn duplicate(&self) -> BoxedInspector {
         Box::new(self.clone())

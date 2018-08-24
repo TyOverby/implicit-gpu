@@ -1,0 +1,4 @@
+(((Serially
+   ((Define 0 (BasicShape (Terminal (Circle ((x 20) (y 20) (r 15))))))
+    (Export 0)))
+  (Positive ((x 5) (y 5) (w 30) (h 30)))))

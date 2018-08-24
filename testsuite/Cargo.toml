@@ -1,0 +1,16 @@
+[package]
+name = "testsuite"
+version = "0.1.0"
+authors = ["Ty Overby <ty@pre-alpha.com>"]
+
+[dependencies]
+serde = "1.*.*"
+
+[dependencies.expectation]
+path = "../../expectation/expectation"
+
+[dependencies.snoot]
+path = "../../snoot"
+
+[dependencies.implicit]
+path = "../implicit"

@@ -1,0 +1,22 @@
+Serially(
+    [
+        Define(
+            0,
+            BasicShape(
+                Terminal(
+                    Circle(
+                        Circle {
+                            x: 20.0,
+                            y: 20.0,
+                            r: 15.0,
+                            mat: [I]
+                        }
+                    )
+                )
+            )
+        ),
+        Export(
+            0
+        )
+    ]
+)
