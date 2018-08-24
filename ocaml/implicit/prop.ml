@@ -6,6 +6,7 @@ let rec propagate shape incoming = match shape with
   | Terminal Circle { x; y; r; mat} -> Terminal (Circle { x; y; r; mat=(mul incoming mat)})
   | Terminal Rect { x; y; w; h; mat} -> Terminal (Rect { x; y; w; h; mat=(mul incoming mat)})
   | Terminal Poly { points; mat} -> Terminal (Poly { points; mat=(mul incoming mat)})
+  | Freeze target -> Freeze (propagate target incoming)
   | Not target -> Not (propagate target incoming)
   | Union targets -> Union (propagate_all targets incoming)
   | Intersection targets -> Intersection (propagate_all targets incoming)

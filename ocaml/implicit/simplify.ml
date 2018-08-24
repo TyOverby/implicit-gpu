@@ -19,6 +19,13 @@ let rec expand: Stages.user -> Stages.expanded = function
   | Terminal Poly { points = []; _ } -> Terminal Nothing
   | Terminal Poly p -> Terminal (Poly p)
 
+  (* freeze *)
+  | Freeze t -> (match expand t with
+      | Terminal Nothing -> Terminal Nothing
+      | Terminal Everything -> Terminal Everything
+      | other -> Freeze other
+    )
+
   (* not *)
   | Not Not x -> expand x
   | Not inner -> (
@@ -95,6 +102,7 @@ module SimplifyExpectTests = struct
     | Terminal Circle c -> Terminal (Circle c)
     | Terminal Rect r -> Terminal (Rect r)
     | Terminal Poly p -> Terminal (Poly p)
+    | Freeze t -> Freeze (e_to_u t)
     | Not t -> Not (e_to_u t)
     | Modulate(t, k) -> Modulate(e_to_u t, k)
     | Transform Scale(t, v) -> Transform(Scale(e_to_u t, v))

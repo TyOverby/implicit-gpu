@@ -23,6 +23,7 @@ let rec compute_bounding_box = function
       |> Option.value_exn in
     Positive box
   | Not target -> target |> compute_bounding_box |> Bbox.inverse
+  | Freeze target -> target |> compute_bounding_box
   | Union targets -> targets |> compute_all_bounding_box |> List.reduce_exn ~f:Bbox.union
   | Intersection targets -> targets |> compute_all_bounding_box |> List.reduce_exn ~f:Bbox.intersection
   | Modulate (target, how_much) -> compute_bounding_box target |> (Fn.flip Bbox.grow) how_much

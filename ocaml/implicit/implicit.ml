@@ -4,6 +4,7 @@ module Shape = struct
   let intersection (lst: t list) : t = Shape.Intersection lst
   let union (lst: t list) : t = Shape.Union lst
   let not (target: t ) : t = Shape.Not target
+  let freeze (target: t ) : t = Shape.Freeze target
   let modulate (target: t) (v: float) : t = Shape.Modulate(target, v)
 
   let circle ~x ~y ~r :t = Shape.Terminal (Shape.Circle { x; y; r; mat = Matrix.id })

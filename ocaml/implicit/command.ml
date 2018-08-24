@@ -10,10 +10,14 @@ type basicTerminals =
   | Field of id
 [@@deriving sexp]
 
+type exportShape = (basicTerminals, Nothing.t) Shape.t
+[@@deriving sexp]
+
 type value =
-  | BasicShape of (basicTerminals, Nothing.t) Shape.t
+  | BasicShape of exportShape
   | Polygon of Shape.poly
 [@@deriving sexp]
+
 
 type t =
   | Concurrently of t list
@@ -33,22 +37,31 @@ let get_id gen =
   next
 
 let compile_commands shape =
-  let values = ref [] in
+  let commands = ref [] in
   let id_gen = { next = ref 0 } in
   let result_shape =
     let map_terminal = function
       | Poly p ->
         let id = get_id id_gen in
-        values := ((id, Polygon p) :: (!values));
+        commands := (Define(id, Polygon p) :: (!commands));
         Field id
       | Circle c -> Circle c
       | Rect r -> Rect r in
     let map_transform = Fn.id in
-    shape |> Shape.map map_terminal map_transform in
-  let values = !values in
-  let commands = List.map values ~f:(fun (x, y) -> Define(x, y)) in
+    let map_shape: exportShape -> exportShape = function
+      | Freeze shape ->
+        let shape_id = get_id id_gen in
+        let freeze_id = get_id id_gen in
+        let def = Define(shape_id, BasicShape shape) in
+        let frz = Freeze { target = shape_id; id = freeze_id } in
+        commands := List.concat [!commands; [def; frz]];
+        Terminal (Field freeze_id)
+      | other -> other
+    in
+    shape |> Shape.visit map_shape map_terminal map_transform in
   let last_id = get_id id_gen in
   let last = Define(last_id, BasicShape result_shape) in
+  let commands = !commands in
   if List.is_empty commands
   then Serially [last; Export last_id]
   else Serially [Serially commands; last; Export last_id]
@@ -126,5 +139,20 @@ module Command_Tests = struct
              ((Terminal (Circle ((x 0) (y 0) (r 1))))
               (Terminal (Rect ((x 0) (y 0) (w 1) (h 1))))))))
           (Export 0)))
+        (Positive ((x 0) (y 0) (w 1) (h 1)))))"]
+
+  let%expect_test _ =
+    test_shape_compile "(Intersection ((Freeze (Terminal (Circle ((x 0) (y 0) (r 1)))))
+                                       (Freeze (Terminal (Rect   ((x 0) (y 0) (w 1) (h 1)))))))";
+    [%expect "
+      (((Serially
+         ((Serially
+           ((Define 0 (BasicShape (Terminal (Circle ((x 0) (y 0) (r 1))))))
+            (Freeze (target 0) (id 1))
+            (Define 2 (BasicShape (Terminal (Rect ((x 0) (y 0) (w 1) (h 1))))))
+            (Freeze (target 2) (id 3))))
+          (Define 4
+           (BasicShape (Intersection ((Terminal (Field 1)) (Terminal (Field 3))))))
+          (Export 4)))
         (Positive ((x 0) (y 0) (w 1) (h 1)))))"]
 end
