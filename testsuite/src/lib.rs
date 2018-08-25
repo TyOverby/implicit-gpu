@@ -53,14 +53,9 @@ fn expectation_test_all() {
                 Bounding::Positive(Bbox { x, y, w, h }) => (w + x, h + y),
                 other => panic!("box of {:?} not handled yet", other),
             };
-            let (w, h) = (w.ceil() + 1.0, h.ceil() + 1.0);
+            let (w, h) = (w.ceil() + 2.0, h.ceil() + 2.0);
 
-            implicit::exec::exec(
-                command,
-                provider.duplicate(),
-                w as usize,
-                h as usize,
-            );
+            implicit::exec::exec(command, provider.duplicate(), w as usize, h as usize);
         });
     }
 }
