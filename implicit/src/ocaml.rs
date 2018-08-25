@@ -108,14 +108,6 @@ pub struct Bbox {
     pub h: f32,
 }
 
-#[derive(Deserialize, Debug)]
-pub enum Bounding {
-    Everything,
-    Nothing,
-    Positive(Bbox),
-    Negative(Bbox),
-}
-
 fn transcode_point<'de, D>(deserializer: D) -> Result<Vec<Point>, D::Error>
 where
     D: Deserializer<'de>,

@@ -2,7 +2,13 @@
    ((Define 0
      (BasicShape
       (Union
-       ((Terminal (Circle ((x 11) (y 11) (r 10))))
-        (Terminal (Circle ((x 21) (y 21) (r 10))))))))
+       ((Terminal
+         (Circle
+          ((x 11) (y 11) (r 10)
+           (mat ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2) (m32 2))))))
+        (Terminal
+         (Circle
+          ((x 21) (y 21) (r 10)
+           (mat ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2) (m32 2))))))))))
     (Export 0)))
-  (Positive ((x 1) (y 1) (w 30) (h 30)))))
+  (36 36)))

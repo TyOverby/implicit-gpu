@@ -17,6 +17,16 @@ let from_extrema min_x min_y max_x max_y = {
   h = max_y -. min_y;
 }
 
+let grow_by factor box =
+  let dx = Float.max_inan 2.0 (box.w *. factor) in
+  let dy = Float.max_inan 2.0 (box.w *. factor) in
+  {
+    x = box.x -. dx;
+    y = box.y -. dy;
+    w = box.w +. dx *. 2.0;
+    h = box.h +. dy *. 2.0;
+  }
+
 let bbox_of_points = function
   | [] -> None
   | points ->

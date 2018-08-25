@@ -67,13 +67,30 @@ let compile_commands shape =
   else Serially [Serially commands; last; Export last_id]
 
 let compile shape =
+  let t_shape (shape: Stages.propagated): Stages.simplified =
+    Shape.map (Fn.id) (Nothing.unreachable_code) shape
+  in
   let simplified = Simplify.simplify shape in
   match simplified with
   | Simplify.SShape shape ->
     let propagated = Prop.remove_transformations shape in
-    let bb = Compute_bb.compute_bounding_box propagated in
-    let compiled = compile_commands propagated in
-    Some (compiled, bb)
+    (match Compute_bb.compute_bounding_box propagated with
+     | Everything | Nothing -> failwith "unreachable"
+     | Positive bb ->
+       let bb = Bbox.grow_by 0.1 bb in
+       let simplified = Transform (Translate(t_shape propagated, {dx = -. bb.x; dy = -. bb.y})) in
+       let propagated = Prop.remove_transformations simplified in
+       let compiled = compile_commands propagated in
+       Some (compiled, (bb.w, bb.h))
+     | Negative bb ->
+       let bb = Bbox.grow_by 0.1 bb in
+       let box_shape: Stages.propagated = Terminal (Rect {x = bb.x; y = bb.y; w = bb.w; h=bb.h; mat = Matrix.id}) in
+       let bb = Bbox.grow_by 0.1 bb in
+       let simplified = Intersection [box_shape; propagated] in
+       let simplified = Transform (Translate(t_shape simplified, {dx = -. bb.x; dy = -. bb.y})) in
+       let propagated = Prop.remove_transformations simplified in
+       let compiled = compile_commands propagated in
+       Some (compiled, (bb.w, bb.h)))
   | Simplify.SNothing
   | Simplify.SEverything -> None
 
@@ -83,7 +100,7 @@ module Command_Tests = struct
     |> Sexp.of_string
     |> Stages.user_of_sexp
     |> compile
-    |> Option.sexp_of_t (Tuple2.sexp_of_t sexp_of_t Bbox.sexp_of_bounding)
+    |> Option.sexp_of_t (Tuple2.sexp_of_t sexp_of_t (Tuple2.sexp_of_t Float.sexp_of_t Float.sexp_of_t))
     |> Sexp.to_string_hum
     |> print_endline
 
@@ -95,25 +112,46 @@ module Command_Tests = struct
     test_shape_compile "(Terminal (Circle ((x 0) (y 0) (r 1))))";
     [%expect "
       (((Serially
-         ((Define 0 (BasicShape (Terminal (Circle ((x 0) (y 0) (r 1))))))
+         ((Define 0
+           (BasicShape
+            (Terminal
+             (Circle
+              ((x 0) (y 0) (r 1)
+               (mat ((m11 1) (m12 0) (m21 0) (m22 1) (m31 3) (m32 3))))))))
           (Export 0)))
-        (Positive ((x -1) (y -1) (w 2) (h 2)))))"]
+        (6 6)))"]
 
   let%expect_test _ =
     test_shape_compile "(Not (Terminal (Circle ((x 0) (y 0) (r 1)))))";
     [%expect "
       (((Serially
-         ((Define 0 (BasicShape (Not (Terminal (Circle ((x 0) (y 0) (r 1)))))))
+         ((Define 0
+           (BasicShape
+            (Intersection
+             ((Terminal
+               (Rect
+                ((x -3) (y -3) (w 6) (h 6)
+                 (mat ((m11 1) (m12 0) (m21 0) (m22 1) (m31 5) (m32 5))))))
+              (Not
+               (Terminal
+                (Circle
+                 ((x 0) (y 0) (r 1)
+                  (mat ((m11 1) (m12 0) (m21 0) (m22 1) (m31 5) (m32 5)))))))))))
           (Export 0)))
-        (Negative ((x -1) (y -1) (w 2) (h 2)))))"]
+        (10 10)))"]
 
   let%expect_test _ =
     test_shape_compile "(Terminal (Circle ((x 1) (y 1) (r 1))))";
     [%expect "
       (((Serially
-         ((Define 0 (BasicShape (Terminal (Circle ((x 1) (y 1) (r 1))))))
+         ((Define 0
+           (BasicShape
+            (Terminal
+             (Circle
+              ((x 1) (y 1) (r 1)
+               (mat ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2) (m32 2))))))))
           (Export 0)))
-        (Positive ((x 0) (y 0) (w 2) (h 2)))))"]
+        (6 6)))"]
 
   let%expect_test _ =
     test_shape_compile "(Union ((Terminal (Circle ((x 1) (y 1) (r 1))))
@@ -123,10 +161,16 @@ module Command_Tests = struct
          ((Define 0
            (BasicShape
             (Union
-             ((Terminal (Circle ((x 1) (y 1) (r 1))))
-              (Terminal (Circle ((x 2) (y 2) (r 1))))))))
+             ((Terminal
+               (Circle
+                ((x 1) (y 1) (r 1)
+                 (mat ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2) (m32 2))))))
+              (Terminal
+               (Circle
+                ((x 2) (y 2) (r 1)
+                 (mat ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2) (m32 2))))))))))
           (Export 0)))
-        (Positive ((x 0) (y 0) (w 3) (h 3)))))"]
+        (7 7)))"]
 
   let%expect_test _ =
     test_shape_compile "(Intersection ((Terminal (Circle ((x 0) (y 0) (r 1))))
@@ -136,10 +180,16 @@ module Command_Tests = struct
          ((Define 0
            (BasicShape
             (Intersection
-             ((Terminal (Circle ((x 0) (y 0) (r 1))))
-              (Terminal (Rect ((x 0) (y 0) (w 1) (h 1))))))))
+             ((Terminal
+               (Circle
+                ((x 0) (y 0) (r 1)
+                 (mat ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2) (m32 2))))))
+              (Terminal
+               (Rect
+                ((x 0) (y 0) (w 1) (h 1)
+                 (mat ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2) (m32 2))))))))))
           (Export 0)))
-        (Positive ((x 0) (y 0) (w 1) (h 1)))))"]
+        (5 5)))"]
 
   let%expect_test _ =
     test_shape_compile "(Intersection ((Freeze (Terminal (Circle ((x 0) (y 0) (r 1)))))
@@ -147,12 +197,22 @@ module Command_Tests = struct
     [%expect "
       (((Serially
          ((Serially
-           ((Define 0 (BasicShape (Terminal (Circle ((x 0) (y 0) (r 1))))))
+           ((Define 0
+             (BasicShape
+              (Terminal
+               (Circle
+                ((x 0) (y 0) (r 1)
+                 (mat ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2) (m32 2))))))))
             (Freeze (target 0) (id 1))
-            (Define 2 (BasicShape (Terminal (Rect ((x 0) (y 0) (w 1) (h 1))))))
+            (Define 2
+             (BasicShape
+              (Terminal
+               (Rect
+                ((x 0) (y 0) (w 1) (h 1)
+                 (mat ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2) (m32 2))))))))
             (Freeze (target 2) (id 3))))
           (Define 4
            (BasicShape (Intersection ((Terminal (Field 1)) (Terminal (Field 3))))))
           (Export 4)))
-        (Positive ((x 0) (y 0) (w 1) (h 1)))))"]
+        (5 5)))"]
 end

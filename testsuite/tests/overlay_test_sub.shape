@@ -2,112 +2,307 @@
    ((Define 0
      (BasicShape
       (Intersection
-       ((Modulate (Terminal (Rect ((x 11) (y 11) (w 14) (h 14)))) 10)
+       ((Modulate
+         (Terminal
+          (Rect
+           ((x 11) (y 11) (w 14) (h 14)
+            (mat
+             ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2.4000000000000004)
+              (m32 2.4000000000000004))))))
+         10)
         (Not
          (Union
           ((Union
             ((Union
               ((Intersection
-                ((Terminal (Circle ((x 23) (y 23) (r 10))))
+                ((Terminal
+                  (Circle
+                   ((x 23) (y 23) (r 10)
+                    (mat
+                     ((m11 1) (m12 0) (m21 0) (m22 1)
+                      (m31 2.4000000000000004) (m32 2.4000000000000004))))))
                  (Not
-                  (Modulate (Terminal (Circle ((x 23) (y 23) (r 10)))) -4))))
+                  (Modulate
+                   (Terminal
+                    (Circle
+                     ((x 23) (y 23) (r 10)
+                      (mat
+                       ((m11 1) (m12 0) (m21 0) (m22 1)
+                        (m31 2.4000000000000004) (m32 2.4000000000000004))))))
+                   -4))))
                (Intersection
                 ((Intersection
-                  ((Terminal (Circle ((x 13) (y 23) (r 10))))
+                  ((Terminal
+                    (Circle
+                     ((x 13) (y 23) (r 10)
+                      (mat
+                       ((m11 1) (m12 0) (m21 0) (m22 1)
+                        (m31 2.4000000000000004) (m32 2.4000000000000004))))))
                    (Not
-                    (Modulate (Terminal (Circle ((x 13) (y 23) (r 10)))) -4))))
+                    (Modulate
+                     (Terminal
+                      (Circle
+                       ((x 13) (y 23) (r 10)
+                        (mat
+                         ((m11 1) (m12 0) (m21 0) (m22 1)
+                          (m31 2.4000000000000004) (m32 2.4000000000000004))))))
+                     -4))))
                  (Not
                   (Modulate
                    (Intersection
-                    ((Terminal (Circle ((x 23) (y 23) (r 10))))
+                    ((Terminal
+                      (Circle
+                       ((x 23) (y 23) (r 10)
+                        (mat
+                         ((m11 1) (m12 0) (m21 0) (m22 1)
+                          (m31 2.4000000000000004) (m32 2.4000000000000004))))))
                      (Not
-                      (Modulate (Terminal (Circle ((x 23) (y 23) (r 10))))
+                      (Modulate
+                       (Terminal
+                        (Circle
+                         ((x 23) (y 23) (r 10)
+                          (mat
+                           ((m11 1) (m12 0) (m21 0) (m22 1)
+                            (m31 2.4000000000000004)
+                            (m32 2.4000000000000004))))))
                        -4))))
                    2))))))
              (Intersection
               ((Intersection
-                ((Terminal (Circle ((x 23) (y 13) (r 10))))
+                ((Terminal
+                  (Circle
+                   ((x 23) (y 13) (r 10)
+                    (mat
+                     ((m11 1) (m12 0) (m21 0) (m22 1)
+                      (m31 2.4000000000000004) (m32 2.4000000000000004))))))
                  (Not
-                  (Modulate (Terminal (Circle ((x 23) (y 13) (r 10)))) -4))))
+                  (Modulate
+                   (Terminal
+                    (Circle
+                     ((x 23) (y 13) (r 10)
+                      (mat
+                       ((m11 1) (m12 0) (m21 0) (m22 1)
+                        (m31 2.4000000000000004) (m32 2.4000000000000004))))))
+                   -4))))
                (Not
                 (Modulate
                  (Union
                   ((Intersection
-                    ((Terminal (Circle ((x 23) (y 23) (r 10))))
+                    ((Terminal
+                      (Circle
+                       ((x 23) (y 23) (r 10)
+                        (mat
+                         ((m11 1) (m12 0) (m21 0) (m22 1)
+                          (m31 2.4000000000000004) (m32 2.4000000000000004))))))
                      (Not
-                      (Modulate (Terminal (Circle ((x 23) (y 23) (r 10))))
+                      (Modulate
+                       (Terminal
+                        (Circle
+                         ((x 23) (y 23) (r 10)
+                          (mat
+                           ((m11 1) (m12 0) (m21 0) (m22 1)
+                            (m31 2.4000000000000004)
+                            (m32 2.4000000000000004))))))
                        -4))))
                    (Intersection
                     ((Intersection
-                      ((Terminal (Circle ((x 13) (y 23) (r 10))))
+                      ((Terminal
+                        (Circle
+                         ((x 13) (y 23) (r 10)
+                          (mat
+                           ((m11 1) (m12 0) (m21 0) (m22 1)
+                            (m31 2.4000000000000004)
+                            (m32 2.4000000000000004))))))
                        (Not
-                        (Modulate (Terminal (Circle ((x 13) (y 23) (r 10))))
+                        (Modulate
+                         (Terminal
+                          (Circle
+                           ((x 13) (y 23) (r 10)
+                            (mat
+                             ((m11 1) (m12 0) (m21 0) (m22 1)
+                              (m31 2.4000000000000004)
+                              (m32 2.4000000000000004))))))
                          -4))))
                      (Not
                       (Modulate
                        (Intersection
-                        ((Terminal (Circle ((x 23) (y 23) (r 10))))
+                        ((Terminal
+                          (Circle
+                           ((x 23) (y 23) (r 10)
+                            (mat
+                             ((m11 1) (m12 0) (m21 0) (m22 1)
+                              (m31 2.4000000000000004)
+                              (m32 2.4000000000000004))))))
                          (Not
                           (Modulate
-                           (Terminal (Circle ((x 23) (y 23) (r 10)))) -4))))
+                           (Terminal
+                            (Circle
+                             ((x 23) (y 23) (r 10)
+                              (mat
+                               ((m11 1) (m12 0) (m21 0) (m22 1)
+                                (m31 2.4000000000000004)
+                                (m32 2.4000000000000004))))))
+                           -4))))
                        2))))))
                  2))))))
            (Intersection
             ((Intersection
-              ((Terminal (Circle ((x 13) (y 13) (r 10))))
-               (Not (Modulate (Terminal (Circle ((x 13) (y 13) (r 10)))) -4))))
+              ((Terminal
+                (Circle
+                 ((x 13) (y 13) (r 10)
+                  (mat
+                   ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2.4000000000000004)
+                    (m32 2.4000000000000004))))))
+               (Not
+                (Modulate
+                 (Terminal
+                  (Circle
+                   ((x 13) (y 13) (r 10)
+                    (mat
+                     ((m11 1) (m12 0) (m21 0) (m22 1)
+                      (m31 2.4000000000000004) (m32 2.4000000000000004))))))
+                 -4))))
              (Not
               (Modulate
                (Union
                 ((Union
                   ((Intersection
-                    ((Terminal (Circle ((x 23) (y 23) (r 10))))
+                    ((Terminal
+                      (Circle
+                       ((x 23) (y 23) (r 10)
+                        (mat
+                         ((m11 1) (m12 0) (m21 0) (m22 1)
+                          (m31 2.4000000000000004) (m32 2.4000000000000004))))))
                      (Not
-                      (Modulate (Terminal (Circle ((x 23) (y 23) (r 10))))
+                      (Modulate
+                       (Terminal
+                        (Circle
+                         ((x 23) (y 23) (r 10)
+                          (mat
+                           ((m11 1) (m12 0) (m21 0) (m22 1)
+                            (m31 2.4000000000000004)
+                            (m32 2.4000000000000004))))))
                        -4))))
                    (Intersection
                     ((Intersection
-                      ((Terminal (Circle ((x 13) (y 23) (r 10))))
+                      ((Terminal
+                        (Circle
+                         ((x 13) (y 23) (r 10)
+                          (mat
+                           ((m11 1) (m12 0) (m21 0) (m22 1)
+                            (m31 2.4000000000000004)
+                            (m32 2.4000000000000004))))))
                        (Not
-                        (Modulate (Terminal (Circle ((x 13) (y 23) (r 10))))
+                        (Modulate
+                         (Terminal
+                          (Circle
+                           ((x 13) (y 23) (r 10)
+                            (mat
+                             ((m11 1) (m12 0) (m21 0) (m22 1)
+                              (m31 2.4000000000000004)
+                              (m32 2.4000000000000004))))))
                          -4))))
                      (Not
                       (Modulate
                        (Intersection
-                        ((Terminal (Circle ((x 23) (y 23) (r 10))))
+                        ((Terminal
+                          (Circle
+                           ((x 23) (y 23) (r 10)
+                            (mat
+                             ((m11 1) (m12 0) (m21 0) (m22 1)
+                              (m31 2.4000000000000004)
+                              (m32 2.4000000000000004))))))
                          (Not
                           (Modulate
-                           (Terminal (Circle ((x 23) (y 23) (r 10)))) -4))))
+                           (Terminal
+                            (Circle
+                             ((x 23) (y 23) (r 10)
+                              (mat
+                               ((m11 1) (m12 0) (m21 0) (m22 1)
+                                (m31 2.4000000000000004)
+                                (m32 2.4000000000000004))))))
+                           -4))))
                        2))))))
                  (Intersection
                   ((Intersection
-                    ((Terminal (Circle ((x 23) (y 13) (r 10))))
+                    ((Terminal
+                      (Circle
+                       ((x 23) (y 13) (r 10)
+                        (mat
+                         ((m11 1) (m12 0) (m21 0) (m22 1)
+                          (m31 2.4000000000000004) (m32 2.4000000000000004))))))
                      (Not
-                      (Modulate (Terminal (Circle ((x 23) (y 13) (r 10))))
+                      (Modulate
+                       (Terminal
+                        (Circle
+                         ((x 23) (y 13) (r 10)
+                          (mat
+                           ((m11 1) (m12 0) (m21 0) (m22 1)
+                            (m31 2.4000000000000004)
+                            (m32 2.4000000000000004))))))
                        -4))))
                    (Not
                     (Modulate
                      (Union
                       ((Intersection
-                        ((Terminal (Circle ((x 23) (y 23) (r 10))))
+                        ((Terminal
+                          (Circle
+                           ((x 23) (y 23) (r 10)
+                            (mat
+                             ((m11 1) (m12 0) (m21 0) (m22 1)
+                              (m31 2.4000000000000004)
+                              (m32 2.4000000000000004))))))
                          (Not
                           (Modulate
-                           (Terminal (Circle ((x 23) (y 23) (r 10)))) -4))))
+                           (Terminal
+                            (Circle
+                             ((x 23) (y 23) (r 10)
+                              (mat
+                               ((m11 1) (m12 0) (m21 0) (m22 1)
+                                (m31 2.4000000000000004)
+                                (m32 2.4000000000000004))))))
+                           -4))))
                        (Intersection
                         ((Intersection
-                          ((Terminal (Circle ((x 13) (y 23) (r 10))))
+                          ((Terminal
+                            (Circle
+                             ((x 13) (y 23) (r 10)
+                              (mat
+                               ((m11 1) (m12 0) (m21 0) (m22 1)
+                                (m31 2.4000000000000004)
+                                (m32 2.4000000000000004))))))
                            (Not
                             (Modulate
-                             (Terminal (Circle ((x 13) (y 23) (r 10)))) -4))))
+                             (Terminal
+                              (Circle
+                               ((x 13) (y 23) (r 10)
+                                (mat
+                                 ((m11 1) (m12 0) (m21 0) (m22 1)
+                                  (m31 2.4000000000000004)
+                                  (m32 2.4000000000000004))))))
+                             -4))))
                          (Not
                           (Modulate
                            (Intersection
-                            ((Terminal (Circle ((x 23) (y 23) (r 10))))
+                            ((Terminal
+                              (Circle
+                               ((x 23) (y 23) (r 10)
+                                (mat
+                                 ((m11 1) (m12 0) (m21 0) (m22 1)
+                                  (m31 2.4000000000000004)
+                                  (m32 2.4000000000000004))))))
                              (Not
                               (Modulate
-                               (Terminal (Circle ((x 23) (y 23) (r 10)))) -4))))
+                               (Terminal
+                                (Circle
+                                 ((x 23) (y 23) (r 10)
+                                  (mat
+                                   ((m11 1) (m12 0) (m21 0) (m22 1)
+                                    (m31 2.4000000000000004)
+                                    (m32 2.4000000000000004))))))
+                               -4))))
                            2))))))
                      2))))))
                2)))))))))))
     (Export 0)))
-  (Positive ((x 1) (y 1) (w 34) (h 34)))))
+  (40.8 40.8)))

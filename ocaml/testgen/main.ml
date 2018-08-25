@@ -6,7 +6,7 @@ let write_tests tests oc =
   let put_test shape oc =
     shape
     |> compile
-    |> Option.sexp_of_t (Tuple2.sexp_of_t Command.sexp_of_t Bbox.sexp_of_bounding)
+    |> Option.sexp_of_t (Tuple2.sexp_of_t Command.sexp_of_t (Tuple2.sexp_of_t Float.sexp_of_t Float.sexp_of_t))
     |> Sexp.to_string_hum
     |> Out_channel.output_string oc
   in
@@ -86,6 +86,10 @@ let translated_and_scaled_circle =
   |> scale ~dx: 2.0 ~dy: 1.0
   |> translate ~dx: 22.0 ~dy: 11.0
 
+let inverted_circle =
+  circle ~x:0.0 ~y:0.0 ~r:10.0
+  |> not
+
 let tests = [
   "small_circle", small_circle;
   "displaced_circle", displaced_circle;
@@ -99,6 +103,7 @@ let tests = [
   "scaled_circle", scaled_circle;
   "translated_circle", translated_circle;
   "translated_and_scaled_circle", translated_and_scaled_circle;
+  "inverted_circle", inverted_circle;
 ]
 
 let () = Out_channel.with_file "../testsuite/tests.txt" ~f:(write_tests tests)

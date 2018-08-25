@@ -31,7 +31,7 @@ pub fn deser<T: DeserializeOwned>(out: &str) -> T {
 #[test]
 fn expectation_test_all() {
     use implicit::inspector::*;
-    use implicit::ocaml::{Bbox, Bounding};
+    use implicit::ocaml::Bbox;
 
     let tests_file =
         BufReader::new(File::open("./tests.txt").expect("tests.txt file should exist"));
@@ -44,22 +44,18 @@ fn expectation_test_all() {
                 let mut test_contents = String::new();
                 test_file.read_to_string(&mut test_contents).unwrap();
 
-                let deser: Option<(
-                    implicit::ocaml::Command,
-                    implicit::ocaml::Bounding,
-                )> = deser(&test_contents);
-                let (command, bbox) = deser.unwrap();
+                let deser: Option<(implicit::ocaml::Command, (f32, f32))> = deser(&test_contents);
+                let (command, (w, h)) = deser.unwrap();
 
                 provider.debug(format!("command.txt"), &command).unwrap();
-                provider.debug(format!("bbox.txt"), &bbox).unwrap();
+                provider.debug(format!("bbox.txt"), &(w, h)).unwrap();
 
-                let (w, h) = match bbox {
-                    Bounding::Positive(Bbox { x, y, w, h }) => (w + x, h + y),
-                    other => panic!("box of {:?} not handled yet", other),
-                };
-                let (w, h) = (w.ceil() + 2.0, h.ceil() + 2.0);
-
-                implicit::exec::exec(command, provider.duplicate(), w as usize, h as usize);
+                implicit::exec::exec(
+                    command,
+                    provider.duplicate(),
+                    w.ceil() as usize,
+                    h.ceil() as usize,
+                );
             });
         });
         if res.is_err() {
