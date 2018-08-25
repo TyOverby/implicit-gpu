@@ -1,4 +1,4 @@
-1062 line segments
+1064 line segments
 
 Line Segment 0 
 2 points
@@ -6371,3 +6371,15 @@ Line Segment 1061
 Clockwise? false
 (295.0,200.0)
 (294.9889,201.0)
+
+Line Segment 1062 
+2 points
+Clockwise? false
+(295.0,200.0)
+(295.0,200.0)
+
+Line Segment 1063 
+2 points
+Clockwise? false
+(295.0,200.0)
+(295.0,200.0)

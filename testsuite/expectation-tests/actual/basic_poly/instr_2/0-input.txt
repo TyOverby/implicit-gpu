@@ -1,4 +1,4 @@
-702 line segments
+704 line segments
 
 Line Segment 0 
 2 points
@@ -4207,6 +4207,18 @@ Clockwise? false
 (250.0,200.0)
 
 Line Segment 701 
+2 points
+Clockwise? false
+(250.0,200.0)
+(250.0,200.0)
+
+Line Segment 702 
+2 points
+Clockwise? false
+(250.0,200.0)
+(250.0,200.0)
+
+Line Segment 703 
 2 points
 Clockwise? false
 (250.0,200.0)
