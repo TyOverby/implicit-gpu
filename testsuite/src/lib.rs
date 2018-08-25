@@ -31,7 +31,6 @@ pub fn deser<T: DeserializeOwned>(out: &str) -> T {
 #[test]
 fn expectation_test_all() {
     use implicit::inspector::*;
-    use implicit::ocaml::Bbox;
 
     let tests_file =
         BufReader::new(File::open("./tests.txt").expect("tests.txt file should exist"));
