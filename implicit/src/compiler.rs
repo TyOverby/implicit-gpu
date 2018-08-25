@@ -82,10 +82,25 @@ pub fn compile<W: Write>(shape: &Shape, mut writer: W) -> IoResult<CompileResult
 }
 
 fn get_xy(matrix: &Matrix) -> (String, String) {
-    if !matrix.approx_eq(&Matrix::identity()) {
-        panic!("Only identity matrixes are supported at the moment");
+    if matrix.approx_eq(&Matrix::identity()) {
+        return ("x_s".into(), "y_s".into());
     }
-    return ("x_s".into(), "y_s".into());
+    let inverted = matrix.inverse().unwrap();
+    // point.x * self.m11 + point.y * self.m21 + self.m31
+    let x = format!(
+        "(x_s * {m11} + y_s * {m21} + {m31})",
+        m11 = inverted.m11,
+        m21 = inverted.m21,
+        m31 = inverted.m31
+    );
+    // point.x * self.m12 + point.y * self.m22 + self.m32
+    let y = format!(
+        "(x_s * {m12} + y_s * {m22} + {m32})",
+        m12 = inverted.m12,
+        m22 = inverted.m22,
+        m32 = inverted.m32
+    );
+    (x, y)
 }
 
 fn compile_impl<W: Write>(
@@ -238,6 +253,20 @@ expectation_test!{
             y: 5.0,
             r: 10.0,
             mat: Transform2D::identity(),
+        }));
+        compile(&shape, w).unwrap();
+    }
+}
+
+expectation_test!{
+    fn expectation_test_cl_for_matrix_circle(mut provider: Provider) {
+        use euclid::*;
+        let w = provider.text_writer("out.c");
+        let shape = Shape::Terminal(Terminal::Circle(Circle {
+            x: 0.0,
+            y: 5.0,
+            r: 10.0,
+            mat: Transform2D::identity().post_scale(2.0, 1.0),
         }));
         compile(&shape, w).unwrap();
     }

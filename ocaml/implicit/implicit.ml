@@ -11,6 +11,9 @@ module Shape = struct
   let circle ~x ~y ~r :t = Shape.Terminal (Shape.Circle { x; y; r; mat = Matrix.id })
   let rect ~x ~y ~w ~h :t = Shape.Terminal( Shape.Rect { x; y; w; h; mat = Matrix.id })
   let poly points: t = Shape.Terminal( Shape.Poly { points; mat = Matrix.id })
+
+  let scale ~dx ~dy target :t = Shape.Transform (Shape.Scale(target, {dx; dy}))
+  let translate ~dx ~dy target :t = Shape.Transform (Shape.Translate(target, {dx; dy}))
 end
 module Point = Point
 module Command = Command

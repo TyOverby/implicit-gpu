@@ -75,6 +75,23 @@ expectation_test!{
 }
 
 expectation_test!{
+    fn expectation_test_exec_circle_with_matrix(provider: Provider) {
+        use euclid::*;
+        use ocaml::*;
+
+        let ctx = OpenClContext::default();
+        let shape = Shape::Terminal(Terminal::Circle(Circle {
+            x: 11.0,
+            y: 11.0,
+            r: 10.0,
+            mat: Transform2D::identity().post_scale(2.0, 1.0),
+        }));
+
+        run_shape_helper(&ctx, shape, 44, 22, provider, &[]);
+    }
+}
+
+expectation_test!{
     fn expectation_test_exec_rect(provider: Provider) {
         use euclid::*;
         use ocaml::*;

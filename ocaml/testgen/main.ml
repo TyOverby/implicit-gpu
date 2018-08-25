@@ -73,6 +73,19 @@ let overlay_test_sub =
     modulate r @@ rect ~x:(x +. r) ~y:(y +. r) ~w:(w -. r *. 2.0) ~h:(h -. r *. 2.0) in
   subtract (rounded_rect ~r:10.0 ~x:1.0 ~y: 1.0 ~w:34.0 ~h:34.0) overlay_test
 
+let scaled_circle =
+  circle ~x:11.0 ~y:11.0 ~r:10.0
+  |> scale ~dx: 2.0 ~dy: 1.0
+
+let translated_circle =
+  circle ~x:0.0 ~y:0.0 ~r:10.0
+  |> translate ~dx: 11.0 ~dy: 11.0
+
+let translated_and_scaled_circle =
+  circle ~x:0.0 ~y:0.0 ~r:10.0
+  |> scale ~dx: 2.0 ~dy: 1.0
+  |> translate ~dx: 22.0 ~dy: 11.0
+
 let tests = [
   "small_circle", small_circle;
   "displaced_circle", displaced_circle;
@@ -83,6 +96,9 @@ let tests = [
   "expanded_poly", expanded_poly;
   "overlay_test", overlay_test;
   "overlay_test_sub", overlay_test_sub;
+  "scaled_circle", scaled_circle;
+  "translated_circle", translated_circle;
+  "translated_and_scaled_circle", translated_and_scaled_circle;
 ]
 
 let () = Out_channel.with_file "../testsuite/tests.txt" ~f:(write_tests tests)

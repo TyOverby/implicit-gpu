@@ -11,10 +11,28 @@ struct PointDef {
     y: f32,
 }
 
+#[derive(Deserialize)]
+#[serde(remote = "Matrix")]
+struct MatrixDef {
+    #[serde(getter = "garbage")]
+    m11: f32,
+    m12: f32,
+    m21: f32,
+    m22: f32,
+    m31: f32,
+    m32: f32,
+}
+
 // Provide a conversion to construct the remote type.
 impl From<PointDef> for Point {
     fn from(def: PointDef) -> Point {
         ::euclid::point2(def.x, def.y)
+    }
+}
+
+impl From<MatrixDef> for Matrix {
+    fn from(def: MatrixDef) -> Matrix {
+        Transform2D::row_major(def.m11, def.m12, def.m21, def.m22, def.m31, def.m32)
     }
 }
 
@@ -25,6 +43,7 @@ pub struct Circle {
     pub r: f32,
 
     #[serde(default = "Transform2D::identity")]
+    #[serde(with = "MatrixDef")]
     pub mat: Matrix,
 }
 
@@ -36,6 +55,7 @@ pub struct Rect {
     pub h: f32,
 
     #[serde(default = "Transform2D::identity")]
+    #[serde(with = "MatrixDef")]
     pub mat: Matrix,
 }
 
@@ -45,6 +65,7 @@ pub struct Polygon {
     pub points: Vec<Point>,
 
     #[serde(default = "Transform2D::identity")]
+    #[serde(with = "MatrixDef")]
     pub mat: Matrix,
 }
 

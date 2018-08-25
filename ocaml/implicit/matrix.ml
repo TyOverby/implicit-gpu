@@ -49,9 +49,11 @@ let apply_to_point matrix (point: Point.t): Point.t = {
 }
 
 let apply_to_rect matrix (rect: Bbox.t) =
-  Bbox.bbox_of_points [
+  [
     apply_to_point matrix { x = rect.x; y = rect.y };
     apply_to_point matrix { x = rect.x +. rect.w; y = rect.y };
     apply_to_point matrix { x = rect.x; y = rect.y +. rect.h};
     apply_to_point matrix { x = rect.x +. rect.w; y = rect.y +. rect.h};
-  ] |> Option.value_exn
+  ]
+  |> Bbox.bbox_of_points
+  |> Option.value_exn

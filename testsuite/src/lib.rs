@@ -36,26 +36,37 @@ fn expectation_test_all() {
     let tests_file =
         BufReader::new(File::open("./tests.txt").expect("tests.txt file should exist"));
     let lines = tests_file.lines();
+    let mut failed = false;
     for test_name in lines.map(|line| line.unwrap()) {
-        expectation::expect(&format!("expectation_test_{}", test_name), |provider| {
-            let mut test_file = File::open(format!("./tests/{}.shape", test_name)).unwrap();
-            let mut test_contents = String::new();
-            test_file.read_to_string(&mut test_contents).unwrap();
+        let res = std::panic::catch_unwind(|| {
+            expectation::expect(&format!("expectation_test_{}", test_name), |provider| {
+                let mut test_file = File::open(format!("./tests/{}.shape", test_name)).unwrap();
+                let mut test_contents = String::new();
+                test_file.read_to_string(&mut test_contents).unwrap();
 
-            let deser: Option<(implicit::ocaml::Command, implicit::ocaml::Bounding)> =
-                deser(&test_contents);
-            let (command, bbox) = deser.unwrap();
+                let deser: Option<(
+                    implicit::ocaml::Command,
+                    implicit::ocaml::Bounding,
+                )> = deser(&test_contents);
+                let (command, bbox) = deser.unwrap();
 
-            provider.debug(format!("command.txt"), &command).unwrap();
-            provider.debug(format!("bbox.txt"), &bbox).unwrap();
+                provider.debug(format!("command.txt"), &command).unwrap();
+                provider.debug(format!("bbox.txt"), &bbox).unwrap();
 
-            let (w, h) = match bbox {
-                Bounding::Positive(Bbox { x, y, w, h }) => (w + x, h + y),
-                other => panic!("box of {:?} not handled yet", other),
-            };
-            let (w, h) = (w.ceil() + 2.0, h.ceil() + 2.0);
+                let (w, h) = match bbox {
+                    Bounding::Positive(Bbox { x, y, w, h }) => (w + x, h + y),
+                    other => panic!("box of {:?} not handled yet", other),
+                };
+                let (w, h) = (w.ceil() + 2.0, h.ceil() + 2.0);
 
-            implicit::exec::exec(command, provider.duplicate(), w as usize, h as usize);
+                implicit::exec::exec(command, provider.duplicate(), w as usize, h as usize);
+            });
         });
+        if res.is_err() {
+            failed = true;
+        }
+    }
+    if failed {
+        panic!("expectation test failed");
     }
 }
