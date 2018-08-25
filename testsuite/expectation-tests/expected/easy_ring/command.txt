@@ -1,0 +1,52 @@
+Serially(
+    [
+        Define(
+            0,
+            BasicShape(
+                Intersection(
+                    [
+                        Terminal(
+                            Circle(
+                                Circle {
+                                    x: 10.0,
+                                    y: 10.0,
+                                    r: 10.0,
+                                    mat: [
+                                        1.0,
+                                        0.0,
+                                        0.0,
+                                        1.0,
+                                        2.0,
+                                        2.0
+                                    ]
+                                }
+                            )
+                        ),
+                        Not(
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 10.0,
+                                        y: 10.0,
+                                        r: 6.0,
+                                        mat: [
+                                            1.0,
+                                            0.0,
+                                            0.0,
+                                            1.0,
+                                            2.0,
+                                            2.0
+                                        ]
+                                    }
+                                )
+                            )
+                        )
+                    ]
+                )
+            )
+        ),
+        Export(
+            0
+        )
+    ]
+)

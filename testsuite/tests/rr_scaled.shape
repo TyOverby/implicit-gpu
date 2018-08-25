@@ -1,0 +1,11 @@
+(((Serially
+   ((Define 0
+     (BasicShape
+      (Modulate
+       (Terminal
+        (Rect
+         ((x 11) (y 11) (w 14) (h 14)
+          (mat ((m11 3) (m12 0) (m21 0) (m22 3) (m31 -16.8) (m32 -16.8))))))
+       10)))
+    (Export 0)))
+  (74.4 74.4)))

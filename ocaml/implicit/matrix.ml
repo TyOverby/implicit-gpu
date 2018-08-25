@@ -6,7 +6,8 @@ type t = {
   m31: float; m32: float;
 } [@@deriving sexp]
 
-let row_major m11 m12 m21 m22 m31 m32 = { m11; m12; m21; m22; m31; m32 }
+let row_major m11 m12 m21 m22 m31 m32 =
+  { m11; m12; m21; m22; m31; m32 }
 
 let id =
   row_major
@@ -50,10 +51,35 @@ let apply_to_point matrix (point: Point.t): Point.t = {
 
 let apply_to_rect matrix (rect: Bbox.t) =
   [
-    apply_to_point matrix { x = rect.x; y = rect.y };
+    apply_to_point matrix { x = rect.x;           y = rect.y };
     apply_to_point matrix { x = rect.x +. rect.w; y = rect.y };
-    apply_to_point matrix { x = rect.x; y = rect.y +. rect.h};
+    apply_to_point matrix { x = rect.x;           y = rect.y +. rect.h};
     apply_to_point matrix { x = rect.x +. rect.w; y = rect.y +. rect.h};
   ]
   |> Bbox.bbox_of_points
   |> Option.value_exn
+
+
+let%expect_test _ =
+  let id = id in
+  let scale = create_scale 2.0 2.0 in
+  let translate = create_translation 10.0 10.0 in
+  let combined = mul (mul id scale) translate in
+  let pt: Point.t = {x = 0.0; y=0.0} in
+  let applied = apply_to_point combined pt in
+  Point.sexp_of_t applied
+  |> Sexp.to_string_hum
+  |> print_endline;
+  [%expect "((x 10) (y 10))"]
+
+let%expect_test _ =
+  let id = id in
+  let scale = create_scale 2.0 2.0 in
+  let translate = create_translation 10.0 10.0 in
+  let combined = mul (mul id translate) scale in
+  let pt: Point.t = {x = 0.0; y=0.0} in
+  let applied = apply_to_point combined pt in
+  Point.sexp_of_t applied
+  |> Sexp.to_string_hum
+  |> print_endline;
+  [%expect "((x 20) (y 20))"]

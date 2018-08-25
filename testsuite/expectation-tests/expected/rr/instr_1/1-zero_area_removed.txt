@@ -1,0 +1,817 @@
+136 line segments
+
+Line Segment 0 
+2 points
+Clockwise? false
+(7.0,35.081867)
+(6.904418,35.0)
+
+Line Segment 1 
+2 points
+Clockwise? true
+(29.0,3.5291514)
+(30.0,3.7445502)
+
+Line Segment 2 
+2 points
+Clockwise? false
+(37.270927,29.0)
+(37.055916,30.0)
+
+Line Segment 3 
+2 points
+Clockwise? true
+(3.4987323,12.0)
+(3.6928804,11.0)
+
+Line Segment 4 
+2 points
+Clockwise? false
+(37.4,23.0)
+(37.4,24.0)
+
+Line Segment 5 
+2 points
+Clockwise? true
+(12.0,3.4987326)
+(13.0,3.4080226)
+
+Line Segment 6 
+2 points
+Clockwise? false
+(26.0,37.4)
+(25.0,37.4)
+
+Line Segment 7 
+2 points
+Clockwise? true
+(35.081867,7.0)
+(35.813877,8.0)
+
+Line Segment 8 
+2 points
+Clockwise? false
+(3.3999996,25.0)
+(3.3999996,24.0)
+
+Line Segment 9 
+2 points
+Clockwise? false
+(13.0,37.39198)
+(12.0,37.301315)
+
+Line Segment 10 
+2 points
+Clockwise? true
+(22.0,3.3999996)
+(23.0,3.3999996)
+
+Line Segment 11 
+2 points
+Clockwise? true
+(33.0,5.117165)
+(34.0,5.8900266)
+
+Line Segment 12 
+2 points
+Clockwise? false
+(3.3999996,16.0)
+(3.3999996,15.0)
+
+Line Segment 13 
+2 points
+Clockwise? true
+(9.989547,4.0)
+(10.0,3.9957685)
+
+Line Segment 14 
+2 points
+Clockwise? true
+(32.815727,5.0)
+(33.0,5.117165)
+
+Line Segment 15 
+2 points
+Clockwise? true
+(37.39198,13.0)
+(37.4,14.0)
+
+Line Segment 16 
+2 points
+Clockwise? true
+(5.0,7.975605)
+(5.721442,7.0)
+
+Line Segment 17 
+2 points
+Clockwise? false
+(3.3999996,19.0)
+(3.3999996,18.0)
+
+Line Segment 18 
+2 points
+Clockwise? true
+(8.0,4.9836073)
+(9.0,4.4226966)
+
+Line Segment 19 
+2 points
+Clockwise? true
+(30.0,3.7445502)
+(30.789719,4.0)
+
+Line Segment 20 
+2 points
+Clockwise? false
+(36.728085,31.0)
+(36.27689,32.0)
+
+Line Segment 21 
+2 points
+Clockwise? true
+(3.6928804,11.0)
+(3.9957685,10.0)
+
+Line Segment 22 
+2 points
+Clockwise? true
+(17.0,3.3999996)
+(18.0,3.3999996)
+
+Line Segment 23 
+2 points
+Clockwise? false
+(23.0,37.4)
+(22.0,37.4)
+
+Line Segment 24 
+2 points
+Clockwise? true
+(35.813877,8.0)
+(36.0,8.312998)
+
+Line Segment 25 
+2 points
+Clockwise? true
+(4.0,9.989547)
+(4.4226966,9.0)
+
+Line Segment 26 
+2 points
+Clockwise? false
+(37.4,24.0)
+(37.4,25.0)
+
+Line Segment 27 
+2 points
+Clockwise? false
+(14.0,37.4)
+(13.0,37.39198)
+
+Line Segment 28 
+2 points
+Clockwise? true
+(19.0,3.3999996)
+(20.0,3.3999996)
+
+Line Segment 29 
+2 points
+Clockwise? false
+(33.89482,35.0)
+(33.0,35.680676)
+
+Line Segment 30 
+2 points
+Clockwise? false
+(3.3999996,26.0)
+(3.3999996,25.0)
+
+Line Segment 31 
+2 points
+Clockwise? false
+(10.0,36.803223)
+(9.0,36.377495)
+
+Line Segment 32 
+2 points
+Clockwise? true
+(30.789719,4.0)
+(31.0,4.070975)
+
+Line Segment 33 
+2 points
+Clockwise? false
+(37.4,15.0)
+(37.4,16.0)
+
+Line Segment 34 
+2 points
+Clockwise? true
+(34.121918,6.0)
+(35.0,6.9044185)
+
+Line Segment 35 
+2 points
+Clockwise? false
+(3.3999996,21.0)
+(3.3999996,20.0)
+
+Line Segment 36 
+2 points
+Clockwise? false
+(6.0,34.121918)
+(5.8900266,34.0)
+
+Line Segment 37 
+2 points
+Clockwise? true
+(27.0,3.3999996)
+(28.0,3.4180605)
+
+Line Segment 38 
+2 points
+Clockwise? true
+(37.0,10.638051)
+(37.107468,11.0)
+
+Line Segment 39 
+2 points
+Clockwise? false
+(5.0,32.815727)
+(4.5237784,32.0)
+
+Line Segment 40 
+2 points
+Clockwise? true
+(18.0,3.3999996)
+(19.0,3.3999996)
+
+Line Segment 41 
+2 points
+Clockwise? false
+(24.0,37.4)
+(23.0,37.4)
+
+Line Segment 42 
+2 points
+Clockwise? true
+(37.107468,11.0)
+(37.301315,12.0)
+
+Line Segment 43 
+2 points
+Clockwise? false
+(4.070975,31.0)
+(4.0,30.789719)
+
+Line Segment 44 
+2 points
+Clockwise? false
+(37.4,26.0)
+(37.4,27.0)
+
+Line Segment 45 
+2 points
+Clockwise? false
+(11.0,37.107468)
+(10.638051,37.0)
+
+Line Segment 46 
+2 points
+Clockwise? true
+(20.0,3.3999996)
+(21.0,3.3999996)
+
+Line Segment 47 
+2 points
+Clockwise? true
+(36.0,8.312998)
+(36.377495,9.0)
+
+Line Segment 48 
+2 points
+Clockwise? true
+(3.4080224,13.0)
+(3.4987323,12.0)
+
+Line Segment 49 
+2 points
+Clockwise? false
+(8.0,35.813877)
+(7.0,35.081867)
+
+Line Segment 50 
+2 points
+Clockwise? false
+(31.0,36.728085)
+(30.176405,37.0)
+
+Line Segment 51 
+2 points
+Clockwise? false
+(21.0,37.4)
+(20.0,37.4)
+
+Line Segment 52 
+2 points
+Clockwise? true
+(35.0,6.9044185)
+(35.081867,7.0)
+
+Line Segment 53 
+2 points
+Clockwise? false
+(3.3999996,15.0)
+(3.3999996,14.0)
+
+Line Segment 54 
+2 points
+Clockwise? false
+(6.904418,35.0)
+(6.0,34.121918)
+
+Line Segment 55 
+2 points
+Clockwise? true
+(28.0,3.4180605)
+(29.0,3.5291514)
+
+Line Segment 56 
+2 points
+Clockwise? false
+(37.4,16.0)
+(37.4,17.0)
+
+Line Segment 57 
+2 points
+Clockwise? true
+(5.721442,7.0)
+(6.0,6.682563)
+
+Line Segment 58 
+2 points
+Clockwise? true
+(15.0,3.3999996)
+(16.0,3.3999996)
+
+Line Segment 59 
+2 points
+Clockwise? false
+(29.0,37.270927)
+(28.0,37.381943)
+
+Line Segment 60 
+2 points
+Clockwise? true
+(37.301315,12.0)
+(37.39198,13.0)
+
+Line Segment 61 
+2 points
+Clockwise? false
+(3.5291514,29.0)
+(3.4180605,28.0)
+
+Line Segment 62 
+2 points
+Clockwise? false
+(37.4,20.0)
+(37.4,21.0)
+
+Line Segment 63 
+2 points
+Clockwise? false
+(12.0,37.301315)
+(11.0,37.107468)
+
+Line Segment 64 
+2 points
+Clockwise? true
+(25.0,3.3999996)
+(26.0,3.3999996)
+
+Line Segment 65 
+2 points
+Clockwise? false
+(36.27689,32.0)
+(36.0,32.484795)
+
+Line Segment 66 
+2 points
+Clockwise? false
+(3.3999996,22.0)
+(3.3999996,21.0)
+
+Line Segment 67 
+2 points
+Clockwise? true
+(9.0,4.4226966)
+(9.989547,4.0)
+
+Line Segment 68 
+2 points
+Clockwise? false
+(22.0,37.4)
+(21.0,37.4)
+
+Line Segment 69 
+2 points
+Clockwise? false
+(33.0,35.680676)
+(32.484795,36.0)
+
+Line Segment 70 
+2 points
+Clockwise? false
+(3.3999996,17.0)
+(3.3999996,16.0)
+
+Line Segment 71 
+2 points
+Clockwise? true
+(10.0,3.9957685)
+(11.0,3.6928802)
+
+Line Segment 72 
+2 points
+Clockwise? true
+(32.0,4.5237784)
+(32.815727,5.0)
+
+Line Segment 73 
+2 points
+Clockwise? false
+(37.4,18.0)
+(37.4,19.0)
+
+Line Segment 74 
+2 points
+Clockwise? true
+(4.4226966,9.0)
+(4.9836073,8.0)
+
+Line Segment 75 
+2 points
+Clockwise? true
+(16.0,3.3999996)
+(17.0,3.3999996)
+
+Line Segment 76 
+2 points
+Clockwise? true
+(7.0,5.721442)
+(7.975605,5.0)
+
+Line Segment 77 
+2 points
+Clockwise? false
+(30.0,37.055916)
+(29.0,37.270927)
+
+Line Segment 78 
+2 points
+Clockwise? true
+(36.803223,10.0)
+(37.0,10.638051)
+
+Line Segment 79 
+2 points
+Clockwise? false
+(3.7445502,30.0)
+(3.5291514,29.0)
+
+Line Segment 80 
+2 points
+Clockwise? false
+(37.4,22.0)
+(37.4,23.0)
+
+Line Segment 81 
+2 points
+Clockwise? false
+(17.0,37.4)
+(16.0,37.4)
+
+Line Segment 82 
+2 points
+Clockwise? true
+(26.0,3.3999996)
+(27.0,3.3999996)
+
+Line Segment 83 
+2 points
+Clockwise? false
+(35.0,33.89482)
+(34.91013,34.0)
+
+Line Segment 84 
+2 points
+Clockwise? false
+(3.3999996,24.0)
+(3.3999996,23.0)
+
+Line Segment 85 
+2 points
+Clockwise? false
+(37.4,25.0)
+(37.4,26.0)
+
+Line Segment 86 
+2 points
+Clockwise? true
+(13.0,3.4080226)
+(14.0,3.3999996)
+
+Line Segment 87 
+2 points
+Clockwise? false
+(19.0,37.4)
+(18.0,37.4)
+
+Line Segment 88 
+2 points
+Clockwise? true
+(34.0,5.8900266)
+(34.121918,6.0)
+
+Line Segment 89 
+2 points
+Clockwise? false
+(3.3999996,27.0)
+(3.3999996,26.0)
+
+Line Segment 90 
+2 points
+Clockwise? false
+(10.638051,37.0)
+(10.0,36.803223)
+
+Line Segment 91 
+2 points
+Clockwise? false
+(32.484795,36.0)
+(32.0,36.27689)
+
+Line Segment 92 
+2 points
+Clockwise? false
+(37.381943,28.0)
+(37.270927,29.0)
+
+Line Segment 93 
+2 points
+Clockwise? true
+(4.9836073,8.0)
+(5.0,7.975605)
+
+Line Segment 94 
+2 points
+Clockwise? false
+(3.3999996,18.0)
+(3.3999996,17.0)
+
+Line Segment 95 
+2 points
+Clockwise? true
+(7.975605,5.0)
+(8.0,4.9836073)
+
+Line Segment 96 
+2 points
+Clockwise? false
+(27.0,37.4)
+(26.0,37.4)
+
+Line Segment 97 
+2 points
+Clockwise? false
+(37.0,30.176405)
+(36.728085,31.0)
+
+Line Segment 98 
+2 points
+Clockwise? false
+(5.117166,33.0)
+(5.0,32.815727)
+
+Line Segment 99 
+2 points
+Clockwise? false
+(18.0,37.4)
+(17.0,37.4)
+
+Line Segment 100 
+2 points
+Clockwise? true
+(23.0,3.3999996)
+(24.0,3.3999996)
+
+Line Segment 101 
+2 points
+Clockwise? false
+(35.680676,33.0)
+(35.0,33.89482)
+
+Line Segment 102 
+2 points
+Clockwise? true
+(3.9957685,10.0)
+(4.0,9.989547)
+
+Line Segment 103 
+2 points
+Clockwise? false
+(37.4,27.0)
+(37.381943,28.0)
+
+Line Segment 104 
+2 points
+Clockwise? true
+(14.0,3.3999996)
+(15.0,3.3999996)
+
+Line Segment 105 
+2 points
+Clockwise? false
+(20.0,37.4)
+(19.0,37.4)
+
+Line Segment 106 
+2 points
+Clockwise? false
+(36.0,32.484795)
+(35.680676,33.0)
+
+Line Segment 107 
+2 points
+Clockwise? false
+(3.4180605,28.0)
+(3.3999996,27.0)
+
+Line Segment 108 
+2 points
+Clockwise? false
+(8.312998,36.0)
+(8.0,35.813877)
+
+Line Segment 109 
+2 points
+Clockwise? false
+(30.176405,37.0)
+(30.0,37.055916)
+
+Line Segment 110 
+2 points
+Clockwise? false
+(37.4,14.0)
+(37.4,15.0)
+
+Line Segment 111 
+2 points
+Clockwise? false
+(34.0,34.91013)
+(33.89482,35.0)
+
+Line Segment 112 
+2 points
+Clockwise? false
+(3.3999996,20.0)
+(3.3999996,19.0)
+
+Line Segment 113 
+2 points
+Clockwise? true
+(6.0,6.682563)
+(6.682563,6.0)
+
+Line Segment 114 
+2 points
+Clockwise? false
+(28.0,37.381943)
+(27.0,37.4)
+
+Line Segment 115 
+2 points
+Clockwise? false
+(37.4,17.0)
+(37.4,18.0)
+
+Line Segment 116 
+2 points
+Clockwise? false
+(5.8900266,34.0)
+(5.117166,33.0)
+
+Line Segment 117 
+2 points
+Clockwise? false
+(15.0,37.4)
+(14.0,37.4)
+
+Line Segment 118 
+2 points
+Clockwise? true
+(24.0,3.3999996)
+(25.0,3.3999996)
+
+Line Segment 119 
+2 points
+Clockwise? false
+(37.055916,30.0)
+(37.0,30.176405)
+
+Line Segment 120 
+2 points
+Clockwise? false
+(4.0,30.789719)
+(3.7445502,30.0)
+
+Line Segment 121 
+2 points
+Clockwise? false
+(37.4,21.0)
+(37.4,22.0)
+
+Line Segment 122 
+2 points
+Clockwise? true
+(11.0,3.6928802)
+(12.0,3.4987326)
+
+Line Segment 123 
+2 points
+Clockwise? false
+(25.0,37.4)
+(24.0,37.4)
+
+Line Segment 124 
+2 points
+Clockwise? true
+(36.377495,9.0)
+(36.803223,10.0)
+
+Line Segment 125 
+2 points
+Clockwise? false
+(3.3999996,23.0)
+(3.3999996,22.0)
+
+Line Segment 126 
+2 points
+Clockwise? false
+(9.0,36.377495)
+(8.312998,36.0)
+
+Line Segment 127 
+2 points
+Clockwise? true
+(31.0,4.070975)
+(32.0,4.5237784)
+
+Line Segment 128 
+2 points
+Clockwise? true
+(21.0,3.3999996)
+(22.0,3.3999996)
+
+Line Segment 129 
+2 points
+Clockwise? false
+(34.91013,34.0)
+(34.0,34.91013)
+
+Line Segment 130 
+2 points
+Clockwise? true
+(3.3999996,14.0)
+(3.4080224,13.0)
+
+Line Segment 131 
+2 points
+Clockwise? true
+(6.682563,6.0)
+(7.0,5.721442)
+
+Line Segment 132 
+2 points
+Clockwise? false
+(32.0,36.27689)
+(31.0,36.728085)
+
+Line Segment 133 
+2 points
+Clockwise? false
+(37.4,19.0)
+(37.4,20.0)
+
+Line Segment 134 
+2 points
+Clockwise? false
+(4.5237784,32.0)
+(4.070975,31.0)
+
+Line Segment 135 
+2 points
+Clockwise? false
+(16.0,37.4)
+(15.0,37.4)

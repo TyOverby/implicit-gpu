@@ -1,0 +1,17 @@
+(((Serially
+   ((Define 0
+     (BasicShape
+      (Intersection
+       ((Terminal
+         (Circle
+          ((x 0) (y 0) (r 10)
+           (mat ((m11 3) (m12 0) (m21 0) (m22 3) (m31 36) (m32 36))))))
+        (Not
+         (Modulate
+          (Terminal
+           (Circle
+            ((x 0) (y 0) (r 10)
+             (mat ((m11 3) (m12 0) (m21 0) (m22 3) (m31 36) (m32 36))))))
+          -4))))))
+    (Export 0)))
+  (72 72)))

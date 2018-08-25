@@ -11,8 +11,16 @@ let rec propagate shape incoming = match shape with
   | Union targets -> Union (propagate_all targets incoming)
   | Intersection targets -> Intersection (propagate_all targets incoming)
   | Modulate (target, how_much) -> Modulate (propagate target incoming, how_much)
-  | Transform (Translate (target, {dx; dy})) -> propagate target (mul (Matrix.create_translation dx dy) incoming)
-  | Transform (Scale (target, {dx; dy})) -> propagate target (mul (Matrix.create_scale dx dy) incoming)
+  | Transform (Translate (target, {dx; dy})) -> propagate target
+                                                  (mul
+                                                     (Matrix.create_translation dx dy)
+                                                     incoming
+                                                  )
+  | Transform (Scale (target, {dx; dy})) -> propagate target
+                                              (mul
+                                                 (Matrix.create_scale dx dy)
+                                                 incoming
+                                              )
 and propagate_all shapes incoming =
   List.map shapes ~f:(fun s -> propagate s incoming)
 

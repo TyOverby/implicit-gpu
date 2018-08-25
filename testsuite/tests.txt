@@ -1,10 +1,15 @@
+rr
+rr_scaled
+ring
+easy_ring
+scaled_ring
+easy_scaled_ring
+basic_rect
 small_circle
 displaced_circle
 circles_union
 circles_intersection
 circles_intersection_freeze
-basic_poly
-expanded_poly
 overlay_test
 overlay_test_sub
 scaled_circle

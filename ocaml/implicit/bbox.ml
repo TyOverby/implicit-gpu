@@ -19,7 +19,7 @@ let from_extrema min_x min_y max_x max_y = {
 
 let grow_by factor box =
   let dx = Float.max_inan 2.0 (box.w *. factor) in
-  let dy = Float.max_inan 2.0 (box.w *. factor) in
+  let dy = Float.max_inan 2.0 (box.h *. factor) in
   {
     x = box.x -. dx;
     y = box.y -. dy;
@@ -32,7 +32,7 @@ let bbox_of_points = function
   | points ->
     let extract f g = points |> List.map ~f:f |> g |> Option.value_exn in
     let get_x (p: Point.t) = p.x in
-    let get_y (p: Point.t) = p.x in
+    let get_y (p: Point.t) = p.y in
     let minimum l = List.min_elt l ~compare:Float.compare in
     let maximum l = List.max_elt l ~compare:Float.compare in
     let min_x = extract get_x minimum in

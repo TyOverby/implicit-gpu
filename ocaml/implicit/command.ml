@@ -67,9 +67,6 @@ let compile_commands shape =
   else Serially [Serially commands; last; Export last_id]
 
 let compile shape =
-  let t_shape (shape: Stages.propagated): Stages.simplified =
-    Shape.map (Fn.id) (Nothing.unreachable_code) shape
-  in
   let simplified = Simplify.simplify shape in
   match simplified with
   | Simplify.SShape shape ->
@@ -78,16 +75,16 @@ let compile shape =
      | Everything | Nothing -> failwith "unreachable"
      | Positive bb ->
        let bb = Bbox.grow_by 0.1 bb in
-       let simplified = Transform (Translate(t_shape propagated, {dx = -. bb.x; dy = -. bb.y})) in
+       let simplified = Transform (Translate(shape, {dx = -. bb.x; dy = -. bb.y})) in
        let propagated = Prop.remove_transformations simplified in
        let compiled = compile_commands propagated in
        Some (compiled, (bb.w, bb.h))
      | Negative bb ->
        let bb = Bbox.grow_by 0.1 bb in
-       let box_shape: Stages.propagated = Terminal (Rect {x = bb.x; y = bb.y; w = bb.w; h=bb.h; mat = Matrix.id}) in
+       let box_shape: Stages.user = Terminal (Rect {x = bb.x; y = bb.y; w = bb.w; h=bb.h; mat = Matrix.id}) in
        let bb = Bbox.grow_by 0.1 bb in
-       let simplified = Intersection [box_shape; propagated] in
-       let simplified = Transform (Translate(t_shape simplified, {dx = -. bb.x; dy = -. bb.y})) in
+       let simplified = Intersection [box_shape; shape] in
+       let simplified = Transform (Translate(simplified, {dx = -. bb.x; dy = -. bb.y})) in
        let propagated = Prop.remove_transformations simplified in
        let compiled = compile_commands propagated in
        Some (compiled, (bb.w, bb.h)))

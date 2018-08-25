@@ -68,9 +68,9 @@ let overlay_test =
   |> List.map ~f:(outline 4.0)
   |> overlay_all 2.0
 
+let rounded_rect ~x ~y ~w ~h ~r =
+  modulate r @@ rect ~x:(x +. r) ~y:(y +. r) ~w:(w -. r *. 2.0) ~h:(h -. r *. 2.0)
 let overlay_test_sub =
-  let rounded_rect ~x ~y ~w ~h ~r =
-    modulate r @@ rect ~x:(x +. r) ~y:(y +. r) ~w:(w -. r *. 2.0) ~h:(h -. r *. 2.0) in
   subtract (rounded_rect ~r:10.0 ~x:1.0 ~y: 1.0 ~w:34.0 ~h:34.0) overlay_test
 
 let scaled_circle =
@@ -79,7 +79,7 @@ let scaled_circle =
 
 let translated_circle =
   circle ~x:0.0 ~y:0.0 ~r:10.0
-  |> translate ~dx: 11.0 ~dy: 11.0
+  |> translate ~dx: 10.0 ~dy: 10.0
 
 let translated_and_scaled_circle =
   circle ~x:0.0 ~y:0.0 ~r:10.0
@@ -90,16 +90,46 @@ let inverted_circle =
   circle ~x:0.0 ~y:0.0 ~r:10.0
   |> not
 
+let basic_rect=
+  rect ~x:0.0 ~y:0.0 ~w:10.0 ~h:20.0
+
+let ring =
+  let larger  = circle ~x:0.0 ~y:0.0 ~r:10.0 in
+  let smaller = larger |> modulate (-. 4.0) in
+  subtract larger smaller
+
+let easy_ring =
+  let larger  =  circle ~x:10.0 ~y:10.0 ~r:10.0 in
+  let smaller = circle ~x:10.0 ~y:10.0 ~r:6.0 in
+  subtract larger smaller
+
+let scaled_ring = ring |> scale ~dx:3.0 ~dy:3.0
+
+let easy_scaled_ring = easy_ring |> scale ~dx:3.0 ~dy:3.0
+
+let rr = rounded_rect ~r:10.0 ~x:1.0 ~y: 1.0 ~w:34.0 ~h:34.0
+
+let rr_scaled = scale ~dx:3.0 ~dy:3.0 rr
+
 let tests = [
+  "rr", rr;
+  "rr_scaled", rr_scaled;
+  "ring", ring;
+  "easy_ring", easy_ring;
+  "scaled_ring", scaled_ring;
+  "easy_scaled_ring", easy_scaled_ring;
+  "basic_rect", basic_rect;
   "small_circle", small_circle;
   "displaced_circle", displaced_circle;
   "circles_union", circles_union;
   "circles_intersection", circles_intersection;
   "circles_intersection_freeze", circles_intersection_freeze;
+  (*
   "basic_poly", basic_poly;
   "expanded_poly", expanded_poly;
+  *)
   "overlay_test", overlay_test;
-  "overlay_test_sub", overlay_test_sub;
+  "overlay_test_sub", overlay_test_sub |> scale ~dx:3.0 ~dy:3.0;
   "scaled_circle", scaled_circle;
   "translated_circle", translated_circle;
   "translated_and_scaled_circle", translated_and_scaled_circle;

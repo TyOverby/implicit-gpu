@@ -1,0 +1,55 @@
+Serially(
+    [
+        Define(
+            0,
+            BasicShape(
+                Intersection(
+                    [
+                        Terminal(
+                            Circle(
+                                Circle {
+                                    x: 0.0,
+                                    y: 0.0,
+                                    r: 10.0,
+                                    mat: [
+                                        3.0,
+                                        0.0,
+                                        0.0,
+                                        3.0,
+                                        36.0,
+                                        36.0
+                                    ]
+                                }
+                            )
+                        ),
+                        Not(
+                            Modulate(
+                                Terminal(
+                                    Circle(
+                                        Circle {
+                                            x: 0.0,
+                                            y: 0.0,
+                                            r: 10.0,
+                                            mat: [
+                                                3.0,
+                                                0.0,
+                                                0.0,
+                                                3.0,
+                                                36.0,
+                                                36.0
+                                            ]
+                                        }
+                                    )
+                                ),
+                                -4.0
+                            )
+                        )
+                    ]
+                )
+            )
+        ),
+        Export(
+            0
+        )
+    ]
+)
