@@ -3,26 +3,38 @@ Serially(
         Define(
             0,
             BasicShape(
-                Modulate(
-                    Terminal(
-                        Rect(
-                            Rect {
-                                x: 11.0,
-                                y: 11.0,
-                                w: 14.0,
-                                h: 14.0,
-                                mat: [
-                                    3.0,
-                                    0.0,
-                                    0.0,
-                                    3.0,
-                                    -16.8,
-                                    -16.8
-                                ]
-                            }
-                        )
+                Transform(
+                    Transform(
+                        Modulate(
+                            Terminal(
+                                Rect(
+                                    Rect {
+                                        x: 11.0,
+                                        y: 11.0,
+                                        w: 14.0,
+                                        h: 14.0
+                                    }
+                                )
+                            ),
+                            10.0
+                        ),
+                        [
+                            3.0,
+                            0.0,
+                            0.0,
+                            3.0,
+                            0.0,
+                            0.0
+                        ]
                     ),
-                    10.0
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        1.0,
+                        7.2,
+                        7.2
+                    ]
                 )
             )
         ),

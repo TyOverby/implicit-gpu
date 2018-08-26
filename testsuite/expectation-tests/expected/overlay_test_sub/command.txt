@@ -3,76 +3,119 @@ Serially(
         Define(
             0,
             BasicShape(
-                Intersection(
-                    [
-                        Modulate(
-                            Terminal(
-                                Rect(
-                                    Rect {
-                                        x: 11.0,
-                                        y: 11.0,
-                                        w: 14.0,
-                                        h: 14.0,
-                                        mat: [
-                                            3.0,
-                                            0.0,
-                                            0.0,
-                                            3.0,
-                                            -16.8,
-                                            -16.8
-                                        ]
-                                    }
-                                )
-                            ),
-                            10.0
-                        ),
-                        Not(
-                            Union(
-                                [
+                Transform(
+                    Transform(
+                        Intersection(
+                            [
+                                Modulate(
+                                    Terminal(
+                                        Rect(
+                                            Rect {
+                                                x: 11.0,
+                                                y: 11.0,
+                                                w: 14.0,
+                                                h: 14.0
+                                            }
+                                        )
+                                    ),
+                                    10.0
+                                ),
+                                Not(
                                     Union(
                                         [
                                             Union(
                                                 [
-                                                    Intersection(
+                                                    Union(
                                                         [
-                                                            Terminal(
-                                                                Circle(
-                                                                    Circle {
-                                                                        x: 23.0,
-                                                                        y: 23.0,
-                                                                        r: 10.0,
-                                                                        mat: [
-                                                                            3.0,
-                                                                            0.0,
-                                                                            0.0,
-                                                                            3.0,
-                                                                            -16.8,
-                                                                            -16.8
-                                                                        ]
-                                                                    }
-                                                                )
-                                                            ),
-                                                            Not(
-                                                                Modulate(
+                                                            Intersection(
+                                                                [
                                                                     Terminal(
                                                                         Circle(
                                                                             Circle {
                                                                                 x: 23.0,
                                                                                 y: 23.0,
-                                                                                r: 10.0,
-                                                                                mat: [
-                                                                                    3.0,
-                                                                                    0.0,
-                                                                                    0.0,
-                                                                                    3.0,
-                                                                                    -16.8,
-                                                                                    -16.8
-                                                                                ]
+                                                                                r: 10.0
                                                                             }
                                                                         )
                                                                     ),
-                                                                    -4.0
-                                                                )
+                                                                    Not(
+                                                                        Modulate(
+                                                                            Terminal(
+                                                                                Circle(
+                                                                                    Circle {
+                                                                                        x: 23.0,
+                                                                                        y: 23.0,
+                                                                                        r: 10.0
+                                                                                    }
+                                                                                )
+                                                                            ),
+                                                                            -4.0
+                                                                        )
+                                                                    )
+                                                                ]
+                                                            ),
+                                                            Intersection(
+                                                                [
+                                                                    Intersection(
+                                                                        [
+                                                                            Terminal(
+                                                                                Circle(
+                                                                                    Circle {
+                                                                                        x: 13.0,
+                                                                                        y: 23.0,
+                                                                                        r: 10.0
+                                                                                    }
+                                                                                )
+                                                                            ),
+                                                                            Not(
+                                                                                Modulate(
+                                                                                    Terminal(
+                                                                                        Circle(
+                                                                                            Circle {
+                                                                                                x: 13.0,
+                                                                                                y: 23.0,
+                                                                                                r: 10.0
+                                                                                            }
+                                                                                        )
+                                                                                    ),
+                                                                                    -4.0
+                                                                                )
+                                                                            )
+                                                                        ]
+                                                                    ),
+                                                                    Not(
+                                                                        Modulate(
+                                                                            Intersection(
+                                                                                [
+                                                                                    Terminal(
+                                                                                        Circle(
+                                                                                            Circle {
+                                                                                                x: 23.0,
+                                                                                                y: 23.0,
+                                                                                                r: 10.0
+                                                                                            }
+                                                                                        )
+                                                                                    ),
+                                                                                    Not(
+                                                                                        Modulate(
+                                                                                            Terminal(
+                                                                                                Circle(
+                                                                                                    Circle {
+                                                                                                        x: 23.0,
+                                                                                                        y: 23.0,
+                                                                                                        r: 10.0
+                                                                                                    }
+                                                                                                )
+                                                                                            ),
+                                                                                            -4.0
+                                                                                        )
+                                                                                    )
+                                                                                ]
+                                                                            ),
+                                                                            2.0
+                                                                        )
+                                                                    )
+                                                                ]
                                                             )
                                                         ]
                                                     ),
@@ -83,17 +126,9 @@ Serially(
                                                                     Terminal(
                                                                         Circle(
                                                                             Circle {
-                                                                                x: 13.0,
-                                                                                y: 23.0,
-                                                                                r: 10.0,
-                                                                                mat: [
-                                                                                    3.0,
-                                                                                    0.0,
-                                                                                    0.0,
-                                                                                    3.0,
-                                                                                    -16.8,
-                                                                                    -16.8
-                                                                                ]
+                                                                                x: 23.0,
+                                                                                y: 13.0,
+                                                                                r: 10.0
                                                                             }
                                                                         )
                                                                     ),
@@ -102,17 +137,9 @@ Serially(
                                                                             Terminal(
                                                                                 Circle(
                                                                                     Circle {
-                                                                                        x: 13.0,
-                                                                                        y: 23.0,
-                                                                                        r: 10.0,
-                                                                                        mat: [
-                                                                                            3.0,
-                                                                                            0.0,
-                                                                                            0.0,
-                                                                                            3.0,
-                                                                                            -16.8,
-                                                                                            -16.8
-                                                                                        ]
+                                                                                        x: 23.0,
+                                                                                        y: 13.0,
+                                                                                        r: 10.0
                                                                                     }
                                                                                 )
                                                                             ),
@@ -123,46 +150,97 @@ Serially(
                                                             ),
                                                             Not(
                                                                 Modulate(
-                                                                    Intersection(
+                                                                    Union(
                                                                         [
-                                                                            Terminal(
-                                                                                Circle(
-                                                                                    Circle {
-                                                                                        x: 23.0,
-                                                                                        y: 23.0,
-                                                                                        r: 10.0,
-                                                                                        mat: [
-                                                                                            3.0,
-                                                                                            0.0,
-                                                                                            0.0,
-                                                                                            3.0,
-                                                                                            -16.8,
-                                                                                            -16.8
-                                                                                        ]
-                                                                                    }
-                                                                                )
-                                                                            ),
-                                                                            Not(
-                                                                                Modulate(
+                                                                            Intersection(
+                                                                                [
                                                                                     Terminal(
                                                                                         Circle(
                                                                                             Circle {
                                                                                                 x: 23.0,
                                                                                                 y: 23.0,
-                                                                                                r: 10.0,
-                                                                                                mat: [
-                                                                                                    3.0,
-                                                                                                    0.0,
-                                                                                                    0.0,
-                                                                                                    3.0,
-                                                                                                    -16.8,
-                                                                                                    -16.8
-                                                                                                ]
+                                                                                                r: 10.0
                                                                                             }
                                                                                         )
                                                                                     ),
-                                                                                    -4.0
-                                                                                )
+                                                                                    Not(
+                                                                                        Modulate(
+                                                                                            Terminal(
+                                                                                                Circle(
+                                                                                                    Circle {
+                                                                                                        x: 23.0,
+                                                                                                        y: 23.0,
+                                                                                                        r: 10.0
+                                                                                                    }
+                                                                                                )
+                                                                                            ),
+                                                                                            -4.0
+                                                                                        )
+                                                                                    )
+                                                                                ]
+                                                                            ),
+                                                                            Intersection(
+                                                                                [
+                                                                                    Intersection(
+                                                                                        [
+                                                                                            Terminal(
+                                                                                                Circle(
+                                                                                                    Circle {
+                                                                                                        x: 13.0,
+                                                                                                        y: 23.0,
+                                                                                                        r: 10.0
+                                                                                                    }
+                                                                                                )
+                                                                                            ),
+                                                                                            Not(
+                                                                                                Modulate(
+                                                                                                    Terminal(
+                                                                                                        Circle(
+                                                                                                            Circle {
+                                                                                                                x: 13.0,
+                                                                                                                y: 23.0,
+                                                                                                                r: 10.0
+                                                                                                            }
+                                                                                                        )
+                                                                                                    ),
+                                                                                                    -4.0
+                                                                                                )
+                                                                                            )
+                                                                                        ]
+                                                                                    ),
+                                                                                    Not(
+                                                                                        Modulate(
+                                                                                            Intersection(
+                                                                                                [
+                                                                                                    Terminal(
+                                                                                                        Circle(
+                                                                                                            Circle {
+                                                                                                                x: 23.0,
+                                                                                                                y: 23.0,
+                                                                                                                r: 10.0
+                                                                                                            }
+                                                                                                        )
+                                                                                                    ),
+                                                                                                    Not(
+                                                                                                        Modulate(
+                                                                                                            Terminal(
+                                                                                                                Circle(
+                                                                                                                    Circle {
+                                                                                                                        x: 23.0,
+                                                                                                                        y: 23.0,
+                                                                                                                        r: 10.0
+                                                                                                                    }
+                                                                                                                )
+                                                                                                            ),
+                                                                                                            -4.0
+                                                                                                        )
+                                                                                                    )
+                                                                                                ]
+                                                                                            ),
+                                                                                            2.0
+                                                                                        )
+                                                                                    )
+                                                                                ]
                                                                             )
                                                                         ]
                                                                     ),
@@ -180,17 +258,9 @@ Serially(
                                                             Terminal(
                                                                 Circle(
                                                                     Circle {
-                                                                        x: 23.0,
+                                                                        x: 13.0,
                                                                         y: 13.0,
-                                                                        r: 10.0,
-                                                                        mat: [
-                                                                            3.0,
-                                                                            0.0,
-                                                                            0.0,
-                                                                            3.0,
-                                                                            -16.8,
-                                                                            -16.8
-                                                                        ]
+                                                                        r: 10.0
                                                                     }
                                                                 )
                                                             ),
@@ -199,17 +269,9 @@ Serially(
                                                                     Terminal(
                                                                         Circle(
                                                                             Circle {
-                                                                                x: 23.0,
+                                                                                x: 13.0,
                                                                                 y: 13.0,
-                                                                                r: 10.0,
-                                                                                mat: [
-                                                                                    3.0,
-                                                                                    0.0,
-                                                                                    0.0,
-                                                                                    3.0,
-                                                                                    -16.8,
-                                                                                    -16.8
-                                                                                ]
+                                                                                r: 10.0
                                                                             }
                                                                         )
                                                                     ),
@@ -222,46 +284,97 @@ Serially(
                                                         Modulate(
                                                             Union(
                                                                 [
-                                                                    Intersection(
+                                                                    Union(
                                                                         [
-                                                                            Terminal(
-                                                                                Circle(
-                                                                                    Circle {
-                                                                                        x: 23.0,
-                                                                                        y: 23.0,
-                                                                                        r: 10.0,
-                                                                                        mat: [
-                                                                                            3.0,
-                                                                                            0.0,
-                                                                                            0.0,
-                                                                                            3.0,
-                                                                                            -16.8,
-                                                                                            -16.8
-                                                                                        ]
-                                                                                    }
-                                                                                )
-                                                                            ),
-                                                                            Not(
-                                                                                Modulate(
+                                                                            Intersection(
+                                                                                [
                                                                                     Terminal(
                                                                                         Circle(
                                                                                             Circle {
                                                                                                 x: 23.0,
                                                                                                 y: 23.0,
-                                                                                                r: 10.0,
-                                                                                                mat: [
-                                                                                                    3.0,
-                                                                                                    0.0,
-                                                                                                    0.0,
-                                                                                                    3.0,
-                                                                                                    -16.8,
-                                                                                                    -16.8
-                                                                                                ]
+                                                                                                r: 10.0
                                                                                             }
                                                                                         )
                                                                                     ),
-                                                                                    -4.0
-                                                                                )
+                                                                                    Not(
+                                                                                        Modulate(
+                                                                                            Terminal(
+                                                                                                Circle(
+                                                                                                    Circle {
+                                                                                                        x: 23.0,
+                                                                                                        y: 23.0,
+                                                                                                        r: 10.0
+                                                                                                    }
+                                                                                                )
+                                                                                            ),
+                                                                                            -4.0
+                                                                                        )
+                                                                                    )
+                                                                                ]
+                                                                            ),
+                                                                            Intersection(
+                                                                                [
+                                                                                    Intersection(
+                                                                                        [
+                                                                                            Terminal(
+                                                                                                Circle(
+                                                                                                    Circle {
+                                                                                                        x: 13.0,
+                                                                                                        y: 23.0,
+                                                                                                        r: 10.0
+                                                                                                    }
+                                                                                                )
+                                                                                            ),
+                                                                                            Not(
+                                                                                                Modulate(
+                                                                                                    Terminal(
+                                                                                                        Circle(
+                                                                                                            Circle {
+                                                                                                                x: 13.0,
+                                                                                                                y: 23.0,
+                                                                                                                r: 10.0
+                                                                                                            }
+                                                                                                        )
+                                                                                                    ),
+                                                                                                    -4.0
+                                                                                                )
+                                                                                            )
+                                                                                        ]
+                                                                                    ),
+                                                                                    Not(
+                                                                                        Modulate(
+                                                                                            Intersection(
+                                                                                                [
+                                                                                                    Terminal(
+                                                                                                        Circle(
+                                                                                                            Circle {
+                                                                                                                x: 23.0,
+                                                                                                                y: 23.0,
+                                                                                                                r: 10.0
+                                                                                                            }
+                                                                                                        )
+                                                                                                    ),
+                                                                                                    Not(
+                                                                                                        Modulate(
+                                                                                                            Terminal(
+                                                                                                                Circle(
+                                                                                                                    Circle {
+                                                                                                                        x: 23.0,
+                                                                                                                        y: 23.0,
+                                                                                                                        r: 10.0
+                                                                                                                    }
+                                                                                                                )
+                                                                                                            ),
+                                                                                                            -4.0
+                                                                                                        )
+                                                                                                    )
+                                                                                                ]
+                                                                                            ),
+                                                                                            2.0
+                                                                                        )
+                                                                                    )
+                                                                                ]
                                                                             )
                                                                         ]
                                                                     ),
@@ -272,17 +385,9 @@ Serially(
                                                                                     Terminal(
                                                                                         Circle(
                                                                                             Circle {
-                                                                                                x: 13.0,
-                                                                                                y: 23.0,
-                                                                                                r: 10.0,
-                                                                                                mat: [
-                                                                                                    3.0,
-                                                                                                    0.0,
-                                                                                                    0.0,
-                                                                                                    3.0,
-                                                                                                    -16.8,
-                                                                                                    -16.8
-                                                                                                ]
+                                                                                                x: 23.0,
+                                                                                                y: 13.0,
+                                                                                                r: 10.0
                                                                                             }
                                                                                         )
                                                                                     ),
@@ -291,17 +396,9 @@ Serially(
                                                                                             Terminal(
                                                                                                 Circle(
                                                                                                     Circle {
-                                                                                                        x: 13.0,
-                                                                                                        y: 23.0,
-                                                                                                        r: 10.0,
-                                                                                                        mat: [
-                                                                                                            3.0,
-                                                                                                            0.0,
-                                                                                                            0.0,
-                                                                                                            3.0,
-                                                                                                            -16.8,
-                                                                                                            -16.8
-                                                                                                        ]
+                                                                                                        x: 23.0,
+                                                                                                        y: 13.0,
+                                                                                                        r: 10.0
                                                                                                     }
                                                                                                 )
                                                                                             ),
@@ -312,46 +409,97 @@ Serially(
                                                                             ),
                                                                             Not(
                                                                                 Modulate(
-                                                                                    Intersection(
+                                                                                    Union(
                                                                                         [
-                                                                                            Terminal(
-                                                                                                Circle(
-                                                                                                    Circle {
-                                                                                                        x: 23.0,
-                                                                                                        y: 23.0,
-                                                                                                        r: 10.0,
-                                                                                                        mat: [
-                                                                                                            3.0,
-                                                                                                            0.0,
-                                                                                                            0.0,
-                                                                                                            3.0,
-                                                                                                            -16.8,
-                                                                                                            -16.8
-                                                                                                        ]
-                                                                                                    }
-                                                                                                )
-                                                                                            ),
-                                                                                            Not(
-                                                                                                Modulate(
+                                                                                            Intersection(
+                                                                                                [
                                                                                                     Terminal(
                                                                                                         Circle(
                                                                                                             Circle {
                                                                                                                 x: 23.0,
                                                                                                                 y: 23.0,
-                                                                                                                r: 10.0,
-                                                                                                                mat: [
-                                                                                                                    3.0,
-                                                                                                                    0.0,
-                                                                                                                    0.0,
-                                                                                                                    3.0,
-                                                                                                                    -16.8,
-                                                                                                                    -16.8
-                                                                                                                ]
+                                                                                                                r: 10.0
                                                                                                             }
                                                                                                         )
                                                                                                     ),
-                                                                                                    -4.0
-                                                                                                )
+                                                                                                    Not(
+                                                                                                        Modulate(
+                                                                                                            Terminal(
+                                                                                                                Circle(
+                                                                                                                    Circle {
+                                                                                                                        x: 23.0,
+                                                                                                                        y: 23.0,
+                                                                                                                        r: 10.0
+                                                                                                                    }
+                                                                                                                )
+                                                                                                            ),
+                                                                                                            -4.0
+                                                                                                        )
+                                                                                                    )
+                                                                                                ]
+                                                                                            ),
+                                                                                            Intersection(
+                                                                                                [
+                                                                                                    Intersection(
+                                                                                                        [
+                                                                                                            Terminal(
+                                                                                                                Circle(
+                                                                                                                    Circle {
+                                                                                                                        x: 13.0,
+                                                                                                                        y: 23.0,
+                                                                                                                        r: 10.0
+                                                                                                                    }
+                                                                                                                )
+                                                                                                            ),
+                                                                                                            Not(
+                                                                                                                Modulate(
+                                                                                                                    Terminal(
+                                                                                                                        Circle(
+                                                                                                                            Circle {
+                                                                                                                                x: 13.0,
+                                                                                                                                y: 23.0,
+                                                                                                                                r: 10.0
+                                                                                                                            }
+                                                                                                                        )
+                                                                                                                    ),
+                                                                                                                    -4.0
+                                                                                                                )
+                                                                                                            )
+                                                                                                        ]
+                                                                                                    ),
+                                                                                                    Not(
+                                                                                                        Modulate(
+                                                                                                            Intersection(
+                                                                                                                [
+                                                                                                                    Terminal(
+                                                                                                                        Circle(
+                                                                                                                            Circle {
+                                                                                                                                x: 23.0,
+                                                                                                                                y: 23.0,
+                                                                                                                                r: 10.0
+                                                                                                                            }
+                                                                                                                        )
+                                                                                                                    ),
+                                                                                                                    Not(
+                                                                                                                        Modulate(
+                                                                                                                            Terminal(
+                                                                                                                                Circle(
+                                                                                                                                    Circle {
+                                                                                                                                        x: 23.0,
+                                                                                                                                        y: 23.0,
+                                                                                                                                        r: 10.0
+                                                                                                                                    }
+                                                                                                                                )
+                                                                                                                            ),
+                                                                                                                            -4.0
+                                                                                                                        )
+                                                                                                                    )
+                                                                                                                ]
+                                                                                                            ),
+                                                                                                            2.0
+                                                                                                        )
+                                                                                                    )
+                                                                                                ]
                                                                                             )
                                                                                         ]
                                                                                     ),
@@ -368,402 +516,26 @@ Serially(
                                                 ]
                                             )
                                         ]
-                                    ),
-                                    Intersection(
-                                        [
-                                            Intersection(
-                                                [
-                                                    Terminal(
-                                                        Circle(
-                                                            Circle {
-                                                                x: 13.0,
-                                                                y: 13.0,
-                                                                r: 10.0,
-                                                                mat: [
-                                                                    3.0,
-                                                                    0.0,
-                                                                    0.0,
-                                                                    3.0,
-                                                                    -16.8,
-                                                                    -16.8
-                                                                ]
-                                                            }
-                                                        )
-                                                    ),
-                                                    Not(
-                                                        Modulate(
-                                                            Terminal(
-                                                                Circle(
-                                                                    Circle {
-                                                                        x: 13.0,
-                                                                        y: 13.0,
-                                                                        r: 10.0,
-                                                                        mat: [
-                                                                            3.0,
-                                                                            0.0,
-                                                                            0.0,
-                                                                            3.0,
-                                                                            -16.8,
-                                                                            -16.8
-                                                                        ]
-                                                                    }
-                                                                )
-                                                            ),
-                                                            -4.0
-                                                        )
-                                                    )
-                                                ]
-                                            ),
-                                            Not(
-                                                Modulate(
-                                                    Union(
-                                                        [
-                                                            Union(
-                                                                [
-                                                                    Intersection(
-                                                                        [
-                                                                            Terminal(
-                                                                                Circle(
-                                                                                    Circle {
-                                                                                        x: 23.0,
-                                                                                        y: 23.0,
-                                                                                        r: 10.0,
-                                                                                        mat: [
-                                                                                            3.0,
-                                                                                            0.0,
-                                                                                            0.0,
-                                                                                            3.0,
-                                                                                            -16.8,
-                                                                                            -16.8
-                                                                                        ]
-                                                                                    }
-                                                                                )
-                                                                            ),
-                                                                            Not(
-                                                                                Modulate(
-                                                                                    Terminal(
-                                                                                        Circle(
-                                                                                            Circle {
-                                                                                                x: 23.0,
-                                                                                                y: 23.0,
-                                                                                                r: 10.0,
-                                                                                                mat: [
-                                                                                                    3.0,
-                                                                                                    0.0,
-                                                                                                    0.0,
-                                                                                                    3.0,
-                                                                                                    -16.8,
-                                                                                                    -16.8
-                                                                                                ]
-                                                                                            }
-                                                                                        )
-                                                                                    ),
-                                                                                    -4.0
-                                                                                )
-                                                                            )
-                                                                        ]
-                                                                    ),
-                                                                    Intersection(
-                                                                        [
-                                                                            Intersection(
-                                                                                [
-                                                                                    Terminal(
-                                                                                        Circle(
-                                                                                            Circle {
-                                                                                                x: 13.0,
-                                                                                                y: 23.0,
-                                                                                                r: 10.0,
-                                                                                                mat: [
-                                                                                                    3.0,
-                                                                                                    0.0,
-                                                                                                    0.0,
-                                                                                                    3.0,
-                                                                                                    -16.8,
-                                                                                                    -16.8
-                                                                                                ]
-                                                                                            }
-                                                                                        )
-                                                                                    ),
-                                                                                    Not(
-                                                                                        Modulate(
-                                                                                            Terminal(
-                                                                                                Circle(
-                                                                                                    Circle {
-                                                                                                        x: 13.0,
-                                                                                                        y: 23.0,
-                                                                                                        r: 10.0,
-                                                                                                        mat: [
-                                                                                                            3.0,
-                                                                                                            0.0,
-                                                                                                            0.0,
-                                                                                                            3.0,
-                                                                                                            -16.8,
-                                                                                                            -16.8
-                                                                                                        ]
-                                                                                                    }
-                                                                                                )
-                                                                                            ),
-                                                                                            -4.0
-                                                                                        )
-                                                                                    )
-                                                                                ]
-                                                                            ),
-                                                                            Not(
-                                                                                Modulate(
-                                                                                    Intersection(
-                                                                                        [
-                                                                                            Terminal(
-                                                                                                Circle(
-                                                                                                    Circle {
-                                                                                                        x: 23.0,
-                                                                                                        y: 23.0,
-                                                                                                        r: 10.0,
-                                                                                                        mat: [
-                                                                                                            3.0,
-                                                                                                            0.0,
-                                                                                                            0.0,
-                                                                                                            3.0,
-                                                                                                            -16.8,
-                                                                                                            -16.8
-                                                                                                        ]
-                                                                                                    }
-                                                                                                )
-                                                                                            ),
-                                                                                            Not(
-                                                                                                Modulate(
-                                                                                                    Terminal(
-                                                                                                        Circle(
-                                                                                                            Circle {
-                                                                                                                x: 23.0,
-                                                                                                                y: 23.0,
-                                                                                                                r: 10.0,
-                                                                                                                mat: [
-                                                                                                                    3.0,
-                                                                                                                    0.0,
-                                                                                                                    0.0,
-                                                                                                                    3.0,
-                                                                                                                    -16.8,
-                                                                                                                    -16.8
-                                                                                                                ]
-                                                                                                            }
-                                                                                                        )
-                                                                                                    ),
-                                                                                                    -4.0
-                                                                                                )
-                                                                                            )
-                                                                                        ]
-                                                                                    ),
-                                                                                    2.0
-                                                                                )
-                                                                            )
-                                                                        ]
-                                                                    )
-                                                                ]
-                                                            ),
-                                                            Intersection(
-                                                                [
-                                                                    Intersection(
-                                                                        [
-                                                                            Terminal(
-                                                                                Circle(
-                                                                                    Circle {
-                                                                                        x: 23.0,
-                                                                                        y: 13.0,
-                                                                                        r: 10.0,
-                                                                                        mat: [
-                                                                                            3.0,
-                                                                                            0.0,
-                                                                                            0.0,
-                                                                                            3.0,
-                                                                                            -16.8,
-                                                                                            -16.8
-                                                                                        ]
-                                                                                    }
-                                                                                )
-                                                                            ),
-                                                                            Not(
-                                                                                Modulate(
-                                                                                    Terminal(
-                                                                                        Circle(
-                                                                                            Circle {
-                                                                                                x: 23.0,
-                                                                                                y: 13.0,
-                                                                                                r: 10.0,
-                                                                                                mat: [
-                                                                                                    3.0,
-                                                                                                    0.0,
-                                                                                                    0.0,
-                                                                                                    3.0,
-                                                                                                    -16.8,
-                                                                                                    -16.8
-                                                                                                ]
-                                                                                            }
-                                                                                        )
-                                                                                    ),
-                                                                                    -4.0
-                                                                                )
-                                                                            )
-                                                                        ]
-                                                                    ),
-                                                                    Not(
-                                                                        Modulate(
-                                                                            Union(
-                                                                                [
-                                                                                    Intersection(
-                                                                                        [
-                                                                                            Terminal(
-                                                                                                Circle(
-                                                                                                    Circle {
-                                                                                                        x: 23.0,
-                                                                                                        y: 23.0,
-                                                                                                        r: 10.0,
-                                                                                                        mat: [
-                                                                                                            3.0,
-                                                                                                            0.0,
-                                                                                                            0.0,
-                                                                                                            3.0,
-                                                                                                            -16.8,
-                                                                                                            -16.8
-                                                                                                        ]
-                                                                                                    }
-                                                                                                )
-                                                                                            ),
-                                                                                            Not(
-                                                                                                Modulate(
-                                                                                                    Terminal(
-                                                                                                        Circle(
-                                                                                                            Circle {
-                                                                                                                x: 23.0,
-                                                                                                                y: 23.0,
-                                                                                                                r: 10.0,
-                                                                                                                mat: [
-                                                                                                                    3.0,
-                                                                                                                    0.0,
-                                                                                                                    0.0,
-                                                                                                                    3.0,
-                                                                                                                    -16.8,
-                                                                                                                    -16.8
-                                                                                                                ]
-                                                                                                            }
-                                                                                                        )
-                                                                                                    ),
-                                                                                                    -4.0
-                                                                                                )
-                                                                                            )
-                                                                                        ]
-                                                                                    ),
-                                                                                    Intersection(
-                                                                                        [
-                                                                                            Intersection(
-                                                                                                [
-                                                                                                    Terminal(
-                                                                                                        Circle(
-                                                                                                            Circle {
-                                                                                                                x: 13.0,
-                                                                                                                y: 23.0,
-                                                                                                                r: 10.0,
-                                                                                                                mat: [
-                                                                                                                    3.0,
-                                                                                                                    0.0,
-                                                                                                                    0.0,
-                                                                                                                    3.0,
-                                                                                                                    -16.8,
-                                                                                                                    -16.8
-                                                                                                                ]
-                                                                                                            }
-                                                                                                        )
-                                                                                                    ),
-                                                                                                    Not(
-                                                                                                        Modulate(
-                                                                                                            Terminal(
-                                                                                                                Circle(
-                                                                                                                    Circle {
-                                                                                                                        x: 13.0,
-                                                                                                                        y: 23.0,
-                                                                                                                        r: 10.0,
-                                                                                                                        mat: [
-                                                                                                                            3.0,
-                                                                                                                            0.0,
-                                                                                                                            0.0,
-                                                                                                                            3.0,
-                                                                                                                            -16.8,
-                                                                                                                            -16.8
-                                                                                                                        ]
-                                                                                                                    }
-                                                                                                                )
-                                                                                                            ),
-                                                                                                            -4.0
-                                                                                                        )
-                                                                                                    )
-                                                                                                ]
-                                                                                            ),
-                                                                                            Not(
-                                                                                                Modulate(
-                                                                                                    Intersection(
-                                                                                                        [
-                                                                                                            Terminal(
-                                                                                                                Circle(
-                                                                                                                    Circle {
-                                                                                                                        x: 23.0,
-                                                                                                                        y: 23.0,
-                                                                                                                        r: 10.0,
-                                                                                                                        mat: [
-                                                                                                                            3.0,
-                                                                                                                            0.0,
-                                                                                                                            0.0,
-                                                                                                                            3.0,
-                                                                                                                            -16.8,
-                                                                                                                            -16.8
-                                                                                                                        ]
-                                                                                                                    }
-                                                                                                                )
-                                                                                                            ),
-                                                                                                            Not(
-                                                                                                                Modulate(
-                                                                                                                    Terminal(
-                                                                                                                        Circle(
-                                                                                                                            Circle {
-                                                                                                                                x: 23.0,
-                                                                                                                                y: 23.0,
-                                                                                                                                r: 10.0,
-                                                                                                                                mat: [
-                                                                                                                                    3.0,
-                                                                                                                                    0.0,
-                                                                                                                                    0.0,
-                                                                                                                                    3.0,
-                                                                                                                                    -16.8,
-                                                                                                                                    -16.8
-                                                                                                                                ]
-                                                                                                                            }
-                                                                                                                        )
-                                                                                                                    ),
-                                                                                                                    -4.0
-                                                                                                                )
-                                                                                                            )
-                                                                                                        ]
-                                                                                                    ),
-                                                                                                    2.0
-                                                                                                )
-                                                                                            )
-                                                                                        ]
-                                                                                    )
-                                                                                ]
-                                                                            ),
-                                                                            2.0
-                                                                        )
-                                                                    )
-                                                                ]
-                                                            )
-                                                        ]
-                                                    ),
-                                                    2.0
-                                                )
-                                            )
-                                        ]
                                     )
-                                ]
-                            )
-                        )
+                                )
+                            ]
+                        ),
+                        [
+                            3.0,
+                            0.0,
+                            0.0,
+                            3.0,
+                            0.0,
+                            0.0
+                        ]
+                    ),
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        1.0,
+                        7.2,
+                        7.2
                     ]
                 )
             )

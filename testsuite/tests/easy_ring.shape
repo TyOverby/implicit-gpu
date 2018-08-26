@@ -1,15 +1,10 @@
 (((Serially
    ((Define 0
      (BasicShape
-      (Intersection
-       ((Terminal
-         (Circle
-          ((x 10) (y 10) (r 10)
-           (mat ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2) (m32 2))))))
-        (Not
-         (Terminal
-          (Circle
-           ((x 10) (y 10) (r 6)
-            (mat ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2) (m32 2)))))))))))
+      (Transform
+       (Intersection
+        ((Terminal (Circle ((x 10) (y 10) (r 10))))
+         (Not (Terminal (Circle ((x 10) (y 10) (r 6)))))))
+       ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2) (m32 2)))))
     (Export 0)))
   (24 24)))

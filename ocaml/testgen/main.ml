@@ -1,5 +1,5 @@
 open Core
-open Implicit.Shape
+open Implicit.Creator
 open Implicit
 
 let write_tests tests oc =

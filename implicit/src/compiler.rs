@@ -33,6 +33,10 @@ impl NameGen {
     fn gen_3(&self, n1: &str, n2: &str, n3: &str) -> (String, String, String) {
         (self.gen(n1), self.gen(n2), self.gen(n3))
     }
+
+    fn gen_2(&self, n1: &str, n2: &str) -> (String, String) {
+        (self.gen(n1), self.gen(n2))
+    }
 }
 
 pub fn compile<W: Write>(shape: &Shape, mut writer: W) -> IoResult<CompileResult<W>> {
@@ -45,6 +49,7 @@ pub fn compile<W: Write>(shape: &Shape, mut writer: W) -> IoResult<CompileResult
         &mut uses_dist_to_line,
         &mut deps,
         &NameGen::new(),
+        ("x_s".into(), "y_s".into()),
     )?;
     let deps = deps.into_iter().collect();
 
@@ -81,21 +86,26 @@ pub fn compile<W: Write>(shape: &Shape, mut writer: W) -> IoResult<CompileResult
     })
 }
 
-fn get_xy(matrix: &Matrix) -> (String, String) {
+fn get_xy(matrix: &Matrix, current_xy: (String, String)) -> (String, String) {
+    let (old_x, old_y) = current_xy;
     if matrix.approx_eq(&Matrix::identity()) {
-        return ("x_s".into(), "y_s".into());
+        return (old_x.into(), old_y.into());
     }
     let inverted = matrix.inverse().unwrap();
     // point.x * self.m11 + point.y * self.m21 + self.m31
     let x = format!(
-        "(x_s * {m11} + y_s * {m21} + {m31})",
+        "({x} * {m11} + {y} * {m21} + {m31})",
+        x = old_x,
+        y = old_y,
         m11 = inverted.m11,
         m21 = inverted.m21,
         m31 = inverted.m31
     );
     // point.x * self.m12 + point.y * self.m22 + self.m32
     let y = format!(
-        "(x_s * {m12} + y_s * {m22} + {m32})",
+        "({x} * {m12} + {y} * {m22} + {m32})",
+        x = old_x,
+        y = old_y,
         m12 = inverted.m12,
         m22 = inverted.m22,
         m32 = inverted.m32
@@ -109,12 +119,21 @@ fn compile_impl<W: Write>(
     uses_dist_to_line: &mut bool,
     deps: &mut BTreeSet<Id>,
     namegen: &NameGen,
+    current_xy: (String, String),
 ) -> IoResult<String> {
     writeln!(out, "")?;
     match shape {
-        Shape::Terminal(Terminal::Circle(Circle { x, y, r, mat })) => {
+        Shape::Transform(target, matrix) => {
+            let (x, y) = get_xy(matrix, current_xy);
+            let (nx, ny) = namegen.gen_2("nx", "ny");
+            writeln!(out, "// Transform {:?}", matrix);
+            writeln!(out, "float {} = {};", nx, x);
+            writeln!(out, "float {} = {};", ny, y);
+            compile_impl(target, out, uses_dist_to_line, deps, namegen, (nx, ny))
+        }
+        Shape::Terminal(Terminal::Circle(Circle { x, y, r })) => {
             let (res, dx, dy) = namegen.gen_3("circle", "dx", "dy");
-            let (mx, my) = get_xy(mat);
+            let (mx, my) = current_xy;
             writeln!(out, "// Circle {}", res)?;
             writeln!(out, "float {} = {} - {};", dx, mx, x)?;
             writeln!(out, "float {} = {} - {};", dy, my, y)?;
@@ -130,11 +149,11 @@ fn compile_impl<W: Write>(
 
             Ok(res)
         }
-        Shape::Terminal(Terminal::Rect(Rect { x, y, w, h, mat })) => {
+        Shape::Terminal(Terminal::Rect(Rect { x, y, w, h })) => {
             *uses_dist_to_line = true;
             let (x, y, w, h) = (*x, *y, *w, *h);
             let res = namegen.gen("rect");
-            let (mx, my) = get_xy(mat);
+            let (mx, my) = current_xy;
             writeln!(out, "// Rect {}", res);
             writeln!(out, "float {} = INFINITY;", res);
             {
@@ -195,7 +214,14 @@ fn compile_impl<W: Write>(
 
             writeln!(out, "float {} = -INFINITY;", result)?;
             for shape in shapes {
-                let intermediate = compile_impl(shape, out, uses_dist_to_line, deps, namegen)?;
+                let intermediate = compile_impl(
+                    shape,
+                    out,
+                    uses_dist_to_line,
+                    deps,
+                    namegen,
+                    current_xy.clone(),
+                )?;
                 writeln!(
                     out,
                     "{res} = max({res}, {int});",
@@ -214,7 +240,14 @@ fn compile_impl<W: Write>(
             writeln!(out, "// Union {}", result);
             writeln!(out, "float {} = INFINITY;", result)?;
             for shape in shapes {
-                let intermediate = compile_impl(shape, out, uses_dist_to_line, deps, namegen)?;
+                let intermediate = compile_impl(
+                    shape,
+                    out,
+                    uses_dist_to_line,
+                    deps,
+                    namegen,
+                    current_xy.clone(),
+                )?;
                 writeln!(
                     out,
                     "{res} = min({res}, {int});",
@@ -228,7 +261,8 @@ fn compile_impl<W: Write>(
         Shape::Not(shape) => {
             let result = namegen.gen("negate");
             writeln!(out, "// Not {}", result);
-            let intermediate = compile_impl(shape, out, uses_dist_to_line, deps, namegen)?;
+            let intermediate =
+                compile_impl(shape, out, uses_dist_to_line, deps, namegen, current_xy)?;
             writeln!(out, "float {} = -{};", result, intermediate)?;
             writeln!(out, "// End Not {}", result);
             Ok(result)
@@ -236,7 +270,8 @@ fn compile_impl<W: Write>(
         Shape::Modulate(shape, how_much) => {
             let result = namegen.gen("modulate");
             writeln!(out, "// Modulate {}", result);
-            let intermediate = compile_impl(shape, out, uses_dist_to_line, deps, namegen)?;
+            let intermediate =
+                compile_impl(shape, out, uses_dist_to_line, deps, namegen, current_xy)?;
             writeln!(out, "float {} = {} - {};", result, intermediate, how_much)?;
             writeln!(out, "// End Modulate {}", result);
             Ok(result)
@@ -246,13 +281,11 @@ fn compile_impl<W: Write>(
 
 expectation_test!{
     fn expectation_test_cl_for_circle(mut provider: Provider) {
-        use euclid::*;
         let w = provider.text_writer("out.c");
         let shape = Shape::Terminal(Terminal::Circle(Circle {
             x: 0.0,
             y: 5.0,
             r: 10.0,
-            mat: Transform2D::identity(),
         }));
         compile(&shape, w).unwrap();
     }
@@ -260,21 +293,23 @@ expectation_test!{
 
 expectation_test!{
     fn expectation_test_cl_for_matrix_circle(mut provider: Provider) {
-        use euclid::*;
+        use euclid::Transform2D;
         let w = provider.text_writer("out.c");
-        let shape = Shape::Terminal(Terminal::Circle(Circle {
-            x: 0.0,
-            y: 5.0,
-            r: 10.0,
-            mat: Transform2D::identity().post_scale(2.0, 1.0),
-        }));
+        let shape =
+        Shape::Transform(
+            Box::new( Shape::Terminal(Terminal::Circle(Circle {
+                    x: 0.0,
+                    y: 5.0,
+                    r: 10.0,
+                }))),
+            Transform2D::create_scale(2.0, 1.0)
+        );
         compile(&shape, w).unwrap();
     }
 }
 
 expectation_test!{
     fn expectation_test_cl_for_rect(mut provider: Provider) {
-        use euclid::*;
         use ocaml::Rect;
         let w = provider.text_writer("out.c");
         let shape = Shape::Terminal(Terminal::Rect(Rect {
@@ -282,7 +317,6 @@ expectation_test!{
             y: 5.0,
             w: 10.0,
             h: 20.0,
-            mat: Transform2D::identity(),
         }));
         compile(&shape, w).unwrap();
     }

@@ -3,22 +3,34 @@ Serially(
         Define(
             0,
             BasicShape(
-                Terminal(
-                    Circle(
-                        Circle {
-                            x: 11.0,
-                            y: 11.0,
-                            r: 10.0,
-                            mat: [
-                                2.0,
-                                0.0,
-                                0.0,
-                                1.0,
-                                2.0,
-                                1.0
-                            ]
-                        }
-                    )
+                Transform(
+                    Transform(
+                        Terminal(
+                            Circle(
+                                Circle {
+                                    x: 11.0,
+                                    y: 11.0,
+                                    r: 10.0
+                                }
+                            )
+                        ),
+                        [
+                            2.0,
+                            0.0,
+                            0.0,
+                            1.0,
+                            0.0,
+                            0.0
+                        ]
+                    ),
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        1.0,
+                        2.0,
+                        1.0
+                    ]
                 )
             )
         ),

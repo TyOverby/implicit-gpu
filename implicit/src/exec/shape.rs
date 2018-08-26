@@ -59,7 +59,6 @@ fn run_shape_helper(
 
 expectation_test!{
     fn expectation_test_exec_circle(provider: Provider) {
-        use euclid::*;
         use ocaml::*;
 
         let ctx = OpenClContext::default();
@@ -67,7 +66,6 @@ expectation_test!{
             x: 11.0,
             y: 11.0,
             r: 10.0,
-            mat: Transform2D::identity(),
         }));
 
         run_shape_helper(&ctx, shape, 22, 22, provider, &[]);
@@ -80,20 +78,44 @@ expectation_test!{
         use ocaml::*;
 
         let ctx = OpenClContext::default();
-        let shape = Shape::Terminal(Terminal::Circle(Circle {
-            x: 11.0,
-            y: 11.0,
-            r: 10.0,
-            mat: Transform2D::identity().post_scale(2.0, 1.0),
-        }));
+        let shape =
+        Shape::Transform(
+            Box::new(Shape::Terminal(Terminal::Circle(Circle {
+                x: 11.0,
+                y: 11.0,
+                r: 10.0,
+            }))),
+            Transform2D::identity().post_scale(2.0, 1.0),
+        );
 
         run_shape_helper(&ctx, shape, 44, 22, provider, &[]);
     }
 }
 
 expectation_test!{
-    fn expectation_test_exec_rect(provider: Provider) {
+    fn expectation_test_exec_rounded_rect_with_scale_on_top(provider: Provider) {
         use euclid::*;
+        use ocaml::*;
+        use ocaml::Rect;
+
+        let ctx = OpenClContext::default();
+        let inner_rect = Shape::Terminal(Terminal::Rect(Rect {
+            x: 6.0,
+            y: 6.0,
+            w: 10.0,
+            h: 10.0,
+        }));
+        let rounded_rect = Shape::Modulate(Box::new(inner_rect), 5.0);
+        let scaled = Shape::Transform(
+            Box::new(rounded_rect),
+            Transform2D::identity().post_scale(3.0, 1.0));
+
+        run_shape_helper(&ctx, scaled, 66, 24, provider, &[]);
+    }
+}
+
+expectation_test!{
+    fn expectation_test_exec_rect(provider: Provider) {
         use ocaml::*;
         use ocaml::Rect;
 
@@ -103,7 +125,6 @@ expectation_test!{
             y: 1.0,
             w: 20.0,
             h: 20.0,
-            mat: Transform2D::identity(),
         }));
 
         run_shape_helper(&ctx, shape, 22, 22, provider, &[]);
@@ -112,7 +133,6 @@ expectation_test!{
 
 expectation_test!{
     fn expectation_test_exec_field(provider: Provider) {
-        use euclid::*;
         use ocaml::*;
 
         let ctx = OpenClContext::default();
@@ -120,7 +140,6 @@ expectation_test!{
             x: 11.0,
             y: 11.0,
             r: 10.0,
-            mat: Transform2D::identity(),
         }));
 
         let circle_field = run_shape_helper(&ctx, circle, 22, 22, provider.subdir("inner"), &[]);
@@ -133,7 +152,6 @@ expectation_test!{
 
 expectation_test!{
     fn expectation_test_exec_field_intersection(provider: Provider) {
-        use euclid::*;
         use ocaml::*;
 
         let ctx = OpenClContext::default();
@@ -141,13 +159,11 @@ expectation_test!{
             x: 11.0,
             y: 11.0,
             r: 10.0,
-            mat: Transform2D::identity(),
         }));
         let circle_2 = Shape::Terminal(Terminal::Circle(Circle {
             x: 15.0,
             y: 15.0,
             r: 10.0,
-            mat: Transform2D::identity(),
         }));
 
         let circle_field_1 = run_shape_helper(&ctx, circle_1, 22, 22, provider.subdir("c1"), &[]);

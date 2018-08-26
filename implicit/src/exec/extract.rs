@@ -45,14 +45,12 @@ fn run_shape_paths(shape: Shape, width: usize, height: usize, provider: Provider
 
 expectation_test!{
     fn expectation_test_extract_circle(provider: Provider) {
-        use euclid::*;
         use ocaml::*;
 
         let shape = Shape::Terminal(Terminal::Circle(Circle {
             x: 11.0,
             y: 11.0,
             r: 10.0,
-            mat: Transform2D::identity(),
         }));
 
         run_shape_paths(shape, 22, 22, provider);
@@ -61,21 +59,18 @@ expectation_test!{
 
 expectation_test!{
     fn expectation_test_extract_subtraction(provider: Provider) {
-        use euclid::*;
         use ocaml::*;
 
         let a = Shape::Terminal(Terminal::Circle(Circle {
             x: 11.0,
             y: 11.0,
             r: 10.0,
-            mat: Transform2D::identity(),
         }));
 
         let b = Shape::Terminal(Terminal::Circle(Circle {
             x: 11.0,
             y: 11.0,
             r: 5.0,
-            mat: Transform2D::identity(),
         }));
 
         let c = Shape::Intersection(vec![a, Shape::Not(Box::new(b))]);

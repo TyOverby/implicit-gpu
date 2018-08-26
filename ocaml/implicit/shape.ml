@@ -3,14 +3,12 @@ open Core
 type vec = { dx: float; dy: float} [@@deriving sexp]
 type polygon = {
   points: Point.t list;
-  mat: Matrix.t [@default Matrix.id] [@sexp_drop_default];
 } [@@deriving sexp]
 
 type circle = {
   x: float;
   y: float;
   r: float;
-  mat: Matrix.t [@default Matrix.id] [@sexp_drop_default];
 } [@@deriving sexp]
 
 type rect ={
@@ -18,12 +16,10 @@ type rect ={
   y: float;
   w: float;
   h: float;
-  mat: Matrix.t [@default Matrix.id] [@sexp_drop_default];
 } [@@deriving sexp]
 
 type poly = {
   points: Point.t list;
-  mat: Matrix.t [@default Matrix.id] [@sexp_drop_default];
 } [@@deriving sexp]
 
 type allTerminals =
@@ -40,34 +36,26 @@ type justConcreteTerminals =
   | Poly of poly
 [@@deriving sexp]
 
-type ('term, 'trans) t =
+type 'term t =
   (* terminals *)
   | Terminal of 'term
 
   (* transformations *)
-  | Transform of 'trans
+  | Transform of 'term t * Matrix.t
 
   (* combinators *)
-  | Not of ('term, 'trans) t
-  | Union of ('term, 'trans) t list
-  | Intersection of ('term, 'trans) t list
-  | Modulate of ('term, 'trans) t * float
-  | Freeze of ('term, 'trans) t
+  | Not of 'term t
+  | Union of 'term t list
+  | Intersection of 'term t list
+  | Modulate of 'term t * float
+  | Freeze of 'term t
 [@@deriving sexp, map]
 
-type 'a allTransforms =
-  | Translate of ('a, 'a allTransforms) t * vec
-  | Scale of ('a, 'a allTransforms) t * vec
-[@@deriving sexp, map]
-
-type 'a allTShape = ('a, 'a allTransforms) t
-[@@deriving sexp]
-
-let rec visit (f: ('term_b, 'trans_b) t -> ('term_b, 'trans_b) t) (g: 'term_a -> 'term_b) (h: 'trans_a -> 'trans_b)  = function
+let rec visit (f: 'term_b t -> 'term_b t) (g: 'term_a -> 'term_b)  = function
   | Terminal t -> Terminal (g t)
-  | Transform t -> Transform(h t)
-  | Not target -> f(Not ((visit f g h) target))
-  | Union targets -> f(Union (List.map ~f:(visit f g h ) targets))
-  | Intersection targets -> f(Intersection (List.map ~f:(visit f g h) targets))
-  | Modulate(target, v) -> f(Modulate((visit f g h) target, v))
-  | Freeze(target) -> f(Freeze((visit f g h) target))
+  | Transform (t, m) -> f(Transform((visit f g) t, m))
+  | Not target -> f(Not ((visit f g ) target))
+  | Union targets -> f(Union (List.map ~f:(visit f g  ) targets))
+  | Intersection targets -> f(Intersection (List.map ~f:(visit f g ) targets))
+  | Modulate(target, v) -> f(Modulate((visit f g ) target, v))
+  | Freeze(target) -> f(Freeze((visit f g ) target))

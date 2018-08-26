@@ -86,14 +86,12 @@ fn exec_inner(
 expectation_test!{
     fn expectation_test_exec_program_single(mut provider: Provider) {
         use debug::print_path_segments;
-        use euclid::*;
         use ocaml::*;
 
         let shape = Shape::Terminal(Terminal::Circle(Circle {
             x: 11.0,
             y: 11.0,
             r: 10.0,
-            mat: Transform2D::identity(),
         }));
 
         let program = Command::Serially(vec![
@@ -119,7 +117,6 @@ expectation_test!{
             x: 11.0,
             y: 11.0,
             r: 10.0,
-            mat: Transform2D::identity(),
         }));
 
         let polygon = Polygon {
@@ -133,7 +130,6 @@ expectation_test!{
                 point2(15.0, 15.0),
                 point2(1.0, 1.0),
             ],
-            mat: Transform2D::identity(),
         };
 
         let combiner = Shape::Intersection(vec![

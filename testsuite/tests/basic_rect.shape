@@ -1,9 +1,7 @@
 (((Serially
    ((Define 0
      (BasicShape
-      (Terminal
-       (Rect
-        ((x 0) (y 0) (w 10) (h 20)
-         (mat ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2) (m32 2))))))))
+      (Transform (Terminal (Rect ((x 0) (y 0) (w 10) (h 20))))
+       ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2) (m32 2)))))
     (Export 0)))
   (14 24)))

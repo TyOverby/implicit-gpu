@@ -1,9 +1,7 @@
 (((Serially
    ((Define 0
      (BasicShape
-      (Terminal
-       (Circle
-        ((x 20) (y 20) (r 15)
-         (mat ((m11 1) (m12 0) (m21 0) (m22 1) (m31 -2) (m32 -2))))))))
+      (Transform (Terminal (Circle ((x 20) (y 20) (r 15))))
+       ((m11 1) (m12 0) (m21 0) (m22 1) (m31 -2) (m32 -2)))))
     (Export 0)))
   (36 36)))

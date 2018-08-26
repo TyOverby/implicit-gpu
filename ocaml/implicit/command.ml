@@ -1,5 +1,7 @@
 open Core
 open Shape
+open Compute_bb
+open Creator
 
 type id = int
 [@@deriving sexp]
@@ -10,7 +12,7 @@ type basicTerminals =
   | Field of id
 [@@deriving sexp]
 
-type exportShape = (basicTerminals, Nothing.t) Shape.t
+type exportShape = basicTerminals Shape.t
 [@@deriving sexp]
 
 type value =
@@ -36,7 +38,7 @@ let get_id gen =
   gen.next := (next + 1);
   next
 
-let compile_commands shape =
+let _compile_commands shape =
   let commands = ref [] in
   let id_gen = { next = ref 0 } in
   let result_shape =
@@ -47,7 +49,6 @@ let compile_commands shape =
         Field id
       | Circle c -> Circle c
       | Rect r -> Rect r in
-    let map_transform = Fn.id in
     let map_shape: exportShape -> exportShape = function
       | Freeze shape ->
         let shape_id = get_id id_gen in
@@ -58,7 +59,7 @@ let compile_commands shape =
         Terminal (Field freeze_id)
       | other -> other
     in
-    shape |> Shape.visit map_shape map_terminal map_transform in
+    shape |> Shape.visit map_shape map_terminal in
   let last_id = get_id id_gen in
   let last = Define(last_id, BasicShape result_shape) in
   let commands = !commands in
@@ -66,150 +67,130 @@ let compile_commands shape =
   then Serially [last; Export last_id]
   else Serially [Serially commands; last; Export last_id]
 
-let compile shape =
-  let simplified = Simplify.simplify shape in
-  match simplified with
-  | Simplify.SShape shape ->
-    let propagated = Prop.remove_transformations shape in
-    (match Compute_bb.compute_bounding_box propagated with
-     | Everything | Nothing -> failwith "unreachable"
-     | Positive bb ->
-       let bb = Bbox.grow_by 0.1 bb in
-       let simplified = Transform (Translate(shape, {dx = -. bb.x; dy = -. bb.y})) in
-       let propagated = Prop.remove_transformations simplified in
-       let compiled = compile_commands propagated in
-       Some (compiled, (bb.w, bb.h))
-     | Negative bb ->
-       let bb = Bbox.grow_by 0.1 bb in
-       let box_shape: Stages.user = Terminal (Rect {x = bb.x; y = bb.y; w = bb.w; h=bb.h; mat = Matrix.id}) in
-       let bb = Bbox.grow_by 0.1 bb in
-       let simplified = Intersection [box_shape; shape] in
-       let simplified = Transform (Translate(simplified, {dx = -. bb.x; dy = -. bb.y})) in
-       let propagated = Prop.remove_transformations simplified in
-       let compiled = compile_commands propagated in
-       Some (compiled, (bb.w, bb.h)))
-  | Simplify.SNothing
-  | Simplify.SEverything -> None
+let compile shape = match compute_bounding_box shape with
+  | Everything | Nothing -> None
+  | Positive bb ->
+    let expanded = bb |> Bbox.grow_by 0.1 in
+    let repositioned = shape |> translate ~dx: (-. expanded.x) ~dy: (-. expanded.y) in
+    let simplified = Simplify.simplify repositioned in
+    (match simplified with
+     | SEverything | SNothing -> None
+     | SShape s -> Some (_compile_commands s, (expanded.w, expanded.h)))
+  | Negative bb ->
+    let expanded = bb |> Bbox.grow_by 0.1 in
+    let expanded_twice = expanded |> Bbox.grow_by 0.1 in
+    let surrounding = rect ~x: expanded.x ~y: expanded.y ~w: expanded.w ~h:expanded.h in
+    let surrounded = intersection [surrounding; shape] in
+    let repositioned = surrounded |> translate ~dx: (-. expanded_twice.x) ~dy: (-. expanded_twice.y) in
+    let simplified = Simplify.simplify repositioned in
+    (match simplified with
+     | SEverything | SNothing -> None
+     | SShape s -> Some (_compile_commands s, (expanded_twice.w, expanded_twice.h)))
 
 module Command_Tests = struct
+  open Creator
   let test_shape_compile shape =
     shape
-    |> Sexp.of_string
-    |> Stages.user_of_sexp
     |> compile
     |> Option.sexp_of_t (Tuple2.sexp_of_t sexp_of_t (Tuple2.sexp_of_t Float.sexp_of_t Float.sexp_of_t))
     |> Sexp.to_string_hum
     |> print_endline
 
   let%expect_test _ =
-    test_shape_compile "(Terminal (Circle ((x 0) (y 0) (r 0))))";
+    circle ~x:0.0 ~y:0.0 ~r:0.0
+    |> test_shape_compile;
     [%expect "()"]
 
   let%expect_test _ =
-    test_shape_compile "(Terminal (Circle ((x 0) (y 0) (r 1))))";
+    circle ~x:0.0 ~y:0.0 ~r:1.0
+    |> test_shape_compile;
     [%expect "
       (((Serially
          ((Define 0
            (BasicShape
-            (Terminal
-             (Circle
-              ((x 0) (y 0) (r 1)
-               (mat ((m11 1) (m12 0) (m21 0) (m22 1) (m31 3) (m32 3))))))))
+            (Transform (Terminal (Circle ((x 0) (y 0) (r 1))))
+             ((m11 1) (m12 0) (m21 0) (m22 1) (m31 3) (m32 3)))))
           (Export 0)))
         (6 6)))"]
 
   let%expect_test _ =
-    test_shape_compile "(Not (Terminal (Circle ((x 0) (y 0) (r 1)))))";
+    circle ~x:0.0 ~y:0.0 ~r:1.0
+    |> not
+    |> test_shape_compile;
     [%expect "
       (((Serially
          ((Define 0
            (BasicShape
-            (Intersection
-             ((Terminal
-               (Rect
-                ((x -3) (y -3) (w 6) (h 6)
-                 (mat ((m11 1) (m12 0) (m21 0) (m22 1) (m31 5) (m32 5))))))
-              (Not
-               (Terminal
-                (Circle
-                 ((x 0) (y 0) (r 1)
-                  (mat ((m11 1) (m12 0) (m21 0) (m22 1) (m31 5) (m32 5)))))))))))
+            (Transform
+             (Intersection
+              ((Terminal (Rect ((x -3) (y -3) (w 6) (h 6))))
+               (Not (Terminal (Circle ((x 0) (y 0) (r 1)))))))
+             ((m11 1) (m12 0) (m21 0) (m22 1) (m31 5) (m32 5)))))
           (Export 0)))
         (10 10)))"]
 
   let%expect_test _ =
-    test_shape_compile "(Terminal (Circle ((x 1) (y 1) (r 1))))";
+    circle ~x:1.0 ~y:1.0 ~r:1.0
+    |> test_shape_compile;
     [%expect "
       (((Serially
          ((Define 0
            (BasicShape
-            (Terminal
-             (Circle
-              ((x 1) (y 1) (r 1)
-               (mat ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2) (m32 2))))))))
+            (Transform (Terminal (Circle ((x 1) (y 1) (r 1))))
+             ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2) (m32 2)))))
           (Export 0)))
         (6 6)))"]
 
   let%expect_test _ =
-    test_shape_compile "(Union ((Terminal (Circle ((x 1) (y 1) (r 1))))
-                                (Terminal (Circle ((x 2) (y 2) (r 1))))))";
+    let left = circle ~x:1.0 ~y:1.0 ~r:1.0 in
+    let right = circle ~x:1.0 ~y:1.0 ~r:1.0 in
+    union [left; right]
+    |> test_shape_compile;
     [%expect "
       (((Serially
          ((Define 0
            (BasicShape
-            (Union
-             ((Terminal
-               (Circle
-                ((x 1) (y 1) (r 1)
-                 (mat ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2) (m32 2))))))
-              (Terminal
-               (Circle
-                ((x 2) (y 2) (r 1)
-                 (mat ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2) (m32 2))))))))))
+            (Transform
+             (Union
+              ((Terminal (Circle ((x 1) (y 1) (r 1))))
+               (Terminal (Circle ((x 1) (y 1) (r 1))))))
+             ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2) (m32 2)))))
+          (Export 0)))
+        (6 6)))"]
+
+  let%expect_test _ =
+    let left = circle ~x:1.0 ~y:1.0 ~r:1.0 in
+    let right = rect ~x:1.0 ~y:1.0 ~w:2.0 ~h:2.0 in
+    union [left; right]
+    |> test_shape_compile;
+    [%expect "
+      (((Serially
+         ((Define 0
+           (BasicShape
+            (Transform
+             (Union
+              ((Terminal (Circle ((x 1) (y 1) (r 1))))
+               (Terminal (Rect ((x 1) (y 1) (w 2) (h 2))))))
+             ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2) (m32 2)))))
           (Export 0)))
         (7 7)))"]
 
   let%expect_test _ =
-    test_shape_compile "(Intersection ((Terminal (Circle ((x 0) (y 0) (r 1))))
-                                       (Terminal (Rect   ((x 0) (y 0) (w 1) (h 1))))))";
-    [%expect "
-      (((Serially
-         ((Define 0
-           (BasicShape
-            (Intersection
-             ((Terminal
-               (Circle
-                ((x 0) (y 0) (r 1)
-                 (mat ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2) (m32 2))))))
-              (Terminal
-               (Rect
-                ((x 0) (y 0) (w 1) (h 1)
-                 (mat ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2) (m32 2))))))))))
-          (Export 0)))
-        (5 5)))"]
-
-  let%expect_test _ =
-    test_shape_compile "(Intersection ((Freeze (Terminal (Circle ((x 0) (y 0) (r 1)))))
-                                       (Freeze (Terminal (Rect   ((x 0) (y 0) (w 1) (h 1)))))))";
+    let left = circle ~x:1.0 ~y:1.0 ~r:1.0 in
+    let right = rect ~x:1.0 ~y:1.0 ~w:2.0 ~h:2.0 in
+    union [freeze left; freeze right]
+    |> test_shape_compile;
     [%expect "
       (((Serially
          ((Serially
-           ((Define 0
-             (BasicShape
-              (Terminal
-               (Circle
-                ((x 0) (y 0) (r 1)
-                 (mat ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2) (m32 2))))))))
+           ((Define 0 (BasicShape (Terminal (Circle ((x 1) (y 1) (r 1))))))
             (Freeze (target 0) (id 1))
-            (Define 2
-             (BasicShape
-              (Terminal
-               (Rect
-                ((x 0) (y 0) (w 1) (h 1)
-                 (mat ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2) (m32 2))))))))
+            (Define 2 (BasicShape (Terminal (Rect ((x 1) (y 1) (w 2) (h 2))))))
             (Freeze (target 2) (id 3))))
           (Define 4
-           (BasicShape (Intersection ((Terminal (Field 1)) (Terminal (Field 3))))))
+           (BasicShape
+            (Transform (Union ((Terminal (Field 1)) (Terminal (Field 3))))
+             ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2) (m32 2)))))
           (Export 4)))
-        (5 5)))"]
+        (7 7)))"]
 end

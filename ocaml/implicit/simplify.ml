@@ -6,7 +6,9 @@ type simplified =
   | SEverything
   | SShape of Stages.simplified
 
-let rec expand: Stages.user -> Stages.expanded = function
+let rec expand: Stages.expanded -> Stages.expanded = function
+  | Terminal Everything -> Terminal Everything
+  | Terminal Nothing -> Terminal Nothing
   (* circle *)
   | Terminal Circle { r; _ } when r <= 0.0  -> Terminal Nothing
   | Terminal Circle c -> Terminal (Circle c)
@@ -45,19 +47,11 @@ let rec expand: Stages.user -> Stages.expanded = function
     )
 
   (* scale *)
-  | Transform Scale(target, vec)  -> (
+  | Transform (target, matrix)  -> (
       match expand target with
       | Terminal Nothing -> Terminal Nothing
       | Terminal Everything -> Terminal Everything
-      | target -> Transform (Scale(target, vec))
-    )
-
-  (* translate *)
-  | Transform Translate(target, vec)  -> (
-      match expand target with
-      | Terminal Nothing -> Terminal Nothing
-      | Terminal Everything -> Terminal Everything
-      | target -> Transform (Translate(target, vec))
+      | target -> Transform (target, matrix)
     )
 
   (* union *)
@@ -81,7 +75,14 @@ and remove list target =
   let filter a = phys_equal a target |> Core.not in
   List.filter ~f:filter list
 
-let rec simplify (shape: Stages.user) : simplified = match expand shape with
+let quick_conv: justConcreteTerminals -> allTerminals = function
+  | Circle c -> Circle c
+  | Rect r -> Rect r
+  | Poly p -> Poly p
+
+let rec simplify (shape: Stages.user) : simplified =
+  let expanded: Stages.expanded = shape |> Shape.map quick_conv in
+  match expand expanded with
   | Terminal Everything -> SEverything
   | Terminal Nothing -> SNothing
   | other -> SShape(simplify_bot other)
@@ -91,30 +92,13 @@ and simplify_bot (shape: Stages.expanded) : Stages.simplified = shape |> Shape.m
     | Circle c -> Circle c
     | Rect r -> Rect r
     | Poly p -> Poly p
-  ) (function
-    | Scale (target, v) -> Scale (simplify_bot target, v)
-    | Translate (target, v) -> Translate (simplify_bot target, v))
+  )
 
 module SimplifyExpectTests = struct
-  let rec e_to_u (e: Stages.expanded) : Stages.user = match e with
-    | Terminal Nothing -> Terminal (Circle {x = 0.0; y = 0.0; r = 0.0; mat = Matrix.id})
-    | Terminal Everything -> Not (Terminal (Circle {x=0.0; y= 0.0; r= 0.0; mat= Matrix.id}))
-    | Terminal Circle c -> Terminal (Circle c)
-    | Terminal Rect r -> Terminal (Rect r)
-    | Terminal Poly p -> Terminal (Poly p)
-    | Freeze t -> Freeze (e_to_u t)
-    | Not t -> Not (e_to_u t)
-    | Modulate(t, k) -> Modulate(e_to_u t, k)
-    | Transform Scale(t, v) -> Transform(Scale(e_to_u t, v))
-    | Transform Translate(t, v) -> Transform(Translate(e_to_u t, v))
-    | Union lst -> Union(List.map ~f:e_to_u lst)
-    | Intersection lst -> Intersection (List.map ~f:e_to_u lst)
-
   let simplify_test a =
     a
     |> Sexp.of_string
     |> Stages.expanded_of_sexp
-    |> e_to_u
     |> expand
     |> Stages.sexp_of_expanded
     |> Sexp.to_string_hum

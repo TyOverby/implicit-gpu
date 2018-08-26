@@ -35,14 +35,12 @@ fn freeze_shape_helper(shape: Shape, width: usize, height: usize, provider: Prov
 
 expectation_test!{
     fn expectation_test_freeze_circle(provider: Provider) {
-        use euclid::*;
         use ocaml::*;
 
         let shape = Shape::Terminal(Terminal::Circle(Circle {
             x: 11.0,
             y: 11.0,
             r: 10.0,
-            mat: Transform2D::identity(),
         }));
 
         freeze_shape_helper(shape, 22, 22, provider);
@@ -51,21 +49,18 @@ expectation_test!{
 
 expectation_test!{
     fn expectation_test_freeze_subtraction(provider: Provider) {
-        use euclid::*;
         use ocaml::*;
 
         let a = Shape::Terminal(Terminal::Circle(Circle {
             x: 11.0,
             y: 11.0,
             r: 10.0,
-            mat: Transform2D::identity(),
         }));
 
         let b = Shape::Terminal(Terminal::Circle(Circle {
             x: 11.0,
             y: 11.0,
             r: 5.0,
-            mat: Transform2D::identity(),
         }));
 
         let c = Shape::Intersection(vec![a, Shape::Not(Box::new(b))]);
@@ -76,21 +71,18 @@ expectation_test!{
 
 expectation_test!{
     fn expectation_test_freeze_union(provider: Provider) {
-        use euclid::*;
         use ocaml::*;
 
         let a = Shape::Terminal(Terminal::Circle(Circle {
             x: 11.0,
             y: 11.0,
             r: 10.0,
-            mat: Transform2D::identity(),
         }));
 
         let b = Shape::Terminal(Terminal::Circle(Circle {
             x: 21.0,
             y: 11.0,
             r: 10.0,
-            mat: Transform2D::identity(),
         }));
 
         let c = Shape::Union(vec![a, b]);

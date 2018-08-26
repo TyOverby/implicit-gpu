@@ -41,10 +41,6 @@ pub struct Circle {
     pub x: f32,
     pub y: f32,
     pub r: f32,
-
-    #[serde(default = "Transform2D::identity")]
-    #[serde(with = "MatrixDef")]
-    pub mat: Matrix,
 }
 
 #[derive(Deserialize, Debug)]
@@ -53,20 +49,12 @@ pub struct Rect {
     pub y: f32,
     pub w: f32,
     pub h: f32,
-
-    #[serde(default = "Transform2D::identity")]
-    #[serde(with = "MatrixDef")]
-    pub mat: Matrix,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct Polygon {
     #[serde(deserialize_with = "transcode_point")]
     pub points: Vec<Point>,
-
-    #[serde(default = "Transform2D::identity")]
-    #[serde(with = "MatrixDef")]
-    pub mat: Matrix,
 }
 
 #[derive(Deserialize, Debug)]
@@ -83,6 +71,7 @@ pub enum Shape {
     Union(Vec<Shape>),
     Intersection(Vec<Shape>),
     Modulate(Box<Shape>, f32),
+    Transform(Box<Shape>, #[serde(with = "MatrixDef")] Matrix),
 }
 
 #[derive(Deserialize, Debug)]

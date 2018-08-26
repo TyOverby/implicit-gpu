@@ -3,14 +3,12 @@
      ((Define 0
        (BasicShape
         (Intersection
-         ((Terminal
-           (Circle
-            ((x 11) (y 11) (r 10)
-             (mat ((m11 1) (m12 0) (m21 0) (m22 1) (m31 -9) (m32 -9))))))
-          (Terminal
-           (Circle
-            ((x 21) (y 21) (r 10)
-             (mat ((m11 1) (m12 0) (m21 0) (m22 1) (m31 -9) (m32 -9))))))))))
+         ((Terminal (Circle ((x 11) (y 11) (r 10))))
+          (Terminal (Circle ((x 21) (y 21) (r 10))))))))
       (Freeze (target 0) (id 1))))
-    (Define 2 (BasicShape (Terminal (Field 1)))) (Export 2)))
+    (Define 2
+     (BasicShape
+      (Transform (Terminal (Field 1))
+       ((m11 1) (m12 0) (m21 0) (m22 1) (m31 -9) (m32 -9)))))
+    (Export 2)))
   (14 14)))
