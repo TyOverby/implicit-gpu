@@ -50,6 +50,8 @@ where
 
 #[inline(always)]
 fn add_matrix(kernel: Kernel, matrix: Matrix) -> Kernel {
+    println!("matrix: {:?}", matrix);
+    let matrix = matrix.inverse().unwrap();
     kernel
         .arg_scl(matrix.m11)
         .arg_scl(matrix.m12)

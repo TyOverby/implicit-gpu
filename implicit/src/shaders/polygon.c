@@ -13,8 +13,8 @@ __kernel void apply_no_sign(
     size_t y = get_global_id(1);
     size_t pos = x + y * width;
 
-    float x_s = (float)x;
-    float y_s = (float)y;
+    float x_s = (float)x * m11 + (float)y * m21 + m31;
+    float y_s = (float)x * m12 + (float)y * m22 + m32;
 
     if (count < 2)
     {
@@ -66,7 +66,6 @@ __kernel void apply_no_sign(
 
 __kernel void apply_with_sign(
     __global float *buffer,
-    __global float *matrix,
     __global float *signbuffer,
     ulong width,
     __global float *lines,

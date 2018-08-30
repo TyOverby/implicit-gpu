@@ -92,7 +92,7 @@ fn get_xy(matrix: &Matrix, current_xy: (String, String)) -> (String, String) {
         return (old_x.into(), old_y.into());
     }
     let inverted = matrix.inverse().unwrap();
-    // point.x * self.m11 + point.y * self.m21 + self.m31
+    // x = point.x * self.m11 + point.y * self.m21 + self.m31
     let x = format!(
         "({x} * {m11} + {y} * {m21} + {m31})",
         x = old_x,
@@ -101,7 +101,7 @@ fn get_xy(matrix: &Matrix, current_xy: (String, String)) -> (String, String) {
         m21 = inverted.m21,
         m31 = inverted.m31
     );
-    // point.x * self.m12 + point.y * self.m22 + self.m32
+    // y = point.x * self.m12 + point.y * self.m22 + self.m32
     let y = format!(
         "({x} * {m12} + {y} * {m22} + {m32})",
         x = old_x,
