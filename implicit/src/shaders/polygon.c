@@ -1,5 +1,13 @@
 
-__kernel void apply_no_sign(__global float *buffer, ulong width, __global float *lines, ulong count)
+__kernel void apply_no_sign(
+    __global float *buffer,
+    ulong width,
+    __global float *lines,
+    ulong count,
+    float m11, float m12,
+    float m21, float m22,
+    float m31, float m32
+)
 {
     size_t x = get_global_id(0);
     size_t y = get_global_id(1);
@@ -56,7 +64,17 @@ __kernel void apply_no_sign(__global float *buffer, ulong width, __global float 
     buffer[pos] = -minimum;
 }
 
-__kernel void apply_with_sign(__global float *buffer, __global float *signbuffer, ulong width, __global float *lines, ulong count)
+__kernel void apply_with_sign(
+    __global float *buffer,
+    __global float *matrix,
+    __global float *signbuffer,
+    ulong width,
+    __global float *lines,
+    ulong count,
+    float m11, float m12,
+    float m21, float m22,
+    float m31, float m32
+)
 {
     size_t x = get_global_id(0);
     size_t y = get_global_id(1);

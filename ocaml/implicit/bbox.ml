@@ -30,15 +30,17 @@ let grow_by factor box =
 let bbox_of_points = function
   | [] -> None
   | points ->
-    let extract f g = points |> List.map ~f:f |> g |> Option.value_exn in
+    let extract f g =
+      points
+      |> List.map ~f:f
+      |> (fun l -> g l ~compare:Float.compare)
+      |> Option.value_exn in
     let get_x (p: Point.t) = p.x in
     let get_y (p: Point.t) = p.y in
-    let minimum l = List.min_elt l ~compare:Float.compare in
-    let maximum l = List.max_elt l ~compare:Float.compare in
-    let min_x = extract get_x minimum in
-    let min_y = extract get_y minimum in
-    let max_x = extract get_x maximum in
-    let max_y = extract get_y maximum in
+    let min_x = extract get_x List.min_elt in
+    let min_y = extract get_y List.min_elt in
+    let max_x = extract get_x List.max_elt in
+    let max_y = extract get_y List.max_elt in
     Some (from_extrema min_x min_y max_x max_y)
 
 let intersects (a: t) (b: t)  =

@@ -20,7 +20,6 @@ type value =
   | Polygon of Shape.poly
 [@@deriving sexp]
 
-
 type t =
   | Concurrently of t list
   | Serially of t list
@@ -38,28 +37,35 @@ let get_id gen =
   gen.next := (next + 1);
   next
 
-let _compile_commands shape =
+let rec breakup_shape id_gen commands matrix = function
+  | Terminal Poly p ->
+    let id = get_id id_gen in
+    commands := (Define(id, Polygon p) :: (!commands));
+    Terminal (Field id)
+  | Freeze t ->
+    let t = breakup_shape id_gen commands matrix t in
+    let t = Transform (t, matrix) in (* Apply cumulative matrix up to this point *)
+    let shape_id = get_id id_gen in
+    let freeze_id = get_id id_gen in
+    let def = Define(shape_id, BasicShape t) in
+    let frz = Freeze { target = shape_id; id = freeze_id } in
+    commands := List.concat [!commands; [def; frz]];
+    Terminal (Field freeze_id)
+  | Terminal Circle c -> Terminal (Circle c)
+  | Terminal Rect r -> Terminal (Rect r)
+  | Transform (t, m) -> Transform (breakup_shape id_gen commands (Matrix.mul matrix m) t, m)
+  | Not t -> Not (breakup_shape id_gen commands matrix t)
+  | Union all -> Union (breakup_all id_gen commands matrix all)
+  | Intersection all -> Intersection (breakup_all id_gen commands matrix all)
+  | Modulate (t, by) -> Modulate (breakup_shape id_gen commands matrix t, by)
+and breakup_all id_gen commands matrix all =
+  List.map all ~f:(breakup_shape id_gen commands matrix)
+
+
+let compile_commands shape =
   let commands = ref [] in
   let id_gen = { next = ref 0 } in
-  let result_shape =
-    let map_terminal = function
-      | Poly p ->
-        let id = get_id id_gen in
-        commands := (Define(id, Polygon p) :: (!commands));
-        Field id
-      | Circle c -> Circle c
-      | Rect r -> Rect r in
-    let map_shape: exportShape -> exportShape = function
-      | Freeze shape ->
-        let shape_id = get_id id_gen in
-        let freeze_id = get_id id_gen in
-        let def = Define(shape_id, BasicShape shape) in
-        let frz = Freeze { target = shape_id; id = freeze_id } in
-        commands := List.concat [!commands; [def; frz]];
-        Terminal (Field freeze_id)
-      | other -> other
-    in
-    shape |> Shape.visit map_shape map_terminal in
+  let result_shape = breakup_shape id_gen commands Matrix.id shape in
   let last_id = get_id id_gen in
   let last = Define(last_id, BasicShape result_shape) in
   let commands = !commands in
@@ -75,7 +81,7 @@ let compile shape = match compute_bounding_box shape with
     let simplified = Simplify.simplify repositioned in
     (match simplified with
      | SEverything | SNothing -> None
-     | SShape s -> Some (_compile_commands s, (expanded.w, expanded.h)))
+     | SShape s -> Some (compile_commands s, (expanded.w, expanded.h)))
   | Negative bb ->
     let expanded = bb |> Bbox.grow_by 0.1 in
     let expanded_twice = expanded |> Bbox.grow_by 0.1 in
@@ -85,7 +91,7 @@ let compile shape = match compute_bounding_box shape with
     let simplified = Simplify.simplify repositioned in
     (match simplified with
      | SEverything | SNothing -> None
-     | SShape s -> Some (_compile_commands s, (expanded_twice.w, expanded_twice.h)))
+     | SShape s -> Some (compile_commands s, (expanded_twice.w, expanded_twice.h)))
 
 module Command_Tests = struct
   open Creator
@@ -183,9 +189,15 @@ module Command_Tests = struct
     [%expect "
       (((Serially
          ((Serially
-           ((Define 0 (BasicShape (Terminal (Circle ((x 1) (y 1) (r 1))))))
+           ((Define 0
+             (BasicShape
+              (Transform (Terminal (Circle ((x 1) (y 1) (r 1))))
+               ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2) (m32 2)))))
             (Freeze (target 0) (id 1))
-            (Define 2 (BasicShape (Terminal (Rect ((x 1) (y 1) (w 2) (h 2))))))
+            (Define 2
+             (BasicShape
+              (Transform (Terminal (Rect ((x 1) (y 1) (w 2) (h 2))))
+               ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2) (m32 2)))))
             (Freeze (target 2) (id 3))))
           (Define 4
            (BasicShape

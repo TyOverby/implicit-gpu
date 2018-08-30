@@ -1,4 +1,6 @@
 use geometry::Point;
+use ocaml::Matrix;
+use ocl::Kernel;
 use opencl::{FieldBuffer, LineBuffer, OpenClContext};
 
 const PROGRAM: &'static str = concat!(
@@ -12,6 +14,7 @@ pub fn run_poly<I>(
     signfield: Option<&FieldBuffer>,
     width: usize,
     height: usize,
+    matrix: Matrix,
     ctx: &OpenClContext,
 ) -> Option<FieldBuffer>
 where
@@ -39,16 +42,28 @@ where
 
     match signfield {
         Some(sf) => Some(run_poly_raw_with_sign(
-            buffer, sf, width, height, buffer_len, ctx,
+            buffer, sf, width, height, buffer_len, matrix, ctx,
         )),
-        None => Some(run_poly_raw_no_sign(buffer, width, height, ctx)),
+        None => Some(run_poly_raw_no_sign(buffer, width, height, matrix, ctx)),
     }
+}
+
+#[inline(always)]
+fn add_matrix(kernel: Kernel, matrix: Matrix) -> Kernel {
+    kernel
+        .arg_scl(matrix.m11)
+        .arg_scl(matrix.m12)
+        .arg_scl(matrix.m21)
+        .arg_scl(matrix.m22)
+        .arg_scl(matrix.m31)
+        .arg_scl(matrix.m32)
 }
 
 pub fn run_poly_raw_no_sign(
     lines: LineBuffer,
     width: usize,
     height: usize,
+    matrix: Matrix,
     ctx: &OpenClContext,
 ) -> FieldBuffer {
     let _guard = ::flame::start_guard("run_poly_raw");
@@ -62,6 +77,7 @@ pub fn run_poly_raw_no_sign(
         .arg_scl(width as u64)
         .arg_buf(lines.buffer())
         .arg_scl(lines.size());
+    let exec = add_matrix(exec, matrix);
     unsafe {
         exec.enq().unwrap();
     }
@@ -74,6 +90,7 @@ pub fn run_poly_raw_with_sign(
     width: usize,
     height: usize,
     count: usize,
+    matrix: Matrix,
     ctx: &OpenClContext,
 ) -> FieldBuffer {
     let _guard = ::flame::start_guard("run_poly_raw");
@@ -88,6 +105,7 @@ pub fn run_poly_raw_with_sign(
         .arg_scl(width as u64)
         .arg_buf(lines.buffer())
         .arg_scl(count);
+    let exec = add_matrix(exec, matrix);
     unsafe {
         exec.enq().unwrap();
     }

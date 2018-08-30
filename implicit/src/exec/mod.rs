@@ -130,6 +130,7 @@ expectation_test!{
                 point2(15.0, 15.0),
                 point2(1.0, 1.0),
             ],
+            matrix: Matrix::identity(),
         };
 
         let combiner = Shape::Intersection(vec![

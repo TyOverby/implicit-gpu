@@ -6,10 +6,20 @@ use expectation::{extensions::ImageDiffExtension, Provider};
 #[cfg(test)]
 use ocaml::Shape;
 
+use ocaml::Matrix;
+
 pub fn exec_freeze(ctx: &OpenClContext, field: &FieldBuffer) -> FieldBuffer {
     let (width, height) = field.size();
     let (lines_buffer, count) = ::marching::run_marching(&field, ctx);
-    run_poly_raw_with_sign(lines_buffer, field, width, height, count as usize, ctx)
+    run_poly_raw_with_sign(
+        lines_buffer,
+        field,
+        width,
+        height,
+        count as usize,
+        Matrix::identity(),
+        ctx,
+    )
 }
 
 #[cfg(test)]

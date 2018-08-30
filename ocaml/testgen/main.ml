@@ -2,6 +2,8 @@ open Core
 open Implicit.Creator
 open Implicit
 
+let x: float = 5.0
+
 let write_tests tests oc =
   let put_test shape oc =
     shape

@@ -55,6 +55,9 @@ pub struct Rect {
 pub struct Polygon {
     #[serde(deserialize_with = "transcode_point")]
     pub points: Vec<Point>,
+    #[serde(with = "MatrixDef")]
+    #[serde(default = "Matrix::identity")]
+    pub matrix: Matrix,
 }
 
 #[derive(Deserialize, Debug)]
