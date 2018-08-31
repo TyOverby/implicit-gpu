@@ -19,6 +19,9 @@ latin = "0.1.5"
 rand = "0.3.15"
 serde_json = "1.*.*"
 
+expectation = "0.1.*"
+expectation_plugin  = "0.1.2"
+
 [dependencies.euclid]
 version = "0.19.0"
 features = ["serde"]
@@ -34,6 +37,3 @@ path = "../aabb-quadtree"
 
 [dependencies.vectorphile]
 path = "../vectorphile"
-
-[dependencies.expectation]
-path = "../../expectation/expectation"

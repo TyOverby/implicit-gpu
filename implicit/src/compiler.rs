@@ -1,5 +1,6 @@
 #[cfg(test)]
 use expectation::{extensions::*, Provider};
+use expectation_plugin::expectation_test;
 use ocaml::*;
 use std::cell::Cell;
 use std::collections::BTreeSet;
@@ -279,92 +280,82 @@ fn compile_impl<W: Write>(
     }
 }
 
-expectation_test!{
-    fn expectation_test_cl_for_circle(mut provider: Provider) {
-        let w = provider.text_writer("out.c");
-        let shape = Shape::Terminal(Terminal::Circle(Circle {
+#[expectation_test]
+fn cl_for_circle(provider: Provider) {
+    let w = provider.text_writer("out.c");
+    let shape = Shape::Terminal(Terminal::Circle(Circle {
+        x: 0.0,
+        y: 5.0,
+        r: 10.0,
+    }));
+    compile(&shape, w).unwrap();
+}
+
+#[expectation_test]
+fn cl_for_matrix_circle(provider: Provider) {
+    use euclid::Transform2D;
+    let w = provider.text_writer("out.c");
+    let shape = Shape::Transform(
+        Box::new(Shape::Terminal(Terminal::Circle(Circle {
             x: 0.0,
             y: 5.0,
             r: 10.0,
-        }));
-        compile(&shape, w).unwrap();
-    }
+        }))),
+        Transform2D::create_scale(2.0, 1.0),
+    );
+    compile(&shape, w).unwrap();
 }
 
-expectation_test!{
-    fn expectation_test_cl_for_matrix_circle(mut provider: Provider) {
-        use euclid::Transform2D;
-        let w = provider.text_writer("out.c");
-        let shape =
-        Shape::Transform(
-            Box::new( Shape::Terminal(Terminal::Circle(Circle {
-                    x: 0.0,
-                    y: 5.0,
-                    r: 10.0,
-                }))),
-            Transform2D::create_scale(2.0, 1.0)
-        );
-        compile(&shape, w).unwrap();
-    }
+#[expectation_test]
+fn cl_for_rect(provider: Provider) {
+    use ocaml::Rect;
+    let w = provider.text_writer("out.c");
+    let shape = Shape::Terminal(Terminal::Rect(Rect {
+        x: 0.0,
+        y: 5.0,
+        w: 10.0,
+        h: 20.0,
+    }));
+    compile(&shape, w).unwrap();
 }
 
-expectation_test!{
-    fn expectation_test_cl_for_rect(mut provider: Provider) {
-        use ocaml::Rect;
-        let w = provider.text_writer("out.c");
-        let shape = Shape::Terminal(Terminal::Rect(Rect {
-            x: 0.0,
-            y: 5.0,
-            w: 10.0,
-            h: 20.0,
-        }));
-        compile(&shape, w).unwrap();
-    }
+#[expectation_test]
+fn cl_for_field(provider: Provider) {
+    let w = provider.text_writer("out.c");
+    let shape = Shape::Terminal(Terminal::Field(5));
+    compile(&shape, w).unwrap();
 }
 
-expectation_test!{
-    fn expectation_test_cl_for_field(mut provider: Provider) {
-        let w = provider.text_writer("out.c");
-        let shape = Shape::Terminal(Terminal::Field(5));
-        compile(&shape, w).unwrap();
-    }
+#[expectation_test]
+fn cl_for_intersection(provider: Provider) {
+    let w = provider.text_writer("out.c");
+    let shape = Shape::Intersection(vec![
+        Shape::Terminal(Terminal::Field(5)),
+        Shape::Terminal(Terminal::Field(6)),
+    ]);
+    compile(&shape, w).unwrap();
 }
 
-expectation_test!{
-    fn expectation_test_cl_for_intersection(mut provider: Provider) {
-        let w = provider.text_writer("out.c");
-        let shape = Shape::Intersection(vec![
-            Shape::Terminal(Terminal::Field(5)),
-            Shape::Terminal(Terminal::Field(6))]);
-        compile(&shape, w).unwrap();
-    }
+#[expectation_test]
+fn cl_for_union(provider: Provider) {
+    let w = provider.text_writer("out.c");
+    let shape = Shape::Union(vec![
+        Shape::Terminal(Terminal::Field(5)),
+        Shape::Terminal(Terminal::Field(6)),
+    ]);
+    compile(&shape, w).unwrap();
 }
 
-expectation_test!{
-    fn expectation_test_cl_for_union(mut provider: Provider) {
-        let w = provider.text_writer("out.c");
-        let shape = Shape::Union(vec![
-            Shape::Terminal(Terminal::Field(5)),
-            Shape::Terminal(Terminal::Field(6))]);
-        compile(&shape, w).unwrap();
-    }
+#[expectation_test]
+fn cl_for_not(provider: Provider) {
+    let w = provider.text_writer("out.c");
+    let shape = Shape::Not(Box::new(Shape::Terminal(Terminal::Field(5))));
+    compile(&shape, w).unwrap();
 }
 
-expectation_test!{
-    fn expectation_test_cl_for_not(mut provider: Provider) {
-        let w = provider.text_writer("out.c");
-        let shape = Shape::Not(Box::new(
-            Shape::Terminal(Terminal::Field(5))));
-        compile(&shape, w).unwrap();
-    }
-}
-
-expectation_test!{
-    fn expectation_test_cl_for_modulate(mut provider: Provider) {
-        let w = provider.text_writer("out.c");
-        let shape = Shape::Modulate(Box::new(
-            Shape::Terminal(Terminal::Field(5))),
-            23.53);
-        compile(&shape, w).unwrap();
-    }
+#[expectation_test]
+fn cl_for_modulate(provider: Provider) {
+    let w = provider.text_writer("out.c");
+    let shape = Shape::Modulate(Box::new(Shape::Terminal(Terminal::Field(5))), 23.53);
+    compile(&shape, w).unwrap();
 }

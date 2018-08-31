@@ -8,6 +8,7 @@ pub use self::freeze::*;
 pub use self::poly::*;
 pub use self::shape::*;
 
+use expectation_plugin::expectation_test;
 use geometry::PathSegment;
 use inspector::*;
 use ocaml::*;
@@ -83,74 +84,70 @@ fn exec_inner(
     }
 }
 
-expectation_test!{
-    fn expectation_test_exec_program_single(mut provider: Provider) {
-        use debug::print_path_segments;
-        use ocaml::*;
+#[expectation_test]
+fn exec_program_single(provider: Provider) {
+    use debug::print_path_segments;
+    use ocaml::*;
 
-        let shape = Shape::Terminal(Terminal::Circle(Circle {
-            x: 11.0,
-            y: 11.0,
-            r: 10.0,
-        }));
+    let shape = Shape::Terminal(Terminal::Circle(Circle {
+        x: 11.0,
+        y: 11.0,
+        r: 10.0,
+    }));
 
-        let program = Command::Serially(vec![
-            Command::Define(0, Value::BasicShape(shape)),
-            Command::Export(0)
-        ]);
+    let program = Command::Serially(vec![
+        Command::Define(0, Value::BasicShape(shape)),
+        Command::Export(0),
+    ]);
 
-        let out = exec(program, provider.duplicate(), 22, 22);
-        for (id, lines) in out {
-            let writer = provider.text_writer(format!("export_{}.lines.txt", id));
-            print_path_segments(writer, &lines);
-        }
+    let out = exec(program, provider.duplicate(), 22, 22);
+    for (id, lines) in out {
+        let writer = provider.text_writer(format!("export_{}.lines.txt", id));
+        print_path_segments(writer, &lines);
     }
 }
 
-expectation_test!{
-    fn expectation_test_exec_program_with_multiple(mut provider: Provider) {
-        use euclid::*;
-        use ocaml::*;
-        use debug::print_path_segments;
+#[expectation_test]
+fn exec_program_with_multiple(provider: Provider) {
+    use debug::print_path_segments;
+    use euclid::*;
+    use ocaml::*;
 
-        let shape = Shape::Terminal(Terminal::Circle(Circle {
-            x: 11.0,
-            y: 11.0,
-            r: 10.0,
-        }));
+    let shape = Shape::Terminal(Terminal::Circle(Circle {
+        x: 11.0,
+        y: 11.0,
+        r: 10.0,
+    }));
 
-        let polygon = Polygon {
-            points: vec![
-                point2(1.0, 1.0),
-                point2(15.0, 1.0),
+    let polygon = Polygon {
+        points: vec![
+            point2(1.0, 1.0),
+            point2(15.0, 1.0),
+            point2(15.0, 1.0),
+            point2(15.0, 15.0),
+            point2(15.0, 15.0),
+            point2(1.0, 1.0),
+        ],
+        matrix: Matrix::identity(),
+    };
 
-                point2(15.0, 1.0),
-                point2(15.0, 15.0),
+    let combiner = Shape::Intersection(vec![
+        Shape::Terminal(Terminal::Field(0)),
+        Shape::Terminal(Terminal::Field(1)),
+    ]);
 
-                point2(15.0, 15.0),
-                point2(1.0, 1.0),
-            ],
-            matrix: Matrix::identity(),
-        };
+    let program = Command::Serially(vec![
+        Command::Define(0, Value::BasicShape(shape)),
+        Command::Define(1, Value::Polygon(polygon)),
+        Command::Define(2, Value::BasicShape(combiner)),
+        Command::Export(0),
+        Command::Export(1),
+        Command::Export(2),
+    ]);
 
-        let combiner = Shape::Intersection(vec![
-            Shape::Terminal(Terminal::Field(0)),
-            Shape::Terminal(Terminal::Field(1)),
-        ]);
-
-        let program = Command::Serially(vec![
-            Command::Define(0, Value::BasicShape(shape)),
-            Command::Define(1, Value::Polygon(polygon)),
-            Command::Define(2, Value::BasicShape(combiner)),
-            Command::Export(0),
-            Command::Export(1),
-            Command::Export(2),
-        ]);
-
-        let out = exec(program, provider.duplicate(), 22, 22);
-        for (id, lines) in out {
-            let writer = provider.text_writer(format!("export_{}.lines.txt", id));
-            print_path_segments(writer, &lines);
-        }
+    let out = exec(program, provider.duplicate(), 22, 22);
+    for (id, lines) in out {
+        let writer = provider.text_writer(format!("export_{}.lines.txt", id));
+        print_path_segments(writer, &lines);
     }
 }

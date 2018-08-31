@@ -4,8 +4,8 @@ extern crate line_stitch;
 extern crate vectorphile;
 
 // My crates
-#[macro_use]
 extern crate expectation;
+extern crate expectation_plugin;
 
 // External Crates
 extern crate euclid;

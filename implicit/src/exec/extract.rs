@@ -4,6 +4,7 @@ use opencl::{FieldBuffer, OpenClContext};
 
 #[cfg(test)]
 use expectation::{extensions::TextDiffExtension, Provider};
+use expectation_plugin::expectation_test;
 #[cfg(test)]
 use ocaml::Shape;
 
@@ -43,38 +44,36 @@ fn run_shape_paths(shape: Shape, width: usize, height: usize, provider: Provider
     print_path_segments(out, &extracted);
 }
 
-expectation_test!{
-    fn expectation_test_extract_circle(provider: Provider) {
-        use ocaml::*;
+#[expectation_test]
+fn extract_circle(provider: Provider) {
+    use ocaml::*;
 
-        let shape = Shape::Terminal(Terminal::Circle(Circle {
-            x: 11.0,
-            y: 11.0,
-            r: 10.0,
-        }));
+    let shape = Shape::Terminal(Terminal::Circle(Circle {
+        x: 11.0,
+        y: 11.0,
+        r: 10.0,
+    }));
 
-        run_shape_paths(shape, 22, 22, provider);
-    }
+    run_shape_paths(shape, 22, 22, provider);
 }
 
-expectation_test!{
-    fn expectation_test_extract_subtraction(provider: Provider) {
-        use ocaml::*;
+#[expectation_test]
+fn extract_subtraction(provider: Provider) {
+    use ocaml::*;
 
-        let a = Shape::Terminal(Terminal::Circle(Circle {
-            x: 11.0,
-            y: 11.0,
-            r: 10.0,
-        }));
+    let a = Shape::Terminal(Terminal::Circle(Circle {
+        x: 11.0,
+        y: 11.0,
+        r: 10.0,
+    }));
 
-        let b = Shape::Terminal(Terminal::Circle(Circle {
-            x: 11.0,
-            y: 11.0,
-            r: 5.0,
-        }));
+    let b = Shape::Terminal(Terminal::Circle(Circle {
+        x: 11.0,
+        y: 11.0,
+        r: 5.0,
+    }));
 
-        let c = Shape::Intersection(vec![a, Shape::Not(Box::new(b))]);
+    let c = Shape::Intersection(vec![a, Shape::Not(Box::new(b))]);
 
-        run_shape_paths(c, 22, 22, provider);
-    }
+    run_shape_paths(c, 22, 22, provider);
 }

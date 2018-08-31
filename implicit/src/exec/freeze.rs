@@ -1,3 +1,4 @@
+use expectation_plugin::expectation_test;
 use opencl::{FieldBuffer, OpenClContext};
 use polygon::run_poly_raw_with_sign;
 
@@ -43,60 +44,57 @@ fn freeze_shape_helper(shape: Shape, width: usize, height: usize, provider: Prov
     save_field_buffer(&after_buffer, w_bw, ColorMode::BlackAndWhite);
 }
 
-expectation_test!{
-    fn expectation_test_freeze_circle(provider: Provider) {
-        use ocaml::*;
+#[expectation_test]
+fn freeze_circle(provider: Provider) {
+    use ocaml::*;
 
-        let shape = Shape::Terminal(Terminal::Circle(Circle {
-            x: 11.0,
-            y: 11.0,
-            r: 10.0,
-        }));
+    let shape = Shape::Terminal(Terminal::Circle(Circle {
+        x: 11.0,
+        y: 11.0,
+        r: 10.0,
+    }));
 
-        freeze_shape_helper(shape, 22, 22, provider);
-    }
+    freeze_shape_helper(shape, 22, 22, provider);
 }
 
-expectation_test!{
-    fn expectation_test_freeze_subtraction(provider: Provider) {
-        use ocaml::*;
+#[expectation_test]
+fn freeze_subtraction(provider: Provider) {
+    use ocaml::*;
 
-        let a = Shape::Terminal(Terminal::Circle(Circle {
-            x: 11.0,
-            y: 11.0,
-            r: 10.0,
-        }));
+    let a = Shape::Terminal(Terminal::Circle(Circle {
+        x: 11.0,
+        y: 11.0,
+        r: 10.0,
+    }));
 
-        let b = Shape::Terminal(Terminal::Circle(Circle {
-            x: 11.0,
-            y: 11.0,
-            r: 5.0,
-        }));
+    let b = Shape::Terminal(Terminal::Circle(Circle {
+        x: 11.0,
+        y: 11.0,
+        r: 5.0,
+    }));
 
-        let c = Shape::Intersection(vec![a, Shape::Not(Box::new(b))]);
+    let c = Shape::Intersection(vec![a, Shape::Not(Box::new(b))]);
 
-        freeze_shape_helper(c, 22, 22, provider);
-    }
+    freeze_shape_helper(c, 22, 22, provider);
 }
 
-expectation_test!{
-    fn expectation_test_freeze_union(provider: Provider) {
-        use ocaml::*;
+#[expectation_test]
+fn freeze_union(provider: Provider) {
+    use ocaml::*;
 
-        let a = Shape::Terminal(Terminal::Circle(Circle {
-            x: 11.0,
-            y: 11.0,
-            r: 10.0,
-        }));
+    let a = Shape::Terminal(Terminal::Circle(Circle {
+        x: 11.0,
+        y: 11.0,
+        r: 10.0,
+    }));
 
-        let b = Shape::Terminal(Terminal::Circle(Circle {
-            x: 21.0,
-            y: 11.0,
-            r: 10.0,
-        }));
+    let b = Shape::Terminal(Terminal::Circle(Circle {
+        x: 21.0,
+        y: 11.0,
+        r: 10.0,
+    }));
 
-        let c = Shape::Union(vec![a, b]);
+    let c = Shape::Union(vec![a, b]);
 
-        freeze_shape_helper(c, 44, 22, provider);
-    }
+    freeze_shape_helper(c, 44, 22, provider);
 }
