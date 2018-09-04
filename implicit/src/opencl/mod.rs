@@ -1,4 +1,4 @@
-use ocl::builders::BufferBuilder;
+use ocl::builders::{BufferBuilder, KernelBuilder};
 use ocl::enums::{DeviceInfo, DeviceInfoResult};
 use ocl::{Context, Device, Kernel, Platform, Program, Queue};
 use std::sync::Mutex;
@@ -84,7 +84,12 @@ impl OpenClContext {
                 .next()
             {
                 let _guard = ::flame::start_guard("Kernel::new");
-                return Kernel::new(name, p).unwrap();
+                return KernelBuilder::new()
+                    .queue(self.queue.clone())
+                    .name(name)
+                    .program(p)
+                    .build_unfinished()
+                    .unwrap();
             }
         }
 
@@ -101,7 +106,12 @@ impl OpenClContext {
 
         {
             let _guard = ::flame::start_guard("Kernel::new");
-            Kernel::new(name, &program).unwrap()
+            return KernelBuilder::new()
+                .queue(self.queue.clone())
+                .name(name)
+                .program(&program)
+                .build_unfinished()
+                .unwrap();
         }
     }
 

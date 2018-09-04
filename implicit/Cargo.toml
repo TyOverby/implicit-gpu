@@ -5,7 +5,7 @@ authors = ["Ty Overby <ty@pre-alpha.com>"]
 workspace = "../"
 
 [dependencies]
-ocl = "0.17.*"
+#ocl = "0.19.*"
 flame = "0.2.0"
 lazy_static = "0.2.*"
 image = "0.19.*"
@@ -21,6 +21,9 @@ serde_json = "1.*.*"
 
 expectation = "0.1.*"
 expectation_plugin  = "0.1.2"
+
+[dependencies.ocl]
+path = "../../ocl/ocl"
 
 [dependencies.euclid]
 version = "0.19.0"
