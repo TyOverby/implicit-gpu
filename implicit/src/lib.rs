@@ -22,6 +22,8 @@ extern crate serde_derive;
 #[cfg(test)]
 extern crate serde_json;
 
+extern crate num_traits;
+
 mod compiler;
 mod debug;
 mod geometry;

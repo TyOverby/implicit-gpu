@@ -52,13 +52,13 @@ where
 fn add_matrix(kernel: Kernel, matrix: Matrix) -> Kernel {
     println!("matrix: {:?}", matrix);
     let matrix = matrix.inverse().unwrap();
+    kernel.set_arg("m11", matrix.m11).unwrap();
+    kernel.set_arg("m12", matrix.m12).unwrap();
+    kernel.set_arg("m21", matrix.m21).unwrap();
+    kernel.set_arg("m22", matrix.m22).unwrap();
+    kernel.set_arg("m31", matrix.m31).unwrap();
+    kernel.set_arg("m32", matrix.m32).unwrap();
     kernel
-        .arg_scl(matrix.m11)
-        .arg_scl(matrix.m12)
-        .arg_scl(matrix.m21)
-        .arg_scl(matrix.m22)
-        .arg_scl(matrix.m31)
-        .arg_scl(matrix.m32)
 }
 
 pub fn run_poly_raw_no_sign(
@@ -70,18 +70,22 @@ pub fn run_poly_raw_no_sign(
 ) -> FieldBuffer {
     let _guard = ::flame::start_guard("run_poly_raw");
     let out = ctx.field_buffer(width, height, None);
-    let kernel = ctx.compile("apply_no_sign", PROGRAM);
+    let mut kernel = ctx.compile("apply_no_sign", PROGRAM, |register| {
+        register.register_buffer("buffer");
+        register.register_long("width");
+        register.register_buffer("lines");
+        register.register_long("count");
+        register.register_matrix();
+    });
 
-    let exec = kernel
-        .queue(ctx.queue().clone())
-        .gws([width, height])
-        .arg_buf(out.buffer())
-        .arg_scl(width as u64)
-        .arg_buf(lines.buffer())
-        .arg_scl(lines.size());
-    let exec = add_matrix(exec, matrix);
+    kernel.set_default_global_work_size(::ocl::SpatialDims::Two(width, height));
+    kernel.set_arg("buffer", out.buffer()).unwrap();
+    kernel.set_arg("width", width as u64).unwrap();
+    kernel.set_arg("lines", lines.buffer()).unwrap();
+    kernel.set_arg("count", lines.size()).unwrap();
+    let kernel = add_matrix(kernel, matrix);
     unsafe {
-        exec.enq().unwrap();
+        kernel.enq().unwrap();
     }
     out
 }
@@ -97,19 +101,24 @@ pub fn run_poly_raw_with_sign(
 ) -> FieldBuffer {
     let _guard = ::flame::start_guard("run_poly_raw");
     let out = ctx.field_buffer(width, height, None);
-    let kernel = ctx.compile("apply_with_sign", PROGRAM);
+    let mut kernel = ctx.compile("apply_with_sign", PROGRAM, |register| {
+        register.register_buffer("buffer");
+        register.register_buffer("signbuffer");
+        register.register_long("width");
+        register.register_buffer("lines");
+        register.register_long("count");
+        register.register_matrix();
+    });
 
-    let exec = kernel
-        .queue(ctx.queue().clone())
-        .gws([width, height])
-        .arg_buf(out.buffer())
-        .arg_buf(signfield.buffer())
-        .arg_scl(width as u64)
-        .arg_buf(lines.buffer())
-        .arg_scl(count);
-    let exec = add_matrix(exec, matrix);
+    kernel.set_default_global_work_size(::ocl::SpatialDims::Two(width, height));
+    kernel.set_arg("buffer", out.buffer()).unwrap();
+    kernel.set_arg("signbuffer", signfield.buffer()).unwrap();
+    kernel.set_arg("width", width as u64).unwrap();
+    kernel.set_arg("lines", lines.buffer()).unwrap();
+    kernel.set_arg("count", count).unwrap();
+    let kernel = add_matrix(kernel, matrix);
     unsafe {
-        exec.enq().unwrap();
+        kernel.enq().unwrap();
     }
     out
 }

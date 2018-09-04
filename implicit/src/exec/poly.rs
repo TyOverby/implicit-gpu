@@ -12,7 +12,7 @@ pub fn exec_poly(ctx: &OpenClContext, poly: Polygon, width: usize, height: usize
 }
 
 #[expectation_test]
-fn exec_triangle(mut provider: Provider) {
+fn exec_triangle(provider: Provider) {
     use euclid::*;
     use ocaml::*;
 
@@ -38,7 +38,7 @@ fn exec_triangle(mut provider: Provider) {
 }
 
 #[expectation_test]
-fn exec_line_BAD(mut provider: Provider) {
+fn exec_line_bad(provider: Provider) {
     use euclid::*;
     use ocaml::*;
 
@@ -62,7 +62,7 @@ fn exec_line_BAD(mut provider: Provider) {
 }
 
 #[expectation_test]
-fn exec_triangle_scaled(mut provider: Provider) {
+fn exec_triangle_scaled(provider: Provider) {
     use euclid::*;
     use ocaml::*;
 

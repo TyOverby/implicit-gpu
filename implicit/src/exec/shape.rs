@@ -18,21 +18,29 @@ where
 {
     let mut writer: Vec<u8> = vec![];
     let CompileResult { dependencies, .. } = compile(&shape, &mut writer).unwrap();
-    let kernel = ctx.compile("apply", String::from_utf8(writer).unwrap());
 
     let out = ctx.field_buffer(width, height, None);
 
-    let mut kc = kernel
-        .queue(ctx.queue().clone())
-        .gws([width, height])
-        .arg_buf(out.buffer())
-        .arg_scl(width as u64);
+    let mut kernel = ctx.compile("apply", String::from_utf8(writer).unwrap(), |register| {
+        register.register_buffer("buffer");
+        register.register_long("width");
+
+        for dep in &dependencies {
+            register.register_buffer(format!("field__{}", dep));
+        }
+    });
+
+    kernel.set_default_global_work_size(::ocl::SpatialDims::Two(width, height));
+    kernel.set_arg("buffer", out.buffer()).unwrap();
+    kernel.set_arg("width", width as u64).unwrap();
 
     for dep in dependencies {
-        kc = kc.arg_buf(buffer_find(dep).buffer());
+        kernel
+            .set_arg(format!("field__{}", dep), buffer_find(dep).buffer())
+            .unwrap();
     }
 
-    unsafe { kc.enq().unwrap() };
+    unsafe { kernel.enq().unwrap() };
 
     out
 }

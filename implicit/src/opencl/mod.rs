@@ -41,6 +41,40 @@ pub fn all_devices() -> Vec<(Platform, Device)> {
     out
 }
 
+pub struct Register<'a, 'b: 'a> {
+    b: &'a mut KernelBuilder<'b>,
+}
+
+impl<'a, 'b> Register<'a, 'b> {
+    pub fn register_buffer<'c, S>(&mut self, name: S)
+    where
+        S: Into<String>,
+    {
+        self.b
+            .arg_named::<_, _, Option<&::ocl::Buffer<f32>>>(name, None);
+    }
+    pub fn register_float<'c, S>(&mut self, name: S)
+    where
+        S: Into<String>,
+    {
+        self.b.arg_named(name, &0.0f32);
+    }
+    pub fn register_long<'c, S>(&mut self, name: S)
+    where
+        S: Into<String>,
+    {
+        self.b.arg_named(name, &0u64);
+    }
+    pub fn register_matrix(&mut self) {
+        self.register_float("m11");
+        self.register_float("m12");
+        self.register_float("m21");
+        self.register_float("m22");
+        self.register_float("m31");
+        self.register_float("m32");
+    }
+}
+
 impl OpenClContext {
     pub fn new(platform: Platform, device: Device) -> OpenClContext {
         let context = Context::builder()
@@ -71,7 +105,12 @@ impl OpenClContext {
     // TODO(tyoverby): You should use a Kernel Cache instead of
     // Program Cache once Kernels
     // implement Clone.
-    pub fn compile<S2: Into<String>, S1: Into<String>>(&self, name: S1, source: S2) -> Kernel {
+    pub fn compile<S1, S2, F>(&self, name: S1, source: S2, f: F) -> Kernel
+    where
+        S2: Into<String>,
+        S1: Into<String>,
+        F: for<'a, 'b, 'c> FnOnce(&'c mut Register<'a, 'b>),
+    {
         let _guard = ::flame::start_guard("OpenClContext::compile");
         let name = name.into();
         let source = source.into();
@@ -84,12 +123,10 @@ impl OpenClContext {
                 .next()
             {
                 let _guard = ::flame::start_guard("Kernel::new");
-                return KernelBuilder::new()
-                    .queue(self.queue.clone())
-                    .name(name)
-                    .program(p)
-                    .build_unfinished()
-                    .unwrap();
+                let mut builder = KernelBuilder::new();
+                builder.queue(self.queue.clone()).name(name).program(p);
+                f(&mut Register { b: &mut builder });
+                return builder.build_unfinished().unwrap();
             }
         }
 
@@ -106,12 +143,13 @@ impl OpenClContext {
 
         {
             let _guard = ::flame::start_guard("Kernel::new");
-            return KernelBuilder::new()
+            let mut builder = KernelBuilder::new();
+            builder
                 .queue(self.queue.clone())
                 .name(name)
-                .program(&program)
-                .build_unfinished()
-                .unwrap();
+                .program(&program);
+            f(&mut Register { b: &mut builder });
+            return builder.build_unfinished().unwrap();
         }
     }
 
