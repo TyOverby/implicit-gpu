@@ -71,10 +71,10 @@ pub fn run_poly_raw_no_sign(
     let _guard = ::flame::start_guard("run_poly_raw");
     let out = ctx.field_buffer(width, height, None);
     let mut kernel = ctx.compile("apply_no_sign", PROGRAM, |register| {
-        register.register_buffer("buffer");
-        register.register_long("width");
-        register.register_buffer("lines");
-        register.register_long("count");
+        register.buffer("buffer");
+        register.long("width");
+        register.buffer("lines");
+        register.long("count");
         register.register_matrix();
     });
 
@@ -102,11 +102,11 @@ pub fn run_poly_raw_with_sign(
     let _guard = ::flame::start_guard("run_poly_raw");
     let out = ctx.field_buffer(width, height, None);
     let mut kernel = ctx.compile("apply_with_sign", PROGRAM, |register| {
-        register.register_buffer("buffer");
-        register.register_buffer("signbuffer");
-        register.register_long("width");
-        register.register_buffer("lines");
-        register.register_long("count");
+        register.buffer("buffer");
+        register.buffer("signbuffer");
+        register.long("width");
+        register.buffer("lines");
+        register.long("count");
         register.register_matrix();
     });
 

@@ -22,11 +22,11 @@ where
     let out = ctx.field_buffer(width, height, None);
 
     let mut kernel = ctx.compile("apply", String::from_utf8(writer).unwrap(), |register| {
-        register.register_buffer("buffer");
-        register.register_long("width");
+        register.buffer("buffer");
+        register.long("width");
 
         for dep in &dependencies {
-            register.register_buffer(format!("field__{}", dep));
+            register.buffer(format!("field__{}", dep));
         }
     });
 

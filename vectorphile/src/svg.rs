@@ -1,9 +1,6 @@
 use super::backend::*;
 use std::io::{Error, Write};
 
-#[cfg(test)]
-use euclid::point2;
-
 pub struct SvgBackend<W> {
     pub out: W,
     pub float_precision: usize,

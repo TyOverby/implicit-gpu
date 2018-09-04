@@ -7,11 +7,11 @@ pub fn run_marching(input: &FieldBuffer, ctx: &OpenClContext) -> (LineBuffer, u3
 
     let (width, height) = (input.width(), input.height());
     let mut kernel = ctx.compile("apply", PROGRAM, |register| {
-        register.register_buffer("buffer");
-        register.register_long("width");
-        register.register_long("height");
-        register.register_buffer("out");
-        register.register_buffer("atomic");
+        register.buffer("buffer");
+        register.long("width");
+        register.long("height");
+        register.buffer("out");
+        register.buffer("atomic");
     });
 
     let line_buffer = ctx.line_buffer_uninit(width * height * 4);

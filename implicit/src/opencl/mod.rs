@@ -1,6 +1,7 @@
 use ocl::builders::{BufferBuilder, KernelBuilder};
 use ocl::enums::{DeviceInfo, DeviceInfoResult};
 use ocl::{Context, Device, Kernel, Platform, Program, Queue};
+use std::borrow::Cow;
 use std::sync::Mutex;
 
 mod buffers;
@@ -46,32 +47,23 @@ pub struct Register<'a, 'b: 'a> {
 }
 
 impl<'a, 'b> Register<'a, 'b> {
-    pub fn register_buffer<'c, S>(&mut self, name: S)
-    where
-        S: Into<String>,
-    {
+    pub fn buffer<S: Into<Cow<'static, str>>>(&mut self, name: S) {
         self.b
             .arg_named::<_, _, Option<&::ocl::Buffer<f32>>>(name, None);
     }
-    pub fn register_float<'c, S>(&mut self, name: S)
-    where
-        S: Into<String>,
-    {
+    pub fn float<S: Into<Cow<'static, str>>>(&mut self, name: S) {
         self.b.arg_named(name, &0.0f32);
     }
-    pub fn register_long<'c, S>(&mut self, name: S)
-    where
-        S: Into<String>,
-    {
+    pub fn long<S: Into<Cow<'static, str>>>(&mut self, name: S) {
         self.b.arg_named(name, &0u64);
     }
     pub fn register_matrix(&mut self) {
-        self.register_float("m11");
-        self.register_float("m12");
-        self.register_float("m21");
-        self.register_float("m22");
-        self.register_float("m31");
-        self.register_float("m32");
+        self.float("m11");
+        self.float("m12");
+        self.float("m21");
+        self.float("m22");
+        self.float("m31");
+        self.float("m32");
     }
 }
 
