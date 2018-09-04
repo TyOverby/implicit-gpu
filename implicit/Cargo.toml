@@ -20,8 +20,12 @@ rand = "0.3.15"
 serde_json = "1.*.*"
 num-traits = "0.2.*"
 
-expectation = "0.1.*"
-expectation_plugin  = "0.1.2"
+#expectation = "0.1.*"
+#expectation_plugin  = "0.1.2"
+[dependencies.expectation]
+path = "../../expectation/expectation"
+[dependencies.expectation_plugin]
+path = "../../expectation/expectation-plugin"
 
 [dependencies.ocl]
 path = "../../ocl/ocl"
