@@ -47,16 +47,16 @@ impl Inspector for Provider {
     fn write_segments(&self, name: &str, segments: &[PathSegment]) {
         use debug::*;
 
-        let tuple_writer = self.text_writer(format!("{}.txt", name));
+        let tuple_writer = self.diagnostic().text_writer(format!("{}.txt", name));
         print_path_segments(tuple_writer, segments);
 
-        let svg_writer = self.text_writer(format!("{}.svg", name));
+        let svg_writer = self.svg_writer(format!("{}.svg", name));
         svg_path_segments(svg_writer, segments).unwrap();
     }
 
     fn write_lines(&self, name: &str, lines: &[(Point, Point)]) {
         use std::io::Write;
-        let mut writer = self.text_writer(format!("{}.txt", name));
+        let mut writer = self.diagnostic().text_writer(format!("{}.txt", name));
         for line in lines {
             writeln!(writer, "{:?}", line);
         }
