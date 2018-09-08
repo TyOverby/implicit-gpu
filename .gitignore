@@ -5,3 +5,4 @@ Cargo.lock
 *.log
 **/*.rs.bk
 .idea
+out.html
