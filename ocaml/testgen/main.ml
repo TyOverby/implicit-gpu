@@ -128,8 +128,31 @@ let grid_of_circles =
   let circle_at (x, y) = circle ~x:x ~y:y ~r:5.0 in
   grid |> List.map ~f:circle_at |> union
 
+let rotated_grid =
+  grid_of_circles
+  |> rotate ~r:(3.14 /. 4.0)
+  |> scale ~dx:2.0 ~dy:2.0
+
+let invert_area target area =
+  let outside = subtract target area in
+  let inside = intersection [not target; area] in
+  union [outside; inside]
+
+let inverted_grid =
+  circle ~x:50.0 ~y:50.0 ~r:25.0
+  |> invert_area grid_of_circles
+
+let rotate_around_test =
+  let c = circle ~x:10.0 ~y:10.0 ~r:5.0 in
+  let r = rect ~x:0.0 ~y:0.0 ~w:10.0 ~h:10.0 in
+  let r = r |> rotate_around ~x:10.0 ~y:10.0 ~r:(3.14 /. 4.0) in
+  union [ c; r ]
+
 let tests = [
+  "rotate_around_test", rotate_around_test;
+  "inverted_grid", inverted_grid;
   "grid_of_circles", grid_of_circles;
+  "rotated_grid", rotated_grid;
   "rotated_square", rotated_square;
   "rr", rr;
   "rr_scaled", rr_scaled;

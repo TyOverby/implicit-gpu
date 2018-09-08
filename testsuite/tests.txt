@@ -1,4 +1,7 @@
+rotate_around_test
+inverted_grid
 grid_of_circles
+rotated_grid
 rotated_square
 rr
 rr_scaled

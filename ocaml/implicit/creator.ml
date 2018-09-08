@@ -14,3 +14,9 @@ let poly points: t = Shape.Terminal( Shape.Poly { points; matrix = Matrix.id })
 let scale ~dx ~dy target :t = Shape.Transform(target, Matrix.create_scale dx dy)
 let translate ~dx ~dy target :t = Shape.Transform (target, Matrix.create_translation dx dy)
 let rotate ~r target :t = Shape.Transform (target, Matrix.create_rotation r)
+
+let rotate_around ~r ~x ~y target =
+  target
+  |> translate ~dx:(-. x) ~dy:(-. y)
+  |> rotate ~r:r
+  |> translate ~dx:x ~dy:y
