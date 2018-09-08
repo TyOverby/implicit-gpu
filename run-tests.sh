@@ -3,5 +3,5 @@
 cd ocaml
 dune exec testgen/main.exe
 cd ../testsuite
-cargo expect run
+cargo expect run --release
 

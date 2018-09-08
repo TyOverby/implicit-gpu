@@ -4,48 +4,38 @@ Serially(
             0,
             BasicShape(
                 Transform(
-                    Transform(
-                        Intersection(
-                            [
-                                Terminal(
-                                    Circle(
-                                        Circle {
-                                            x: 0.0,
-                                            y: 0.0,
-                                            r: 10.0
-                                        }
-                                    )
-                                ),
-                                Not(
-                                    Modulate(
-                                        Terminal(
-                                            Circle(
-                                                Circle {
-                                                    x: 0.0,
-                                                    y: 0.0,
-                                                    r: 10.0
-                                                }
-                                            )
-                                        ),
-                                        -4.0
-                                    )
-                                )
-                            ]
-                        ),
+                    Intersection(
                         [
-                            3.0,
-                            0.0,
-                            0.0,
-                            3.0,
-                            0.0,
-                            0.0
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 0.0,
+                                        y: 0.0,
+                                        r: 10.0
+                                    }
+                                )
+                            ),
+                            Not(
+                                Modulate(
+                                    Terminal(
+                                        Circle(
+                                            Circle {
+                                                x: 0.0,
+                                                y: 0.0,
+                                                r: 10.0
+                                            }
+                                        )
+                                    ),
+                                    -4.0
+                                )
+                            )
                         ]
                     ),
                     [
-                        1.0,
+                        3.0,
                         0.0,
                         0.0,
-                        1.0,
+                        3.0,
                         36.0,
                         36.0
                     ]

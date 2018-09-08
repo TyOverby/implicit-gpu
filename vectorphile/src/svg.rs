@@ -51,14 +51,14 @@ impl<W: Write> DrawBackend for SvgBackend<W> {
             }
             MoveTo { x, y } => write!(
                 &mut self.out,
-                "M{:.p$},{:.p$} ",
+                "\nM{:.p$},{:.p$} ",
                 x,
                 y,
                 p = self.float_precision
             ),
             LineTo { x, y } => write!(
                 &mut self.out,
-                "L{:.p$},{:.p$} ",
+                "\nL{:.p$},{:.p$} ",
                 x,
                 y,
                 p = self.float_precision

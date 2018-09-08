@@ -46,21 +46,24 @@ let rec expand: Stages.expanded -> Stages.expanded = function
       | target -> Modulate (target, how_much)
     )
 
-  (* scale *)
+  (* transform *)
   | Transform (target, matrix)  -> (
       match expand target with
+      | Transform (target, m2) -> Transform(target, Matrix.mul m2 matrix)
       | Terminal Nothing -> Terminal Nothing
       | Terminal Everything -> Terminal Everything
       | target -> Transform (target, matrix)
     )
 
   (* union *)
+  (* TODO: Union[a ; Union [b; c]] should simplify to Union[a; b; c] *)
   | Union list -> let list = expand_all list in
     if List.exists list ~f:(phys_equal (Terminal Everything))
     then Terminal Everything
     else expand_easy_lists (Union (remove list (Terminal Nothing)))
 
   (* intersection *)
+  (* TODO: Intersection[a ; Intersection [b; c]] should simplify to Intersection[a; b; c] *)
   | Intersection list -> let list = expand_all list in
     if List.exists list ~f:(phys_equal (Terminal Nothing))
     then Terminal Nothing

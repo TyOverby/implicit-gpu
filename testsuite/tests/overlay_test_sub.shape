@@ -2,120 +2,117 @@
    ((Define 0
      (BasicShape
       (Transform
-       (Transform
-        (Intersection
-         ((Modulate (Terminal (Rect ((x 11) (y 11) (w 14) (h 14)))) 10)
-          (Not
-           (Union
-            ((Union
-              ((Union
-                ((Intersection
-                  ((Terminal (Circle ((x 23) (y 23) (r 10))))
-                   (Not
-                    (Modulate (Terminal (Circle ((x 23) (y 23) (r 10)))) -4))))
-                 (Intersection
-                  ((Intersection
-                    ((Terminal (Circle ((x 13) (y 23) (r 10))))
-                     (Not
-                      (Modulate (Terminal (Circle ((x 13) (y 23) (r 10))))
-                       -4))))
-                   (Not
-                    (Modulate
-                     (Intersection
-                      ((Terminal (Circle ((x 23) (y 23) (r 10))))
-                       (Not
-                        (Modulate (Terminal (Circle ((x 23) (y 23) (r 10))))
-                         -4))))
-                     2))))))
-               (Intersection
-                ((Intersection
-                  ((Terminal (Circle ((x 23) (y 13) (r 10))))
-                   (Not
-                    (Modulate (Terminal (Circle ((x 23) (y 13) (r 10)))) -4))))
-                 (Not
-                  (Modulate
-                   (Union
-                    ((Intersection
-                      ((Terminal (Circle ((x 23) (y 23) (r 10))))
-                       (Not
-                        (Modulate (Terminal (Circle ((x 23) (y 23) (r 10))))
-                         -4))))
-                     (Intersection
-                      ((Intersection
-                        ((Terminal (Circle ((x 13) (y 23) (r 10))))
-                         (Not
-                          (Modulate
-                           (Terminal (Circle ((x 13) (y 23) (r 10)))) -4))))
-                       (Not
-                        (Modulate
-                         (Intersection
-                          ((Terminal (Circle ((x 23) (y 23) (r 10))))
-                           (Not
-                            (Modulate
-                             (Terminal (Circle ((x 23) (y 23) (r 10)))) -4))))
-                         2))))))
-                   2))))))
-             (Intersection
-              ((Intersection
-                ((Terminal (Circle ((x 13) (y 13) (r 10))))
-                 (Not
-                  (Modulate (Terminal (Circle ((x 13) (y 13) (r 10)))) -4))))
-               (Not
-                (Modulate
-                 (Union
-                  ((Union
-                    ((Intersection
-                      ((Terminal (Circle ((x 23) (y 23) (r 10))))
-                       (Not
-                        (Modulate (Terminal (Circle ((x 23) (y 23) (r 10))))
-                         -4))))
-                     (Intersection
-                      ((Intersection
-                        ((Terminal (Circle ((x 13) (y 23) (r 10))))
-                         (Not
-                          (Modulate
-                           (Terminal (Circle ((x 13) (y 23) (r 10)))) -4))))
-                       (Not
-                        (Modulate
-                         (Intersection
-                          ((Terminal (Circle ((x 23) (y 23) (r 10))))
-                           (Not
-                            (Modulate
-                             (Terminal (Circle ((x 23) (y 23) (r 10)))) -4))))
-                         2))))))
-                   (Intersection
-                    ((Intersection
-                      ((Terminal (Circle ((x 23) (y 13) (r 10))))
-                       (Not
-                        (Modulate (Terminal (Circle ((x 23) (y 13) (r 10))))
-                         -4))))
-                     (Not
-                      (Modulate
-                       (Union
-                        ((Intersection
-                          ((Terminal (Circle ((x 23) (y 23) (r 10))))
-                           (Not
-                            (Modulate
-                             (Terminal (Circle ((x 23) (y 23) (r 10)))) -4))))
-                         (Intersection
-                          ((Intersection
-                            ((Terminal (Circle ((x 13) (y 23) (r 10))))
-                             (Not
-                              (Modulate
-                               (Terminal (Circle ((x 13) (y 23) (r 10)))) -4))))
-                           (Not
-                            (Modulate
-                             (Intersection
-                              ((Terminal (Circle ((x 23) (y 23) (r 10))))
-                               (Not
-                                (Modulate
-                                 (Terminal (Circle ((x 23) (y 23) (r 10))))
-                                 -4))))
-                             2))))))
-                       2))))))
-                 2)))))))))
-        ((m11 3) (m12 0) (m21 0) (m22 3) (m31 0) (m32 0)))
-       ((m11 1) (m12 0) (m21 0) (m22 1) (m31 7.2000000000000011)
+       (Intersection
+        ((Modulate (Terminal (Rect ((x 11) (y 11) (w 14) (h 14)))) 10)
+         (Not
+          (Union
+           ((Union
+             ((Union
+               ((Intersection
+                 ((Terminal (Circle ((x 23) (y 23) (r 10))))
+                  (Not
+                   (Modulate (Terminal (Circle ((x 23) (y 23) (r 10)))) -4))))
+                (Intersection
+                 ((Intersection
+                   ((Terminal (Circle ((x 13) (y 23) (r 10))))
+                    (Not
+                     (Modulate (Terminal (Circle ((x 13) (y 23) (r 10)))) -4))))
+                  (Not
+                   (Modulate
+                    (Intersection
+                     ((Terminal (Circle ((x 23) (y 23) (r 10))))
+                      (Not
+                       (Modulate (Terminal (Circle ((x 23) (y 23) (r 10))))
+                        -4))))
+                    2))))))
+              (Intersection
+               ((Intersection
+                 ((Terminal (Circle ((x 23) (y 13) (r 10))))
+                  (Not
+                   (Modulate (Terminal (Circle ((x 23) (y 13) (r 10)))) -4))))
+                (Not
+                 (Modulate
+                  (Union
+                   ((Intersection
+                     ((Terminal (Circle ((x 23) (y 23) (r 10))))
+                      (Not
+                       (Modulate (Terminal (Circle ((x 23) (y 23) (r 10))))
+                        -4))))
+                    (Intersection
+                     ((Intersection
+                       ((Terminal (Circle ((x 13) (y 23) (r 10))))
+                        (Not
+                         (Modulate (Terminal (Circle ((x 13) (y 23) (r 10))))
+                          -4))))
+                      (Not
+                       (Modulate
+                        (Intersection
+                         ((Terminal (Circle ((x 23) (y 23) (r 10))))
+                          (Not
+                           (Modulate
+                            (Terminal (Circle ((x 23) (y 23) (r 10)))) -4))))
+                        2))))))
+                  2))))))
+            (Intersection
+             ((Intersection
+               ((Terminal (Circle ((x 13) (y 13) (r 10))))
+                (Not
+                 (Modulate (Terminal (Circle ((x 13) (y 13) (r 10)))) -4))))
+              (Not
+               (Modulate
+                (Union
+                 ((Union
+                   ((Intersection
+                     ((Terminal (Circle ((x 23) (y 23) (r 10))))
+                      (Not
+                       (Modulate (Terminal (Circle ((x 23) (y 23) (r 10))))
+                        -4))))
+                    (Intersection
+                     ((Intersection
+                       ((Terminal (Circle ((x 13) (y 23) (r 10))))
+                        (Not
+                         (Modulate (Terminal (Circle ((x 13) (y 23) (r 10))))
+                          -4))))
+                      (Not
+                       (Modulate
+                        (Intersection
+                         ((Terminal (Circle ((x 23) (y 23) (r 10))))
+                          (Not
+                           (Modulate
+                            (Terminal (Circle ((x 23) (y 23) (r 10)))) -4))))
+                        2))))))
+                  (Intersection
+                   ((Intersection
+                     ((Terminal (Circle ((x 23) (y 13) (r 10))))
+                      (Not
+                       (Modulate (Terminal (Circle ((x 23) (y 13) (r 10))))
+                        -4))))
+                    (Not
+                     (Modulate
+                      (Union
+                       ((Intersection
+                         ((Terminal (Circle ((x 23) (y 23) (r 10))))
+                          (Not
+                           (Modulate
+                            (Terminal (Circle ((x 23) (y 23) (r 10)))) -4))))
+                        (Intersection
+                         ((Intersection
+                           ((Terminal (Circle ((x 13) (y 23) (r 10))))
+                            (Not
+                             (Modulate
+                              (Terminal (Circle ((x 13) (y 23) (r 10)))) -4))))
+                          (Not
+                           (Modulate
+                            (Intersection
+                             ((Terminal (Circle ((x 23) (y 23) (r 10))))
+                              (Not
+                               (Modulate
+                                (Terminal (Circle ((x 23) (y 23) (r 10))))
+                                -4))))
+                            2))))))
+                      2))))))
+                2)))))))))
+       ((m11 3) (m12 0) (m21 0) (m22 3) (m31 7.2000000000000011)
         (m32 7.2000000000000011)))))
     (Export 0)))
   (122.4 122.4)))
