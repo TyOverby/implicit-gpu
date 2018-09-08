@@ -1,3 +1,5 @@
+grid_of_circles
+rotated_square
 rr
 rr_scaled
 ring
@@ -10,6 +12,8 @@ displaced_circle
 circles_union
 circles_intersection
 circles_intersection_freeze
+basic_poly
+expanded_poly
 overlay_test
 overlay_test_sub
 scaled_circle

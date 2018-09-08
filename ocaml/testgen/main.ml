@@ -113,7 +113,24 @@ let rr = rounded_rect ~r:10.0 ~x:1.0 ~y: 1.0 ~w:34.0 ~h:34.0
 
 let rr_scaled = scale ~dx:3.0 ~dy:3.0 rr
 
+let rotated_square = rect ~x:0.0 ~y:0.0 ~w:10.0 ~h:10.0 |> rotate ~r:(3.14 /. 4.0)
+
+let grid_of_circles =
+  let z_to_100 =
+    List.range ~stride:10 0 100
+    |> List.map ~f:Float.of_int in
+  let grid = begin
+    let open List.Let_syntax in
+    let%bind x = z_to_100 in
+    let%bind y = z_to_100 in
+    return (x, y)
+  end in
+  let circle_at (x, y) = circle ~x:x ~y:y ~r:5.0 in
+  grid |> List.map ~f:circle_at |> union
+
 let tests = [
+  "grid_of_circles", grid_of_circles;
+  "rotated_square", rotated_square;
   "rr", rr;
   "rr_scaled", rr_scaled;
   "ring", ring;
@@ -126,10 +143,8 @@ let tests = [
   "circles_union", circles_union;
   "circles_intersection", circles_intersection;
   "circles_intersection_freeze", circles_intersection_freeze;
-  (*
   "basic_poly", basic_poly;
   "expanded_poly", expanded_poly;
-  *)
   "overlay_test", overlay_test;
   "overlay_test_sub", overlay_test_sub |> scale ~dx:3.0 ~dy:3.0;
   "scaled_circle", scaled_circle;

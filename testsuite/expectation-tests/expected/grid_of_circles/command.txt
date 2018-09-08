@@ -1,0 +1,926 @@
+Serially(
+    [
+        Define(
+            0,
+            BasicShape(
+                Transform(
+                    Union(
+                        [
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 0.0,
+                                        y: 0.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 0.0,
+                                        y: 10.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 0.0,
+                                        y: 20.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 0.0,
+                                        y: 30.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 0.0,
+                                        y: 40.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 0.0,
+                                        y: 50.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 0.0,
+                                        y: 60.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 0.0,
+                                        y: 70.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 0.0,
+                                        y: 80.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 0.0,
+                                        y: 90.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 10.0,
+                                        y: 0.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 10.0,
+                                        y: 10.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 10.0,
+                                        y: 20.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 10.0,
+                                        y: 30.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 10.0,
+                                        y: 40.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 10.0,
+                                        y: 50.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 10.0,
+                                        y: 60.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 10.0,
+                                        y: 70.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 10.0,
+                                        y: 80.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 10.0,
+                                        y: 90.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 20.0,
+                                        y: 0.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 20.0,
+                                        y: 10.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 20.0,
+                                        y: 20.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 20.0,
+                                        y: 30.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 20.0,
+                                        y: 40.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 20.0,
+                                        y: 50.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 20.0,
+                                        y: 60.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 20.0,
+                                        y: 70.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 20.0,
+                                        y: 80.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 20.0,
+                                        y: 90.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 30.0,
+                                        y: 0.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 30.0,
+                                        y: 10.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 30.0,
+                                        y: 20.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 30.0,
+                                        y: 30.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 30.0,
+                                        y: 40.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 30.0,
+                                        y: 50.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 30.0,
+                                        y: 60.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 30.0,
+                                        y: 70.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 30.0,
+                                        y: 80.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 30.0,
+                                        y: 90.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 40.0,
+                                        y: 0.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 40.0,
+                                        y: 10.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 40.0,
+                                        y: 20.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 40.0,
+                                        y: 30.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 40.0,
+                                        y: 40.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 40.0,
+                                        y: 50.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 40.0,
+                                        y: 60.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 40.0,
+                                        y: 70.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 40.0,
+                                        y: 80.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 40.0,
+                                        y: 90.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 50.0,
+                                        y: 0.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 50.0,
+                                        y: 10.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 50.0,
+                                        y: 20.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 50.0,
+                                        y: 30.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 50.0,
+                                        y: 40.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 50.0,
+                                        y: 50.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 50.0,
+                                        y: 60.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 50.0,
+                                        y: 70.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 50.0,
+                                        y: 80.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 50.0,
+                                        y: 90.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 60.0,
+                                        y: 0.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 60.0,
+                                        y: 10.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 60.0,
+                                        y: 20.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 60.0,
+                                        y: 30.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 60.0,
+                                        y: 40.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 60.0,
+                                        y: 50.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 60.0,
+                                        y: 60.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 60.0,
+                                        y: 70.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 60.0,
+                                        y: 80.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 60.0,
+                                        y: 90.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 70.0,
+                                        y: 0.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 70.0,
+                                        y: 10.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 70.0,
+                                        y: 20.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 70.0,
+                                        y: 30.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 70.0,
+                                        y: 40.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 70.0,
+                                        y: 50.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 70.0,
+                                        y: 60.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 70.0,
+                                        y: 70.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 70.0,
+                                        y: 80.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 70.0,
+                                        y: 90.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 80.0,
+                                        y: 0.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 80.0,
+                                        y: 10.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 80.0,
+                                        y: 20.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 80.0,
+                                        y: 30.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 80.0,
+                                        y: 40.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 80.0,
+                                        y: 50.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 80.0,
+                                        y: 60.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 80.0,
+                                        y: 70.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 80.0,
+                                        y: 80.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 80.0,
+                                        y: 90.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 90.0,
+                                        y: 0.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 90.0,
+                                        y: 10.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 90.0,
+                                        y: 20.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 90.0,
+                                        y: 30.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 90.0,
+                                        y: 40.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 90.0,
+                                        y: 50.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 90.0,
+                                        y: 60.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 90.0,
+                                        y: 70.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 90.0,
+                                        y: 80.0,
+                                        r: 5.0
+                                    }
+                                )
+                            ),
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 90.0,
+                                        y: 90.0,
+                                        r: 5.0
+                                    }
+                                )
+                            )
+                        ]
+                    ),
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        1.0,
+                        15.0,
+                        15.0
+                    ]
+                )
+            )
+        ),
+        Export(
+            0
+        )
+    ]
+)

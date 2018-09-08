@@ -18,9 +18,10 @@ let rec compute_bounding_box = function
   | Terminal Circle { x; y; r; } -> Positive { x=x -. r; y=y -. r; h=2.0 *. r; w=2.0 *. r; }
   | Terminal Rect { x; y; w; h; } ->
     Positive { x=x; y=y; w=w; h=h; }
-  | Terminal Poly { points; } ->
+  | Terminal Poly { points; matrix; } ->
     let box  =
       points
+      |> List.map ~f:(Matrix.apply_to_point matrix)
       |> bbox_of_points
       |> Option.value_exn in
     Positive box

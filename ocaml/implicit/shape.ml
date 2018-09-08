@@ -20,6 +20,7 @@ type rect ={
 
 type poly = {
   points: Point.t list;
+  matrix: Matrix.t [@default Matrix.id] [@sexp_drop_default];
 } [@@deriving sexp]
 
 type allTerminals =

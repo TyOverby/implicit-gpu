@@ -9,7 +9,7 @@ let modulate (v: float) (target: t) : t = Shape.Modulate(target, v)
 
 let circle ~x ~y ~r :t = Shape.Terminal (Shape.Circle { x; y; r; })
 let rect ~x ~y ~w ~h :t = Shape.Terminal( Shape.Rect { x; y; w; h; })
-let poly points: t = Shape.Terminal( Shape.Poly { points; })
+let poly points: t = Shape.Terminal( Shape.Poly { points; matrix = Matrix.id })
 
 let scale ~dx ~dy target :t = Shape.Transform(target, Matrix.create_scale dx dy)
 let translate ~dx ~dy target :t = Shape.Transform (target, Matrix.create_translation dx dy)

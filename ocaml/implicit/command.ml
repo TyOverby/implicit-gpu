@@ -40,6 +40,10 @@ let get_id gen =
 let rec breakup_shape id_gen commands matrix = function
   | Terminal Poly p ->
     let id = get_id id_gen in
+    let p = {
+      points = p.points;
+      matrix = Matrix.mul matrix p.matrix
+    } in
     commands := (Define(id, Polygon p) :: (!commands));
     Terminal (Field id)
   | Freeze t ->
