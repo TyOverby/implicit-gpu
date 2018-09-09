@@ -2,7 +2,6 @@ open Core
 open Implicit.Creator
 open Implicit
 
-let x: float = 5.0
 
 let write_tests tests oc =
   let put_test shape oc =
@@ -148,7 +147,54 @@ let rotate_around_test =
   let r = r |> rotate_around ~x:10.0 ~y:10.0 ~r:(3.14 /. 4.0) in
   union [ c; r ]
 
+let x: Point.t = {x=10.; y=11.}
+
+let poly_from_points pts =
+  pts
+  |> List.bind ~f:(fun e -> [e; e])
+  |> List.tl_exn
+  |> (fun l -> List.append l @@ [List.hd_exn l])
+  |> poly
+
+let regular_poly points r =
+  List.range 0 points
+  |> List.rev
+  |> List.map ~f:(fun idx -> (Float.of_int idx) /. (Float.of_int points) *. Float.pi *. 2.0)
+  |> List.map ~f:(fun rad -> ({x = (Float.sin rad) *. r; y = (Float.cos rad) *. r}: Point.t))
+  |> poly_from_points
+
+let star tips out_r in_r =
+  let points = tips * 2 in
+  List.range 0 points
+  |> List.rev
+  |> List.map ~f:(fun idx -> (idx, (Float.of_int idx) /. (Float.of_int points) *. Float.pi *. 2.0))
+  |> List.map ~f:(fun (idx, rad) ->
+      let r = if idx % 2 = 0 then out_r else in_r in
+      ({x = (Float.sin rad) *. r; y = (Float.cos rad) *. r}: Point.t))
+  |> poly_from_points
+
+let tri = regular_poly 3 10.0
+let quad = regular_poly 4 10.0
+let pent = regular_poly 5 10.0
+let hex = regular_poly 6 10.0
+
+let three_star = star 3 20.0 5.0
+let four_star = star 4 20.0 10.0
+let five_star = star 5 20.0 10.0
+let six_star = star 6 20.0 10.0
+
+let huge_star = star 10 200.0 100.0
+
 let tests = [
+  "huge_star_BAD", huge_star;
+  "three_star", three_star;
+  "four_star", four_star;
+  "five_star", five_star;
+  "six_star", six_star;
+  "tri", tri;
+  "quad", quad;
+  "pent", pent;
+  "hex", hex;
   "rotate_around_test", rotate_around_test;
   "inverted_grid", inverted_grid;
   "grid_of_circles", grid_of_circles;

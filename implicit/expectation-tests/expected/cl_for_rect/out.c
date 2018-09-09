@@ -1,4 +1,4 @@
-float dist_to_line(float x, float y, float x1, float y1, float x2, float y2)
+float2 dist_to_line_comp(float x, float y, float x1, float y1, float x2, float y2)
 {
     float A = x - x1;
     float B = y - y1;
@@ -16,6 +16,11 @@ float dist_to_line(float x, float y, float x1, float y1, float x2, float y2)
 
     float xx;
     float yy;
+
+    float pos = (x2 - x1) * (y - y1) - (y2 - y1) * (x - x1);
+    if (pos == 0) {
+        pos = -1.0;
+    }
 
     if (param < 0)
     {
@@ -36,12 +41,17 @@ float dist_to_line(float x, float y, float x1, float y1, float x2, float y2)
     float dx = x - xx;
     float dy = y - yy;
 
-    return sqrt(dx * dx + dy * dy);
+    return (float2)(sqrt(dx * dx + dy * dy), pos);
+}
+
+float dist_to_line(float x, float y, float x1, float y1, float x2, float y2)
+{
+    return dist_to_line_comp(x, y, x1, y1, x2, y2).x;
 }
 
 float position(float x, float y, float x1, float y1, float x2, float y2)
 {
-    return (x2 - x1) * (y - y1) - (y2 - y1) * (x - x1);
+    return dist_to_line_comp(x, y, x1, y1, x2, y2).y;
 }
 
 __kernel void apply(__global float* buffer, ulong width) {

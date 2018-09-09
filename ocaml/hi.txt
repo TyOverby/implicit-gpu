@@ -1,1 +1,8 @@
-hi
+sum_if_true even 3 4
+
+(((sum_if_true even) 3) 4)
+
+let sum_if_true =
+    (fun pred ->
+        fun x ->
+            fun y -> if pred x then x + y else x)

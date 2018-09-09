@@ -3,7 +3,7 @@ type t = Stages.user
 let intersection (lst: t list) : t = Shape.Intersection lst
 let union (lst: t list) : t = Shape.Union lst
 let not (target: t ) : t = Shape.Not target
-let subtract (a: t) (b: t): t = intersection [a; (not b)]
+let subtract (a: t) (b: t): t = intersection [a; not b]
 let freeze (target: t ) : t = Shape.Freeze target
 let modulate (v: float) (target: t) : t = Shape.Modulate(target, v)
 

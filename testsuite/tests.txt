@@ -1,3 +1,12 @@
+huge_star
+three_star
+four_star
+five_star
+six_star
+tri
+quad
+pent
+hex
 rotate_around_test
 inverted_grid
 grid_of_circles
