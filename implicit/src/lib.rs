@@ -29,6 +29,7 @@ mod debug;
 mod geometry;
 pub mod inspector;
 mod lines;
+mod noise;
 mod marching;
 mod opencl;
 mod polygon;
