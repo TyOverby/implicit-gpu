@@ -9,6 +9,7 @@ type simplified =
 let rec expand: Stages.expanded -> Stages.expanded = function
   | Terminal Everything -> Terminal Everything
   | Terminal Nothing -> Terminal Nothing
+  | Terminal (Simplex s) -> Terminal (Simplex s)
   (* circle *)
   | Terminal Circle { r; _ } when r <= 0.0  -> Terminal Nothing
   | Terminal Circle c -> Terminal (Circle c)
@@ -82,6 +83,7 @@ let quick_conv: justConcreteTerminals -> allTerminals = function
   | Circle c -> Circle c
   | Rect r -> Rect r
   | Poly p -> Poly p
+  | Simplex s -> Simplex s
 
 let rec simplify (shape: Stages.user) : simplified =
   let expanded: Stages.expanded = shape |> Shape.map quick_conv in
@@ -92,6 +94,7 @@ let rec simplify (shape: Stages.user) : simplified =
 and simplify_bot (shape: Stages.expanded) : Stages.simplified = shape |> Shape.map (function
     | Everything -> failwith "Everything found after simplification"
     | Nothing -> failwith "Nothing found after simplification"
+    | Simplex s -> Simplex s
     | Circle c -> Circle c
     | Rect r -> Rect r
     | Poly p -> Poly p

@@ -49,7 +49,7 @@ where
 }
 
 #[inline(always)]
-fn add_matrix(kernel: Kernel, matrix: Matrix) -> Kernel {
+pub fn add_matrix(kernel: Kernel, matrix: Matrix) -> Kernel {
     let matrix = matrix.inverse().unwrap();
     kernel.set_arg("m11", matrix.m11).unwrap();
     kernel.set_arg("m12", matrix.m12).unwrap();
@@ -74,7 +74,7 @@ pub fn run_poly_raw_no_sign(
         register.long("width");
         register.buffer("lines");
         register.long("count");
-        register.register_matrix();
+        register.matrix();
     });
 
     kernel.set_default_global_work_size(::ocl::SpatialDims::Two(width, height));
@@ -106,7 +106,7 @@ pub fn run_poly_raw_with_sign(
         register.long("width");
         register.buffer("lines");
         register.long("count");
-        register.register_matrix();
+        register.matrix();
     });
 
     kernel.set_default_global_work_size(::ocl::SpatialDims::Two(width, height));

@@ -1,4 +1,6 @@
-huge_star
+more_specific_simplex
+small_simplex
+huge_star_BAD
 three_star
 four_star
 five_star

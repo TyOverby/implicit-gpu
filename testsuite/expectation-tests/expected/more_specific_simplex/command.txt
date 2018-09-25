@@ -1,0 +1,94 @@
+Serially(
+    [
+        Serially(
+            [
+                Simplex(
+                    1,
+                    Simplex {
+                        cutoff: 0.65,
+                        matrix: [
+                            2.0,
+                            0.0,
+                            0.0,
+                            2.0,
+                            40.0,
+                            40.0
+                        ]
+                    }
+                ),
+                Simplex(
+                    0,
+                    Simplex {
+                        cutoff: 0.5,
+                        matrix: [
+                            2.0,
+                            0.0,
+                            0.0,
+                            2.0,
+                            40.0,
+                            40.0
+                        ]
+                    }
+                )
+            ]
+        ),
+        Define(
+            2,
+            BasicShape(
+                Transform(
+                    Intersection(
+                        [
+                            Transform(
+                                Intersection(
+                                    [
+                                        Terminal(
+                                            Field(
+                                                0
+                                            )
+                                        ),
+                                        Not(
+                                            Terminal(
+                                                Field(
+                                                    1
+                                                )
+                                            )
+                                        )
+                                    ]
+                                ),
+                                [
+                                    2.0,
+                                    0.0,
+                                    0.0,
+                                    2.0,
+                                    0.0,
+                                    0.0
+                                ]
+                            ),
+                            Terminal(
+                                Rect(
+                                    Rect {
+                                        x: 0.0,
+                                        y: 0.0,
+                                        w: 200.0,
+                                        h: 200.0
+                                    }
+                                )
+                            )
+                        ]
+                    ),
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        1.0,
+                        20.0,
+                        20.0
+                    ]
+                )
+            )
+        ),
+        Export(
+            2
+        )
+    ]
+)

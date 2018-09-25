@@ -96,17 +96,32 @@ float snoise(vec2 v)
 
 __kernel void apply(
     __global float *buffer,
-    ulong width
-//    float m11, float m12,
-//    float m21, float m22,
-//    float m31, float m32
+    ulong width,
+    float cutoff,
+    float m11, float m12,
+    float m21, float m22,
+    float m31, float m32
 )
 {
     size_t x = get_global_id(0);
     size_t y = get_global_id(1);
     size_t pos = x + y * width;
 
-    float scalar = width / 3.0;
+    float scalar = 20.0 / 3.0;
 
-    buffer[pos] = snoise((float2)((float)x / scalar, (float)y / scalar));
+    float x_s = ((float)x * m11 + (float)y * m21 + m31) / scalar;
+    float y_s = ((float)x * m12 + (float)y * m22 + m32) / scalar;
+
+    float a = (2 * cutoff) - 1.0;
+    a *= 0.1467;
+    float value = snoise((float2)(x_s, y_s)) + a;
+    buffer[pos] = value;
 }
+
+// a    out
+//
+// 0 -> -1
+// 0.5 -> 0
+// 1 -> 1
+//
+// out = (a * 2) - 1

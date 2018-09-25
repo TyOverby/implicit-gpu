@@ -3,12 +3,17 @@ open Point
 
 type t = { x: float; y: float; w: float; h: float} [@@deriving sexp]
 
-type bounding =
+type b =
   | Everything
   | Nothing
-  | Positive of t
-  | Negative of t
+  | Something of t
+  | Hole of t
 [@@deriving sexp]
+
+type bounding =
+  { positive: b
+  ; negative: b
+  } [@@deriving sexp]
 
 let from_extrema min_x min_y max_x max_y = {
   x = min_x;
@@ -79,47 +84,73 @@ let box_intersection a b =
     }
 
 let inverse = function
-  | Everything -> Nothing
-  | Nothing -> Everything
-  | Positive a -> Negative a
-  | Negative a -> Positive a
+    { positive; negative } ->   {positive = negative; negative = positive}
 
-let rec union a b = match (a, b) with
-  | (Everything, _) | (_, Everything) -> Everything
-  | (Nothing, o) | (o, Nothing) -> o
+let union_part a b = match (a, b) with
+  | Nothing, other
+  | other, Nothing -> other
+  | Everything, _
+  | _, Everything -> Everything
+  | Something a, Something b -> box_union a b |> Something
+  | Hole a, Hole b -> (match box_intersection a b with
+      | Some h -> Hole h
+      | None -> Everything
+    )
+  | Hole h, Something _
+  | Something _, Hole h -> Hole h
 
-  | (Positive a, Positive b) -> Positive (box_union a b)
-  | (Negative a, Negative b) -> (match box_intersection a b with
-      | Some box ->  Negative box
-      | None -> Everything)
-  | (Positive _, Negative b) -> Negative b
-  | (Negative _, Positive _) -> union b a
+let intersection_part a b = match (a, b) with
+  | Nothing, _
+  | _, Nothing -> Nothing
+  | Everything, other
+  | other, Everything -> other
+  | Something a, Something b -> (match box_intersection a b with
+      | Some a -> Something a
+      | None -> Nothing )
+  | Hole a, Hole b -> box_union a b |> Hole
+  | Hole _, Something s
+  | Something s, Hole _ -> Something s
 
-let rec intersection a b = match (a, b) with
-  | (o, Everything) | (Everything, o) -> o
-  | (Nothing, _) | (_, Nothing) -> Nothing
+let union_b_all boxes =
+  boxes
+  |> List.reduce ~f:union_part
+  |> Option.value_exn
 
-  | (Positive a, Positive b) -> (match box_intersection a b with
-      | Some box -> Positive box
-      | None -> Nothing)
-  | (Negative a, Negative b) -> Negative (box_union a b)
-  (*TODO: if we had a `val cut: bbox -> bbox -> bbox`
-    then we could narrow this down further by making
-    the "then" branch be `Positive cut_result` *)
-  | (Positive a, Negative _) -> Positive a
-  | (Negative _, Positive _) -> intersection b a
+let intersection_b_all boxes =
+  boxes
+  |> List.reduce ~f:intersection_part
+  |> Option.value_exn
+
+let union_all boundings =
+  {
+    positive = boundings |> List.map ~f:(fun b -> b.positive) |> union_b_all;
+    negative = boundings |> List.map ~f:(fun b -> b.negative) |> intersection_b_all;
+  }
+let intersection_all boundings =
+  {
+    positive = boundings |> List.map ~f:(fun b -> b.positive) |> intersection_b_all;
+    negative = boundings |> List.map ~f:(fun b -> b.negative) |> union_b_all;
+  }
 
 let rec grow bounding how_much = match bounding with
-  | Everything  -> Everything
-  | Nothing -> Nothing
-  | Positive b -> Positive (increase b how_much)
-  | Negative b -> Negative (decrease b how_much)
-and increase { x; y; w; h } how_much = {
-  x=x -. how_much;
-  y=y -. how_much;
-  w=w +. how_much *. 2.0;
-  h=h +. how_much *. 2.0;
-}
+  | {positive= Something a; negative=Something b} -> {
+      positive = Something (increase a how_much);
+      negative = Something ( decrease b how_much)
+    }
+  | {positive = Something a; negative} -> {
+      positive = Something (increase a how_much);
+      negative
+    }
+  | {negative = Something a; positive} -> {
+      negative= Something (decrease a how_much);
+      positive
+    }
+  | other -> other
+and increase { x; y; w; h } how_much =
+  { x=x -. how_much
+  ; y=y -. how_much
+  ; w=w +. how_much *. 2.0
+  ; h=h +. how_much *. 2.0 }
 and decrease a how_much = increase a (how_much *. -1.0)
 
 module BboxExpectTests = struct
@@ -136,25 +167,26 @@ module BboxExpectTests = struct
     |> print_endline
 
   let bounding_test_stub f a b =
-    let decode a = a |> Sexp.of_string |>  bounding_of_sexp in
-    let a = decode a in
-    let b = decode b in
     let ab = f a b in
     let ba = f b a in
     assert(ab = ba);
     ab
-    |> sexp_of_bounding
+    |> sexp_of_b
     |> Sexp.to_string_hum
     |> print_endline
 
   let union_box_test = box_test_stub box_union
   let intersection_box_test_some = box_test_stub (fun a b -> (box_intersection a b) |> Option.value_exn)
 
-  let union_test = bounding_test_stub union
-  let intersection_test = bounding_test_stub intersection
+  let union_test = bounding_test_stub union_part
+  let intersection_test = bounding_test_stub intersection_part
 
   let%expect_test _ =
     union_box_test "((x 0) (y 0) (w 10) (h 10))" "((x 0) (y 0) (w 10) (h 10))";
+    [%expect "((x 0) (y 0) (w 10) (h 10))"]
+
+  let%expect_test _ =
+    intersection_box_test_some "((x 0) (y 0) (w 10) (h 10))" "((x 0) (y 0) (w 10) (h 10))";
     [%expect "((x 0) (y 0) (w 10) (h 10))"]
 
   let%expect_test _ =
@@ -196,21 +228,36 @@ module BboxExpectTests = struct
     [%expect "()"]
 
   let%expect_test _ =
-    union_test "Everything" "Everything";
+    union_test Everything Everything;
     [%expect "Everything"]
 
   let%expect_test _ =
-    union_test "Everything" "Nothing";
+    intersection_test Everything Everything;
     [%expect "Everything"]
 
   let%expect_test _ =
-    union_test "(Positive ((x 10) (y 10) (w 10) (h 10)))" "Nothing";
-    [%expect "(Positive ((x 10) (y 10) (w 10) (h 10)))"]
+    union_test Everything Nothing;
+    [%expect "Everything"]
 
   let%expect_test _ =
-    union_test "(Positive ((x 10) (y 10) (w 10) (h 10)))" "(Negative ((x 50) (y 50) (w 10) (h 10)))";
-    [%expect "(Negative ((x 50) (y 50) (w 10) (h 10)))"]
+    union_test Nothing Nothing;
+    [%expect "Nothing"]
 
+  let%expect_test _ =
+    union_test (Something {x= 10.0; y=10.0; w=10.0; h=10.0}) Nothing;
+    [%expect "(Something ((x 10) (y 10) (w 10) (h 10)))"]
+
+  let%expect_test _ =
+    union_test
+      (Something {x=10.0; y=10.0; w=10.0; h=10.0})
+      (Something {x=50.0; y=50.0;w=10.0; h=10.0});
+    [%expect "(Something ((x 10) (y 10) (w 50) (h 50)))"]
+
+  let%expect_test _ =
+    intersection_test (Something {x=10.0; y=10.0; w=10.0; h=10.0}) Nothing;
+    [%expect "Nothing"]
+
+(*
   let%expect_test _ =
     union_test "(Positive ((x 10) (y 10) (w 10) (h 10)))" "(Negative ((x 5) (y 5) (w 10) (h 10)))";
     [%expect "(Negative ((x 5) (y 5) (w 10) (h 10)))"]
@@ -234,4 +281,5 @@ module BboxExpectTests = struct
   let%expect_test _ =
     intersection_test "(Positive ((x 10) (y 10) (w 10) (h 10)))" "(Negative ((x 5) (y 5) (w 10) (h 10)))";
     [%expect "(Positive ((x 10) (y 10) (w 10) (h 10)))"]
+    *)
 end

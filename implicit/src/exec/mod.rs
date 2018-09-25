@@ -51,6 +51,11 @@ fn exec_inner(
     height: usize,
 ) {
     match command {
+        Command::Simplex(id, simplex) => {
+            let field = get_noise(ctx, width, height, simplex.cutoff, simplex.matrix);
+            inspector.write_field(&format!("simplex_{}", id), &field);
+            mapping.insert(id, field);
+        }
         Command::Define(id, Value::BasicShape(shape)) => {
             let field = exec_shape(ctx, shape, width, height, |id| mapping[&id].clone());
             inspector.write_field(&format!("shape_{}", id), &field);
@@ -148,6 +153,29 @@ fn exec_program_with_multiple(provider: Provider) {
     ]);
 
     let out = exec(program, provider.duplicate(), 22, 22);
+    for (id, lines) in out {
+        let writer = provider.text_writer(format!("export_{}.lines.txt", id));
+        print_path_segments(writer, &lines);
+    }
+}
+
+#[expectation_test]
+fn exec_program_single_noise(provider: Provider) {
+    use debug::print_path_segments;
+    use ocaml::*;
+
+    let program = Command::Serially(vec![
+        Command::Simplex(
+            0,
+            Simplex {
+                cutoff: 0.5,
+                matrix: Matrix::identity(),
+            },
+        ),
+        Command::Export(0),
+    ]);
+
+    let out = exec(program, provider.duplicate(), 100, 100);
     for (id, lines) in out {
         let writer = provider.text_writer(format!("export_{}.lines.txt", id));
         print_path_segments(writer, &lines);

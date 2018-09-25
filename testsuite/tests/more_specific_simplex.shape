@@ -1,0 +1,19 @@
+(((Serially
+   ((Serially
+     ((Simplex 1
+       ((cutoff 0.65)
+        (matrix ((m11 2) (m12 0) (m21 0) (m22 2) (m31 40) (m32 40)))))
+      (Simplex 0
+       ((cutoff 0.5)
+        (matrix ((m11 2) (m12 0) (m21 0) (m22 2) (m31 40) (m32 40)))))))
+    (Define 2
+     (BasicShape
+      (Transform
+       (Intersection
+        ((Transform
+          (Intersection ((Terminal (Field 0)) (Not (Terminal (Field 1)))))
+          ((m11 2) (m12 0) (m21 0) (m22 2) (m31 0) (m32 0)))
+         (Terminal (Rect ((x 0) (y 0) (w 200) (h 200))))))
+       ((m11 1) (m12 0) (m21 0) (m22 1) (m31 20) (m32 20)))))
+    (Export 2)))
+  (240 240)))

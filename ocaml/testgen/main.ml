@@ -2,7 +2,6 @@ open Core
 open Implicit.Creator
 open Implicit
 
-
 let write_tests tests oc =
   let put_test shape oc =
     shape
@@ -185,7 +184,19 @@ let six_star = star 6 20.0 10.0
 
 let huge_star = star 10 200.0 100.0
 
+let small_simplex = intersection [
+    noise 0.5;
+    rect  ~x:0.0 ~y:0.0 ~w:100.0 ~h:100.0
+  ]
+
+let more_specific_simplex = intersection [
+    scale ~dx:2.0 ~dy:2.0 @@ subtract (noise 0.5) (noise 0.65);
+    rect  ~x:0.0 ~y:0.0 ~w:200.0 ~h:200.0
+  ]
+
 let tests = [
+  "more_specific_simplex", more_specific_simplex;
+  "small_simplex", small_simplex;
   "huge_star_BAD", huge_star;
   "three_star", three_star;
   "four_star", four_star;

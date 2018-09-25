@@ -61,6 +61,14 @@ pub struct Polygon {
 }
 
 #[derive(Deserialize, Debug)]
+pub struct Simplex {
+    pub cutoff: f32,
+    #[serde(with = "MatrixDef")]
+    #[serde(default = "Matrix::identity")]
+    pub matrix: Matrix,
+}
+
+#[derive(Deserialize, Debug)]
 pub enum Terminal {
     Circle(Circle),
     Rect(Rect),
@@ -90,6 +98,7 @@ pub enum Command {
     Define(Id, Value),
     Freeze { target: Id, id: Id },
     Export(Id),
+    Simplex(Id, Simplex),
 }
 
 #[derive(Deserialize, Debug)]

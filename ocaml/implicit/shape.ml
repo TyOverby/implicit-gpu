@@ -23,10 +23,16 @@ type poly = {
   matrix: Matrix.t [@default Matrix.id] [@sexp_drop_default];
 } [@@deriving sexp]
 
+type simplex = {
+  cutoff: float;
+  matrix: Matrix.t [@default Matrix.id] [@sexp_drop_default];
+} [@@deriving sexp]
+
 type allTerminals =
   | Circle of circle
   | Rect of rect
   | Poly of poly
+  | Simplex of simplex
   | Nothing
   | Everything
 [@@deriving sexp]
@@ -35,6 +41,7 @@ type justConcreteTerminals =
   | Circle of circle
   | Rect of rect
   | Poly of poly
+  | Simplex of simplex
 [@@deriving sexp]
 
 type 'term t =

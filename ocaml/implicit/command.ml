@@ -25,6 +25,7 @@ type t =
   | Serially of t list
   | Define of id * value
   | Freeze of { target: id; id: id }
+  | Simplex of id * Shape.simplex
   | Export of id
 [@@deriving sexp]
 
@@ -46,6 +47,10 @@ let rec breakup_shape id_gen commands matrix = function
     } in
     commands := (Define(id, Polygon p) :: (!commands));
     Terminal (Field id)
+  | Terminal (Simplex {cutoff; matrix=m}) ->
+    let id = get_id id_gen in
+    commands := (Simplex (id, {cutoff; matrix = Matrix.mul matrix m})) :: !commands;
+    Terminal (Field id)
   | Freeze t ->
     let t = breakup_shape id_gen commands matrix t in
     let t = Transform (t, matrix) in (* Apply cumulative matrix up to this point *)
@@ -65,7 +70,6 @@ let rec breakup_shape id_gen commands matrix = function
 and breakup_all id_gen commands matrix all =
   List.map all ~f:(breakup_shape id_gen commands matrix)
 
-
 let compile_commands shape =
   let commands = ref [] in
   let id_gen = { next = ref 0 } in
@@ -77,16 +81,19 @@ let compile_commands shape =
   then Serially [last; Export last_id]
   else Serially [Serially commands; last; Export last_id]
 
-let compile shape = match compute_bounding_box shape with
-  | Everything | Nothing -> None
-  | Positive bb ->
+let compile shape =
+  let bounding = compute_bounding_box shape in
+  (*bounding |> Bbox.sexp_of_bounding |> Sexp.to_string_hum |> print_endline ; *)
+  match bounding with
+  | { positive = Everything | Nothing ; _ } -> None
+  | { positive = Something bb; _ } ->
     let expanded = bb |> Bbox.grow_by 0.1 in
     let repositioned = shape |> translate ~dx: (-. expanded.x) ~dy: (-. expanded.y) in
     let simplified = Simplify.simplify repositioned in
     (match simplified with
      | SEverything | SNothing -> None
      | SShape s -> Some (compile_commands s, (expanded.w, expanded.h)))
-  | Negative bb ->
+  | { positive = Hole bb; _ } -> 
     let expanded = bb |> Bbox.grow_by 0.1 in
     let expanded_twice = expanded |> Bbox.grow_by 0.1 in
     let surrounding = rect ~x: expanded.x ~y: expanded.y ~w: expanded.w ~h:expanded.h in
@@ -110,6 +117,53 @@ module Command_Tests = struct
     circle ~x:0.0 ~y:0.0 ~r:0.0
     |> test_shape_compile;
     [%expect "()"]
+
+
+  let%expect_test _ =
+    noise 0.5
+    |> test_shape_compile;
+    [%expect "()"]
+
+  let%expect_test _ =
+    let inf_big = noise 0.5 in
+    let inf_small = noise 0.3 in
+    let cut = circle ~x:0.0 ~y:0.0 ~r:1.0 in
+    subtract (subtract inf_big inf_small) cut
+    |> test_shape_compile;
+    [%expect "
+      (((Serially
+         ((Serially ((Simplex 1 ((cutoff 0.3))) (Simplex 0 ((cutoff 0.5)))))
+          (Define 2
+           (BasicShape
+            (Transform
+             (Intersection
+              ((Terminal (Rect ((x -3) (y -3) (w 6) (h 6))))
+               (Intersection
+                ((Intersection ((Terminal (Field 0)) (Not (Terminal (Field 1)))))
+                 (Not (Terminal (Circle ((x 0) (y 0) (r 1)))))))))
+             ((m11 1) (m12 0) (m21 0) (m22 1) (m31 5) (m32 5)))))
+          (Export 2)))
+        (10 10)))"]
+
+  let%expect_test _ =
+    let inf = noise 0.5 in
+    let cut = circle ~x:0.0 ~y:0.0 ~r:1.0 in
+    subtract inf cut
+    |> test_shape_compile;
+    [%expect "
+      (((Serially
+         ((Serially ((Simplex 0 ((cutoff 0.5)))))
+          (Define 1
+           (BasicShape
+            (Transform
+             (Intersection
+              ((Terminal (Rect ((x -3) (y -3) (w 6) (h 6))))
+               (Intersection
+                ((Terminal (Field 0))
+                 (Not (Terminal (Circle ((x 0) (y 0) (r 1)))))))))
+             ((m11 1) (m12 0) (m21 0) (m22 1) (m31 5) (m32 5)))))
+          (Export 1)))
+        (10 10)))"]
 
   let%expect_test _ =
     circle ~x:0.0 ~y:0.0 ~r:1.0

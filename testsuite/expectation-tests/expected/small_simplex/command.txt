@@ -1,0 +1,59 @@
+Serially(
+    [
+        Serially(
+            [
+                Simplex(
+                    0,
+                    Simplex {
+                        cutoff: 0.5,
+                        matrix: [
+                            1.0,
+                            0.0,
+                            0.0,
+                            1.0,
+                            10.0,
+                            10.0
+                        ]
+                    }
+                )
+            ]
+        ),
+        Define(
+            1,
+            BasicShape(
+                Transform(
+                    Intersection(
+                        [
+                            Terminal(
+                                Field(
+                                    0
+                                )
+                            ),
+                            Terminal(
+                                Rect(
+                                    Rect {
+                                        x: 0.0,
+                                        y: 0.0,
+                                        w: 100.0,
+                                        h: 100.0
+                                    }
+                                )
+                            )
+                        ]
+                    ),
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        1.0,
+                        10.0,
+                        10.0
+                    ]
+                )
+            )
+        ),
+        Export(
+            1
+        )
+    ]
+)

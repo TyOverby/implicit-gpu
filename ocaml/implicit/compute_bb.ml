@@ -2,33 +2,56 @@ open Core
 open Shape
 open Bbox
 
+let both_everything = {
+  positive = Everything;
+  negative = Everything;
+}
+
 let rec compute_bounding_box = function
   | Transform (target, matrix) ->
-    (match compute_bounding_box target with
-     | Positive bb -> Positive (Matrix.apply_to_rect matrix bb)
-     | Negative bb -> Negative (Matrix.apply_to_rect matrix bb)
-     | Everything -> Everything
-     | Nothing -> Nothing
-    )
-  | Intersection [] -> Nothing
-  | Union [] -> Nothing
-  | Terminal Poly { points = []; _ } -> Nothing
-  | Terminal Circle { r=0.0; _ } -> Nothing
+    let bb = compute_bounding_box target in
+    let positive = match bb.positive with
+      | Something b -> Something (Matrix.apply_to_rect matrix b)
+      | other -> other
+    in
+    let negative = match bb.negative with
+      | Something b -> Something (Matrix.apply_to_rect matrix b)
+      | other -> other
+    in
+    { positive; negative }
+  | Intersection []
+  | Union []
+  | Terminal Poly { points = []; _ }
+  | Terminal Circle { r=0.0; _ } ->
+    { positive = Nothing
+    ; negative = Everything; }
+  | Terminal Simplex _ -> both_everything
 
-  | Terminal Circle { x; y; r; } -> Positive { x=x -. r; y=y -. r; h=2.0 *. r; w=2.0 *. r; }
+  | Terminal Circle { x; y; r; } ->
+    let bb = { x=x -. r; y=y -. r; h=2.0 *. r; w=2.0 *. r; } in
+    {
+      positive = Something bb;
+      negative = Hole bb;
+    }
   | Terminal Rect { x; y; w; h; } ->
-    Positive { x=x; y=y; w=w; h=h; }
+    let bb = { x=x; y=y; w=w; h=h; } in
+    {
+      positive = Something bb;
+      negative = Hole bb;
+    }
   | Terminal Poly { points; matrix; } ->
     let box  =
       points
       |> List.map ~f:(Matrix.apply_to_point matrix)
       |> bbox_of_points
       |> Option.value_exn in
-    Positive box
+    { positive = Something box
+    ; negative = Everything
+    }
   | Not target -> target |> compute_bounding_box |> Bbox.inverse
   | Freeze target -> target |> compute_bounding_box
-  | Union targets -> targets |> compute_all_bounding_box |> List.reduce_exn ~f:Bbox.union
-  | Intersection targets -> targets |> compute_all_bounding_box |> List.reduce_exn ~f:Bbox.intersection
+  | Union targets -> targets |> compute_all_bounding_box |> Bbox.union_all
+  | Intersection targets -> targets |> compute_all_bounding_box |> Bbox.intersection_all
   | Modulate (target, how_much) -> compute_bounding_box target |> (Fn.flip Bbox.grow) how_much
 and compute_all_bounding_box list = list |> List.map ~f: compute_bounding_box
 
@@ -45,13 +68,13 @@ module ComputeBB_Test = struct
   let%expect_test _ =
     rect ~x:0.0 ~y:0.0 ~w:10.0 ~h:20.0
     |> run_bb_test;
-    [%expect "(Positive ((x 0) (y 0) (w 10) (h 20)))"]
+    [%expect "((positive (Something ((x 0) (y 0) (w 10) (h 20)))) (negative Everything))"]
 
   let%expect_test _ =
     rect ~x:0.0 ~y:0.0 ~w:10.0 ~h:10.0
     |> scale ~dx:3.0 ~dy: 5.0
     |> run_bb_test;
-    [%expect "(Positive ((x 0) (y 0) (w 30) (h 50)))"]
+    [%expect "((positive (Something ((x 0) (y 0) (w 30) (h 50)))) (negative Everything))"]
 
 
   let%expect_test _ =
@@ -59,19 +82,23 @@ module ComputeBB_Test = struct
     |> scale ~dx:3.0 ~dy: 3.0
     |> translate ~dx:5.0 ~dy:5.0
     |> run_bb_test;
-    [%expect "(Positive ((x 5) (y 5) (w 30) (h 30)))"]
+    [%expect "((positive (Something ((x 5) (y 5) (w 30) (h 30)))) (negative Everything))"]
 
   let%expect_test _ =
     circle ~x:0.0 ~y:0.0 ~r:10.0
     |> scale ~dx:3.0 ~dy: 3.0
     |> run_bb_test;
-    [%expect "(Positive ((x -30) (y -30) (w 60) (h 60)))"]
+    [%expect "
+      ((positive (Something ((x -30) (y -30) (w 60) (h 60))))
+       (negative Everything))"]
 
   let%expect_test _ =
     rect ~x:(-.10.0) ~y:(-.10.0) ~w:20.0 ~h:20.0
     |> scale ~dx:3.0 ~dy: 3.0
     |> run_bb_test;
-    [%expect "(Positive ((x -30) (y -30) (w 60) (h 60)))"]
+    [%expect "
+      ((positive (Something ((x -30) (y -30) (w 60) (h 60))))
+       (negative Everything))"]
 
 
   let%expect_test _ =
@@ -81,7 +108,9 @@ module ComputeBB_Test = struct
     ring
     |> scale ~dy:3.0 ~dx:3.0
     |> run_bb_test;
-    [%expect "(Positive ((x -30) (y -30) (w 60) (h 60)))"]
+    [%expect "
+      ((positive (Something ((x -30) (y -30) (w 60) (h 60))))
+       (negative Everything))"]
 
   let%expect_test _ =
     let outer = circle ~x:0.0 ~y:0.0 ~r:10.0 in
@@ -91,7 +120,7 @@ module ComputeBB_Test = struct
     |> scale ~dy:3.0 ~dx:3.0
     |> translate ~dy:30.0 ~dx:30.0
     |> run_bb_test;
-    [%expect "(Positive ((x 0) (y 0) (w 60) (h 60)))"]
+    [%expect "((positive (Something ((x 0) (y 0) (w 60) (h 60)))) (negative Everything))"]
 
   let%expect_test _ =
     let outer = circle ~x:0.0 ~y:0.0 ~r:10.0 in
@@ -102,17 +131,21 @@ module ComputeBB_Test = struct
     |> translate ~dy:30.0 ~dx:30.0
     |> not
     |> run_bb_test;
-    [%expect "(Negative ((x 0) (y 0) (w 60) (h 60)))"]
+    [%expect "((positive Everything) (negative (Something ((x 0) (y 0) (w 60) (h 60)))))"]
 
   let%expect_test _ =
     circle ~x:0.0 ~y:0.0 ~r:10.0
     |> scale ~dy:3.0 ~dx:3.0
     |> run_bb_test;
-    [%expect "(Positive ((x -30) (y -30) (w 60) (h 60)))"]
+    [%expect "
+      ((positive (Something ((x -30) (y -30) (w 60) (h 60))))
+       (negative Everything))"]
 
   let%expect_test _ =
     circle ~x:0.0 ~y:0.0 ~r:10.0
     |> modulate 10.0
     |> run_bb_test;
-    [%expect "(Positive ((x -20) (y -20) (w 40) (h 40)))"]
+    [%expect "
+      ((positive (Something ((x -20) (y -20) (w 40) (h 40))))
+       (negative Everything))"]
 end

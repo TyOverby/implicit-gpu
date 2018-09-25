@@ -57,7 +57,7 @@ impl<'a, 'b> Register<'a, 'b> {
     pub fn long<S: Into<Cow<'static, str>>>(&mut self, name: S) {
         self.b.arg_named(name, &0u64);
     }
-    pub fn register_matrix(&mut self) {
+    pub fn matrix(&mut self) {
         self.float("m11");
         self.float("m12");
         self.float("m21");

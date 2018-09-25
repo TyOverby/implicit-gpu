@@ -1,14 +1,19 @@
 type t = { x: float; y: float; w: float; h: float} [@@deriving sexp]
 
-type bounding =
+type b =
   | Everything
   | Nothing
-  | Positive of t
-  | Negative of t
+  | Something of t
+  | Hole of t 
 [@@deriving sexp]
 
-val union: bounding -> bounding -> bounding
-val intersection: bounding -> bounding -> bounding
+type bounding =
+  { positive: b
+  ; negative: b
+  } [@@deriving sexp]
+
+val union_all: bounding list -> bounding
+val intersection_all: bounding list -> bounding
 val inverse: bounding -> bounding
 
 val grow_by: float -> t -> t
