@@ -23,7 +23,7 @@ __kernel void apply_no_sign(
     }
 
     float minimum = INFINITY;
-    float sign_of_min = 0.0;
+    int winding = 0;
 
     for (size_t i = 0; i < count; i += 4)
     {
@@ -44,24 +44,29 @@ __kernel void apply_no_sign(
         }
 
         float new = dist_to_line(x_s, y_s, x1, y1, x2, y2);
-        float pos = sign(position(x_s, y_s, x1, y1, x2, y2));
-
-        float new_abs = fabs(new);
-        float min_abs = fabs(minimum);
-
-        if (new_abs < min_abs)
-        {
-            minimum = copysign(new, pos);
-            sign_of_min = pos;
+        float is_left = position(x_s, y_s, x1, y1, x2, y2);
+        if (y1 <= y_s) {
+            if (y2 > y_s) {
+                if (is_left > 0.0) {
+                    winding++;
+                }
+            }
+        } else {
+            if (y2 <= y_s) {
+                if (is_left < 0.0) {
+                    winding--;
+                }
+            }
         }
-
-        if (new_abs == min_abs && sign_of_min != pos)
-        {
-            minimum = copysign(minimum, -1);
-        }
+        minimum = min(minimum, fabs(new));
     }
-
-    buffer[pos] = -minimum;
+    float s;
+    if (winding == 0) {
+        s = 1.0;
+    } else {
+        s = -1.0;
+    }
+    buffer[pos] = copysign(minimum, s);
 }
 
 __kernel void apply_with_sign(

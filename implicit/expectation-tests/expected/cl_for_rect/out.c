@@ -41,7 +41,7 @@ float2 dist_to_line_comp(float x, float y, float x1, float y1, float x2, float y
     float dx = x - xx;
     float dy = y - yy;
 
-    return (float2)(sqrt(dx * dx + dy * dy), pos);
+    return (float2)(sqrt(dx * dx + dy * dy), sign(pos));
 }
 
 float dist_to_line(float x, float y, float x1, float y1, float x2, float y2)

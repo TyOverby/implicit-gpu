@@ -18,9 +18,6 @@ float2 dist_to_line_comp(float x, float y, float x1, float y1, float x2, float y
     float yy;
 
     float pos = (x2 - x1) * (y - y1) - (y2 - y1) * (x - x1);
-    if (pos == 0) {
-        pos = -1.0;
-    }
 
     if (param < 0)
     {
