@@ -132,7 +132,13 @@ module Command_Tests = struct
     |> test_shape_compile;
     [%expect "
       (((Serially
-         ((Serially ((Simplex 1 ((cutoff 0.3))) (Simplex 0 ((cutoff 0.5)))))
+         ((Serially
+           ((Simplex 1
+             ((cutoff 0.3)
+              (matrix ((m11 1) (m12 0) (m21 0) (m22 1) (m31 5) (m32 5)))))
+            (Simplex 0
+             ((cutoff 0.5)
+              (matrix ((m11 1) (m12 0) (m21 0) (m22 1) (m31 5) (m32 5)))))))
           (Define 2
            (BasicShape
             (Transform
@@ -152,7 +158,10 @@ module Command_Tests = struct
     |> test_shape_compile;
     [%expect "
       (((Serially
-         ((Serially ((Simplex 0 ((cutoff 0.5)))))
+         ((Serially
+           ((Simplex 0
+             ((cutoff 0.5)
+              (matrix ((m11 1) (m12 0) (m21 0) (m22 1) (m31 5) (m32 5)))))))
           (Define 1
            (BasicShape
             (Transform
