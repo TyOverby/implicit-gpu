@@ -73,3 +73,17 @@ fn drag_circle(provider: Provider) {
 
     drag_shape_helper(shape, 30, 30, 5.0, 7.0, provider);
 }
+
+#[expectation_test]
+fn drag_rect(provider: Provider) {
+    use ocaml::*;
+
+    let shape = Shape::Terminal(Terminal::Rect(Rect {
+        x: 1.0,
+        y: 1.0,
+        w: 10.0,
+        h: 10.0,
+    }));
+
+    drag_shape_helper(shape, 20, 20, 5.0, 7.0, provider);
+}
