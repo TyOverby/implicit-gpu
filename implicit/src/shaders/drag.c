@@ -9,19 +9,11 @@ float sample(
         return INFINITY;
     }
 
-
     float x_floor;
     float x_rem = fract(x, &x_floor);
 
     float y_floor;
     float y_rem = fract(y, &y_floor);
-
-    /*
-    float x_rem = 0.0;
-    float y_rem = 0.0;
-    float x_floor = floor(x);
-    float y_floor = floor(y);
-    */
 
     float nw = input[(long)(x_floor) + (long)(y_floor) * width];
     float ne = input[((long)(x_floor) + 1) + (long)(y_floor) * width];
@@ -53,9 +45,9 @@ __kernel void apply(
     int travel = (int) ceil(max(fabs(dx), fabs(dy)));
     float best = INFINITY;
     for (int i = 0; i < travel; i++) {
-        float dist_traveled = ((float) i) / ((float) travel);
-        float q_x = x_s - dx * dist_traveled;
-        float q_y = y_s - dy * dist_traveled;
+        float percent_traveled = ((float) i) / ((float) travel);
+        float q_x = x_s - dx * percent_traveled;
+        float q_y = y_s - dy * percent_traveled;
         best = min(best, sample(input, q_x, q_y, width, height));
     }
 

@@ -1,12 +1,9 @@
 #[cfg(test)]
-use debug::*;
-#[cfg(test)]
 use expectation::{extensions::*, Provider};
-
-use expectation_plugin::expectation_test;
-use ocaml::Matrix;
 #[cfg(test)]
 use ocaml::Shape;
+
+use expectation_plugin::expectation_test;
 use opencl::{FieldBuffer, OpenClContext};
 
 const PROGRAM: &'static str = include_str!("../shaders/drag.c");
