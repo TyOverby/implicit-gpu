@@ -1,9 +1,11 @@
+mod drag;
 mod extract;
 mod freeze;
 mod noise;
 mod poly;
 mod shape;
 
+pub use self::drag::*;
 pub use self::extract::*;
 pub use self::freeze::*;
 pub use self::noise::*;
