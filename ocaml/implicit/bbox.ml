@@ -132,26 +132,16 @@ let intersection_all boundings =
     negative = boundings |> List.map ~f:(fun b -> b.negative) |> union_b_all;
   }
 
-let rec grow bounding how_much = match bounding with
-  | {positive= Something a; negative=Something b} -> {
-      positive = Something (increase a how_much);
-      negative = Something ( decrease b how_much)
-    }
-  | {positive = Something a; negative} -> {
-      positive = Something (increase a how_much);
-      negative
-    }
-  | {negative = Something a; positive} -> {
-      negative= Something (decrease a how_much);
-      positive
-    }
-  | other -> other
-and increase { x; y; w; h } how_much =
-  { x=x -. how_much
-  ; y=y -. how_much
-  ; w=w +. how_much *. 2.0
-  ; h=h +. how_much *. 2.0 }
-and decrease a how_much = increase a (how_much *. -1.0)
+let grow {positive; negative} how_much =
+  let g_h = function
+      | Something a -> Something (grow_by how_much a)
+      | Hole a -> Hole (grow_by how_much a)
+      | Everything -> Everything
+      | Nothing -> Nothing
+  in
+  { positive = g_h positive
+  ; negative = g_h negative
+  }
 
 module BboxExpectTests = struct
   let box_test_stub f a b =

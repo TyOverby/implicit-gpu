@@ -12,11 +12,15 @@ let rec compute_bounding_box = function
     let bb = compute_bounding_box target in
     let positive = match bb.positive with
       | Something b -> Something (Matrix.apply_to_rect matrix b)
-      | other -> other
+      | Hole b -> Hole (Matrix.apply_to_rect matrix b)
+      | Everything -> Everything
+      | Nothing -> Nothing
     in
     let negative = match bb.negative with
       | Something b -> Something (Matrix.apply_to_rect matrix b)
-      | other -> other
+      | Hole b -> Hole (Matrix.apply_to_rect matrix b)
+      | Everything -> Everything
+      | Nothing -> Nothing
     in
     { positive; negative }
   | Intersection []
@@ -68,13 +72,17 @@ module ComputeBB_Test = struct
   let%expect_test _ =
     rect ~x:0.0 ~y:0.0 ~w:10.0 ~h:20.0
     |> run_bb_test;
-    [%expect "((positive (Something ((x 0) (y 0) (w 10) (h 20)))) (negative Everything))"]
+    [%expect "
+      ((positive (Something ((x 0) (y 0) (w 10) (h 20))))
+       (negative (Hole ((x 0) (y 0) (w 10) (h 20)))))"]
 
   let%expect_test _ =
     rect ~x:0.0 ~y:0.0 ~w:10.0 ~h:10.0
     |> scale ~dx:3.0 ~dy: 5.0
     |> run_bb_test;
-    [%expect "((positive (Something ((x 0) (y 0) (w 30) (h 50)))) (negative Everything))"]
+    [%expect "
+      ((positive (Something ((x 0) (y 0) (w 30) (h 50))))
+       (negative (Hole ((x 0) (y 0) (w 30) (h 50)))))"]
 
 
   let%expect_test _ =
@@ -82,7 +90,9 @@ module ComputeBB_Test = struct
     |> scale ~dx:3.0 ~dy: 3.0
     |> translate ~dx:5.0 ~dy:5.0
     |> run_bb_test;
-    [%expect "((positive (Something ((x 5) (y 5) (w 30) (h 30)))) (negative Everything))"]
+    [%expect "
+      ((positive (Something ((x 5) (y 5) (w 30) (h 30))))
+       (negative (Hole ((x 5) (y 5) (w 30) (h 30)))))"]
 
   let%expect_test _ =
     circle ~x:0.0 ~y:0.0 ~r:10.0
@@ -90,7 +100,7 @@ module ComputeBB_Test = struct
     |> run_bb_test;
     [%expect "
       ((positive (Something ((x -30) (y -30) (w 60) (h 60))))
-       (negative Everything))"]
+       (negative (Hole ((x -30) (y -30) (w 60) (h 60)))))"]
 
   let%expect_test _ =
     rect ~x:(-.10.0) ~y:(-.10.0) ~w:20.0 ~h:20.0
@@ -98,7 +108,7 @@ module ComputeBB_Test = struct
     |> run_bb_test;
     [%expect "
       ((positive (Something ((x -30) (y -30) (w 60) (h 60))))
-       (negative Everything))"]
+       (negative (Hole ((x -30) (y -30) (w 60) (h 60)))))"]
 
 
   let%expect_test _ =
@@ -110,7 +120,7 @@ module ComputeBB_Test = struct
     |> run_bb_test;
     [%expect "
       ((positive (Something ((x -30) (y -30) (w 60) (h 60))))
-       (negative Everything))"]
+       (negative (Hole ((x -30) (y -30) (w 60) (h 60)))))"]
 
   let%expect_test _ =
     let outer = circle ~x:0.0 ~y:0.0 ~r:10.0 in
@@ -120,7 +130,9 @@ module ComputeBB_Test = struct
     |> scale ~dy:3.0 ~dx:3.0
     |> translate ~dy:30.0 ~dx:30.0
     |> run_bb_test;
-    [%expect "((positive (Something ((x 0) (y 0) (w 60) (h 60)))) (negative Everything))"]
+    [%expect "
+      ((positive (Something ((x 0) (y 0) (w 60) (h 60))))
+       (negative (Hole ((x 0) (y 0) (w 60) (h 60)))))"]
 
   let%expect_test _ =
     let outer = circle ~x:0.0 ~y:0.0 ~r:10.0 in
@@ -131,7 +143,9 @@ module ComputeBB_Test = struct
     |> translate ~dy:30.0 ~dx:30.0
     |> not
     |> run_bb_test;
-    [%expect "((positive Everything) (negative (Something ((x 0) (y 0) (w 60) (h 60)))))"]
+    [%expect "
+      ((positive (Hole ((x 0) (y 0) (w 60) (h 60))))
+       (negative (Something ((x 0) (y 0) (w 60) (h 60)))))"]
 
   let%expect_test _ =
     circle ~x:0.0 ~y:0.0 ~r:10.0
@@ -139,13 +153,13 @@ module ComputeBB_Test = struct
     |> run_bb_test;
     [%expect "
       ((positive (Something ((x -30) (y -30) (w 60) (h 60))))
-       (negative Everything))"]
+       (negative (Hole ((x -30) (y -30) (w 60) (h 60)))))"]
 
   let%expect_test _ =
     circle ~x:0.0 ~y:0.0 ~r:10.0
     |> modulate 10.0
     |> run_bb_test;
     [%expect "
-      ((positive (Something ((x -20) (y -20) (w 40) (h 40))))
-       (negative Everything))"]
+      ((positive (Something ((x -210) (y -210) (w 420) (h 420))))
+       (negative (Hole ((x -210) (y -210) (w 420) (h 420)))))"]
 end
