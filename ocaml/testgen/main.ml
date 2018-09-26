@@ -4,20 +4,21 @@ open Implicit
 
 let write_tests tests oc =
   let put_test shape oc =
+    let export_float_tuple = (Tuple2.sexp_of_t Float.sexp_of_t Float.sexp_of_t) in
     shape
     |> compile
-    |> Option.sexp_of_t (Tuple2.sexp_of_t Command.sexp_of_t (Tuple2.sexp_of_t Float.sexp_of_t Float.sexp_of_t))
+    |> Option.sexp_of_t (Tuple2.sexp_of_t Command.sexp_of_t export_float_tuple)
     |> Sexp.to_string_hum
     |> Out_channel.output_string oc
   in
-  let each_test name shape =
-    Out_channel.with_file (sprintf "../testsuite/tests/%s.shape" name) ~f:(put_test shape);
+  let write_test name shape =
+    let filename = sprintf "../testsuite/tests/%s.shape" name in
+    Out_channel.with_file filename ~f:(put_test shape);
     ()
   in
   let test_names = List.map tests ~f:Tuple2.get1 in
-  ignore (Out_channel.output_lines oc test_names);
-  List.iter tests ~f:(Tuple2.uncurry each_test)
-
+  ignore @@ Out_channel.output_lines oc test_names;
+  List.iter tests ~f:(Tuple2.uncurry write_test)
 
 let small_circle = circle ~x:11.0 ~y:11.0 ~r:10.0
 
@@ -69,9 +70,15 @@ let overlay_test =
   |> overlay_all 2.0
 
 let rounded_rect ~x ~y ~w ~h ~r =
-  modulate r @@ rect ~x:(x +. r) ~y:(y +. r) ~w:(w -. r *. 2.0) ~h:(h -. r *. 2.0)
+  let x = x +. r in
+  let y = y +. r in
+  let w = w -. r *. 2.0 in
+  let h = h -. r *. 2.0 in
+  modulate r @@ rect ~x ~y ~w ~h
+
 let overlay_test_sub =
-  subtract (rounded_rect ~r:10.0 ~x:1.0 ~y: 1.0 ~w:34.0 ~h:34.0) overlay_test
+  let rr =  rounded_rect ~r:10.0 ~x:1.0 ~y: 1.0 ~w:34.0 ~h:34.0 in
+  subtract rr overlay_test
 
 let scaled_circle =
   circle ~x:11.0 ~y:11.0 ~r:10.0
@@ -99,7 +106,7 @@ let ring =
   subtract larger smaller
 
 let easy_ring =
-  let larger  =  circle ~x:10.0 ~y:10.0 ~r:10.0 in
+  let larger  = circle ~x:10.0 ~y:10.0 ~r:10.0 in
   let smaller = circle ~x:10.0 ~y:10.0 ~r:6.0 in
   subtract larger smaller
 
@@ -123,7 +130,8 @@ let grid_of_circles =
     let%bind y = z_to_100 in
     return (x, y)
   end in
-  let circle_at (x, y) = circle ~x:x ~y:y ~r:5.0 in
+  let r = 5.0 in
+  let circle_at (x, y) = circle ~x ~y ~r in
   grid |> List.map ~f:circle_at |> union
 
 let rotated_grid =
@@ -145,8 +153,6 @@ let rotate_around_test =
   let r = rect ~x:0.0 ~y:0.0 ~w:10.0 ~h:10.0 in
   let r = r |> rotate_around ~x:10.0 ~y:10.0 ~r:(3.14 /. 4.0) in
   union [ c; r ]
-
-let x: Point.t = {x=10.; y=11.}
 
 let poly_from_points pts =
   pts
@@ -181,7 +187,6 @@ let three_star = star 3 20.0 5.0
 let four_star = star 4 20.0 10.0
 let five_star = star 5 20.0 10.0
 let six_star = star 6 20.0 10.0
-
 let huge_star = star 10 200.0 100.0
 
 let small_simplex = intersection [
