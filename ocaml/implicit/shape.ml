@@ -55,15 +55,19 @@ type 'term t =
   | Not of 'term t
   | Union of 'term t list
   | Intersection of 'term t list
+
+  (* modifiers *)
   | Modulate of 'term t * float
   | Freeze of 'term t
+  | Drag of 'term t * float * float
 [@@deriving sexp, map]
 
 let rec visit (f: 'term_b t -> 'term_b t) (g: 'term_a -> 'term_b)  = function
   | Terminal t -> Terminal (g t)
   | Transform (t, m) -> f(Transform((visit f g) t, m))
   | Not target -> f(Not ((visit f g ) target))
-  | Union targets -> f(Union (List.map ~f:(visit f g  ) targets))
-  | Intersection targets -> f(Intersection (List.map ~f:(visit f g ) targets))
+  | Union targets -> f(Union (List.map ~f:(visit f g) targets))
+  | Intersection targets -> f(Intersection (List.map ~f:(visit f g) targets))
   | Modulate(target, v) -> f(Modulate((visit f g ) target, v))
-  | Freeze(target) -> f(Freeze((visit f g ) target))
+  | Freeze (target) -> f(Freeze((visit f g ) target))
+  | Drag (target, dx, dy) -> f(Drag((visit f g) target, dx, dy))

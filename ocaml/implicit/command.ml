@@ -25,6 +25,7 @@ type t =
   | Serially of t list
   | Define of id * value
   | Freeze of { target: id; id: id }
+  | Drag of { target: id; id: id; dx: float; dy: float }
   | Simplex of id * Shape.simplex
   | Export of id
 [@@deriving sexp]
@@ -51,6 +52,15 @@ let rec breakup_shape id_gen commands matrix = function
     let id = get_id id_gen in
     commands := (Simplex (id, {cutoff; matrix = Matrix.mul matrix m})) :: !commands;
     Terminal (Field id)
+  | Drag (t, dx, dy) ->
+    let t = breakup_shape id_gen commands matrix t in
+    let t = Transform (t, matrix) in (* Apply cumulative matrix up to this point *)
+    let shape_id = get_id id_gen in
+    let drag_id = get_id id_gen in
+    let def = Define(shape_id, BasicShape t) in
+    let drug = Drag {target = shape_id; id = drag_id; dx; dy} in (* TODO: APPLY MATRIX *)
+    commands := List.concat [!commands; [def; drug]] ;
+    Terminal (Field drag_id)
   | Freeze t ->
     let t = breakup_shape id_gen commands matrix t in
     let t = Transform (t, matrix) in (* Apply cumulative matrix up to this point *)
@@ -272,4 +282,23 @@ module Command_Tests = struct
              ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2) (m32 2)))))
           (Export 4)))
         (7 7)))"]
+
+  let%expect_test _ =
+    circle ~x:1.0 ~y:1.0 ~r:1.0
+    |> drag ~dx:10.0 ~dy:5.0
+    |> test_shape_compile;
+    [%expect "
+      (((Serially
+         ((Serially
+           ((Define 0
+             (BasicShape
+              (Transform (Terminal (Circle ((x 1) (y 1) (r 1))))
+               ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2) (m32 2)))))
+            (Drag (target 0) (id 1) (dx 10) (dy 5))))
+          (Define 2
+           (BasicShape
+            (Transform (Terminal (Field 1))
+             ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2) (m32 2)))))
+          (Export 2)))
+        (16 11)))"]
 end

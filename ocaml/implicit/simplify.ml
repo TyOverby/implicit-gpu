@@ -56,6 +56,9 @@ let rec expand: Stages.expanded -> Stages.expanded = function
       | target -> Transform (target, matrix)
     )
 
+  (* drag *)
+  | Drag (t, dx, dy) -> Drag (t, dx, dy)
+
   (* union *)
   (* TODO: Union[a ; Union [b; c]] should simplify to Union[a; b; c] *)
   | Union list -> let list = expand_all list in

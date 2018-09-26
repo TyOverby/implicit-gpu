@@ -54,6 +54,7 @@ let rec compute_bounding_box = function
     }
   | Not target -> target |> compute_bounding_box |> Bbox.inverse
   | Freeze target -> target |> compute_bounding_box
+  | Drag (target, dx, dy) -> Creator.union [target; target |> Creator.translate ~dx ~dy] |>  compute_bounding_box  (* TODO: this is potentially quadratic *)
   | Union targets -> targets |> compute_all_bounding_box |> Bbox.union_all
   | Intersection targets -> targets |> compute_all_bounding_box |> Bbox.intersection_all
   | Modulate (target, how_much) -> compute_bounding_box target |> (Fn.flip Bbox.grow) how_much
@@ -160,6 +161,14 @@ module ComputeBB_Test = struct
     |> modulate 10.0
     |> run_bb_test;
     [%expect "
-      ((positive (Something ((x -210) (y -210) (w 420) (h 420))))
-       (negative (Hole ((x -210) (y -210) (w 420) (h 420)))))"]
+      ((positive (Something ((x -20) (y -20) (w 40) (h 40))))
+       (negative (Hole ((x -20) (y -20) (w 40) (h 40)))))"]
+
+  let%expect_test _ =
+    circle ~x:0.0 ~y:0.0 ~r:10.0
+    |> drag ~dx:10.0 ~dy: 0.0  
+    |> run_bb_test;
+    [%expect "
+      ((positive (Something ((x -10) (y -10) (w 30) (h 20))))
+       (negative (Hole ((x -10) (y -10) (w 30) (h 20)))))"]
 end

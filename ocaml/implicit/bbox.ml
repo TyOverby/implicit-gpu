@@ -104,9 +104,10 @@ let intersection_part a b = match (a, b) with
   | _, Nothing -> Nothing
   | Everything, other
   | other, Everything -> other
-  | Something a, Something b -> (match box_intersection a b with
+  | Something a, Something b -> begin match box_intersection a b with
       | Some a -> Something a
-      | None -> Nothing )
+      | None -> Nothing
+    end
   | Hole a, Hole b -> box_union a b |> Hole
   | Hole _, Something s
   | Something s, Hole _ -> Something s
@@ -132,12 +133,18 @@ let intersection_all boundings =
     negative = boundings |> List.map ~f:(fun b -> b.negative) |> union_b_all;
   }
 
+let increase { x; y; w; h } how_much =
+  { x=x -. how_much
+  ; y=y -. how_much
+  ; w=w +. how_much *. 2.0
+  ; h=h +. how_much *. 2.0 }
+
 let grow {positive; negative} how_much =
   let g_h = function
-      | Something a -> Something (grow_by how_much a)
-      | Hole a -> Hole (grow_by how_much a)
-      | Everything -> Everything
-      | Nothing -> Nothing
+    | Something a -> Something (increase a how_much)
+    | Hole a -> Hole (increase  a how_much)
+    | Everything -> Everything
+    | Nothing -> Nothing
   in
   { positive = g_h positive
   ; negative = g_h negative
@@ -145,7 +152,7 @@ let grow {positive; negative} how_much =
 
 module BboxExpectTests = struct
   let box_test_stub f a b =
-    let decode a = a |> Sexp.of_string |>  t_of_sexp in
+    let decode a = a |> Sexp.of_string |> t_of_sexp in
     let a = decode a in
     let b = decode b in
     let ab = f a b in

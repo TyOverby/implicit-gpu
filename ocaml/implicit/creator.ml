@@ -6,6 +6,7 @@ let not (target: t ) : t = Shape.Not target
 let subtract (a: t) (b: t): t = intersection [a; not b]
 let freeze (target: t ) : t = Shape.Freeze target
 let modulate (v: float) (target: t) : t = Shape.Modulate(target, v)
+let drag ~dx ~dy (target: t) : t = Shape.Drag (target, dx, dy)
 
 let circle ~x ~y ~r :t = Shape.Terminal (Shape.Circle { x; y; r; })
 let rect ~x ~y ~w ~h :t = Shape.Terminal( Shape.Rect { x; y; w; h; })

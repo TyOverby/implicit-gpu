@@ -1,3 +1,4 @@
+dragged_circle
 more_specific_simplex
 small_simplex
 huge_star

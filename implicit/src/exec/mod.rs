@@ -73,6 +73,11 @@ fn exec_inner(
             inspector.write_field(&format!("freeze_{}", id), &field);
             mapping.insert(id, field);
         }
+        Command::Drag { target, id, dx, dy } => {
+            let field = exec_drag(ctx, &mapping[&target], dx, dy);
+            inspector.write_field(&format!("drag_{}", id), &field);
+            mapping.insert(id, field);
+        }
         Command::Concurrently(commands) | Command::Serially(commands) => {
             for (i, command) in commands.into_iter().enumerate() {
                 exec_inner(

@@ -1,0 +1,13 @@
+(((Serially
+   ((Serially
+     ((Define 0
+       (BasicShape
+        (Transform (Terminal (Circle ((x 0) (y 0) (r 10))))
+         ((m11 1) (m12 0) (m21 0) (m22 1) (m31 13) (m32 12.5)))))
+      (Drag (target 0) (id 1) (dx 10) (dy 5))))
+    (Define 2
+     (BasicShape
+      (Transform (Terminal (Field 1))
+       ((m11 1) (m12 0) (m21 0) (m22 1) (m31 13) (m32 12.5)))))
+    (Export 2)))
+  (36 30)))

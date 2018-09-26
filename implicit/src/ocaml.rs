@@ -96,7 +96,16 @@ pub enum Command {
     Concurrently(Vec<Command>),
     Serially(Vec<Command>),
     Define(Id, Value),
-    Freeze { target: Id, id: Id },
+    Freeze {
+        target: Id,
+        id: Id,
+    },
+    Drag {
+        target: Id,
+        id: Id,
+        dx: f32,
+        dy: f32,
+    },
     Export(Id),
     Simplex(Id, Simplex),
 }

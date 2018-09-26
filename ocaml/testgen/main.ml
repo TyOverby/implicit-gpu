@@ -199,7 +199,12 @@ let more_specific_simplex = intersection [
     rect  ~x:0.0 ~y:0.0 ~w:200.0 ~h:200.0
   ]
 
+let dragged_circle =
+  circle ~x:0.0 ~y:0.0 ~r:10.0
+  |> drag ~dx:10.0 ~dy: 5.0
+
 let tests = [
+  "dragged_circle", dragged_circle;
   "more_specific_simplex", more_specific_simplex;
   "small_simplex", small_simplex;
   "huge_star", huge_star;
