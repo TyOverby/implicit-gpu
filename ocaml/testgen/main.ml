@@ -202,7 +202,7 @@ let more_specific_simplex = intersection [
 let tests = [
   "more_specific_simplex", more_specific_simplex;
   "small_simplex", small_simplex;
-  "huge_star_BAD", huge_star;
+  "huge_star", huge_star;
   "three_star", three_star;
   "four_star", four_star;
   "five_star", five_star;

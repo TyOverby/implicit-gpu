@@ -46,6 +46,7 @@ __kernel void apply_no_sign(
         float2 res = dist_to_line_comp(x_s, y_s, x1, y1, x2, y2);
         float new = res.x;
         float is_left = res.y;
+
         if (y1 <= y_s) {
             if (y2 > y_s) {
                 if (is_left > 0.0) {
@@ -61,6 +62,7 @@ __kernel void apply_no_sign(
         }
         minimum = min(minimum, fabs(new));
     }
+
     float s;
     if (winding == 0) {
         s = 1.0;
