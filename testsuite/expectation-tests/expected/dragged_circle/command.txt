@@ -1,0 +1,61 @@
+Serially(
+    [
+        Serially(
+            [
+                Define(
+                    0,
+                    BasicShape(
+                        Transform(
+                            Terminal(
+                                Circle(
+                                    Circle {
+                                        x: 0.0,
+                                        y: 0.0,
+                                        r: 10.0
+                                    }
+                                )
+                            ),
+                            [
+                                1.0,
+                                0.0,
+                                0.0,
+                                1.0,
+                                13.0,
+                                12.5
+                            ]
+                        )
+                    )
+                ),
+                Drag {
+                    target: 0,
+                    id: 1,
+                    dx: 10.0,
+                    dy: 5.0
+                }
+            ]
+        ),
+        Define(
+            2,
+            BasicShape(
+                Transform(
+                    Terminal(
+                        Field(
+                            1
+                        )
+                    ),
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        1.0,
+                        13.0,
+                        12.5
+                    ]
+                )
+            )
+        ),
+        Export(
+            2
+        )
+    ]
+)

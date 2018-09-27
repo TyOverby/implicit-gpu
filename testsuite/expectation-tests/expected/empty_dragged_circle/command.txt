@@ -1,0 +1,110 @@
+Serially(
+    [
+        Serially(
+            [
+                Define(
+                    0,
+                    BasicShape(
+                        Transform(
+                            Intersection(
+                                [
+                                    Terminal(
+                                        Rect(
+                                            Rect {
+                                                x: 0.0,
+                                                y: 0.0,
+                                                w: 20.0,
+                                                h: 20.0
+                                            }
+                                        )
+                                    ),
+                                    Not(
+                                        Terminal(
+                                            Rect(
+                                                Rect {
+                                                    x: 5.0,
+                                                    y: 5.0,
+                                                    w: 10.0,
+                                                    h: 10.0
+                                                }
+                                            )
+                                        )
+                                    )
+                                ]
+                            ),
+                            [
+                                1.0,
+                                0.0,
+                                0.0,
+                                1.0,
+                                2.5,
+                                2.5
+                            ]
+                        )
+                    )
+                ),
+                Drag {
+                    target: 0,
+                    id: 1,
+                    dx: 5.0,
+                    dy: 5.0
+                }
+            ]
+        ),
+        Define(
+            2,
+            BasicShape(
+                Transform(
+                    Intersection(
+                        [
+                            Terminal(
+                                Field(
+                                    1
+                                )
+                            ),
+                            Not(
+                                Intersection(
+                                    [
+                                        Terminal(
+                                            Rect(
+                                                Rect {
+                                                    x: 0.0,
+                                                    y: 0.0,
+                                                    w: 20.0,
+                                                    h: 20.0
+                                                }
+                                            )
+                                        ),
+                                        Not(
+                                            Terminal(
+                                                Rect(
+                                                    Rect {
+                                                        x: 5.0,
+                                                        y: 5.0,
+                                                        w: 10.0,
+                                                        h: 10.0
+                                                    }
+                                                )
+                                            )
+                                        )
+                                    ]
+                                )
+                            )
+                        ]
+                    ),
+                    [
+                        1.0,
+                        0.0,
+                        0.0,
+                        1.0,
+                        2.5,
+                        2.5
+                    ]
+                )
+            )
+        ),
+        Export(
+            2
+        )
+    ]
+)

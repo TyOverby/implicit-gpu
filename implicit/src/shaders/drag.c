@@ -42,7 +42,7 @@ __kernel void apply(
     float x_s = (float) x;
     float y_s = (float) y;
 
-    int travel = (int) ceil(max(fabs(dx), fabs(dy)));
+    int travel = (int) ceil(max(fabs(dx), fabs(dy))) + 1;
     float best = INFINITY;
     for (int i = 0; i < travel; i++) {
         float percent_traveled = ((float) i) / ((float) travel);

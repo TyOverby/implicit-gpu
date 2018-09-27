@@ -1,0 +1,22 @@
+(((Serially
+   ((Serially
+     ((Define 0
+       (BasicShape
+        (Transform
+         (Intersection
+          ((Terminal (Rect ((x 0) (y 0) (w 20) (h 20))))
+           (Not (Terminal (Rect ((x 5) (y 5) (w 10) (h 10)))))))
+         ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2.5) (m32 2.5)))))
+      (Drag (target 0) (id 1) (dx 5) (dy 5))))
+    (Define 2
+     (BasicShape
+      (Transform
+       (Intersection
+        ((Terminal (Field 1))
+         (Not
+          (Intersection
+           ((Terminal (Rect ((x 0) (y 0) (w 20) (h 20))))
+            (Not (Terminal (Rect ((x 5) (y 5) (w 10) (h 10))))))))))
+       ((m11 1) (m12 0) (m21 0) (m22 1) (m31 2.5) (m32 2.5)))))
+    (Export 2)))
+  (30 30)))

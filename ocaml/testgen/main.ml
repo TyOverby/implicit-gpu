@@ -203,7 +203,16 @@ let dragged_circle =
   circle ~x:0.0 ~y:0.0 ~r:10.0
   |> drag ~dx:10.0 ~dy: 5.0
 
+let empty_dragged_circle =
+  let outer = rect ~x:0.0 ~y:0.0 ~w:20.0 ~h:20.0 in
+  let inner = rect ~x:5.0 ~y:5.0 ~w:10.0 ~h:10.0 in
+  let rem = subtract outer inner in
+  let drug = drag ~dx:5.0 ~dy:5.0 rem in
+  subtract drug rem 
+
+
 let tests = [
+  "empty_dragged_circle", empty_dragged_circle;
   "dragged_circle", dragged_circle;
   "more_specific_simplex", more_specific_simplex;
   "small_simplex", small_simplex;
