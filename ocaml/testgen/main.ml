@@ -208,8 +208,7 @@ let empty_dragged_circle =
   let inner = rect ~x:5.0 ~y:5.0 ~w:10.0 ~h:10.0 in
   let rem = subtract outer inner in
   let drug = drag ~dx:5.0 ~dy:5.0 rem in
-  subtract drug rem 
-
+  subtract drug rem
 
 let tests = [
   "empty_dragged_circle", empty_dragged_circle;
