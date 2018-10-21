@@ -210,7 +210,19 @@ let empty_dragged_circle =
   let drug = drag ~dx:5.0 ~dy:5.0 rem in
   subtract drug rem
 
+let waiting_room_art =
+  let left =
+    regular_poly 3 20.0
+    |> rotate ~r:(Float.pi /. 2.0)
+  in
+  let right =
+    regular_poly 3 20.0
+    |> rotate ~r:(Float.pi /. -4.0)
+  in
+  union [left; right]
+
 let tests = [
+  "waiting_room_art", waiting_room_art;
   "empty_dragged_circle", empty_dragged_circle;
   "dragged_circle", dragged_circle;
   "more_specific_simplex", more_specific_simplex;
