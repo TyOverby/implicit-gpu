@@ -15,10 +15,21 @@ type basicTerminals =
 type exportShape = basicTerminals Shape.t
 [@@deriving sexp]
 
+type exportPoly = {
+  points: Point.t list;
+  matrix: Matrix.t;
+} [@@deriving sexp]
+
+type exportSimplex = {
+  cutoff: float;
+  matrix: Matrix.t;
+} [@@deriving sexp]
+
 type value =
   | BasicShape of exportShape
-  | Polygon of Shape.poly
+  | Polygon of exportPoly
 [@@deriving sexp]
+
 
 type t =
   | Concurrently of t list
@@ -26,7 +37,7 @@ type t =
   | Define of id * value
   | Freeze of { target: id; id: id }
   | Drag of { target: id; id: id; dx: float; dy: float }
-  | Simplex of id * Shape.simplex
+  | Simplex of id * exportSimplex
   | Export of id
 [@@deriving sexp]
 
@@ -44,13 +55,13 @@ let rec breakup_shape id_gen commands matrix = function
     let id = get_id id_gen in
     let p = {
       points = p.points;
-      matrix = Matrix.mul matrix p.matrix
+      matrix
     } in
     commands := (Define(id, Polygon p) :: (!commands));
     Terminal (Field id)
-  | Terminal (Simplex {cutoff; matrix=m}) ->
+  | Terminal (Simplex {cutoff}) ->
     let id = get_id id_gen in
-    commands := (Simplex (id, {cutoff; matrix = Matrix.mul matrix m})) :: !commands;
+    commands := (Simplex (id, {cutoff; matrix})) :: !commands;
     Terminal (Field id)
   | Drag (t, dx, dy) ->
     let t = breakup_shape id_gen commands matrix t in
@@ -103,7 +114,7 @@ let compile shape =
     (match simplified with
      | SEverything | SNothing -> None
      | SShape s -> Some (compile_commands s, (expanded.w, expanded.h)))
-  | { positive = Hole bb; _ } -> 
+  | { positive = Hole bb; _ } ->
     let expanded = bb |> Bbox.grow_by 0.1 in
     let expanded_twice = expanded |> Bbox.grow_by 0.1 in
     let surrounding = rect ~x: expanded.x ~y: expanded.y ~w: expanded.w ~h:expanded.h in

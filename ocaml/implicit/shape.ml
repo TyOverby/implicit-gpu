@@ -1,9 +1,6 @@
 open Core
 
 type vec = { dx: float; dy: float} [@@deriving sexp]
-type polygon = {
-  points: Point.t list;
-} [@@deriving sexp]
 
 type circle = {
   x: float;
@@ -20,12 +17,10 @@ type rect ={
 
 type poly = {
   points: Point.t list;
-  matrix: Matrix.t [@default Matrix.id] [@sexp_drop_default];
 } [@@deriving sexp]
 
 type simplex = {
   cutoff: float;
-  matrix: Matrix.t [@default Matrix.id] [@sexp_drop_default];
 } [@@deriving sexp]
 
 type allTerminals =

@@ -43,10 +43,9 @@ let rec compute_bounding_box = function
       positive = Something bb;
       negative = Hole bb;
     }
-  | Terminal Poly { points; matrix; } ->
+  | Terminal Poly { points; } ->
     let box  =
       points
-      |> List.map ~f:(Matrix.apply_to_point matrix)
       |> bbox_of_points
       |> Option.value_exn in
     { positive = Something box
@@ -166,7 +165,7 @@ module ComputeBB_Test = struct
 
   let%expect_test _ =
     circle ~x:0.0 ~y:0.0 ~r:10.0
-    |> drag ~dx:10.0 ~dy: 0.0  
+    |> drag ~dx:10.0 ~dy: 0.0
     |> run_bb_test;
     [%expect "
       ((positive (Something ((x -10) (y -10) (w 30) (h 20))))
