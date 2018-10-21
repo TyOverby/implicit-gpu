@@ -83,7 +83,7 @@ let rec breakup_shape id_gen commands matrix = function
     Terminal (Field freeze_id)
   | Terminal Circle c -> Terminal (Circle c)
   | Terminal Rect r -> Terminal (Rect r)
-  | Transform (t, m) -> Transform (breakup_shape id_gen commands (Matrix.mul matrix m) t, m)
+  | Transform (t, m) -> Transform (breakup_shape id_gen commands (Matrix.mul m matrix) t, m)
   | Not t -> Not (breakup_shape id_gen commands matrix t)
   | Union all -> Union (breakup_all id_gen commands matrix all)
   | Intersection all -> Intersection (breakup_all id_gen commands matrix all)

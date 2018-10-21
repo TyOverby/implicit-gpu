@@ -2,10 +2,10 @@
    ((Serially
      ((Simplex 1
        ((cutoff 0.65)
-        (matrix ((m11 2) (m12 0) (m21 0) (m22 2) (m31 40) (m32 40)))))
+        (matrix ((m11 2) (m12 0) (m21 0) (m22 2) (m31 20) (m32 20)))))
       (Simplex 0
        ((cutoff 0.5)
-        (matrix ((m11 2) (m12 0) (m21 0) (m22 2) (m31 40) (m32 40)))))))
+        (matrix ((m11 2) (m12 0) (m21 0) (m22 2) (m31 20) (m32 20)))))))
     (Define 2
      (BasicShape
       (Transform

@@ -217,9 +217,16 @@ let waiting_room_art =
   in
   let right =
     regular_poly 3 20.0
-    |> rotate ~r:(Float.pi /. -4.0)
+    |> rotate ~r:(Float.pi /. -2.0)
+    |> translate ~dx:50.0 ~dy:0.0
   in
-  union [left; right]
+  let diff = 10.0 in
+  let right_small =
+    regular_poly 3 (20.0 -. diff)
+    |> rotate ~r:(Float.pi /. -2.0)
+    |> translate ~dx:(50.0 +. diff) ~dy:0.0
+  in
+  union [left ; subtract right right_small]
 
 let tests = [
   "waiting_room_art", waiting_room_art;
