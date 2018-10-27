@@ -4,8 +4,8 @@ extern crate snoot;
 
 use implicit::ocaml::*;
 use snoot::serde_serialization::{deserialize, DeserializeResult};
-use std::io::stdin;
 use std::io::Read;
+use std::io::{stdin, stdout};
 
 fn main() {
     let mut out = String::new();
@@ -17,13 +17,16 @@ fn main() {
     assert!(sexprs.roots.len() == 1);
 
     let program = sexprs.roots.into_iter().next().unwrap();
-    let deser = match deserialize::<Command>(&program) {
-        DeserializeResult::AllGood(v) => v,
+    let (command, (w, h)) = match deserialize::<Option<(Command, (f32, f32))>>(&program) {
+        DeserializeResult::AllGood(None) => panic!("deserialized into none"),
+        DeserializeResult::AllGood(Some(v)) => v,
         DeserializeResult::CouldntRecover(bag) | DeserializeResult::CouldRecover(_, bag) => {
             bag.assert_empty();
             panic!()
         }
     };
 
-    println!("{:?}", deser);
+    let output = implicit::exec::exec(command, Box::new(()), w.ceil() as usize, h.ceil() as usize);
+    let output: Vec<_> = output.into_iter().flat_map(|(_, v)| v).collect();
+    implicit::debug::print_path_segments(stdout(), &output);
 }

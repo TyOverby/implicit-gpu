@@ -25,7 +25,7 @@ extern crate serde_json;
 extern crate num_traits;
 
 mod compiler;
-mod debug;
+pub mod debug;
 mod geometry;
 pub mod inspector;
 mod lines;
