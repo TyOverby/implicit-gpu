@@ -1,3 +1,4 @@
+extern crate flame;
 extern crate implicit;
 extern crate serde;
 extern crate snoot;
@@ -28,5 +29,7 @@ fn main() {
 
     let output = implicit::exec::exec(command, Box::new(()), w.ceil() as usize, h.ceil() as usize);
     let output: Vec<_> = output.into_iter().flat_map(|(_, v)| v).collect();
-    implicit::debug::print_path_segments(stdout(), &output);
+    implicit::debug::svg_path_segments(stdout(), &output).unwrap();
+
+    flame::dump_html(std::fs::File::create("perf.html").unwrap()).unwrap();
 }

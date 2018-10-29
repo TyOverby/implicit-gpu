@@ -1,0 +1,4 @@
+(executable
+    (name main)
+    (libraries implicit core yojson )
+    (preprocess (pps ppx_let ppx_jane)))
