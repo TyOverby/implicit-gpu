@@ -42,8 +42,10 @@ pub fn execute(compilation: CompilationResult, width: u32, height: u32) -> Buffe
         .unwrap();
 
     let program = Program::builder()
-        .source(include_str!("./interp.c"))
-        .build(&context)
+        .source(concat!(
+            include_str!(concat!(env!("OUT_DIR"), "/opcodes.c")),
+            include_str!("./interp.c")
+        )).build(&context)
         .unwrap();
 
     let mut kernel_builder = Kernel::builder();

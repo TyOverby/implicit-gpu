@@ -1,17 +1,7 @@
 use super::Ast;
 
 mod ops {
-    pub const X: u8 = 0;
-    pub const Y: u8 = 1;
-    pub const Z: u8 = 2;
-    pub const ADD: u8 = 3;
-    pub const SUB: u8 = 4;
-    pub const MAX: u8 = 5;
-    pub const MIN: u8 = 6;
-    pub const ABS: u8 = 7;
-    pub const SQRT: u8 = 8;
-
-    pub const CONST_START: u8 = SQRT + 1;
+    include!(concat!(env!("OUT_DIR"), "/opcodes.rs"));
 }
 
 #[derive(Debug, PartialEq)]
@@ -65,7 +55,8 @@ pub fn compile(ast: &Ast) -> CompilationResult {
             Ast::Constant(c) => {
                 let idx = constants.len() as u8;
                 constants.push(*c);
-                code.push(ops::CONST_START + idx);
+                code.push(ops::CONSTANT_SMALL);
+                code.push(idx);
             }
             Ast::Sub(l, r) => {
                 compile_inner(l, code, constants);
@@ -106,7 +97,7 @@ fn compile_basic_constant() {
     assert_eq!(
         compile(&Ast::Constant(10.0)),
         CompilationResult {
-            code: vec![ops::CONST_START + 0],
+            code: vec![ops::CONSTANT_SMALL, 0],
             constants: vec![10.0],
             max_stack: 1,
         }
@@ -118,7 +109,7 @@ fn compile_basic_max() {
     assert_eq!(
         compile(&Ast::Max(&[Ast::Constant(10.0), Ast::Constant(5.0)])),
         CompilationResult {
-            code: vec![ops::CONST_START + 0, ops::CONST_START + 1, ops::MAX],
+            code: vec![ops::CONSTANT_SMALL, 0, ops::CONSTANT_SMALL, 1, ops::MAX],
             constants: vec![10.0, 5.0],
             max_stack: 2,
         }
@@ -135,10 +126,13 @@ fn compile_more_max() {
         ])),
         CompilationResult {
             code: vec![
-                ops::CONST_START + 0,
-                ops::CONST_START + 1,
+                ops::CONSTANT_SMALL,
+                0,
+                ops::CONSTANT_SMALL,
+                1,
                 ops::MAX,
-                ops::CONST_START + 2,
+                ops::CONSTANT_SMALL,
+                2,
                 ops::MAX,
             ],
             constants: vec![10.0, 5.0, 2.0],

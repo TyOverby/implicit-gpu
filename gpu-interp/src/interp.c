@@ -25,59 +25,61 @@ __kernel void apply(
 
         printf("code: %d\n", (int)code);
         switch (code) {
-            case 0: {
-                printf("x: %f\n", x_s);
-                PUSH(x_s);
-                printf("stack: %f\n", PEEK());
-                printf("stack_ptr: %d\n", stack_ptr);
+            case OP_CONSTANT_SMALL: {
+                int constant_index = program[i+1];
+                i ++;
+                PUSH(consts[constant_index]);
                 break;
             }
-            case 1: {
+            case OP_X: {
+                PUSH(x_s);
+                break;
+            }
+            case OP_Y: {
                 PUSH(y_s);
                 break;
             }
-            case 2: {
+            case OP_Z: {
                 printf("z not supported yet");
                 PUSH(0.0);
                 break;
             }
-            case 3: {
+            case OP_ADD: {
                 float l = POP();
                 float r = POP();
                 PUSH(l + r);
                 break;
             }
-            case 4: {
+            case OP_SUB: {
                 float l = POP();
                 float r = POP();
                 PUSH(l - r);
                 break;
             }
-            case 5: {
+            case OP_MAX: {
                 float l = POP();
                 float r = POP();
                 PUSH(fmax(l, r));
                 break;
             }
-            case 6: {
+            case OP_MIN: {
                 float l = POP();
                 float r = POP();
                 PUSH(fmin(l, r));
                 break;
             }
-            case 7: {
+            case OP_ABS: {
                 float v = POP();
                 PUSH(fabs(v));
                 break;
             }
-            case 8: {
+            case OP_SQRT: {
                 float v = POP();
-                PUSH(fabs(v));
+                PUSH(sqrt(v));
                 break;
             }
             default: {
-                printf("constant: %f\n", consts[code - 9]);
-                PUSH(consts[code - 9]);
+                printf("unrecognized opcode: %d\n", code);
             }
         }
     }
