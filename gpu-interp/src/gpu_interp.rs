@@ -1,12 +1,11 @@
 use super::bytecode::CompilationResult;
 use super::Buffer;
-use ocl::{Buffer as OclBuffer, Context, Device, Kernel, Program, Queue};
+use ocl::{Buffer as OclBuffer, Context, Kernel, Program, Queue};
 
 #[derive(Clone)]
 pub struct Triad {
-    context: Context,
-    device: Device,
-    queue: Queue,
+    pub context: Context,
+    pub queue: Queue,
 }
 
 impl Triad {
@@ -14,11 +13,7 @@ impl Triad {
         let context = Context::builder().build().unwrap();
         let device = context.devices().into_iter().next().unwrap();
         let queue = Queue::new(&context, device, None).unwrap();
-        Triad {
-            context,
-            device,
-            queue,
-        }
+        Triad { context, queue }
     }
 }
 
@@ -27,10 +22,13 @@ pub fn execute(
     width: u32,
     height: u32,
     depth: u32,
-    Triad { context, queue, .. }: Triad,
+    Triad { context, queue }: Triad,
 ) -> Buffer {
     assert!(compilation.buffers.len() <= ::bytecode::ops::BUFFER_COUNT);
 
+    let mut buffer_input = vec![];
+
+    let output_clone;
     let bytecode = OclBuffer::builder()
         .len([compilation.code.len()])
         .copy_host_slice(&compilation.code)
@@ -80,6 +78,7 @@ pub fn execute(
         .queue(queue.clone())
         .build()
         .unwrap();
+    output_clone = output.clone();
 
     let program = Program::builder()
         .source(concat!(
@@ -94,18 +93,19 @@ pub fn execute(
         .name("apply")
         .queue(queue.clone())
         .global_work_size([width, height, depth])
-        .arg(output.clone())
-        .arg(constants)
-        .arg(bytecode)
-        .arg(stack)
-        .arg(position_stack);
+        .arg(&output_clone)
+        .arg(&constants)
+        .arg(&bytecode)
+        .arg(&stack)
+        .arg(&position_stack);
 
     let buffer_count = compilation.buffers.len();
+
     for mut buffer in compilation.buffers {
-        kernel.arg(buffer.to_opencl(&queue).clone());
+        buffer_input.push(buffer.to_opencl(&queue).clone());
     }
     for _ in 0..(::bytecode::ops::BUFFER_COUNT - buffer_count) {
-        kernel.arg(
+        buffer_input.push(
             OclBuffer::builder()
                 .len([1])
                 .copy_host_slice(&[0.0])
@@ -113,6 +113,10 @@ pub fn execute(
                 .build()
                 .unwrap(),
         );
+    }
+
+    for buffer in &buffer_input {
+        kernel.arg(buffer);
     }
 
     let kernel = kernel

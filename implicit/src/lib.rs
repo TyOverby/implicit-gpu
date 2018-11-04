@@ -1,5 +1,6 @@
 // Local crates
 extern crate aabb_quadtree;
+extern crate gpu_interp;
 extern crate line_stitch;
 extern crate vectorphile;
 
@@ -15,6 +16,7 @@ extern crate itertools;
 extern crate lazy_static;
 extern crate ocl;
 extern crate serde;
+extern crate typed_arena;
 extern crate vecmath;
 
 #[macro_use]
@@ -30,6 +32,7 @@ mod geometry;
 pub mod inspector;
 mod lines;
 mod marching;
+mod old_compiler;
 mod opencl;
 mod polygon;
 

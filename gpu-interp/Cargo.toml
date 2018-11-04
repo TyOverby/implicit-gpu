@@ -6,5 +6,8 @@ authors = ["Ty Overby <ty@pre-alpha.com>"]
 build="./build.rs"
 
 [dependencies]
-ocl = "*"
+#ocl = "*"
 euclid = "*"
+
+[dependencies.ocl]
+path = "../../ocl/ocl"

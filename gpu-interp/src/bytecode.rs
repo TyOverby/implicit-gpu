@@ -21,10 +21,10 @@ pub fn compile(ast: &Ast) -> CompilationResult {
             Ast::Constant(_) | Ast::Buffer(_) => 0,
             Ast::Transform { target, .. } => 1 + transform_depth(target),
             Ast::Sub(l, r) => max(transform_depth(l), transform_depth(r)),
-            Ast::Add(lst) | Ast::Min(lst) | Ast::Max(lst) => {
+            Ast::Mul(lst) | Ast::Add(lst) | Ast::Min(lst) | Ast::Max(lst) => {
                 lst.iter().map(transform_depth).fold(0, max)
             }
-            Ast::Abs(t) | Ast::Sqrt(t) => transform_depth(t),
+            Ast::Abs(t) | Ast::Sqrt(t) | Ast::Neg(t) => transform_depth(t),
         }
     }
     fn depth(ast: &Ast) -> u32 {
@@ -33,8 +33,8 @@ pub fn compile(ast: &Ast) -> CompilationResult {
             Ast::X | Ast::Y | Ast::Z | Ast::Constant(_) | Ast::Buffer(_) => 1,
             Ast::Transform { target, .. } => depth(target),
             Ast::Sub(l, r) => max(depth(l), depth(r)) + 1,
-            Ast::Add(lst) | Ast::Min(lst) | Ast::Max(lst) => lst.iter().map(depth).fold(0, max) + 1,
-            Ast::Abs(t) | Ast::Sqrt(t) => depth(t),
+            Ast::Mul(lst) | Ast::Add(lst) | Ast::Min(lst) | Ast::Max(lst) => lst.iter().map(depth).fold(0, max) + 1,
+            Ast::Abs(t) | Ast::Sqrt(t) | Ast::Neg(t) => depth(t),
         }
     }
 
@@ -118,6 +118,7 @@ pub fn compile(ast: &Ast) -> CompilationResult {
                 code.push(ops::SUB);
             }
             Ast::Add(lst) => compile_inner_list(lst, code, constants, buffers, ops::ADD, "add"),
+            Ast::Mul(lst) => compile_inner_list(lst, code, constants, buffers, ops::MUL, "mul"),
             Ast::Max(lst) => compile_inner_list(lst, code, constants, buffers, ops::MAX, "max"),
             Ast::Min(lst) => compile_inner_list(lst, code, constants, buffers, ops::MIN, "min"),
             Ast::Abs(t) => {
@@ -127,6 +128,10 @@ pub fn compile(ast: &Ast) -> CompilationResult {
             Ast::Sqrt(t) => {
                 compile_inner(t, code, constants, buffers);
                 code.push(ops::SQRT);
+            }
+            Ast::Neg(t) => {
+                compile_inner(t, code, constants, buffers);
+                code.push(ops::NEG);
             }
         }
     }

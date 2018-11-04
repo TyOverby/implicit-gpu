@@ -3,10 +3,12 @@ extern crate ocl;
 
 mod buffer;
 pub mod bytecode;
-pub mod gpu_interp;
+mod gpu_interp;
 pub mod walk_interp;
 
-use buffer::*;
+pub use buffer::*;
+pub use bytecode::compile;
+pub use gpu_interp::{execute, Triad};
 
 pub type AstPtr<'a> = &'a Ast<'a>;
 pub type AstSlice<'a> = &'a [Ast<'a>];
@@ -19,10 +21,12 @@ pub enum Ast<'a> {
     Y,
     Z,
     Add(AstSlice<'a>),
+    Mul(AstSlice<'a>),
     Sub(AstPtr<'a>, AstPtr<'a>),
     Max(AstSlice<'a>),
     Min(AstSlice<'a>),
     Abs(AstPtr<'a>),
+    Neg(AstPtr<'a>),
     Sqrt(AstPtr<'a>),
     Transform {
         target: AstPtr<'a>,

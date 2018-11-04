@@ -1,12 +1,12 @@
-use compiler::{compile, CompileResult};
 use ocaml::{Id, Shape};
+use old_compiler::{compile, CompileResult};
 use opencl::{FieldBuffer, OpenClContext};
 
 #[cfg(test)]
 use expectation::{extensions::*, Provider};
 use expectation_plugin::expectation_test;
 
-pub fn exec_shape<F>(
+pub fn exec_shape_old<F>(
     ctx: &OpenClContext,
     shape: Shape,
     width: usize,
@@ -43,6 +43,37 @@ where
     unsafe { kernel.enq().unwrap() };
 
     out
+}
+
+pub fn exec_shape<F>(
+    ctx: &OpenClContext,
+    shape: Shape,
+    width: usize,
+    height: usize,
+    _buffer_find: F,
+) -> FieldBuffer
+where
+    F: Fn(Id) -> FieldBuffer,
+{
+    let arena = ::typed_arena::Arena::new();
+    let output = ::compiler::compile(&shape, &arena);
+
+    let compiled = ::gpu_interp::compile(&output);
+    let mut buf = ::gpu_interp::execute(
+        compiled,
+        width as u32,
+        height as u32,
+        1,
+        ::gpu_interp::Triad {
+            context: ctx.context().clone(),
+            queue: ctx.queue().clone(),
+        },
+    );
+
+    FieldBuffer {
+        dims: (width, height),
+        internal: buf.to_opencl(ctx.queue()).clone(),
+    }
 }
 
 #[cfg(test)]

@@ -1,7 +1,6 @@
 waiting_room_art
 empty_dragged_circle
 dragged_circle
-more_specific_simplex
 small_simplex
 huge_star
 three_star

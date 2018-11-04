@@ -9,10 +9,12 @@ x
 y
 z
 add
+mul
 sub
 max
 min
 abs
 sqrt
+neg
 push_transform
 pop_transform

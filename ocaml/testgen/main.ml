@@ -194,9 +194,9 @@ let small_simplex = intersection [
     rect  ~x:0.0 ~y:0.0 ~w:100.0 ~h:100.0
   ]
 
-let more_specific_simplex = intersection [
+let _more_specific_simplex = intersection [
     scale ~dx:2.0 ~dy:2.0 @@ subtract (noise 0.5) (noise 0.65);
-    rect  ~x:0.0 ~y:0.0 ~w:200.0 ~h:200.0
+    rect  ~x:0.0 ~y:0.0 ~w:20.0 ~h:20.0
   ]
 
 let dragged_circle =
@@ -232,7 +232,7 @@ let tests = [
   "waiting_room_art", waiting_room_art;
   "empty_dragged_circle", empty_dragged_circle;
   "dragged_circle", dragged_circle;
-  "more_specific_simplex", more_specific_simplex;
+  (*"more_specific_simplex", more_specific_simplex;*)
   "small_simplex", small_simplex;
   "huge_star", huge_star;
   "three_star", three_star;

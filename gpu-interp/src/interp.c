@@ -68,6 +68,12 @@ __kernel void apply(
                 PUSH(l + r);
                 break;
             }
+            case OP_MUL: {
+                float l = POP();
+                float r = POP();
+                PUSH(l * r);
+                break;
+            }
             case OP_SUB: {
                 float l = POP();
                 float r = POP();
@@ -94,6 +100,11 @@ __kernel void apply(
             case OP_SQRT: {
                 float v = POP();
                 PUSH(sqrt(v));
+                break;
+            }
+            case OP_NEG: {
+                float v = POP();
+                PUSH(-v);
                 break;
             }
             case OP_PUSH_TRANSFORM: {

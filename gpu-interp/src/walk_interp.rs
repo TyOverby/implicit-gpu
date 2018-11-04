@@ -14,6 +14,7 @@ pub fn interpret(ast: &Ast, x: f32, y: f32, z: f32) -> f32 {
         Ast::Y => y,
         Ast::Z => z,
         Ast::Add(list) => list.iter().map(|a| interpret(a, x, y, z)).sum(),
+        Ast::Mul(list) => list.iter().map(|a| interpret(a, x, y, z)).product(),
         Ast::Sub(l, r) => interpret(l, x, y, z) - interpret(r, x, y, z),
         Ast::Max(list) => {
             if list.len() == 0 {
@@ -32,6 +33,7 @@ pub fn interpret(ast: &Ast, x: f32, y: f32, z: f32) -> f32 {
                 .fold(::std::f32::MAX, |a, b| a.max(b))
         }
         Ast::Abs(a) => interpret(a, x, y, z).abs(),
+        Ast::Neg(a) => -interpret(a, x, y, z),
         Ast::Sqrt(a) => interpret(a, x, y, z).sqrt(),
     }
 }
