@@ -44,6 +44,21 @@ pub fn execute(
         .build()
         .unwrap();
 
+    let position_stack = if compilation.transform_depth == 0 {
+        OclBuffer::builder()
+            .len([1])
+            .copy_host_slice(&[0.0])
+            .queue(queue.clone())
+            .build()
+            .unwrap()
+    } else {
+        OclBuffer::<f32>::builder()
+            .len([3 * width * height * depth * ::std::cmp::max(compilation.transform_depth, 1)])
+            .queue(queue.clone())
+            .build()
+            .unwrap()
+    };
+
     let constants = if compilation.constants.len() == 0 {
         OclBuffer::builder()
             .len([1])
@@ -82,7 +97,9 @@ pub fn execute(
         .arg(output.clone())
         .arg(constants)
         .arg(bytecode)
-        .arg(stack);
+        .arg(stack)
+        .arg(position_stack);
+
     let buffer_count = compilation.buffers.len();
     for mut buffer in compilation.buffers {
         kernel.arg(buffer.to_opencl(&queue).clone());
@@ -100,6 +117,7 @@ pub fn execute(
 
     let kernel = kernel
         .arg(compilation.max_stack as u64)
+        .arg(compilation.transform_depth as u64)
         .arg(width as u64)
         .arg(height as u64)
         .arg(compilation.code.len() as u64)

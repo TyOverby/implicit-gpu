@@ -9,23 +9,29 @@ pub struct CompilationResult {
     pub code: Vec<u8>,
     pub constants: Vec<f32>,
     pub max_stack: u32,
+    pub transform_depth: u32,
     pub buffers: Vec<Buffer>,
 }
 
 pub fn compile(ast: &Ast) -> CompilationResult {
-    fn count_constants(ast: &Ast) -> u32 {
+    fn transform_depth(ast: &Ast) -> u32 {
+        use std::cmp::max;
         match ast {
-            Ast::X | Ast::Y | Ast::Z | Ast::Buffer(_) => 0,
-            Ast::Constant(_) => 1,
-            Ast::Sub(l, r) => count_constants(l) + count_constants(r),
-            Ast::Add(lst) | Ast::Min(lst) | Ast::Max(lst) => lst.iter().map(count_constants).sum(),
-            Ast::Abs(t) | Ast::Sqrt(t) => count_constants(t),
+            Ast::X | Ast::Y | Ast::Z => 1,
+            Ast::Constant(_) | Ast::Buffer(_) => 0,
+            Ast::Transform { target, .. } => 1 + transform_depth(target),
+            Ast::Sub(l, r) => max(transform_depth(l), transform_depth(r)),
+            Ast::Add(lst) | Ast::Min(lst) | Ast::Max(lst) => {
+                lst.iter().map(transform_depth).fold(0, max)
+            }
+            Ast::Abs(t) | Ast::Sqrt(t) => transform_depth(t),
         }
     }
     fn depth(ast: &Ast) -> u32 {
         use std::cmp::max;
         match ast {
             Ast::X | Ast::Y | Ast::Z | Ast::Constant(_) | Ast::Buffer(_) => 1,
+            Ast::Transform { target, .. } => depth(target),
             Ast::Sub(l, r) => max(depth(l), depth(r)) + 1,
             Ast::Add(lst) | Ast::Min(lst) | Ast::Max(lst) => lst.iter().map(depth).fold(0, max) + 1,
             Ast::Abs(t) | Ast::Sqrt(t) => depth(t),
@@ -67,10 +73,44 @@ pub fn compile(ast: &Ast) -> CompilationResult {
             Ast::Y => code.push(ops::Y),
             Ast::Z => code.push(ops::Z),
             Ast::Constant(c) => {
+                if constants.len() >= 255 {
+                    panic!("large constants not supported yet")
+                }
                 let idx = constants.len() as u8;
                 constants.push(*c);
                 code.push(ops::CONSTANT_SMALL);
                 code.push(idx);
+            }
+            Ast::Transform { target, matrix } => {
+                code.push(ops::PUSH_TRANSFORM);
+                {
+                    let mut push_const = |constant| {
+                        if constants.len() >= 255 {
+                            panic!("large constants not supported yet")
+                        }
+                        let idx = constants.len() as u8;
+                        constants.push(constant);
+                        code.push(idx);
+                    };
+                    push_const(matrix.m11);
+                    push_const(matrix.m21);
+                    push_const(matrix.m31);
+                    push_const(matrix.m41);
+                    push_const(matrix.m12);
+                    push_const(matrix.m22);
+                    push_const(matrix.m32);
+                    push_const(matrix.m42);
+                    push_const(matrix.m13);
+                    push_const(matrix.m23);
+                    push_const(matrix.m33);
+                    push_const(matrix.m43);
+                    push_const(matrix.m14);
+                    push_const(matrix.m24);
+                    push_const(matrix.m34);
+                    push_const(matrix.m44);
+                }
+                compile_inner(target, code, constants, buffers);
+                code.push(ops::POP_TRANSFORM);
             }
             Ast::Sub(l, r) => {
                 compile_inner(l, code, constants, buffers);
@@ -92,12 +132,9 @@ pub fn compile(ast: &Ast) -> CompilationResult {
     }
 
     let mut code = vec![];
-    let constant_count = count_constants(ast);
-    if constant_count > 255 {
-        panic!("more than 255 constants!");
-    }
     let mut constants = vec![];
     let max_stack = depth(ast);
+    let transform_depth = transform_depth(ast);
     let mut buffers = vec![];
     compile_inner(ast, &mut code, &mut constants, &mut buffers);
     CompilationResult {
@@ -105,6 +142,7 @@ pub fn compile(ast: &Ast) -> CompilationResult {
         constants,
         max_stack,
         buffers,
+        transform_depth,
     }
 }
 
@@ -116,6 +154,21 @@ fn compile_basic_constant() {
             code: vec![ops::CONSTANT_SMALL, 0],
             constants: vec![10.0],
             max_stack: 1,
+            transform_depth: 0,
+            buffers: vec![],
+        }
+    )
+}
+
+#[test]
+fn compile_x() {
+    assert_eq!(
+        compile(&Ast::X),
+        CompilationResult {
+            code: vec![ops::X],
+            constants: vec![],
+            max_stack: 1,
+            transform_depth: 1,
             buffers: vec![],
         }
     )
@@ -129,6 +182,7 @@ fn compile_basic_buffer() {
             code: vec![0],
             constants: vec![],
             max_stack: 1,
+            transform_depth: 0,
             buffers: vec![Buffer::debug()],
         }
     )
@@ -142,6 +196,7 @@ fn compile_basic_max() {
             code: vec![ops::CONSTANT_SMALL, 0, ops::CONSTANT_SMALL, 1, ops::MAX],
             constants: vec![10.0, 5.0],
             max_stack: 2,
+            transform_depth: 0,
             buffers: vec![],
         }
     )
@@ -168,6 +223,48 @@ fn compile_more_max() {
             ],
             constants: vec![10.0, 5.0, 2.0],
             max_stack: 2,
+            transform_depth: 0,
+            buffers: vec![],
+        }
+    )
+}
+
+#[test]
+fn compile_a_transform() {
+    assert_eq!(
+        compile(&Ast::Transform {
+            target: &Ast::Max(&[Ast::X, Ast::Y,]),
+            matrix: ::euclid::Transform3D::create_translation(2.0, 2.0, 2.0)
+        }),
+        CompilationResult {
+            code: vec![
+                ops::PUSH_TRANSFORM,
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                ops::X,
+                ops::Y,
+                ops::MAX,
+                ops::POP_TRANSFORM
+            ],
+            constants: vec![
+                1.0, 0.0, 0.0, 2.0, 0.0, 1.0, 0.0, 2.0, 0.0, 0.0, 1.0, 2.0, 0.0, 0.0, 0.0, 1.0
+            ],
+            max_stack: 2,
+            transform_depth: 2,
             buffers: vec![],
         }
     )

@@ -2,13 +2,27 @@
 #define PUSH(v) stack[stack_ptr++] = v
 #define PEEK() stack[stack_ptr - 1]
 
+#define FETCH_SMALL() consts[program[++i]]
+
+#define PUSH_POS(x, y, z) do {\
+        position_stack[position_stack_ptr++]=x;\
+        position_stack[position_stack_ptr++]=y;\
+        position_stack[position_stack_ptr++]=z;\
+    } while(0)
+#define POP_POS() position_stack_ptr-=3
+#define X_POS() position_stack[position_stack_ptr - 3]
+#define Y_POS() position_stack[position_stack_ptr - 2]
+#define Z_POS() position_stack[position_stack_ptr - 1]
+
 __kernel void apply(
     __global float* buffer,
     __global float* consts,
     __global char* program,
     __global float* stack,
+    __global float* position_stack,
     INPUT_BUFFERS,
     ulong max_stack,
+    ulong max_position_stack,
     ulong width,
     ulong height,
     ulong instr_length)
@@ -18,11 +32,10 @@ __kernel void apply(
     size_t z = get_global_id(2);
     size_t pos = x + (y * width) + (z * width * height);
 
-    float x_s = (float) x;
-    float y_s = (float) y;
-    float z_s = (float) z;
-
     size_t stack_ptr = pos * max_stack;
+    size_t position_stack_ptr = pos * max_position_stack * 3;
+
+    PUSH_POS((float) x, (float) y, (float) z);
 
     for (ulong i = 0; i < instr_length; i++) {
         char code = program[i];
@@ -30,19 +43,22 @@ __kernel void apply(
         switch (code) {
             IMPLEMENT_INPUT_BUFFERS
             case OP_CONSTANT_SMALL: {
-                int constant_index = program[++i];
-                PUSH(consts[constant_index]);
+                float c = FETCH_SMALL();
+                PUSH(c);
                 break;
             }
             case OP_X: {
+                float x_s = X_POS();
                 PUSH(x_s);
                 break;
             }
             case OP_Y: {
+                float y_s = Y_POS();
                 PUSH(y_s);
                 break;
             }
             case OP_Z: {
+                float z_s = Z_POS();
                 PUSH(z_s);
                 break;
             }
