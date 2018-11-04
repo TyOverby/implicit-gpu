@@ -96,6 +96,40 @@ __kernel void apply(
                 PUSH(sqrt(v));
                 break;
             }
+            case OP_PUSH_TRANSFORM: {
+                float m11 = FETCH_SMALL();
+                float m12 = FETCH_SMALL();
+                float m13 = FETCH_SMALL();
+                float m14 = FETCH_SMALL();
+                float m21 = FETCH_SMALL();
+                float m22 = FETCH_SMALL();
+                float m23 = FETCH_SMALL();
+                float m24 = FETCH_SMALL();
+                float m31 = FETCH_SMALL();
+                float m32 = FETCH_SMALL();
+                float m33 = FETCH_SMALL();
+                float m34 = FETCH_SMALL();
+                float m41 = FETCH_SMALL();
+                float m42 = FETCH_SMALL();
+                float m43 = FETCH_SMALL();
+                float m44 = FETCH_SMALL();
+
+                float x_s = X_POS();
+                float y_s = Y_POS();
+                float z_s = Z_POS();
+
+                float x = x_s * m11 + y_s * m21 + z_s * m31 + m41;
+                float y = x_s * m12 + y_s * m22 + z_s * m32 + m42;
+                float z = x_s * m13 + y_s * m23 + z_s * m33 + m43;
+                float w = x_s * m14 + y_s * m24 + z_s * m34 + m44;
+
+                PUSH_POS(x / w, y / w, z / w);
+                break;
+            }
+            case OP_POP_TRANSFORM: {
+                POP_POS();
+                break;
+            }
             default: {
                 printf("unrecognized opcode: %d\n", code);
             }

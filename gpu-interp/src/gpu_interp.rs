@@ -207,6 +207,34 @@ fn max_of_a_few_constants() {
 }
 
 #[test]
+fn scaled_add_xy() {
+    use super::bytecode::*;
+    use super::*;
+    let c = compile(&Ast::Transform {
+        target: &Ast::Add(&[Ast::X, Ast::Y]),
+        matrix: ::euclid::Transform3D::create_scale(2.0, 2.0, 2.0),
+    });
+    let mut b = execute(c, 3, 3, 1, Triad::default());
+    assert_eq!(
+        b.to_memory(),
+        &[
+            // y = 0
+            (0.0 * 2.0 + 0.0 * 2.0),
+            (1.0 * 2.0 + 0.0 * 2.0),
+            (2.0 * 2.0 + 0.0 * 2.0),
+            // y = 1
+            (0.0 * 2.0 + 1.0 * 2.0),
+            (1.0 * 2.0 + 1.0 * 2.0),
+            (2.0 * 2.0 + 1.0 * 2.0),
+            // y = 2
+            (0.0 * 2.0 + 2.0 * 2.0),
+            (1.0 * 2.0 + 2.0 * 2.0),
+            (2.0 * 2.0 + 2.0 * 2.0),
+        ]
+    );
+}
+
+#[test]
 fn max_of_a_few_buffers() {
     use super::bytecode::*;
     use super::*;
