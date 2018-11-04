@@ -1,0 +1,84 @@
+Transform {
+    target: Max(
+        [
+            Buffer(
+                Buffer {
+                    width: 120,
+                    height: 120,
+                    depth: 1,
+                    kind: Opencl(
+                        OpenclBuffer(
+                            Buffer {
+                                obj_core: Mem(
+                                    0x00007f9478e23450
+                                ),
+                                queue: Some(
+                                    Queue {
+                                        obj_core: CommandQueue(
+                                            0x00007f947918ddc0
+                                        ),
+                                        device_version: OpenclVersion {
+                                            ver: [
+                                                1,
+                                                2
+                                            ]
+                                        }
+                                    }
+                                ),
+                                len: 14400,
+                                offset: None,
+                                _data: PhantomData
+                            }
+                        )
+                    )
+                }
+            ),
+            DistToPoly(
+                [
+                    (
+                        0.0,
+                        0.0,
+                        100.0,
+                        0.0
+                    ),
+                    (
+                        100.0,
+                        0.0,
+                        100.0,
+                        100.0
+                    ),
+                    (
+                        100.0,
+                        100.0,
+                        0.0,
+                        100.0
+                    ),
+                    (
+                        0.0,
+                        100.0,
+                        0.0,
+                        0.0
+                    )
+                ]
+            )
+        ]
+    ),
+    matrix: [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        -10.0,
+        -10.0,
+        0.0,
+        1.0
+    ]
+}

@@ -1,0 +1,186 @@
+Transform {
+    target: Min(
+        [
+            Transform {
+                target: Buffer(
+                    Buffer {
+                        width: 84,
+                        height: 42,
+                        depth: 1,
+                        kind: Opencl(
+                            OpenclBuffer(
+                                Buffer {
+                                    obj_core: Mem(
+                                        0x00007f94790003a0
+                                    ),
+                                    queue: Some(
+                                        Queue {
+                                            obj_core: CommandQueue(
+                                                0x00007f9479037860
+                                            ),
+                                            device_version: OpenclVersion {
+                                                ver: [
+                                                    1,
+                                                    2
+                                                ]
+                                            }
+                                        }
+                                    ),
+                                    len: 3528,
+                                    offset: None,
+                                    _data: PhantomData
+                                }
+                            )
+                        )
+                    }
+                ),
+                matrix: [
+                    0.00000000000000006123234,
+                    1.0,
+                    0.0,
+                    0.0,
+                    -1.0,
+                    0.00000000000000006123234,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0,
+                    0.0,
+                    0.0,
+                    -0.0,
+                    0.0,
+                    1.0
+                ]
+            },
+            Max(
+                [
+                    Transform {
+                        target: Buffer(
+                            Buffer {
+                                width: 84,
+                                height: 42,
+                                depth: 1,
+                                kind: Opencl(
+                                    OpenclBuffer(
+                                        Buffer {
+                                            obj_core: Mem(
+                                                0x00007f9479138100
+                                            ),
+                                            queue: Some(
+                                                Queue {
+                                                    obj_core: CommandQueue(
+                                                        0x00007f9479037860
+                                                    ),
+                                                    device_version: OpenclVersion {
+                                                        ver: [
+                                                            1,
+                                                            2
+                                                        ]
+                                                    }
+                                                }
+                                            ),
+                                            len: 3528,
+                                            offset: None,
+                                            _data: PhantomData
+                                        }
+                                    )
+                                )
+                            }
+                        ),
+                        matrix: [
+                            0.00000000000000006123234,
+                            -1.0,
+                            0.0,
+                            0.0,
+                            1.0,
+                            0.00000000000000006123234,
+                            0.0,
+                            0.0,
+                            0.0,
+                            0.0,
+                            1.0,
+                            0.0,
+                            -0.000000000000003061617,
+                            50.0,
+                            0.0,
+                            1.0
+                        ]
+                    },
+                    Neg(
+                        Transform {
+                            target: Buffer(
+                                Buffer {
+                                    width: 84,
+                                    height: 42,
+                                    depth: 1,
+                                    kind: Opencl(
+                                        OpenclBuffer(
+                                            Buffer {
+                                                obj_core: Mem(
+                                                    0x00007f9478e2c520
+                                                ),
+                                                queue: Some(
+                                                    Queue {
+                                                        obj_core: CommandQueue(
+                                                            0x00007f9479037860
+                                                        ),
+                                                        device_version: OpenclVersion {
+                                                            ver: [
+                                                                1,
+                                                                2
+                                                            ]
+                                                        }
+                                                    }
+                                                ),
+                                                len: 3528,
+                                                offset: None,
+                                                _data: PhantomData
+                                            }
+                                        )
+                                    )
+                                }
+                            ),
+                            matrix: [
+                                0.00000000000000006123234,
+                                -1.0,
+                                0.0,
+                                0.0,
+                                1.0,
+                                0.00000000000000006123234,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0,
+                                0.0,
+                                -0.0000000000000036739406,
+                                60.0,
+                                0.0,
+                                1.0
+                            ]
+                        }
+                    )
+                ]
+            )
+        ]
+    ),
+    matrix: [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        -17.0,
+        -20.784609,
+        0.0,
+        1.0
+    ]
+}

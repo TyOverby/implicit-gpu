@@ -1,0 +1,47 @@
+Transform {
+    target: Sub(
+        Constant(
+            15.0
+        ),
+        Sqrt(
+            Add(
+                [
+                    Square(
+                        Sub(
+                            X,
+                            Constant(
+                                20.0
+                            )
+                        )
+                    ),
+                    Square(
+                        Sub(
+                            Y,
+                            Constant(
+                                20.0
+                            )
+                        )
+                    )
+                ]
+            )
+        )
+    ),
+    matrix: [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        2.0,
+        2.0,
+        0.0,
+        1.0
+    ]
+}

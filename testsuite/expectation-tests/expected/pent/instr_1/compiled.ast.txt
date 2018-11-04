@@ -1,0 +1,63 @@
+CompilationResult {
+    code: [
+        19,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        2,
+        3,
+        1,
+        0,
+        0,
+        20
+    ],
+    constants: [
+        1.0,
+        0.0,
+        -11.510565,
+        -10.09017
+    ],
+    max_stack: 1,
+    transform_depth: 1,
+    buffers: [
+        Buffer {
+            width: 24,
+            height: 23,
+            depth: 1,
+            kind: Opencl(
+                OpenclBuffer(
+                    Buffer {
+                        obj_core: Mem(
+                            0x00007f947904b950
+                        ),
+                        queue: Some(
+                            Queue {
+                                obj_core: CommandQueue(
+                                    0x00007f947918ddc0
+                                ),
+                                device_version: OpenclVersion {
+                                    ver: [
+                                        1,
+                                        2
+                                    ]
+                                }
+                            }
+                        ),
+                        len: 552,
+                        offset: None,
+                        _data: PhantomData
+                    }
+                )
+            )
+        }
+    ]
+}

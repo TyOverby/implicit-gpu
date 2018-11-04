@@ -1,0 +1,27 @@
+Sub(
+    Constant(
+        10.0
+    ),
+    Sqrt(
+        Add(
+            [
+                Square(
+                    Sub(
+                        X,
+                        Constant(
+                            15.0
+                        )
+                    )
+                ),
+                Square(
+                    Sub(
+                        Y,
+                        Constant(
+                            15.0
+                        )
+                    )
+                )
+            ]
+        )
+    )
+)

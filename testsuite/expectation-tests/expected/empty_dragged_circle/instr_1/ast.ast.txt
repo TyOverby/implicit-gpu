@@ -1,0 +1,120 @@
+Transform {
+    target: Max(
+        [
+            Buffer(
+                Buffer {
+                    width: 30,
+                    height: 30,
+                    depth: 1,
+                    kind: Opencl(
+                        OpenclBuffer(
+                            Buffer {
+                                obj_core: Mem(
+                                    0x00007f9475a1be40
+                                ),
+                                queue: Some(
+                                    Queue {
+                                        obj_core: CommandQueue(
+                                            0x00007f9479235e40
+                                        ),
+                                        device_version: OpenclVersion {
+                                            ver: [
+                                                1,
+                                                2
+                                            ]
+                                        }
+                                    }
+                                ),
+                                len: 900,
+                                offset: None,
+                                _data: PhantomData
+                            }
+                        )
+                    )
+                }
+            ),
+            Neg(
+                Max(
+                    [
+                        DistToPoly(
+                            [
+                                (
+                                    0.0,
+                                    0.0,
+                                    20.0,
+                                    0.0
+                                ),
+                                (
+                                    20.0,
+                                    0.0,
+                                    20.0,
+                                    20.0
+                                ),
+                                (
+                                    20.0,
+                                    20.0,
+                                    0.0,
+                                    20.0
+                                ),
+                                (
+                                    0.0,
+                                    20.0,
+                                    0.0,
+                                    0.0
+                                )
+                            ]
+                        ),
+                        Neg(
+                            DistToPoly(
+                                [
+                                    (
+                                        5.0,
+                                        5.0,
+                                        15.0,
+                                        5.0
+                                    ),
+                                    (
+                                        15.0,
+                                        5.0,
+                                        15.0,
+                                        15.0
+                                    ),
+                                    (
+                                        15.0,
+                                        15.0,
+                                        5.0,
+                                        15.0
+                                    ),
+                                    (
+                                        5.0,
+                                        15.0,
+                                        5.0,
+                                        5.0
+                                    )
+                                ]
+                            )
+                        )
+                    ]
+                )
+            )
+        ]
+    ),
+    matrix: [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        -2.5,
+        -2.5,
+        0.0,
+        1.0
+    ]
+}

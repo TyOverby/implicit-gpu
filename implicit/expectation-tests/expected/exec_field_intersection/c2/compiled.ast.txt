@@ -1,0 +1,26 @@
+CompilationResult {
+    code: [
+        4,
+        0,
+        5,
+        4,
+        1,
+        10,
+        11,
+        6,
+        4,
+        1,
+        10,
+        11,
+        8,
+        15,
+        10
+    ],
+    constants: [
+        10.0,
+        15.0
+    ],
+    max_stack: 4,
+    transform_depth: 1,
+    buffers: []
+}

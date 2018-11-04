@@ -90,8 +90,9 @@ fn run_shape_helper(
     fields: &[FieldBuffer],
 ) -> FieldBuffer {
     use debug::*;
+    use inspector::Inspector;
 
-    let buffer = exec_shape(ctx, Box::new(provider), shape, width, height, |i| {
+    let buffer = exec_shape(ctx, provider.duplicate(), shape, width, height, |i| {
         fields[i as usize].clone()
     });
 

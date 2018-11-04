@@ -1,0 +1,52 @@
+Transform {
+    target: Buffer(
+        Buffer {
+            width: 48,
+            height: 48,
+            depth: 1,
+            kind: Opencl(
+                OpenclBuffer(
+                    Buffer {
+                        obj_core: Mem(
+                            0x00007f947918ddc0
+                        ),
+                        queue: Some(
+                            Queue {
+                                obj_core: CommandQueue(
+                                    0x00007f9478e23070
+                                ),
+                                device_version: OpenclVersion {
+                                    ver: [
+                                        1,
+                                        2
+                                    ]
+                                }
+                            }
+                        ),
+                        len: 2304,
+                        offset: None,
+                        _data: PhantomData
+                    }
+                )
+            )
+        }
+    ),
+    matrix: [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        -24.0,
+        -24.0,
+        0.0,
+        1.0
+    ]
+}

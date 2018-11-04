@@ -1,0 +1,68 @@
+Max(
+    [
+        Buffer(
+            Buffer {
+                width: 22,
+                height: 22,
+                depth: 1,
+                kind: Opencl(
+                    OpenclBuffer(
+                        Buffer {
+                            obj_core: Mem(
+                                0x00007fbf4cc32f50
+                            ),
+                            queue: Some(
+                                Queue {
+                                    obj_core: CommandQueue(
+                                        0x00007fbf4f100e60
+                                    ),
+                                    device_version: OpenclVersion {
+                                        ver: [
+                                            1,
+                                            2
+                                        ]
+                                    }
+                                }
+                            ),
+                            len: 484,
+                            offset: None,
+                            _data: PhantomData
+                        }
+                    )
+                )
+            }
+        ),
+        Buffer(
+            Buffer {
+                width: 22,
+                height: 22,
+                depth: 1,
+                kind: Opencl(
+                    OpenclBuffer(
+                        Buffer {
+                            obj_core: Mem(
+                                0x00007fbf4f234fd0
+                            ),
+                            queue: Some(
+                                Queue {
+                                    obj_core: CommandQueue(
+                                        0x00007fbf4f100e60
+                                    ),
+                                    device_version: OpenclVersion {
+                                        ver: [
+                                            1,
+                                            2
+                                        ]
+                                    }
+                                }
+                            ),
+                            len: 484,
+                            offset: None,
+                            _data: PhantomData
+                        }
+                    )
+                )
+            }
+        )
+    ]
+)
