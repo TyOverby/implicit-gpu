@@ -18,10 +18,15 @@ fn main() -> Result<(), Box<Error>> {
     let mut opencl_file = File::create(&Path::join(dest_path, "opcodes.c"))?;
 
     let mut buffer_count = 0;
+    let mut i_sub = 0;
 
     for (i, op) in opcodes.enumerate() {
+        let i = i - i_sub;
         match op.trim().chars().next() {
-            None | Some('#') => continue,
+            None | Some('#') => {
+                i_sub += 1;
+                continue;
+            }
             Some(_) => {}
         }
 
