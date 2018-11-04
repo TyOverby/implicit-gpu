@@ -42,12 +42,14 @@ impl Inspector for Provider {
     }
     fn write_ast(&self, name: &str, ast: &::gpu_interp::Ast) {
         use std::io::Write;
-        let mut w_text = self.text_writer(format!("{}.ast.txt", name));
+        let mut w_text = self.diagnostic().text_writer(format!("{}.ast.txt", name));
         write!(w_text, "{:#?}", ast);
     }
     fn write_compiled(&self, name: &str, ast: &::gpu_interp::bytecode::CompilationResult) {
         use std::io::Write;
-        let mut w_text = self.text_writer(format!("{}.ast.txt", name));
+        let mut w_text = self
+            .diagnostic()
+            .text_writer(format!("{}.compiled.txt", name));
         write!(w_text, "{:#?}", ast);
     }
     fn write_field(&self, name: &str, buffer: &FieldBuffer) {
