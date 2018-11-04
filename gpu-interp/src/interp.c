@@ -27,7 +27,6 @@ __kernel void apply(
     for (ulong i = 0; i < instr_length; i++) {
         char code = program[i];
 
-        printf("code: %d\n", (int)code);
         switch (code) {
             IMPLEMENT_INPUT_BUFFERS
             case OP_CONSTANT_SMALL: {
@@ -44,7 +43,6 @@ __kernel void apply(
                 break;
             }
             case OP_Z: {
-                printf("z not supported yet");
                 PUSH(z_s);
                 break;
             }
@@ -88,8 +86,5 @@ __kernel void apply(
         }
     }
 
-    printf("pos: %d\n", pos);
-    printf("pstack: %f\n", PEEK());
-    printf("pstack_ptr: %d\n", stack_ptr);
     buffer[pos] = POP();
 }
