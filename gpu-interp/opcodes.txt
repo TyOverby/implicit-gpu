@@ -10,6 +10,7 @@ y
 z
 add
 mul
+square
 sub
 max
 min

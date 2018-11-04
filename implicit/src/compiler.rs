@@ -8,8 +8,8 @@ pub fn compile<'a>(shape: &Shape, arena: &'a Arena<Ast<'a>>) -> Ast<'a> {
             let dx = Ast::Sub(arena.alloc(Ast::X), arena.alloc(Ast::Constant(c.x)));
             let dy = Ast::Sub(arena.alloc(Ast::Y), arena.alloc(Ast::Constant(c.y)));
             // TODO: don't duplicate this entire branch.
-            let dx2 = Ast::Mul(arena.alloc_extend(vec![dx.clone(), dx]));
-            let dy2 = Ast::Mul(arena.alloc_extend(vec![dy.clone(), dy]));
+            let dx2 = Ast::Square(arena.alloc(dx));
+            let dy2 = Ast::Square(arena.alloc(dy));
             let dx2_plus_dy2 = Ast::Add(arena.alloc_extend(vec![dx2, dy2]));
             let sqrt = Ast::Sqrt(arena.alloc(dx2_plus_dy2));
             Ast::Sub(arena.alloc(Ast::Constant(c.r)), arena.alloc(sqrt))

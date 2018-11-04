@@ -74,6 +74,11 @@ __kernel void apply(
                 PUSH(l * r);
                 break;
             }
+            case OP_SQUARE: {
+                float v = POP();
+                PUSH(v * v);
+                break;
+            }
             case OP_SUB: {
                 float l = POP();
                 float r = POP();

@@ -24,7 +24,7 @@ pub fn compile(ast: &Ast) -> CompilationResult {
             Ast::Mul(lst) | Ast::Add(lst) | Ast::Min(lst) | Ast::Max(lst) => {
                 lst.iter().map(transform_depth).fold(0, max)
             }
-            Ast::Abs(t) | Ast::Sqrt(t) | Ast::Neg(t) => transform_depth(t),
+            Ast::Square(t) | Ast::Abs(t) | Ast::Sqrt(t) | Ast::Neg(t) => transform_depth(t),
         }
     }
     fn depth(ast: &Ast) -> u32 {
@@ -33,8 +33,10 @@ pub fn compile(ast: &Ast) -> CompilationResult {
             Ast::X | Ast::Y | Ast::Z | Ast::Constant(_) | Ast::Buffer(_) => 1,
             Ast::Transform { target, .. } => depth(target),
             Ast::Sub(l, r) => max(depth(l), depth(r)) + 1,
-            Ast::Mul(lst) | Ast::Add(lst) | Ast::Min(lst) | Ast::Max(lst) => lst.iter().map(depth).fold(0, max) + 1,
-            Ast::Abs(t) | Ast::Sqrt(t) | Ast::Neg(t) => depth(t),
+            Ast::Mul(lst) | Ast::Add(lst) | Ast::Min(lst) | Ast::Max(lst) => {
+                lst.iter().map(depth).fold(0, max) + 1
+            }
+            Ast::Square(t) | Ast::Abs(t) | Ast::Sqrt(t) | Ast::Neg(t) => depth(t),
         }
     }
 
@@ -132,6 +134,10 @@ pub fn compile(ast: &Ast) -> CompilationResult {
             Ast::Neg(t) => {
                 compile_inner(t, code, constants, buffers);
                 code.push(ops::NEG);
+            }
+            Ast::Square(t) => {
+                compile_inner(t, code, constants, buffers);
+                code.push(ops::SQUARE);
             }
         }
     }

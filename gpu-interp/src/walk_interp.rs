@@ -35,5 +35,9 @@ pub fn interpret(ast: &Ast, x: f32, y: f32, z: f32) -> f32 {
         Ast::Abs(a) => interpret(a, x, y, z).abs(),
         Ast::Neg(a) => -interpret(a, x, y, z),
         Ast::Sqrt(a) => interpret(a, x, y, z).sqrt(),
+        Ast::Square(a) => {
+            let v = interpret(a, x, y, z);
+            v * v
+        }
     }
 }
