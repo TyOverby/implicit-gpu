@@ -122,6 +122,19 @@ fn compile_basic_constant() {
 }
 
 #[test]
+fn compile_basic_buffer() {
+    assert_eq!(
+        compile(&Ast::Buffer(Buffer::debug())),
+        CompilationResult {
+            code: vec![0],
+            constants: vec![],
+            max_stack: 1,
+            buffers: vec![Buffer::debug()],
+        }
+    )
+}
+
+#[test]
 fn compile_basic_max() {
     assert_eq!(
         compile(&Ast::Max(&[Ast::Constant(10.0), Ast::Constant(5.0)])),
