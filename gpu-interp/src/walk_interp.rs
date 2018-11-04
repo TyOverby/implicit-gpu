@@ -3,6 +3,7 @@ use super::Ast;
 pub fn interpret(ast: &Ast, x: f32, y: f32, z: f32) -> f32 {
     match ast {
         Ast::Constant(c) => *c,
+        Ast::Buffer(_) => unimplemented!(),
         Ast::X => x,
         Ast::Y => y,
         Ast::Z => z,

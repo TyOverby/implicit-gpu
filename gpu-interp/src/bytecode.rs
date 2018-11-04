@@ -1,6 +1,6 @@
-use super::Ast;
+use super::{Ast, Buffer};
 
-mod ops {
+pub mod ops {
     include!(concat!(env!("OUT_DIR"), "/opcodes.rs"));
 }
 
@@ -9,12 +9,13 @@ pub struct CompilationResult {
     pub code: Vec<u8>,
     pub constants: Vec<f32>,
     pub max_stack: u32,
+    pub buffers: Vec<Buffer>,
 }
 
 pub fn compile(ast: &Ast) -> CompilationResult {
     fn count_constants(ast: &Ast) -> u32 {
         match ast {
-            Ast::X | Ast::Y | Ast::Z => 0,
+            Ast::X | Ast::Y | Ast::Z | Ast::Buffer(_) => 0,
             Ast::Constant(_) => 1,
             Ast::Sub(l, r) => count_constants(l) + count_constants(r),
             Ast::Add(lst) | Ast::Min(lst) | Ast::Max(lst) => lst.iter().map(count_constants).sum(),
@@ -24,31 +25,44 @@ pub fn compile(ast: &Ast) -> CompilationResult {
     fn depth(ast: &Ast) -> u32 {
         use std::cmp::max;
         match ast {
-            Ast::X | Ast::Y | Ast::Z | Ast::Constant(_) => 1,
+            Ast::X | Ast::Y | Ast::Z | Ast::Constant(_) | Ast::Buffer(_) => 1,
             Ast::Sub(l, r) => max(depth(l), depth(r)) + 1,
             Ast::Add(lst) | Ast::Min(lst) | Ast::Max(lst) => lst.iter().map(depth).fold(0, max) + 1,
             Ast::Abs(t) | Ast::Sqrt(t) => depth(t),
         }
     }
 
-    fn compile_inner(ast: &Ast, code: &mut Vec<u8>, constants: &mut Vec<f32>) {
+    fn compile_inner(
+        ast: &Ast,
+        code: &mut Vec<u8>,
+        constants: &mut Vec<f32>,
+        buffers: &mut Vec<Buffer>,
+    ) {
         fn compile_inner_list(
             asts: &[Ast],
             code: &mut Vec<u8>,
             constants: &mut Vec<f32>,
+            buffers: &mut Vec<Buffer>,
             op: u8,
             name: &str,
         ) {
             if asts.len() == 0 {
                 panic!("{} with 0 children", name);
             }
-            compile_inner(&asts[0], code, constants);
+            compile_inner(&asts[0], code, constants, buffers);
             for child in &asts[1..] {
-                compile_inner(child, code, constants);
+                compile_inner(child, code, constants, buffers);
                 code.push(op);
             }
         }
         match ast {
+            Ast::Buffer(b) => {
+                let idx = buffers.len();
+                buffers.push(b.clone());
+                assert!(buffers.len() < ops::BUFFER_COUNT);
+                assert!(buffers.len() <= 255);
+                code.push(idx as u8);
+            }
             Ast::X => code.push(ops::X),
             Ast::Y => code.push(ops::Y),
             Ast::Z => code.push(ops::Z),
@@ -59,19 +73,19 @@ pub fn compile(ast: &Ast) -> CompilationResult {
                 code.push(idx);
             }
             Ast::Sub(l, r) => {
-                compile_inner(l, code, constants);
-                compile_inner(r, code, constants);
+                compile_inner(l, code, constants, buffers);
+                compile_inner(r, code, constants, buffers);
                 code.push(ops::SUB);
             }
-            Ast::Add(lst) => compile_inner_list(lst, code, constants, ops::ADD, "add"),
-            Ast::Max(lst) => compile_inner_list(lst, code, constants, ops::MAX, "max"),
-            Ast::Min(lst) => compile_inner_list(lst, code, constants, ops::MIN, "min"),
+            Ast::Add(lst) => compile_inner_list(lst, code, constants, buffers, ops::ADD, "add"),
+            Ast::Max(lst) => compile_inner_list(lst, code, constants, buffers, ops::MAX, "max"),
+            Ast::Min(lst) => compile_inner_list(lst, code, constants, buffers, ops::MIN, "min"),
             Ast::Abs(t) => {
-                compile_inner(t, code, constants);
+                compile_inner(t, code, constants, buffers);
                 code.push(ops::ABS);
             }
             Ast::Sqrt(t) => {
-                compile_inner(t, code, constants);
+                compile_inner(t, code, constants, buffers);
                 code.push(ops::SQRT);
             }
         }
@@ -84,11 +98,13 @@ pub fn compile(ast: &Ast) -> CompilationResult {
     }
     let mut constants = vec![];
     let max_stack = depth(ast);
-    compile_inner(ast, &mut code, &mut constants);
+    let mut buffers = vec![];
+    compile_inner(ast, &mut code, &mut constants, &mut buffers);
     CompilationResult {
         code,
         constants,
         max_stack,
+        buffers,
     }
 }
 
@@ -100,6 +116,7 @@ fn compile_basic_constant() {
             code: vec![ops::CONSTANT_SMALL, 0],
             constants: vec![10.0],
             max_stack: 1,
+            buffers: vec![],
         }
     )
 }
@@ -112,6 +129,7 @@ fn compile_basic_max() {
             code: vec![ops::CONSTANT_SMALL, 0, ops::CONSTANT_SMALL, 1, ops::MAX],
             constants: vec![10.0, 5.0],
             max_stack: 2,
+            buffers: vec![],
         }
     )
 }
@@ -137,6 +155,7 @@ fn compile_more_max() {
             ],
             constants: vec![10.0, 5.0, 2.0],
             max_stack: 2,
+            buffers: vec![],
         }
     )
 }

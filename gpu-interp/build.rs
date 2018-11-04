@@ -17,13 +17,53 @@ fn main() -> Result<(), Box<Error>> {
     let mut rust_file = File::create(&Path::join(dest_path, "opcodes.rs"))?;
     let mut opencl_file = File::create(&Path::join(dest_path, "opcodes.c"))?;
 
+    let mut buffer_count = 0;
+
     for (i, op) in opcodes.enumerate() {
         match op.trim().chars().next() {
             None | Some('#') => continue,
             Some(_) => {}
         }
-        writeln!(&mut rust_file, "pub const {}:u8 = {};", op.to_uppercase(), i);
+
+        if op.starts_with("buffer_") {
+            buffer_count += 1;
+        }
+
+        writeln!(
+            &mut rust_file,
+            "pub const {}:u8 = {};",
+            op.to_uppercase(),
+            i
+        );
         writeln!(&mut opencl_file, "#define OP_{} {}", op.to_uppercase(), i);
+    }
+
+    writeln!(
+        &mut rust_file,
+        "pub const BUFFER_COUNT:usize = {};",
+        buffer_count
+    );
+    {
+        write!(&mut opencl_file, "#define INPUT_BUFFERS ");
+        let mut args = (0..buffer_count)
+            .map(|i| format!("__global float* BUFFER_{}", i))
+            .flat_map(|a| vec![a, ",".to_string()])
+            .collect::<Vec<_>>();
+        args.pop();
+        let args = args.concat();
+        writeln!(&mut opencl_file, "{}", args);
+    }
+    {
+        write!(&mut opencl_file, "#define IMPLEMENT_INPUT_BUFFERS ");
+        for i in 0..buffer_count {
+            let pusher = "stack[stack_ptr++] = v;";
+            write!(
+                &mut opencl_file,
+                "case {}: {{float v = BUFFER_{}[pos]; {} break;}}",
+                i, i, pusher
+            );
+        }
+        writeln!(&mut opencl_file);
     }
 
     Ok(())

@@ -1,3 +1,9 @@
+buffer_0
+buffer_1
+buffer_2
+buffer_3
+
+# A "small" constant is one whose index fits in a byte.
 constant_small
 x
 y

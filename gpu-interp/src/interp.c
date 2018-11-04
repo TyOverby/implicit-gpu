@@ -7,16 +7,20 @@ __kernel void apply(
     __global float* consts,
     __global char* program,
     __global float* stack,
+    INPUT_BUFFERS,
     ulong max_stack,
     ulong width,
+    ulong height,
     ulong instr_length)
 {
     size_t x = get_global_id(0);
     size_t y = get_global_id(1);
-    size_t pos = x + y * width;
+    size_t z = get_global_id(2);
+    size_t pos = x + (y * width) + (z * width * height);
 
     float x_s = (float) x;
     float y_s = (float) y;
+    float z_s = (float) z;
 
     size_t stack_ptr = pos * max_stack;
 
@@ -25,9 +29,9 @@ __kernel void apply(
 
         printf("code: %d\n", (int)code);
         switch (code) {
+            IMPLEMENT_INPUT_BUFFERS
             case OP_CONSTANT_SMALL: {
-                int constant_index = program[i+1];
-                i ++;
+                int constant_index = program[++i];
                 PUSH(consts[constant_index]);
                 break;
             }
@@ -41,7 +45,7 @@ __kernel void apply(
             }
             case OP_Z: {
                 printf("z not supported yet");
-                PUSH(0.0);
+                PUSH(z_s);
                 break;
             }
             case OP_ADD: {
