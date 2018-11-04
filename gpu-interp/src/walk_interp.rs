@@ -4,7 +4,12 @@ pub fn interpret(ast: &Ast, x: f32, y: f32, z: f32) -> f32 {
     match ast {
         Ast::Constant(c) => *c,
         Ast::Buffer(_) => unimplemented!(),
-        Ast::Transform { .. } => unimplemented!(),
+        Ast::Transform { target, matrix } => {
+            let ::euclid::Point3D { x, y, z, .. } = matrix
+                .transform_point3d(&::euclid::point3(x, y, z))
+                .unwrap();
+            interpret(target, x, y, z)
+        }
         Ast::X => x,
         Ast::Y => y,
         Ast::Z => z,
