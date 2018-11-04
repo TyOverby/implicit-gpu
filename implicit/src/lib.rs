@@ -7,6 +7,7 @@ extern crate vectorphile;
 // My crates
 extern crate expectation;
 extern crate expectation_plugin;
+extern crate expectation_shared;
 
 // External Crates
 extern crate euclid;

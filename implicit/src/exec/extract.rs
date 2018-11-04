@@ -36,7 +36,7 @@ fn run_shape_paths(shape: Shape, width: usize, height: usize, provider: Provider
     use opencl::OpenClContext;
 
     let ctx = OpenClContext::default();
-    let buffer = exec_shape(&ctx, shape, width, height, |_| unimplemented!());
+    let buffer = exec_shape(&ctx, provider.duplicate(), shape, width, height, |_| unimplemented!());
     let mut extracted = extract_lines(&ctx, provider.duplicate(), &buffer);
     extracted.sort();
 

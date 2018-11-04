@@ -1,3 +1,5 @@
+overlay_test_sub
+overlay_test
 waiting_room_art
 empty_dragged_circle
 dragged_circle
@@ -30,8 +32,6 @@ circles_intersection
 circles_intersection_freeze
 basic_poly
 expanded_poly
-overlay_test
-overlay_test_sub
 scaled_circle
 translated_circle
 translated_and_scaled_circle

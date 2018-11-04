@@ -350,6 +350,7 @@ dependencies = [
  "aabb-quadtree 0.1.0",
  "euclid 0.19.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "expectation 0.1.1",
+ "expectation-shared 0.1.0",
  "expectation_plugin 0.1.2",
  "flame 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "fnv 1.0.6 (registry+https://github.com/rust-lang/crates.io-index)",

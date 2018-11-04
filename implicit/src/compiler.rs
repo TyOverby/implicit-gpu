@@ -1,8 +1,13 @@
 use gpu_interp::Ast;
+use ocaml::Id;
 use ocaml::{Shape, Terminal};
+use opencl::FieldBuffer;
 use typed_arena::Arena;
 
-pub fn compile<'a>(shape: &Shape, arena: &'a Arena<Ast<'a>>) -> Ast<'a> {
+pub fn compile<'a, F>(shape: &Shape, arena: &'a Arena<Ast<'a>>, find_buffer: &F) -> Ast<'a>
+where
+    F: Fn(Id) -> FieldBuffer,
+{
     match shape {
         Shape::Terminal(Terminal::Circle(c)) => {
             let dx = Ast::Sub(arena.alloc(Ast::X), arena.alloc(Ast::Constant(c.x)));
@@ -14,28 +19,51 @@ pub fn compile<'a>(shape: &Shape, arena: &'a Arena<Ast<'a>>) -> Ast<'a> {
             let sqrt = Ast::Sqrt(arena.alloc(dx2_plus_dy2));
             Ast::Sub(arena.alloc(Ast::Constant(c.r)), arena.alloc(sqrt))
         }
-        Shape::Terminal(_) => unimplemented!(),
+        Shape::Terminal(Terminal::Field(id)) => {
+            let buffer = find_buffer(*id);
+            let (width, height) = buffer.dims;
+            Ast::Buffer(::gpu_interp::Buffer::from_opencl(
+                buffer.internal.clone(),
+                width as u32,
+                height as u32,
+                1,
+            ))
+        }
+        Shape::Terminal(Terminal::Rect(rect)) => {
+            let ::ocaml::Rect { x, y, w, h } = *rect;
+            let top = (x, y, x + w, y);
+            let right = (x + w, y, x + w, y + h);
+            let bot = (x + w, y + h, x, y + h);
+            let left = (x, y + h, x, y);
+            Ast::DistToPoly(vec![top, right, bot, left])
+        }
         Shape::Not(target) => {
-            let child = compile(target, arena);
+            let child = compile(target, arena, find_buffer);
             Ast::Neg(arena.alloc(child))
         }
         Shape::Union(shapes) => {
-            let children = arena.alloc_extend(shapes.into_iter().map(|s| compile(s, arena)));
-            Ast::Max(children)
+            let children = shapes
+                .into_iter()
+                .map(|s| compile(s, arena, find_buffer))
+                .collect::<Vec<_>>();
+            Ast::Min(arena.alloc_extend(children))
         }
         Shape::Intersection(shapes) => {
-            let children = arena.alloc_extend(shapes.into_iter().map(|s| compile(s, arena)));
-            Ast::Max(children)
+            let children = shapes
+                .into_iter()
+                .map(|s| compile(s, arena, find_buffer))
+                .collect::<Vec<_>>();
+            Ast::Max(arena.alloc_extend(children))
         }
         Shape::Modulate(target, how_much) => {
-            let child = compile(target, arena);
-            Ast::Add(arena.alloc_extend(vec![child, Ast::Constant(*how_much)].into_iter()))
+            let child = compile(target, arena, find_buffer);
+            Ast::Add(arena.alloc_extend(vec![child, Ast::Constant(-*how_much)].into_iter()))
         }
         Shape::Transform(target, matrix) => {
-            let child = compile(target, arena);
+            let child = compile(target, arena, find_buffer);
             Ast::Transform {
                 target: arena.alloc(child),
-                matrix: matrix.to_3d().inverse().unwrap(),
+                matrix: matrix.inverse().unwrap().to_3d(),
             }
         }
     }

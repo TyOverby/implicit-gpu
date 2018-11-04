@@ -229,6 +229,8 @@ let waiting_room_art =
   union [left ; subtract right right_small]
 
 let tests = [
+  "overlay_test_sub", overlay_test_sub |> scale ~dx:3.0 ~dy:3.0;
+  "overlay_test", overlay_test;
   "waiting_room_art", waiting_room_art;
   "empty_dragged_circle", empty_dragged_circle;
   "dragged_circle", dragged_circle;
@@ -262,8 +264,6 @@ let tests = [
   "circles_intersection_freeze", circles_intersection_freeze;
   "basic_poly", basic_poly;
   "expanded_poly", expanded_poly;
-  "overlay_test", overlay_test;
-  "overlay_test_sub", overlay_test_sub |> scale ~dx:3.0 ~dy:3.0;
   "scaled_circle", scaled_circle;
   "translated_circle", translated_circle;
   "translated_and_scaled_circle", translated_and_scaled_circle;

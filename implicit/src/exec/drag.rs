@@ -44,10 +44,18 @@ fn drag_shape_helper(
 ) {
     use debug::*;
     use exec::exec_shape;
+    use inspector::Inspector;
 
     let ctx = OpenClContext::default();
 
-    let before_buffer = exec_shape(&ctx, shape, width, height, |_| unimplemented!());
+    let before_buffer = exec_shape(
+        &ctx,
+        provider.duplicate(),
+        shape,
+        width,
+        height,
+        |_| unimplemented!(),
+    );
     let after_buffer = exec_drag(&ctx, &before_buffer, dx, dy);
 
     let w_color = provider.png_writer("before.color.png");

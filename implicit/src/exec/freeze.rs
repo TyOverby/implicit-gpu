@@ -27,10 +27,18 @@ pub fn exec_freeze(ctx: &OpenClContext, field: &FieldBuffer) -> FieldBuffer {
 fn freeze_shape_helper(shape: Shape, width: usize, height: usize, provider: Provider) {
     use debug::*;
     use exec::exec_shape;
+    use inspector::Inspector;
 
     let ctx = OpenClContext::default();
 
-    let before_buffer = exec_shape(&ctx, shape, width, height, |_| unimplemented!());
+    let before_buffer = exec_shape(
+        &ctx,
+        provider.duplicate(),
+        shape,
+        width,
+        height,
+        |_| unimplemented!(),
+    );
     let after_buffer = exec_freeze(&ctx, &before_buffer);
 
     let w_color = provider.png_writer("before.color.png");

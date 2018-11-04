@@ -24,6 +24,8 @@ typed-arena = "1.4.1"
 #expectation_plugin  = "0.1.2"
 [dependencies.expectation]
 path = "../../expectation/expectation"
+[dependencies.expectation-shared]
+path = "../../expectation/expectation-shared"
 [dependencies.expectation_plugin]
 path = "../../expectation/expectation-plugin"
 

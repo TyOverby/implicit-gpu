@@ -6,3 +6,6 @@ Cargo.lock
 **/*.rs.bk
 .idea
 out.html
+main_out
+out.svg
+perf.html

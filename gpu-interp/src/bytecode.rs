@@ -4,6 +4,41 @@ pub mod ops {
     include!(concat!(env!("OUT_DIR"), "/opcodes.rs"));
 }
 
+#[derive(PartialOrd, PartialEq)]
+struct OrderedF32(f32);
+
+pub struct ConstantCache {
+    map: ::std::collections::BTreeMap<OrderedF32, u32>,
+}
+impl Eq for OrderedF32 {}
+
+impl Ord for OrderedF32 {
+    fn cmp(&self, other: &Self) -> ::std::cmp::Ordering {
+        self.partial_cmp(other)
+            .unwrap_or(::std::cmp::Ordering::Equal)
+    }
+}
+
+impl ConstantCache {
+    fn new() -> ConstantCache {
+        ConstantCache {
+            map: ::std::collections::BTreeMap::new(),
+        }
+    }
+    fn record(&mut self, value: f32) -> u32 {
+        let size = self.map.len();
+        *self.map.entry(OrderedF32(value)).or_insert(size as u32)
+    }
+    fn to_vec(self) -> Vec<f32> {
+        let mut v = self.map.into_iter().collect::<Vec<_>>();
+        v.sort_by_key(|&(_, v)| v);
+        v.into_iter().map(|(OrderedF32(k), _)| k).collect()
+    }
+    fn len(&self) -> u32 {
+        self.map.len() as u32
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub struct CompilationResult {
     pub code: Vec<u8>,
@@ -17,7 +52,7 @@ pub fn compile(ast: &Ast) -> CompilationResult {
     fn transform_depth(ast: &Ast) -> u32 {
         use std::cmp::max;
         match ast {
-            Ast::X | Ast::Y | Ast::Z => 1,
+            Ast::X | Ast::Y | Ast::Z | Ast::DistToPoly(_) => 1,
             Ast::Constant(_) | Ast::Buffer(_) => 0,
             Ast::Transform { target, .. } => 1 + transform_depth(target),
             Ast::Sub(l, r) => max(transform_depth(l), transform_depth(r)),
@@ -31,6 +66,7 @@ pub fn compile(ast: &Ast) -> CompilationResult {
         use std::cmp::max;
         match ast {
             Ast::X | Ast::Y | Ast::Z | Ast::Constant(_) | Ast::Buffer(_) => 1,
+            Ast::DistToPoly(v) => 2 * (v.len() as u32),
             Ast::Transform { target, .. } => depth(target),
             Ast::Sub(l, r) => max(depth(l), depth(r)) + 1,
             Ast::Mul(lst) | Ast::Add(lst) | Ast::Min(lst) | Ast::Max(lst) => {
@@ -43,13 +79,19 @@ pub fn compile(ast: &Ast) -> CompilationResult {
     fn compile_inner(
         ast: &Ast,
         code: &mut Vec<u8>,
-        constants: &mut Vec<f32>,
+        constants: &mut ConstantCache,
         buffers: &mut Vec<Buffer>,
     ) {
+        fn push_const(constant: f32, code: &mut Vec<u8>, constants: &mut ConstantCache) {
+            if constants.len() >= 255 {
+                panic!("large constants not supported yet")
+            }
+            code.push(constants.record(constant) as u8);
+        }
         fn compile_inner_list(
             asts: &[Ast],
             code: &mut Vec<u8>,
-            constants: &mut Vec<f32>,
+            constants: &mut ConstantCache,
             buffers: &mut Vec<Buffer>,
             op: u8,
             name: &str,
@@ -75,42 +117,39 @@ pub fn compile(ast: &Ast) -> CompilationResult {
             Ast::Y => code.push(ops::Y),
             Ast::Z => code.push(ops::Z),
             Ast::Constant(c) => {
-                if constants.len() >= 255 {
-                    panic!("large constants not supported yet")
-                }
-                let idx = constants.len() as u8;
-                constants.push(*c);
                 code.push(ops::CONSTANT_SMALL);
-                code.push(idx);
+                push_const(*c, code, constants);
+            }
+            Ast::DistToPoly(v) => {
+                for (x1, y1, x2, y2) in v {
+                    code.push(ops::DIST_TO_LINE);
+                    push_const(*x1, code, constants);
+                    push_const(*y1, code, constants);
+                    push_const(*x2, code, constants);
+                    push_const(*y2, code, constants);
+                }
+                code.push(ops::COLLECT_POLY);
+                assert!(v.len() <= 255);
+                code.push(v.len() as u8);
             }
             Ast::Transform { target, matrix } => {
                 code.push(ops::PUSH_TRANSFORM);
-                {
-                    let mut push_const = |constant| {
-                        if constants.len() >= 255 {
-                            panic!("large constants not supported yet")
-                        }
-                        let idx = constants.len() as u8;
-                        constants.push(constant);
-                        code.push(idx);
-                    };
-                    push_const(matrix.m11);
-                    push_const(matrix.m21);
-                    push_const(matrix.m31);
-                    push_const(matrix.m41);
-                    push_const(matrix.m12);
-                    push_const(matrix.m22);
-                    push_const(matrix.m32);
-                    push_const(matrix.m42);
-                    push_const(matrix.m13);
-                    push_const(matrix.m23);
-                    push_const(matrix.m33);
-                    push_const(matrix.m43);
-                    push_const(matrix.m14);
-                    push_const(matrix.m24);
-                    push_const(matrix.m34);
-                    push_const(matrix.m44);
-                }
+                push_const(matrix.m11, code, constants);
+                push_const(matrix.m12, code, constants);
+                push_const(matrix.m13, code, constants);
+                push_const(matrix.m14, code, constants);
+                push_const(matrix.m21, code, constants);
+                push_const(matrix.m22, code, constants);
+                push_const(matrix.m23, code, constants);
+                push_const(matrix.m24, code, constants);
+                push_const(matrix.m31, code, constants);
+                push_const(matrix.m32, code, constants);
+                push_const(matrix.m33, code, constants);
+                push_const(matrix.m34, code, constants);
+                push_const(matrix.m41, code, constants);
+                push_const(matrix.m42, code, constants);
+                push_const(matrix.m43, code, constants);
+                push_const(matrix.m44, code, constants);
                 compile_inner(target, code, constants, buffers);
                 code.push(ops::POP_TRANSFORM);
             }
@@ -143,14 +182,14 @@ pub fn compile(ast: &Ast) -> CompilationResult {
     }
 
     let mut code = vec![];
-    let mut constants = vec![];
+    let mut constants = ConstantCache::new();
     let max_stack = depth(ast);
     let transform_depth = transform_depth(ast);
     let mut buffers = vec![];
     compile_inner(ast, &mut code, &mut constants, &mut buffers);
     CompilationResult {
         code,
-        constants,
+        constants: constants.to_vec(),
         max_stack,
         buffers,
         transform_depth,
@@ -252,28 +291,26 @@ fn compile_a_transform() {
                 ops::PUSH_TRANSFORM,
                 0,
                 1,
+                1,
+                1,
+                1,
+                0,
+                1,
+                1,
+                1,
+                1,
+                0,
+                1,
                 2,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15,
+                2,
+                2,
+                0,
                 ops::X,
                 ops::Y,
                 ops::MAX,
                 ops::POP_TRANSFORM
             ],
-            constants: vec![
-                1.0, 0.0, 0.0, 2.0, 0.0, 1.0, 0.0, 2.0, 0.0, 0.0, 1.0, 2.0, 0.0, 0.0, 0.0, 1.0
-            ],
+            constants: vec![1.0, 0.0, 2.0],
             max_stack: 2,
             transform_depth: 2,
             buffers: vec![],

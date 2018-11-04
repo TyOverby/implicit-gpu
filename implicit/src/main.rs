@@ -1,12 +1,17 @@
+extern crate expectation;
+extern crate expectation_shared;
 extern crate flame;
 extern crate implicit;
 extern crate serde;
 extern crate snoot;
 
+use expectation_shared::filesystem::{ReadSeek, RealFileSystem};
 use implicit::ocaml::*;
 use snoot::serde_serialization::{deserialize, DeserializeResult};
 use std::io::Read;
 use std::io::{stdin, stdout};
+
+use expectation::{extensions::*, Provider};
 
 fn main() {
     let mut out = String::new();
@@ -27,7 +32,19 @@ fn main() {
         }
     };
 
-    let output = implicit::exec::exec(command, Box::new(()), w.ceil() as usize, h.ceil() as usize);
+    let output = implicit::exec::exec(
+        command,
+        Box::new(Provider::new(
+            Box::new(RealFileSystem {
+                root: "./main_out/actual".into(),
+            }),
+            Box::new(RealFileSystem {
+                root: "./main_out/expected".into(),
+            }),
+        )),
+        w.ceil() as usize,
+        h.ceil() as usize,
+    );
     let output: Vec<_> = output.into_iter().flat_map(|(_, v)| v).collect();
     implicit::debug::svg_path_segments(stdout(), &output).unwrap();
 

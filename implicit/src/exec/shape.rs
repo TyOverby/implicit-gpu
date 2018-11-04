@@ -1,3 +1,4 @@
+use inspector::BoxedInspector;
 use ocaml::{Id, Shape};
 use old_compiler::{compile, CompileResult};
 use opencl::{FieldBuffer, OpenClContext};
@@ -47,18 +48,21 @@ where
 
 pub fn exec_shape<F>(
     ctx: &OpenClContext,
+    inspector: BoxedInspector,
     shape: Shape,
     width: usize,
     height: usize,
-    _buffer_find: F,
+    buffer_find: F,
 ) -> FieldBuffer
 where
     F: Fn(Id) -> FieldBuffer,
 {
     let arena = ::typed_arena::Arena::new();
-    let output = ::compiler::compile(&shape, &arena);
+    let output = ::compiler::compile(&shape, &arena, &buffer_find);
+    inspector.write_ast("ast", &output);
 
     let compiled = ::gpu_interp::compile(&output);
+    inspector.write_compiled("compiled", &compiled);
     let mut buf = ::gpu_interp::execute(
         compiled,
         width as u32,
@@ -87,7 +91,9 @@ fn run_shape_helper(
 ) -> FieldBuffer {
     use debug::*;
 
-    let buffer = exec_shape(ctx, shape, width, height, |i| fields[i as usize].clone());
+    let buffer = exec_shape(ctx, Box::new(provider), shape, width, height, |i| {
+        fields[i as usize].clone()
+    });
 
     let w_color = provider.png_writer("out.color.png");
     save_field_buffer(&buffer, w_color, ColorMode::Debug);
@@ -143,12 +149,50 @@ fn exec_rounded_rect_with_scale_on_top(provider: Provider) {
         h: 10.0,
     }));
     let rounded_rect = Shape::Modulate(Box::new(inner_rect), 5.0);
-    let scaled = Shape::Transform(
-        Box::new(rounded_rect),
-        Transform2D::identity().post_scale(3.0, 1.0),
-    );
+    let scaled = Shape::Transform(Box::new(rounded_rect), Transform2D::create_scale(3.0, 1.0));
 
     run_shape_helper(&ctx, scaled, 66, 24, provider, &[]);
+}
+
+#[expectation_test]
+fn exec_rect_translated(provider: Provider) {
+    use euclid::*;
+    use ocaml::Rect;
+    use ocaml::*;
+
+    let ctx = OpenClContext::default();
+    let inner_rect = Shape::Terminal(Terminal::Rect(Rect {
+        x: 6.0,
+        y: 6.0,
+        w: 10.0,
+        h: 10.0,
+    }));
+
+    let translated = Shape::Transform(
+        Box::new(inner_rect),
+        Transform2D::create_translation(5.0, 5.0),
+    );
+
+    run_shape_helper(&ctx, translated, 33, 24, provider, &[]);
+}
+#[expectation_test]
+fn exec_circle_translated(provider: Provider) {
+    use euclid::*;
+    use ocaml::*;
+
+    let ctx = OpenClContext::default();
+    let inner_rect = Shape::Terminal(Terminal::Circle(Circle {
+        x: 0.0,
+        y: 0.0,
+        r: 5.0,
+    }));
+
+    let translated = Shape::Transform(
+        Box::new(inner_rect),
+        Transform2D::create_translation(6.0, 6.0),
+    );
+
+    run_shape_helper(&ctx, translated, 33, 24, provider, &[]);
 }
 
 #[expectation_test]

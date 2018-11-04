@@ -1,3 +1,4 @@
+# Buffer lists
 buffer_0
 buffer_1
 buffer_2
@@ -8,14 +9,26 @@ constant_small
 x
 y
 z
+
+# Binary arith
 add
 mul
-square
 sub
+square
+
+# Binary comparison
 max
 min
+
+# Unary
 abs
 sqrt
 neg
+
+# Polygon
+dist_to_line
+collect_poly
+
+# Transformation
 push_transform
 pop_transform

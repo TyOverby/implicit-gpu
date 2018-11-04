@@ -29,6 +29,7 @@ pub enum Ast<'a> {
     Neg(AstPtr<'a>),
     Sqrt(AstPtr<'a>),
     Square(AstPtr<'a>),
+    DistToPoly(Vec<(f32, f32, f32, f32)>),
     Transform {
         target: AstPtr<'a>,
         matrix: euclid::Transform3D<f32>,

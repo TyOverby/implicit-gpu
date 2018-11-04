@@ -39,5 +39,6 @@ pub fn interpret(ast: &Ast, x: f32, y: f32, z: f32) -> f32 {
             let v = interpret(a, x, y, z);
             v * v
         }
+        Ast::DistToPoly(_) => unimplemented!(),
     }
 }

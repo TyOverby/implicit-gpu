@@ -59,7 +59,9 @@ fn exec_inner(
             mapping.insert(id, field);
         }
         Command::Define(id, Value::BasicShape(shape)) => {
-            let field = exec_shape(ctx, shape, width, height, |id| mapping[&id].clone());
+            let field = exec_shape(ctx, inspector.duplicate(), shape, width, height, |id| {
+                mapping[&id].clone()
+            });
             inspector.write_field(&format!("shape_{}", id), &field);
             mapping.insert(id, field);
         }
