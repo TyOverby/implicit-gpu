@@ -68,7 +68,7 @@ pub fn run_poly_raw_no_sign(
     ctx: &OpenClContext,
 ) -> FieldBuffer {
     let _guard = ::flame::start_guard("run_poly_raw");
-    let out = ctx.field_buffer(width, height, None);
+    let out = ctx.field_buffer(width, height, 1, None);
     let mut kernel = ctx.compile("apply_no_sign", PROGRAM, |register| {
         register.buffer("buffer");
         register.long("width");
@@ -99,7 +99,7 @@ pub fn run_poly_raw_with_sign(
     ctx: &OpenClContext,
 ) -> FieldBuffer {
     let _guard = ::flame::start_guard("run_poly_raw");
-    let out = ctx.field_buffer(width, height, None);
+    let out = ctx.field_buffer(width, height, 1, None);
     let mut kernel = ctx.compile("apply_with_sign", PROGRAM, |register| {
         register.buffer("buffer");
         register.buffer("signbuffer");

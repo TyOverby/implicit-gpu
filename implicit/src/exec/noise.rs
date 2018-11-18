@@ -16,7 +16,7 @@ pub fn get_noise(
     cutoff: f32,
     matrix: Matrix,
 ) -> FieldBuffer {
-    let out = ctx.field_buffer(width, height, None);
+    let out = ctx.field_buffer(width, height, 1, None);
     let mut kernel = ctx.compile("apply", PROGRAM, |register| {
         register.buffer("buffer");
         register.long("width");

@@ -37,7 +37,7 @@ pub fn run_marching(input: &FieldBuffer, ctx: &OpenClContext) -> (LineBuffer, u3
 #[test]
 fn basic() {
     fn test_this(a: f32, b: f32, c: f32, d: f32, ctx: &OpenClContext) -> ((f32, f32), (f32, f32)) {
-        let buf = ctx.field_buffer(2, 2, Some(&[a, b, d, c]));
+        let buf = ctx.field_buffer(2, 2, 1, Some(&[a, b, d, c]));
         let lines = run_marching(&buf, &ctx).0.values(None);
 
         return ((lines[0], lines[1]), (lines[2], lines[3]));

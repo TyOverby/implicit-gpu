@@ -36,6 +36,7 @@ mod marching;
 mod old_compiler;
 mod opencl;
 mod polygon;
+pub mod surface_net;
 
 pub mod exec;
 pub mod ocaml;

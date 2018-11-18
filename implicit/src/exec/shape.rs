@@ -20,7 +20,7 @@ where
     let mut writer: Vec<u8> = vec![];
     let CompileResult { dependencies, .. } = compile(&shape, &mut writer).unwrap();
 
-    let out = ctx.field_buffer(width, height, None);
+    let out = ctx.field_buffer(width, height, 1, None);
 
     let mut kernel = ctx.compile("apply", String::from_utf8(writer).unwrap(), |register| {
         register.buffer("buffer");
@@ -75,7 +75,7 @@ where
     );
 
     FieldBuffer {
-        dims: (width, height),
+        dims: (width, height, 1),
         internal: buf.to_opencl(ctx.queue()).clone(),
     }
 }

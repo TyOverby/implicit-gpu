@@ -2,12 +2,18 @@ use ocl::Buffer;
 
 #[derive(Debug, Clone)]
 pub struct FieldBuffer {
-    pub dims: (usize, usize),
+    pub dims: (usize, usize, usize),
     pub internal: Buffer<f32>,
 }
 
 #[derive(Debug, Clone)]
 pub struct LineBuffer {
+    pub size: usize,
+    pub internal: Buffer<f32>,
+}
+
+#[derive(Debug, Clone)]
+pub struct TriangleBuffer {
     pub size: usize,
     pub internal: Buffer<f32>,
 }
@@ -53,6 +59,41 @@ impl FieldBuffer {
 }
 
 impl LineBuffer {
+    pub fn size(&self) -> usize {
+        self.size
+    }
+
+    pub fn values(&self, _count: Option<u32>) -> Vec<f32> {
+        let _guard = ::flame::start_guard("line buffer values");
+        let count = self.size();
+        let mut out = vec![0.0; count];
+        self.internal.read(&mut out).enq().unwrap();
+        if let Some(count) = _count {
+            let count = count as usize;
+            out.drain(count..);
+        }
+        out
+    }
+
+    pub fn non_nans_at_front(&self) -> bool {
+        let _guard = ::flame::start_guard("line buffer non-nans-at-front");
+        let mut seen_nan = false;
+        for v in self.values(None) {
+            if v.is_nan() {
+                seen_nan = true;
+            } else if seen_nan {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    pub fn buffer(&self) -> &Buffer<f32> {
+        &self.internal
+    }
+}
+
+impl TriangleBuffer {
     pub fn size(&self) -> usize {
         self.size
     }

@@ -145,12 +145,24 @@ impl OpenClContext {
         }
     }
 
-    pub fn field_buffer(&self, width: usize, height: usize, fill: Option<&[f32]>) -> FieldBuffer {
+    pub fn field_buffer(
+        &self,
+        width: usize,
+        height: usize,
+        depth: usize,
+        fill: Option<&[f32]>,
+    ) -> FieldBuffer {
         let _guard = ::flame::start_guard("OpenClContext::field_buffer");
 
-        let builder: BufferBuilder<f32> = BufferBuilder::new()
-            .queue(self.queue.clone())
-            .len(&[width, height]);
+        let builder = if depth == 1 {
+            BufferBuilder::new()
+                .queue(self.queue.clone())
+                .len(&[width, height])
+        } else {
+            BufferBuilder::new()
+                .queue(self.queue.clone())
+                .len(&[width, height, depth])
+        };
 
         let internal = if let Some(fill) = fill {
             if fill.len() == 1 {
@@ -165,27 +177,40 @@ impl OpenClContext {
         };
 
         FieldBuffer {
-            dims: (width, height),
+            dims: (width, height, depth),
             internal,
         }
     }
 
-    pub fn field_buffer_nan(&self, width: usize, height: usize) -> FieldBuffer {
+    pub fn field_buffer_nan(&self, width: usize, height: usize, depth: usize) -> FieldBuffer {
         let _guard = ::flame::start_guard("OpenClContext::field_buffer_inf");
         let buffer = &[::std::f32::NAN][..];
-        self.field_buffer(width, height, Some(buffer))
+        self.field_buffer(width, height, depth, Some(buffer))
     }
 
-    pub fn field_buffer_inf(&self, width: usize, height: usize) -> FieldBuffer {
+    pub fn field_buffer_inf(&self, width: usize, height: usize, depth: usize) -> FieldBuffer {
         let _guard = ::flame::start_guard("OpenClContext::field_buffer_inf");
         let buffer = &[::std::f32::INFINITY][..];
-        self.field_buffer(width, height, Some(buffer))
+        self.field_buffer(width, height, depth, Some(buffer))
     }
 
-    pub fn field_buffer_neg_inf(&self, width: usize, height: usize) -> FieldBuffer {
+    pub fn field_buffer_neg_inf(&self, width: usize, height: usize, depth: usize) -> FieldBuffer {
         let _guard = ::flame::start_guard("OpenClContext::field_buffer_neg_inf");
         let buffer = &[::std::f32::NEG_INFINITY][..];
-        self.field_buffer(width, height, Some(buffer))
+        self.field_buffer(width, height, depth, Some(buffer))
+    }
+
+    pub fn triangle_buffer_uninit(&self, len: usize) -> TriangleBuffer {
+        let _guard = ::flame::start_guard("OpenClContext::linear_buffer");
+        let internal = BufferBuilder::new()
+            .queue(self.queue.clone())
+            .len(&[len])
+            .build()
+            .unwrap();
+        TriangleBuffer {
+            size: len,
+            internal,
+        }
     }
 
     pub fn line_buffer_uninit(&self, len: usize) -> LineBuffer {

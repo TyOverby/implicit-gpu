@@ -34,6 +34,7 @@ fn main() {
 
     let output = implicit::exec::exec(
         command,
+        /*
         Box::new(Provider::new(
             Box::new(RealFileSystem {
                 root: "./main_out/actual".into(),
@@ -41,7 +42,8 @@ fn main() {
             Box::new(RealFileSystem {
                 root: "./main_out/expected".into(),
             }),
-        )),
+        )),*/
+        Box::new(()),
         w.ceil() as usize,
         h.ceil() as usize,
     );
@@ -49,4 +51,5 @@ fn main() {
     implicit::debug::svg_path_segments(stdout(), &output).unwrap();
 
     flame::dump_html(std::fs::File::create("perf.html").unwrap()).unwrap();
+    flame::dump_text_to_writer(::std::io::stderr());
 }

@@ -9,7 +9,7 @@ use opencl::{FieldBuffer, OpenClContext};
 const PROGRAM: &'static str = include_str!("../shaders/drag.c");
 
 pub fn exec_drag(ctx: &OpenClContext, input: &FieldBuffer, dx: f32, dy: f32) -> FieldBuffer {
-    let out = ctx.field_buffer(input.width(), input.height(), None);
+    let out = ctx.field_buffer(input.width(), input.height(), 1, None);
     let mut kernel = ctx.compile("apply", PROGRAM, |register| {
         register.buffer("buffer");
         register.buffer("input");
