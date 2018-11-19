@@ -22,6 +22,31 @@ fn sphere<'a>(x: f32, y: f32, z: f32, r: f32, arena: &'a Arena<Ast<'a>>) -> Ast<
     Ast::Mul(arena.alloc_extend(vec![sub, Ast::Constant(1.0)]))
 }
 
+fn torus<'a>(x: f32, y: f32, z: f32, r: f32, a: f32, arena: &'a Arena<Ast<'a>>) -> Ast<'a> {
+    let x2 = Ast::Square(arena.alloc(Ast::X));
+    let y2 = Ast::Square(arena.alloc(Ast::Y));
+    let z2 = Ast::Square(arena.alloc(Ast::Z));
+    let r2 = Ast::Square(arena.alloc(Ast::Constant(r)));
+    let a2 = Ast::Square(arena.alloc(Ast::Constant(a)));
+
+    let lhs = Ast::Add(arena.alloc_extend(vec![
+        x2.clone(),
+        y2.clone(),
+        z2,
+        r2.clone(),
+        Ast::Neg(arena.alloc(a2)),
+    ]));
+    let lhs = Ast::Square(arena.alloc(lhs));
+
+    let rhs = Ast::Mul(arena.alloc_extend(vec![
+        Ast::Constant(4.0),
+        r2,
+        Ast::Add(arena.alloc_extend(vec![x2, y2])),
+    ]));
+
+    Ast::Sub(arena.alloc(lhs), arena.alloc(rhs))
+}
+
 fn main() {
     let arena = Arena::new();
     let ctx = OpenClContext::default();
@@ -38,23 +63,20 @@ fn main() {
             1.0 / (factor as f32),
         ),
     };
+    let program = torus(20.0, 20.0, 20.0, 25.0, 10.0, &arena);
     let compiled = ::gpu_interp::compile(&program);
     let mut buf = ::gpu_interp::execute(
         compiled,
-        20 * factor,
-        20 * factor,
-        20 * factor,
+        40,
+        40,
+        40,
         ::gpu_interp::Triad {
             context: ctx.context().clone(),
             queue: ctx.queue().clone(),
         },
     );
     let field_buffer = FieldBuffer {
-        dims: (
-            20 * factor as usize,
-            20 * factor as usize,
-            20 * factor as usize,
-        ),
+        dims: (40, 40, 40),
         internal: buf.to_opencl(ctx.queue()).clone(),
     };
     let (index_buffer, count, pos_buffer, normal_buffer) =
