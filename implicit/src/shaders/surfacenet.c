@@ -4,7 +4,7 @@
 // What is here is dangerous and repulsive to us.
 // This message is a warning about danger.
 
-long3* OFFSETS = {
+__constant long3 OFFSETS[24] = {
     (long3)(0, 0, 0),(long3) (0, 0, 1),
     (long3)(0, 0, 0),(long3) (0, 1, 0),
     (long3)(0, 0, 0), (long3)(1, 0, 0),
@@ -19,21 +19,45 @@ long3* OFFSETS = {
     (long3)(1, 1, 0), (long3)(1, 1, 1),
 };
 
-float grid_values(float* buffer, long3 position, long3 dims) {
+void printf3(__constant char* prefix, float3 v) {
+    printf("%s: %f %f %f\n", prefix, v.x, v.y, v.z);
+}
+
+void printul3(__constant char* prefix, long3 v) {
+    printf("%s: %ld %ld %ld\n", prefix, v.x, v.y, v.z);
+}
+
+float grid_values(__global float* buffer, long3 position, long3 dims) {
     size_t pos = position.x + (position.y * dims.x) + (position.z * dims.x * dims.y);
     return buffer[pos];
 }
 
+float3 center_values(__global float* centers, long3 position, long3 dims) {
+    size_t pos = position.x + (position.y * dims.x) + (position.z * dims.x * dims.y);
+    size_t pos_3 = pos * 3;
+    float3 res = (float3)(
+         centers[pos_3 + 0],
+         centers[pos_3 + 1],
+         centers[pos_3 + 2]);
+    return res;
+}
+
+void write_float3(float3 v, __global float* out, ulong start, ulong offset) {
+    out[start + offset * 3 + 0] = v.x;
+    out[start + offset * 3 + 1] = v.y;
+    out[start + offset * 3 + 2] = v.z;
+}
+
 float3 find_edge(
-    float* buffer,
+    __global float* buffer,
     long3 coord,
     long3 offset1,
     long3 offset2,
-    long3 dims,
+    long3 dims
 ) {
     float value1 = grid_values(buffer, coord + offset1, dims);
     float value2 = grid_values(buffer, coord + offset2, dims);
-    if ((value 1 < 0.0) == (value2 < 0.0)) {
+    if ((value1 < 0.0) == (value2 < 0.0)) {
         return (float3)(NAN, NAN, NAN);
     }
     float interp = value1 / (value1 - value2);
@@ -45,14 +69,45 @@ float3 find_edge(
     return point;
 }
 
-float3 find_center(float* buffer, long3 coord, long3 dims) {
+long3 normal_offset(long3 coord, long x) {
+    return (long3) (
+        coord.x + (x & 1),
+        coord.y + ((x >> 1) & 1),
+        coord.z + ((x >> 2) & 1)
+    );
+}
+
+float3 find_center(__global float* buffer, long3 coord, long3 dims, float3* normal) {
+    float n_000 = grid_values(buffer, normal_offset(coord, 0), dims);
+    float n_001 = grid_values(buffer, normal_offset(coord, 1), dims);
+    float n_010 = grid_values(buffer, normal_offset(coord, 2), dims);
+    float n_011 = grid_values(buffer, normal_offset(coord, 3), dims);
+    float n_100 = grid_values(buffer, normal_offset(coord, 4), dims);
+    float n_101 = grid_values(buffer, normal_offset(coord, 5), dims);
+    float n_110 = grid_values(buffer, normal_offset(coord, 6), dims);
+    float n_111 = grid_values(buffer, normal_offset(coord, 7), dims);
+
+
+    float normal_x = (n_001 + n_011 + n_101 + n_111)
+            - (n_000 + n_010 + n_100 + n_110);
+    float normal_y = (n_010 + n_011 + n_110 + n_111)
+            - (n_000 + n_001 + n_100 + n_101);
+    float normal_z = (n_100 + n_101 + n_110 + n_111)
+            - (n_000 + n_001 + n_010 + n_011);
+    float normal_len = sqrt(normal_x * normal_x + normal_y * normal_y + normal_z * normal_z);
+    *normal = (float3)(
+        normal_x / normal_len,
+        normal_y / normal_len,
+        normal_z / normal_len
+    );
+
     long count = 0;
     float3 sum = (float3)(0.0, 0.0, 0.0);
-    for (int i = 0; i < 24, i+=2) {
+    for (int i = 0; i < 24; i+=2) {
         long3 a = OFFSETS[i];
         long3 b = OFFSETS[i+1];
         float3 edge = find_edge(buffer, coord, a, b, dims);
-        if (edge.x != NAN) {
+        if (!isnan(edge.x)) {
             count += 1;
             sum += edge;
         }
@@ -73,18 +128,18 @@ enum FaceResult {
     NoFace,
     FacePositive,
     FaceNegative,
-}
+};
 
-FaceResult is_face(
-    float* buffer,
+enum FaceResult is_face(
+    __global float* buffer,
     long3 coord,
     long3 offset,
-    long3 dims,
+    long3 dims
     )
 {
     long3 other = coord + offset;
-    bool a = grid_values(buffer, coord, dims);
-    bool b = grid_values(buffer, other, dims);
+    bool a = grid_values(buffer, coord, dims) < 0.0;
+    bool b = grid_values(buffer, other, dims) < 0.0;
     if (a && !b) {
         return FacePositive;
     } else if (!a && b) {
@@ -95,93 +150,116 @@ FaceResult is_face(
 }
 
 float dist(float3 a, float3 b) {
-    let d = a - b;
+    float3 d = a - b;
     return d.x * d.x + d.y * d.y + d.z * d.z;
 }
 
 void make_triangle(
-    float* buffer,
-    float* out,
+    __global float* buffer,
+    __global float* centers,
+    __global float* out,
     long3 coord,
     long3 offset,
     long3 axis1,
     long3 axis2,
     long3 dims,
-    volatile __global unsigned int *atomic,
+    volatile __global unsigned int *atomic
 ) {
-    FaceResult fr = is_face(buffer, coord, offset, dims;
+    enum FaceResult fr = is_face(buffer, coord, offset, dims);
     if (fr == NoFace) {
         return;
     }
 
-    int p = atomic_inc(atomic);
-    long insert_pos = p * 6;
+    long p = atomic_inc(atomic);
+    long insert_pos = p * 3 * 3 * 2;
 
-    float p1 = grid_values(buffer, coord, dims);
-    float p2 = grid_values(buffer, coord - axis1, dims);
-    float p3 = grid_values(buffer, coord - axis2, dims);
-    float p4 = grid_values(buffer, coord - axis1 - axis2, dims);
+    float3 p1 = center_values(centers, coord, dims);
+    float3 p2 = center_values(centers, coord - axis1, dims);
+    float3 p3 = center_values(centers, coord - axis2, dims);
+    float3 p4 = center_values(centers, coord - axis1 - axis2, dims);
 
     float d14 = dist(p1, p4);
     float d23 = dist(p2, p3);
     if (d14 < d23) {
         if (fr == FacePositive) {
-            out[0 + insert_pos] = v1;
-            out[1 + insert_pos] = v2;
-            out[2 + insert_pos] = v4;
+            write_float3(p1, out, insert_pos, 0);
+            write_float3(p2, out, insert_pos, 1);
+            write_float3(p4, out, insert_pos, 2);
 
-            out[3 + insert_pos] = v1;
-            out[4 + insert_pos] = v4;
-            out[5 + insert_pos] = v3;
+            write_float3(p1, out, insert_pos, 3);
+            write_float3(p4, out, insert_pos, 4);
+            write_float3(p3, out, insert_pos, 5);
         } else {
-            out[0 + insert_pos] = v1;
-            out[1 + insert_pos] = v4;
-            out[2 + insert_pos] = v2;
+            write_float3(p1, out, insert_pos, 0);
+            write_float3(p4, out, insert_pos, 1);
+            write_float3(p2, out, insert_pos, 2);
 
-            out[3 + insert_pos] = v1;
-            out[4 + insert_pos] = v3;
-            out[5 + insert_pos] = v4;
+            write_float3(p1, out, insert_pos, 3);
+            write_float3(p3, out, insert_pos, 4);
+            write_float3(p4, out, insert_pos, 5);
         }
     } else {
         if (fr == FacePositive) {
-            out[0 + insert_pos] = v2;
-            out[1 + insert_pos] = v4;
-            out[2 + insert_pos] = v3;
+            write_float3(p2, out, insert_pos, 0);
+            write_float3(p4, out, insert_pos, 1);
+            write_float3(p3, out, insert_pos, 2);
 
-            out[3 + insert_pos] = v2;
-            out[4 + insert_pos] = v3;
-            out[5 + insert_pos] = v1;
+            write_float3(p2, out, insert_pos, 3);
+            write_float3(p3, out, insert_pos, 4);
+            write_float3(p1, out, insert_pos, 5);
         } else {
-            out[0 + insert_pos] = v2;
-            out[1 + insert_pos] = v3;
-            out[2 + insert_pos] = v4;
+            write_float3(p2, out, insert_pos, 0);
+            write_float3(p3, out, insert_pos, 1);
+            write_float3(p4, out, insert_pos, 2);
 
-            out[3 + insert_pos] = v2;
-            out[4 + insert_pos] = v1;
-            out[5 + insert_pos] = v3;
+            write_float3(p2, out, insert_pos, 3);
+            write_float3(p1, out, insert_pos, 4);
+            write_float3(p3, out, insert_pos, 5);
         }
     }
 }
 
-__kernel void apply(
-    __global float *buffer,
+__kernel void phase_1(
+    __global float* buffer,
     ulong width,
     ulong height,
     ulong depth,
-    __global float *out,
+    __global float* out,
+    __global float* normals
+) {
+    size_t x = get_global_id(0);
+    size_t y = get_global_id(1);
+    size_t z = get_global_id(2);
+
+    size_t pos = x + (y * width) + (z * width * height);
+    float3 normal;
+    float3 center = find_center(buffer, (long3)(x, y, z), (long3)(width, height, depth), &normal);
+    size_t pos_out = pos * 3;
+    out[pos_out + 0] = center.x;
+    out[pos_out + 1] = center.y;
+    out[pos_out + 2] = center.z;
+    normals[pos_out + 0] = normal.x;
+    normals[pos_out + 1] = normal.y;
+    normals[pos_out + 2] = normal.z;
+}
+
+__kernel void phase_2(
+    __global float* buffer,
+    __global float* centers,
+    ulong width,
+    ulong height,
+    ulong depth,
+    __global float* out,
     volatile __global unsigned int *atomic)
 {
     size_t x = get_global_id(0);
     size_t y = get_global_id(1);
     size_t z = get_global_id(2);
 
-    if (x == 0 || y == 0 || z == 0 || x == width - 1 || y == height - 1 || z == depth -1) {
-        return;
-    }
-
     if (y != 0 && z != 0) {
         make_triangle(
             buffer,
+            centers,
             out,
             (long3)(x, y, z),
             (long3)(1, 0, 0),
@@ -194,11 +272,12 @@ __kernel void apply(
     if (x != 0 && z != 0) {
         make_triangle(
             buffer,
+            centers,
             out,
             (long3)(x, y, z),
-            (long3)(1, 0, 0),
             (long3)(0, 1, 0),
             (long3)(0, 0, 1),
+            (long3)(1, 0, 0),
             (long3)(width, height, depth),
             atomic
         );
@@ -206,11 +285,12 @@ __kernel void apply(
     if (x != 0 && y != 0) {
         make_triangle(
             buffer,
+            centers,
             out,
             (long3)(x, y, z),
+            (long3)(0, 0, 1),
             (long3)(1, 0, 0),
             (long3)(0, 1, 0),
-            (long3)(0, 0, 1),
             (long3)(width, height, depth),
             atomic
         );

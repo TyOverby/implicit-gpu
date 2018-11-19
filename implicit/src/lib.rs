@@ -27,15 +27,15 @@ extern crate serde_json;
 
 extern crate num_traits;
 
-mod compiler;
+pub mod compiler;
 pub mod debug;
-mod geometry;
+pub mod geometry;
 pub mod inspector;
-mod lines;
-mod marching;
-mod old_compiler;
-mod opencl;
-mod polygon;
+pub mod lines;
+pub mod marching;
+pub mod old_compiler;
+pub mod opencl;
+pub mod polygon;
 pub mod surface_net;
 
 pub mod exec;

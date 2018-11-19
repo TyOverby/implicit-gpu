@@ -205,6 +205,7 @@ impl OpenClContext {
         let internal = BufferBuilder::new()
             .queue(self.queue.clone())
             .len(&[len])
+            .fill_val(-5.0)
             .build()
             .unwrap();
         TriangleBuffer {

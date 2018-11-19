@@ -4,6 +4,14 @@ version = "0.1.0"
 authors = ["Ty Overby <ty@pre-alpha.com>"]
 workspace = "../"
 
+[[bin]]
+name = "server"
+path = "src/bin/server.rs"
+
+[[bin]]
+name  = "surface_net"
+path = "src/bin/surface_net.rs"
+
 [dependencies]
 #ocl = "0.19.*"
 flame = "0.2.0"

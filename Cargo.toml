@@ -5,5 +5,6 @@ members = [
     "./line-stitch",
     "./vectorphile",
     "./testsuite",
-    "./gpu-interp"
+    "./gpu-interp",
+    "./vis_3d"
 ]

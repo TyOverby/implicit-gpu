@@ -31,6 +31,7 @@ impl SyncBuffer {
         let _guard = ::flame::start_guard("sync buffer value");
         let mut out = vec![0];
         self.internal.read(&mut out).enq().unwrap();
+        // TODO: FUCKING REMOVE THIS MULTIPLICATION
         out[0] * 4 // Multiply by 4 because there are 4 floats in a line
     }
 }
@@ -45,10 +46,13 @@ impl FieldBuffer {
     pub fn height(&self) -> usize {
         self.dims.1
     }
+    pub fn depth(&self) -> usize {
+        self.dims.2
+    }
 
     pub fn values(&self) -> Vec<f32> {
         let _guard = ::flame::start_guard("field buffer values");
-        let mut out = vec![0.0; self.width() * self.height()];
+        let mut out = vec![0.0; self.width() * self.height() * self.depth()];
         self.internal.read(&mut out).enq().unwrap();
         out
     }
@@ -101,7 +105,7 @@ impl TriangleBuffer {
     pub fn values(&self, _count: Option<u32>) -> Vec<f32> {
         let _guard = ::flame::start_guard("line buffer values");
         let count = self.size();
-        let mut out = vec![0.0; count];
+        let mut out = vec![::std::f32::NAN; count];
         self.internal.read(&mut out).enq().unwrap();
         if let Some(count) = _count {
             let count = count as usize;

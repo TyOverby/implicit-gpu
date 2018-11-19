@@ -1,35 +1,95 @@
-use opencl::{FieldBuffer, LineBuffer, OpenClContext};
+use opencl::{FieldBuffer, OpenClContext, TriangleBuffer};
 
 const PROGRAM: &'static str = include_str!("shaders/surfacenet.c");
 
-pub fn run_surface_net(input: &FieldBuffer, ctx: &OpenClContext) -> (LineBuffer, u32) {
-    let _guard = ::flame::start_guard("opencl marching [run_marching]");
+pub fn run_surface_net(input: &FieldBuffer, ctx: &OpenClContext) -> (TriangleBuffer, u32) {
+    let centers = run_surface_net_phase_1(input, ctx);
+    run_surface_net_phase_2(input, &centers, ctx)
+}
 
-    let (width, height) = (input.width(), input.height());
-    let mut kernel = ctx.compile("apply", PROGRAM, |register| {
+pub fn run_surface_net_phase_1(input: &FieldBuffer, ctx: &OpenClContext) -> FieldBuffer {
+    let _guard = ::flame::start_guard("opencl surface net phase 1 [run_surface_net]");
+
+    let (width, height, depth) = input.dims;
+    let mut phase_1_kernel = ctx.compile("phase_1", PROGRAM, |register| {
         register.buffer("buffer");
         register.long("width");
         register.long("height");
+        register.long("depth");
+        register.buffer("out");
+        register.buffer("normals");
+    });
+
+    let center_buffer = ctx.field_buffer(width, height, depth * 3, None);
+    let normal_buffer = ctx.field_buffer(width, height, depth * 3, None);
+
+    ::flame::start("setup phase_1_kernel");
+    phase_1_kernel.set_default_global_work_size(::ocl::SpatialDims::Three(width, height, depth));
+    phase_1_kernel.set_arg("buffer", input.buffer()).unwrap();
+    phase_1_kernel.set_arg("width", width as u64).unwrap();
+    phase_1_kernel.set_arg("height", height as u64).unwrap();
+    phase_1_kernel.set_arg("depth", depth as u64).unwrap();
+    phase_1_kernel
+        .set_arg("out", center_buffer.buffer())
+        .unwrap();
+    phase_1_kernel
+        .set_arg("normals", normal_buffer.buffer())
+        .unwrap();
+    ::flame::end("setup phase_1_kernel");
+
+    unsafe {
+        ::flame::span_of("opencl surface_net phase_1 [execution]", || {
+            phase_1_kernel.enq().unwrap()
+        });
+    }
+
+    center_buffer
+}
+pub fn run_surface_net_phase_2(
+    input: &FieldBuffer,
+    center_buffer: &FieldBuffer,
+    ctx: &OpenClContext,
+) -> (TriangleBuffer, u32) {
+    let _guard = ::flame::start_guard("opencl surface net [run_surface_net]");
+
+    let (width, height, depth) = input.dims;
+    let mut phase_1_kernel = ctx.compile("phase_2", PROGRAM, |register| {
+        register.buffer("buffer");
+        register.buffer("centers");
+        register.long("width");
+        register.long("height");
+        register.long("depth");
         register.buffer("out");
         register.buffer("atomic");
     });
 
-    let line_buffer = ctx.line_buffer_uninit(width * height * 4);
+    let triangle_buffer = ctx.triangle_buffer_uninit(width * height * depth * 6 * 3);
     let sync_buffer = ctx.sync_buffer();
 
-    ::flame::start("setup kernel");
-    kernel.set_default_global_work_size(::ocl::SpatialDims::Two(width, height));
-    kernel.set_arg("buffer", input.buffer()).unwrap();
-    kernel.set_arg("width", width as u64).unwrap();
-    kernel.set_arg("height", height as u64).unwrap();
-    kernel.set_arg("out", line_buffer.buffer()).unwrap();
-    kernel.set_arg("atomic", sync_buffer.buffer()).unwrap();
-    ::flame::end("setup kernel");
+    ::flame::start("setup phase_1_kernel");
+    phase_1_kernel.set_default_global_work_size(::ocl::SpatialDims::Three(width, height, depth));
+    phase_1_kernel.set_arg("buffer", input.buffer()).unwrap();
+    phase_1_kernel
+        .set_arg("centers", center_buffer.buffer())
+        .unwrap();
+    phase_1_kernel.set_arg("width", width as u64).unwrap();
+    phase_1_kernel.set_arg("height", height as u64).unwrap();
+    phase_1_kernel.set_arg("depth", depth as u64).unwrap();
+    phase_1_kernel
+        .set_arg("out", triangle_buffer.buffer())
+        .unwrap();
+    phase_1_kernel
+        .set_arg("atomic", sync_buffer.buffer())
+        .unwrap();
+    ::flame::end("setup phase_1_kernel");
 
     unsafe {
-        ::flame::span_of("opencl marching [execution]", || kernel.enq().unwrap());
+        ::flame::span_of("opencl surface_net [execution]", || {
+            phase_1_kernel.enq().unwrap()
+        });
     }
 
-    let count = sync_buffer.value();
-    (line_buffer, count)
+    // divide by 4 because the implementation of value() is bullshit
+    let count = sync_buffer.value() / 4;
+    (triangle_buffer, count * 18)
 }
