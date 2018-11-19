@@ -1,13 +1,20 @@
-use opencl::{FieldBuffer, OpenClContext, TriangleBuffer};
+use opencl::{FieldBuffer, IndexBuffer, OpenClContext};
 
 const PROGRAM: &'static str = include_str!("shaders/surfacenet.c");
 
-pub fn run_surface_net(input: &FieldBuffer, ctx: &OpenClContext) -> (TriangleBuffer, u32) {
-    let centers = run_surface_net_phase_1(input, ctx);
-    run_surface_net_phase_2(input, &centers, ctx)
+pub fn run_surface_net(
+    input: &FieldBuffer,
+    ctx: &OpenClContext,
+) -> (IndexBuffer, u32, FieldBuffer, FieldBuffer) {
+    let (centers, normal_buffer) = run_surface_net_phase_1(input, ctx);
+    let (idx, count) = run_surface_net_phase_2(input, &centers, ctx);
+    (idx, count, centers, normal_buffer)
 }
 
-pub fn run_surface_net_phase_1(input: &FieldBuffer, ctx: &OpenClContext) -> FieldBuffer {
+pub fn run_surface_net_phase_1(
+    input: &FieldBuffer,
+    ctx: &OpenClContext,
+) -> (FieldBuffer, FieldBuffer) {
     let _guard = ::flame::start_guard("opencl surface net phase 1 [run_surface_net]");
 
     let (width, height, depth) = input.dims;
@@ -43,13 +50,13 @@ pub fn run_surface_net_phase_1(input: &FieldBuffer, ctx: &OpenClContext) -> Fiel
         });
     }
 
-    center_buffer
+    (center_buffer, normal_buffer)
 }
 pub fn run_surface_net_phase_2(
     input: &FieldBuffer,
     center_buffer: &FieldBuffer,
     ctx: &OpenClContext,
-) -> (TriangleBuffer, u32) {
+) -> (IndexBuffer, u32) {
     let _guard = ::flame::start_guard("opencl surface net [run_surface_net]");
 
     let (width, height, depth) = input.dims;
@@ -63,7 +70,7 @@ pub fn run_surface_net_phase_2(
         register.buffer("atomic");
     });
 
-    let triangle_buffer = ctx.triangle_buffer_uninit(width * height * depth * 6 * 3);
+    let index_buffer = ctx.index_buffer_uninit(width * height * depth * 6);
     let sync_buffer = ctx.sync_buffer();
 
     ::flame::start("setup phase_1_kernel");
@@ -76,7 +83,7 @@ pub fn run_surface_net_phase_2(
     phase_1_kernel.set_arg("height", height as u64).unwrap();
     phase_1_kernel.set_arg("depth", depth as u64).unwrap();
     phase_1_kernel
-        .set_arg("out", triangle_buffer.buffer())
+        .set_arg("out", index_buffer.buffer())
         .unwrap();
     phase_1_kernel
         .set_arg("atomic", sync_buffer.buffer())
@@ -91,5 +98,5 @@ pub fn run_surface_net_phase_2(
 
     // divide by 4 because the implementation of value() is bullshit
     let count = sync_buffer.value() / 4;
-    (triangle_buffer, count * 18)
+    (index_buffer, count * 3 * 2)
 }

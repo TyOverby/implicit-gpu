@@ -3,7 +3,15 @@ extern crate gfx;
 extern crate cgmath;
 extern crate gfx_window_glutin;
 extern crate glutin;
+extern crate gpu_interp;
+extern crate implicit;
 extern crate noise;
+extern crate typed_arena;
+
+use glutin::GlContext;
+use gpu_interp::*;
+use implicit::opencl::*;
+use typed_arena::Arena;
 
 mod camera;
 
@@ -19,6 +27,7 @@ pub type DepthFormat = gfx::format::DepthStencil;
 gfx_defines!{
     vertex Vertex {
         pos: [f32; 3] = "a_Pos",
+        norm: [f32; 3] = "a_Norm",
     }
 
     constant Locals {
@@ -39,31 +48,19 @@ gfx_defines!{
     }
 }
 
-impl Vertex {
-    fn new(p: [f32; 3], n: [f32; 3]) -> Vertex {
-        Vertex {
-            pos: [p[0], p[1], p[2]],
-            norm: [n[0], n[1], n[2]],
-        }
-    }
-}
-
 // wikipedia to the rescue!
 // https://en.wikipedia.org/wiki/Blinn%E2%80%93Phong_shading_model
 static VERTEX_SRC: &'static [u8] = b"
 #version 140
-
 in vec3 a_Pos;
-
+in vec3 a_Norm;
 uniform Locals {
     mat4 u_Projection;
     mat4 u_ModelView;
     mat4 u_NormalMat;
 };
-
 out vec3 vertPos;
 out vec3 normalInterp;
-
 void main() {
     gl_Position = u_Projection * u_ModelView * vec4(a_Pos, 1.0);
     vec4 vertPos4 = u_ModelView * vec4(a_Pos, 1.0);
@@ -74,23 +71,19 @@ void main() {
 
 static FRAGMENT_SRC: &'static [u8] = b"
 #version 140
-
 in vec3 vertPos;
 in vec3 normalInterp;
-
 const vec3 lightPos = vec3(1.0,1.0,1.0);
 const vec3 ambientColor = vec3(0.1, 0.15, 0.2);
 const vec3 diffuseColor = vec3(0.4, 0.3, 0.5);
 const vec3 specColor = vec3(1.0, 0.8, 0.8);
 const float shininess = 16.0;
-
+out vec4 fragColor;
 void main() {
     vec3 normal = normalize(normalInterp);
     vec3 lightDir = normalize(lightPos - vertPos);
-
     float lambertian = max(dot(lightDir, normal), 0.0);
     float specular = 0.0;
-
     if (lambertian > 0.0) {
         vec3 viewDir = normalize(-vertPos);
         vec3 halfDir = normalize(lightDir + viewDir);
@@ -98,7 +91,7 @@ void main() {
         specular = pow(specAngle, shininess);
     }
     vec3 colorLinear = ambientColor + diffuseColor * lambertian + specColor * specular;
-    gl_FragColor = vec4(colorLinear, 1.0);
+    fragColor = vec4(colorLinear, 1.0);
 }
 ";
 
@@ -125,7 +118,8 @@ fn main() {
                 Primitive::TriangleList,
                 rasterizer,
                 pipe::new(),
-            ).unwrap();
+            )
+            .unwrap();
         let mut rasterizer_alt = Rasterizer::new_fill().with_cull_back();
         rasterizer_alt.method = RasterMethod::Line(1);
         let pso_alt = factory
@@ -134,7 +128,8 @@ fn main() {
                 Primitive::TriangleList,
                 rasterizer_alt,
                 pipe::new(),
-            ).unwrap();
+            )
+            .unwrap();
         (pso, pso_alt)
     };
     let (verts, inds) = get_data();
@@ -219,48 +214,83 @@ fn main() {
 }
 
 fn get_data() -> (Vec<Vertex>, Vec<u32>) {
-    let simplex = noise::OpenSimplex::new();
-    use noise::NoiseFn;
-    let grid_size = 200;
-    let sdf = move |x, y, z| {
-        let x = x as f64 / 5.0;
-        let y = y as f64 / 5.0;
-        let z = z as f64 / 5.0;
-        //let bias_source = (y - 5.0) / 10.0;
-        //let bias = bias_source;
-        simplex.get([x, y, z]) as f32
-        //+ bias as f32
-        //
-        //let x = x as f32 - grid_size as f32 / 2.0;
-        //let y = y as f32 - grid_size as f32 / 2.0;
-        //let z = z as f32 - grid_size as f32 / 2.0;
-        //(x * x + y * y + z * z).sqrt() - grid_size as f32 / 2.1
-        //
-        //let sum = x + y + z;
-        //if sum & 1 == 0 {
-        //    -1.0
-        //} else {
-        //    1.0
-        //}
-        //-(x as f32) + y as f32 / 2.0 + z as f32 / 3.0 + 5.5
-        //let x = x as f32 - grid_size as f32 / 2.0;
-        //let y = y as f32 - grid_size as f32 / 2.0;
-        //let z = z as f32 - grid_size as f32 / 2.0;
-        //x * x + y * y - z
-    };
-    let (verts, normals, indicies) = surface_nets::surface_net(grid_size, &sdf, true);
-    println!(
-        "{} verts, {} inds ({} triangles)",
-        verts.len(),
-        indicies.len(),
-        indicies.len() / 3
+    let arena = Arena::new();
+    let ctx = OpenClContext::default();
+    let program = sphere(10.0, 10.0, 10.0, 5.0, &arena);
+    let compiled = ::gpu_interp::compile(&program);
+    let mut buf = ::gpu_interp::execute(
+        compiled,
+        20,
+        20,
+        20,
+        ::gpu_interp::Triad {
+            context: ctx.context().clone(),
+            queue: ctx.queue().clone(),
+        },
     );
-    (
-        verts
-            .into_iter()
-            .zip(normals.into_iter())
-            .map(|(pos, norm)| Vertex::new(pos, norm))
-            .collect(),
-        indicies.into_iter().map(|i| i as u32).collect(),
-    )
+    let field_buffer = FieldBuffer {
+        dims: (20, 20, 20),
+        internal: buf.to_opencl(ctx.queue()).clone(),
+    };
+    let (index_buffer, count, positions, normals) =
+        implicit::surface_net::run_surface_net(&field_buffer, &ctx);
+
+    let vertexes = positions
+        .values()
+        .chunks(3)
+        .zip(normals.values().chunks(3))
+        .map(|(p, n)| Vertex {
+            pos: [p[0], p[1], p[2]],
+            norm: [n[0], n[1], n[2]],
+        })
+        .collect();
+    let indexes = index_buffer
+        .values(Some(count))
+        .into_iter()
+        .map(|i| i as u32 * 3)
+        .collect();
+    (vertexes, indexes)
 }
+
+fn sphere<'a>(x: f32, y: f32, z: f32, r: f32, arena: &'a Arena<Ast<'a>>) -> Ast<'a> {
+    let dx = Ast::Sub(arena.alloc(Ast::X), arena.alloc(Ast::Constant(x)));
+    let dy = Ast::Sub(arena.alloc(Ast::Y), arena.alloc(Ast::Constant(y)));
+    let dz = Ast::Sub(arena.alloc(Ast::Z), arena.alloc(Ast::Constant(z)));
+
+    let dx2 = Ast::Square(arena.alloc(dx));
+    let dy2 = Ast::Square(arena.alloc(dy));
+    let dz2 = Ast::Square(arena.alloc(dz));
+
+    let dx2_plus_dy2_plus_dz2 = Ast::Add(arena.alloc_extend(vec![dx2, dy2, dz2]));
+    let sqrt = Ast::Sqrt(arena.alloc(dx2_plus_dy2_plus_dz2));
+    Ast::Sub(arena.alloc(Ast::Constant(r)), arena.alloc(sqrt))
+}
+
+/*
+fn main() {
+    let arena = Arena::new();
+    let ctx = OpenClContext::default();
+    let program = sphere(10.0, 10.0, 10.0, 5.0, &arena);
+    let compiled = ::gpu_interp::compile(&program);
+    let mut buf = ::gpu_interp::execute(
+        compiled,
+        20,
+        20,
+        20,
+        ::gpu_interp::Triad {
+            context: ctx.context().clone(),
+            queue: ctx.queue().clone(),
+        },
+    );
+    let field_buffer = FieldBuffer {
+        dims: (20, 20, 20),
+        internal: buf.to_opencl(ctx.queue()).clone(),
+    };
+    let (index_buffer, count, _, _) = implicit::surface_net::run_surface_net(&field_buffer, &ctx);
+    let index_buffer = index_buffer.values(Some(count));
+    for slice in index_buffer.chunks(3) {
+        println!("{}, {}, {}", slice[0], slice[1], slice[2]);
+    }
+}
+
+*/

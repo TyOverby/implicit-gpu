@@ -9,3 +9,10 @@ gfx = ""
 gfx_window_glutin = ""
 glutin = ""
 cgmath = ""
+typed-arena = ""
+
+[dependencies.gpu-interp]
+path = "../gpu-interp"
+
+[dependencies.implicit]
+path = "../implicit"

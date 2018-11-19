@@ -200,15 +200,15 @@ impl OpenClContext {
         self.field_buffer(width, height, depth, Some(buffer))
     }
 
-    pub fn triangle_buffer_uninit(&self, len: usize) -> TriangleBuffer {
+    pub fn index_buffer_uninit(&self, len: usize) -> IndexBuffer {
         let _guard = ::flame::start_guard("OpenClContext::linear_buffer");
         let internal = BufferBuilder::new()
             .queue(self.queue.clone())
             .len(&[len])
-            .fill_val(-5.0)
+            .fill_val(-5)
             .build()
             .unwrap();
-        TriangleBuffer {
+        IndexBuffer {
             size: len,
             internal,
         }

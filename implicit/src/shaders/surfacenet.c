@@ -32,9 +32,13 @@ float grid_values(__global float* buffer, long3 position, long3 dims) {
     return buffer[pos];
 }
 
+long center_coord(long3 position, long3 dims) {
+    return position.x + (position.y * dims.x) + (position.z * dims.x * dims.y);
+}
+
 float3 center_values(__global float* centers, long3 position, long3 dims) {
-    size_t pos = position.x + (position.y * dims.x) + (position.z * dims.x * dims.y);
-    size_t pos_3 = pos * 3;
+    long pos = center_coord(position, dims);
+    long pos_3 = pos * 3;
     float3 res = (float3)(
          centers[pos_3 + 0],
          centers[pos_3 + 1],
@@ -62,9 +66,9 @@ float3 find_edge(
     }
     float interp = value1 / (value1 - value2);
     float3 point = (float3)(
-        ((float)coord.x) * (1.0 - interp) + ((float) offset2.x) * interp + ((float)coord.x),
-        ((float)coord.y) * (1.0 - interp) + ((float) offset2.y) * interp + ((float)coord.z),
-        ((float)coord.z) * (1.0 - interp) + ((float) offset2.z) * interp + ((float)coord.z)
+        ((float)offset1.x) * (1.0 - interp) + ((float) offset2.x) * interp + ((float)coord.x),
+        ((float)offset1.y) * (1.0 - interp) + ((float) offset2.y) * interp + ((float)coord.y),
+        ((float)offset1.z) * (1.0 - interp) + ((float) offset2.z) * interp + ((float)coord.z)
     );
     return point;
 }
@@ -95,11 +99,6 @@ float3 find_center(__global float* buffer, long3 coord, long3 dims, float3* norm
     float normal_z = (n_100 + n_101 + n_110 + n_111)
             - (n_000 + n_001 + n_010 + n_011);
     float normal_len = sqrt(normal_x * normal_x + normal_y * normal_y + normal_z * normal_z);
-    *normal = (float3)(
-        normal_x / normal_len,
-        normal_y / normal_len,
-        normal_z / normal_len
-    );
 
     long count = 0;
     float3 sum = (float3)(0.0, 0.0, 0.0);
@@ -115,6 +114,12 @@ float3 find_center(__global float* buffer, long3 coord, long3 dims, float3* norm
     if (count == 0) {
         return (float3)(NAN, NAN, NAN);
     } else {
+        *normal = (float3)(
+            normal_x / normal_len,
+            normal_y / normal_len,
+            normal_z / normal_len
+        );
+
         float c = (float) count;
         return (float3)(
             sum.x / c,
@@ -157,7 +162,7 @@ float dist(float3 a, float3 b) {
 void make_triangle(
     __global float* buffer,
     __global float* centers,
-    __global float* out,
+    __global long* out,
     long3 coord,
     long3 offset,
     long3 axis1,
@@ -171,7 +176,12 @@ void make_triangle(
     }
 
     long p = atomic_inc(atomic);
-    long insert_pos = p * 3 * 3 * 2;
+    long insert_pos = p * 3 * 2;
+
+    long v1 = center_coord(coord, dims);
+    long v2 = center_coord(coord - axis1, dims);
+    long v3 = center_coord(coord - axis2, dims);
+    long v4 = center_coord(coord - axis1 - axis2, dims);
 
     float3 p1 = center_values(centers, coord, dims);
     float3 p2 = center_values(centers, coord - axis1, dims);
@@ -182,39 +192,39 @@ void make_triangle(
     float d23 = dist(p2, p3);
     if (d14 < d23) {
         if (fr == FacePositive) {
-            write_float3(p1, out, insert_pos, 0);
-            write_float3(p2, out, insert_pos, 1);
-            write_float3(p4, out, insert_pos, 2);
+            out[insert_pos + 0] = v1;
+            out[insert_pos + 1] = v2;
+            out[insert_pos + 2] = v4;
 
-            write_float3(p1, out, insert_pos, 3);
-            write_float3(p4, out, insert_pos, 4);
-            write_float3(p3, out, insert_pos, 5);
+            out[insert_pos + 3] = v1;
+            out[insert_pos + 4] = v4;
+            out[insert_pos + 5] = v3;
         } else {
-            write_float3(p1, out, insert_pos, 0);
-            write_float3(p4, out, insert_pos, 1);
-            write_float3(p2, out, insert_pos, 2);
+            out[insert_pos + 0] = v1;
+            out[insert_pos + 1] = v4;
+            out[insert_pos + 2] = v2;
 
-            write_float3(p1, out, insert_pos, 3);
-            write_float3(p3, out, insert_pos, 4);
-            write_float3(p4, out, insert_pos, 5);
+            out[insert_pos + 3] = v1;
+            out[insert_pos + 4] = v3;
+            out[insert_pos + 5] = v4;
         }
     } else {
         if (fr == FacePositive) {
-            write_float3(p2, out, insert_pos, 0);
-            write_float3(p4, out, insert_pos, 1);
-            write_float3(p3, out, insert_pos, 2);
+            out[insert_pos + 0] = v2;
+            out[insert_pos + 1] = v4;
+            out[insert_pos + 2] = v3;
 
-            write_float3(p2, out, insert_pos, 3);
-            write_float3(p3, out, insert_pos, 4);
-            write_float3(p1, out, insert_pos, 5);
+            out[insert_pos + 3] = v2;
+            out[insert_pos + 4] = v3;
+            out[insert_pos + 5] = v1;
         } else {
-            write_float3(p2, out, insert_pos, 0);
-            write_float3(p3, out, insert_pos, 1);
-            write_float3(p4, out, insert_pos, 2);
+            out[insert_pos + 0] = v2;
+            out[insert_pos + 1] = v3;
+            out[insert_pos + 2] = v4;
 
-            write_float3(p2, out, insert_pos, 3);
-            write_float3(p1, out, insert_pos, 4);
-            write_float3(p3, out, insert_pos, 5);
+            out[insert_pos + 3] = v2;
+            out[insert_pos + 4] = v1;
+            out[insert_pos + 5] = v3;
         }
     }
 }
@@ -249,7 +259,7 @@ __kernel void phase_2(
     ulong width,
     ulong height,
     ulong depth,
-    __global float* out,
+    __global long* out,
     volatile __global unsigned int *atomic)
 {
     size_t x = get_global_id(0);

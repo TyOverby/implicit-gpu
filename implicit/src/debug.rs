@@ -122,14 +122,14 @@ pub fn is_clockwise<K>(pts: &[TypedPoint2D<f32, K>]) -> bool {
     total > 0.0
 }
 pub fn print_path_segments<W: Write>(mut out: W, extracted: &[PathSegment]) {
-    writeln!(out, "{} line segments", extracted.len());
+    writeln!(out, "{} line segments", extracted.len()).unwrap();
     for (i, segment) in extracted.iter().enumerate() {
-        writeln!(out);
-        writeln!(out, "Line Segment {} ", i);
-        writeln!(out, "{} points", segment.path.len());
-        writeln!(out, "Clockwise? {}", is_clockwise(&segment.path[..]));
+        writeln!(out).unwrap();
+        writeln!(out, "Line Segment {} ", i).unwrap();
+        writeln!(out, "{} points", segment.path.len()).unwrap();
+        writeln!(out, "Clockwise? {}", is_clockwise(&segment.path[..])).unwrap();
         for point in &segment.path[..] {
-            writeln!(out, "{:?}", point);
+            writeln!(out, "{:?}", point).unwrap();
         }
     }
 }

@@ -24,7 +24,7 @@ impl Inspector for () {
     fn specialize(&self, _name: &str) -> BoxedInspector {
         Box::new(())
     }
-    fn write_compiled(&self, name: &str, ast: &::gpu_interp::bytecode::CompilationResult) {}
+    fn write_compiled(&self, _name: &str, _ast: &::gpu_interp::bytecode::CompilationResult) {}
     fn write_ast(&self, _name: &str, _ast: &::gpu_interp::Ast) {}
     fn write_field(&self, _name: &str, _buffer: &FieldBuffer) {}
     fn write_segments(&self, _name: &str, _segments: &[PathSegment]) {}
@@ -43,14 +43,14 @@ impl Inspector for Provider {
     fn write_ast(&self, name: &str, ast: &::gpu_interp::Ast) {
         use std::io::Write;
         let mut w_text = self.diagnostic().text_writer(format!("{}.ast.txt", name));
-        write!(w_text, "{:#?}", ast);
+        write!(w_text, "{:#?}", ast).unwrap();
     }
     fn write_compiled(&self, name: &str, ast: &::gpu_interp::bytecode::CompilationResult) {
         use std::io::Write;
         let mut w_text = self
             .diagnostic()
             .text_writer(format!("{}.compiled.txt", name));
-        write!(w_text, "{:#?}", ast);
+        write!(w_text, "{:#?}", ast).unwrap();
     }
     fn write_field(&self, name: &str, buffer: &FieldBuffer) {
         use debug::*;
@@ -74,7 +74,7 @@ impl Inspector for Provider {
         use std::io::Write;
         let mut writer = self.diagnostic().text_writer(format!("{}.txt", name));
         for line in lines {
-            writeln!(writer, "{:?}", line);
+            writeln!(writer, "{:?}", line).unwrap();
         }
     }
 

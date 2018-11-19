@@ -1,4 +1,4 @@
-use cgmath::{Matrix3, Rad, Vector3, Point3};
+use cgmath::{Matrix3, Point3, Rad, Vector3};
 use glutin::VirtualKeyCode;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
@@ -15,8 +15,8 @@ impl CameraControl {
     pub fn new() -> Self {
         Self {
             pressed_keys: HashMap::new(),
-            pos: Point3::new(0.0, 0.0, 0.0),
-            look: Vector3::unit_x(),
+            pos: Point3::new(-5.0, -5.0, -5.0),
+            look: Point3::new(5.0, 5.0, 5.0) - Point3::new(-5.0, -5.0, -5.0),
             up: Vector3::unit_y(),
         }
     }

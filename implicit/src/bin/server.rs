@@ -5,13 +5,10 @@ extern crate implicit;
 extern crate serde;
 extern crate snoot;
 
-use expectation_shared::filesystem::{ReadSeek, RealFileSystem};
 use implicit::ocaml::*;
 use snoot::serde_serialization::{deserialize, DeserializeResult};
 use std::io::Read;
 use std::io::{stdin, stdout};
-
-use expectation::{extensions::*, Provider};
 
 fn main() {
     let mut out = String::new();
@@ -51,5 +48,5 @@ fn main() {
     implicit::debug::svg_path_segments(stdout(), &output).unwrap();
 
     flame::dump_html(std::fs::File::create("perf.html").unwrap()).unwrap();
-    flame::dump_text_to_writer(::std::io::stderr());
+    flame::dump_text_to_writer(::std::io::stderr()).unwrap();
 }

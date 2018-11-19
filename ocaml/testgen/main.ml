@@ -271,3 +271,16 @@ let tests = [
 ]
 
 let () = Out_channel.with_file "../testsuite/tests.txt" ~f:(write_tests tests)
+let sphere ~x ~y ~z ~r = failwith "";;
+let export _ ~resolution = failwith "";;
+let f _ = failwith "";;
+
+
+let main = sphere ~x:10.0 ~y:10.0 ~z:10.0 ~r:5.0 in
+let cutout = sphere ~x:12.0 ~y:12.0 ~z:10.0 ~r:3.0 in
+let shape = subtract main cutout in
+let exported = export ~resolution:20.0 shape in
+
+
+
+f exported;;

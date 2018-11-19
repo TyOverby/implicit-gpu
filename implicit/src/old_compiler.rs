@@ -55,7 +55,7 @@ pub fn compile<W: Write>(shape: &Shape, mut writer: W) -> IoResult<CompileResult
     let deps = deps.into_iter().collect();
 
     if uses_dist_to_line {
-        writeln!(writer, "{}", DIST_TO_LINE);
+        writeln!(writer, "{}", DIST_TO_LINE)?;
     }
     write!(
         writer,
@@ -79,7 +79,7 @@ pub fn compile<W: Write>(shape: &Shape, mut writer: W) -> IoResult<CompileResult
 
     writer.write_all(&program_body)?;
     writeln!(writer, "buffer[pos] = {};", result)?;
-    writeln!(writer, "}}");
+    writeln!(writer, "}}")?;
 
     Ok(CompileResult {
         text: writer,
@@ -127,9 +127,9 @@ fn compile_impl<W: Write>(
         Shape::Transform(target, matrix) => {
             let (x, y) = get_xy(matrix, current_xy);
             let (nx, ny) = namegen.gen_2("nx", "ny");
-            writeln!(out, "// Transform {:?}", matrix);
-            writeln!(out, "float {} = {};", nx, x);
-            writeln!(out, "float {} = {};", ny, y);
+            writeln!(out, "// Transform {:?}", matrix)?;
+            writeln!(out, "float {} = {};", nx, x)?;
+            writeln!(out, "float {} = {};", ny, y)?;
             compile_impl(target, out, uses_dist_to_line, deps, namegen, (nx, ny))
         }
         Shape::Terminal(Terminal::Circle(Circle { x, y, r })) => {
@@ -155,8 +155,8 @@ fn compile_impl<W: Write>(
             let (x, y, w, h) = (*x, *y, *w, *h);
             let res = namegen.gen("rect");
             let (mx, my) = current_xy;
-            writeln!(out, "// Rect {}", res);
-            writeln!(out, "float {} = INFINITY;", res);
+            writeln!(out, "// Rect {}", res)?;
+            writeln!(out, "float {} = INFINITY;", res)?;
             {
                 let mut dist_to_line = |ax: f32, ay: f32, bx: f32, by: f32| {
                     writeln!(
@@ -194,8 +194,8 @@ fn compile_impl<W: Write>(
                 w = w,
                 h = h,
             )?;
-            writeln!(out, "{res} = -{res};", res = res);
-            writeln!(out, "// End Rect {}", res);
+            writeln!(out, "{res} = -{res};", res = res)?;
+            writeln!(out, "// End Rect {}", res)?;
 
             Ok(res)
         }
@@ -211,7 +211,7 @@ fn compile_impl<W: Write>(
             }
 
             let result = namegen.gen("intersection");
-            writeln!(out, "// Intersection {}", result);
+            writeln!(out, "// Intersection {}", result)?;
 
             writeln!(out, "float {} = -INFINITY;", result)?;
             for shape in shapes {
@@ -230,7 +230,7 @@ fn compile_impl<W: Write>(
                     int = intermediate
                 )?;
             }
-            writeln!(out, "// End Intersection {}", result);
+            writeln!(out, "// End Intersection {}", result)?;
             Ok(result)
         }
         Shape::Union(shapes) => {
@@ -238,7 +238,7 @@ fn compile_impl<W: Write>(
                 panic!("empty union");
             }
             let result = namegen.gen("union");
-            writeln!(out, "// Union {}", result);
+            writeln!(out, "// Union {}", result)?;
             writeln!(out, "float {} = INFINITY;", result)?;
             for shape in shapes {
                 let intermediate = compile_impl(
@@ -256,25 +256,25 @@ fn compile_impl<W: Write>(
                     int = intermediate
                 )?;
             }
-            writeln!(out, "// End Union {}", result);
+            writeln!(out, "// End Union {}", result)?;
             Ok(result)
         }
         Shape::Not(shape) => {
             let result = namegen.gen("negate");
-            writeln!(out, "// Not {}", result);
+            writeln!(out, "// Not {}", result)?;
             let intermediate =
                 compile_impl(shape, out, uses_dist_to_line, deps, namegen, current_xy)?;
             writeln!(out, "float {} = -{};", result, intermediate)?;
-            writeln!(out, "// End Not {}", result);
+            writeln!(out, "// End Not {}", result)?;
             Ok(result)
         }
         Shape::Modulate(shape, how_much) => {
             let result = namegen.gen("modulate");
-            writeln!(out, "// Modulate {}", result);
+            writeln!(out, "// Modulate {}", result)?;
             let intermediate =
                 compile_impl(shape, out, uses_dist_to_line, deps, namegen, current_xy)?;
             writeln!(out, "float {} = {} - {};", result, intermediate, how_much)?;
-            writeln!(out, "// End Modulate {}", result);
+            writeln!(out, "// End Modulate {}", result)?;
             Ok(result)
         }
     }
