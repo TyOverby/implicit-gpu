@@ -1,3 +1,4 @@
+extern crate euclid;
 extern crate gpu_interp;
 extern crate implicit;
 extern crate typed_arena;
@@ -28,19 +29,32 @@ fn main() {
     let cutout = sphere(12.0, 12.0, 12.0, 3.0, &arena);
     let cutout = Ast::Mul(arena.alloc_extend(vec![cutout, Ast::Constant(-1.0)]));
     let program = Ast::Max(arena.alloc_extend(vec![main, cutout]));
+    let factor: u32 = 10;
+    let program = Ast::Transform {
+        target: arena.alloc(program),
+        matrix: euclid::Transform3D::create_scale(
+            1.0 / (factor as f32),
+            1.0 / (factor as f32),
+            1.0 / (factor as f32),
+        ),
+    };
     let compiled = ::gpu_interp::compile(&program);
     let mut buf = ::gpu_interp::execute(
         compiled,
-        20,
-        20,
-        20,
+        20 * factor,
+        20 * factor,
+        20 * factor,
         ::gpu_interp::Triad {
             context: ctx.context().clone(),
             queue: ctx.queue().clone(),
         },
     );
     let field_buffer = FieldBuffer {
-        dims: (20, 20, 20),
+        dims: (
+            20 * factor as usize,
+            20 * factor as usize,
+            20 * factor as usize,
+        ),
         internal: buf.to_opencl(ctx.queue()).clone(),
     };
     let (index_buffer, count, pos_buffer, normal_buffer) =
@@ -49,11 +63,13 @@ fn main() {
     let pos_buffer = pos_buffer.values();
     let normal_buffer = normal_buffer.values();
 
+    /*
     for position in pos_buffer.chunks(3) {
         if !position[0].is_nan() {
             eprintln!("p {} {} {}", position[0], position[1], position[2]);
         }
     }
+    */
 
     let mut max_x = std::f32::NEG_INFINITY;
     let mut max_y = std::f32::NEG_INFINITY;
