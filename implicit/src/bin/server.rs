@@ -5,6 +5,9 @@ extern crate implicit;
 extern crate serde;
 extern crate snoot;
 
+use expectation::Provider;
+use expectation_shared::filesystem::RealFileSystem;
+use implicit::inspector::Inspector;
 use implicit::ocaml::*;
 use snoot::serde_serialization::{deserialize, DeserializeResult};
 use std::io::Read;
@@ -31,16 +34,16 @@ fn main() {
 
     let output = implicit::exec::exec(
         command,
-        /*
-        Box::new(Provider::new(
+        Provider::new(
             Box::new(RealFileSystem {
                 root: "./main_out/actual".into(),
             }),
             Box::new(RealFileSystem {
                 root: "./main_out/expected".into(),
             }),
-        )),*/
-        Box::new(()),
+        )
+        .duplicate(),
+        //Box::new(()),
         w.ceil() as usize,
         h.ceil() as usize,
     );

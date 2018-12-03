@@ -19,7 +19,7 @@ fn sphere<'a>(x: f32, y: f32, z: f32, r: f32, arena: &'a Arena<Ast<'a>>) -> Ast<
     let dx2_plus_dy2_plus_dz2 = Ast::Add(arena.alloc_extend(vec![dx2, dy2, dz2]));
     let sqrt = Ast::Sqrt(arena.alloc(dx2_plus_dy2_plus_dz2));
     let sub = Ast::Sub(arena.alloc(Ast::Constant(r)), arena.alloc(sqrt));
-    Ast::Mul(arena.alloc_extend(vec![sub, Ast::Constant(1.0)]))
+    sub
 }
 
 fn torus<'a>(x: f32, y: f32, z: f32, r: f32, a: f32, arena: &'a Arena<Ast<'a>>) -> Ast<'a> {
@@ -45,16 +45,18 @@ fn torus<'a>(x: f32, y: f32, z: f32, r: f32, a: f32, arena: &'a Arena<Ast<'a>>) 
     ]));
 
     Ast::Sub(arena.alloc(lhs), arena.alloc(rhs))
+    //Ast::Neg(arena.alloc(Ast::Sub(arena.alloc(lhs), arena.alloc(rhs))))
 }
 
 fn main() {
     let arena = Arena::new();
     let ctx = OpenClContext::default();
+    let factor: u32 = 3;
+    /*
     let main = sphere(10.0, 10.0, 10.0, 5.0, &arena);
     let cutout = sphere(12.0, 12.0, 12.0, 3.0, &arena);
     let cutout = Ast::Mul(arena.alloc_extend(vec![cutout, Ast::Constant(-1.0)]));
     let program = Ast::Max(arena.alloc_extend(vec![main, cutout]));
-    let factor: u32 = 10;
     let program = Ast::Transform {
         target: arena.alloc(program),
         matrix: euclid::Transform3D::create_scale(
@@ -62,21 +64,43 @@ fn main() {
             1.0 / (factor as f32),
             1.0 / (factor as f32),
         ),
+    };*/
+    let torus = arena.alloc(torus(20.0, 20.0, 20.0, 25.0, 10.0, &arena));
+    let a = Ast::Transform {
+        target: torus,
+        matrix: euclid::Transform3D::create_rotation(1.0, 0.0, 0.0, euclid::Angle::radians(1.5708)),
     };
-    let program = torus(20.0, 20.0, 20.0, 25.0, 10.0, &arena);
+    let b = Ast::Transform {
+        target: torus,
+        matrix: euclid::Transform3D::create_rotation(0.0, 1.0, 0.0, euclid::Angle::radians(1.5708)),
+    };
+    let c = Ast::Transform {
+        target: torus,
+        matrix: euclid::Transform3D::create_rotation(0.0, 0.0, 1.0, euclid::Angle::radians(1.5708)),
+    };
+    let sphere = sphere(0.0, 0.0, 0.0, 5.0, &arena);
+    let program = Ast::Transform {
+        target: arena.alloc(Ast::Max(arena.alloc_extend(vec![a, /*sphere,*/ b, c]))),
+        matrix: euclid::Transform3D::create_translation(-40.0, -40.0, -40.0),
+    };
+    eprintln!("compiled: {:#?}", program);
     let compiled = ::gpu_interp::compile(&program);
     let mut buf = ::gpu_interp::execute(
         compiled,
-        40,
-        40,
-        40,
+        40 * factor,
+        40 * factor,
+        40 * factor,
         ::gpu_interp::Triad {
             context: ctx.context().clone(),
             queue: ctx.queue().clone(),
         },
     );
     let field_buffer = FieldBuffer {
-        dims: (40, 40, 40),
+        dims: (
+            40 * factor as usize,
+            40 * factor as usize,
+            40 * factor as usize,
+        ),
         internal: buf.to_opencl(ctx.queue()).clone(),
     };
     let (index_buffer, count, pos_buffer, normal_buffer) =
