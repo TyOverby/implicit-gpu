@@ -2,6 +2,5 @@
 
 set -ex
 
-dune exec ocaml/workbench/main.exe | \
-cargo run --manifest-path=implicit/Cargo.toml --bin server --release \
-> out.svg
+dune exec ocaml/workbench/main.exe "$1" | \
+cargo run --manifest-path=implicit/Cargo.toml --bin server --release > "umbrellas/$1.svg"

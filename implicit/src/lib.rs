@@ -33,7 +33,6 @@ pub mod geometry;
 pub mod inspector;
 pub mod lines;
 pub mod marching;
-pub mod old_compiler;
 pub mod opencl;
 pub mod polygon;
 pub mod surface_net;

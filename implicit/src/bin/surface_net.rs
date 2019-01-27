@@ -22,7 +22,7 @@ fn sphere<'a>(x: f32, y: f32, z: f32, r: f32, arena: &'a Arena<Ast<'a>>) -> Ast<
     sub
 }
 
-fn torus<'a>(x: f32, y: f32, z: f32, r: f32, a: f32, arena: &'a Arena<Ast<'a>>) -> Ast<'a> {
+fn torus<'a>(_x: f32, _y: f32, _z: f32, r: f32, a: f32, arena: &'a Arena<Ast<'a>>) -> Ast<'a> {
     let x2 = Ast::Square(arena.alloc(Ast::X));
     let y2 = Ast::Square(arena.alloc(Ast::Y));
     let z2 = Ast::Square(arena.alloc(Ast::Z));
@@ -78,19 +78,19 @@ fn main() {
         target: torus,
         matrix: euclid::Transform3D::create_rotation(0.0, 0.0, 1.0, euclid::Angle::radians(1.5708)),
     };
-    let sphere = sphere(0.0, 0.0, 0.0, 5.0, &arena);
+    let _sphere = sphere(0.0, 0.0, 0.0, 5.0, &arena);
     let program = Ast::Transform {
         target: arena.alloc(Ast::Max(arena.alloc_extend(vec![a, /*sphere,*/ b, c]))),
         matrix: euclid::Transform3D::create_translation(-40.0, -40.0, -40.0),
     };
     eprintln!("compiled: {:#?}", program);
-    let compiled = ::gpu_interp::compile(&program);
-    let mut buf = ::gpu_interp::execute(
+    let compiled = ::gpu_interp::gpu::compile(&program);
+    let mut buf = ::gpu_interp::gpu::execute(
         compiled,
         40 * factor,
         40 * factor,
         40 * factor,
-        ::gpu_interp::Triad {
+        ::gpu_interp::gpu::Triad {
             context: ctx.context().clone(),
             queue: ctx.queue().clone(),
         },

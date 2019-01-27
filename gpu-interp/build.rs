@@ -5,7 +5,7 @@ use std::io::{Read, Write};
 use std::path::Path;
 
 fn main() -> Result<(), Box<Error>> {
-    let mut in_file = File::open("./opcodes.txt")?;
+    let mut in_file = File::open("./src/gpu/opcodes.txt")?;
     let mut in_contents = String::new();
     in_file.read_to_string(&mut in_contents)?;
     let opcodes = in_contents.split("\n");

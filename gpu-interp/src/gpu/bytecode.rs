@@ -1,6 +1,7 @@
-use super::{Ast, Buffer};
+use *;
 
 pub mod ops {
+    #[allow(dead_code)]
     include!(concat!(env!("OUT_DIR"), "/opcodes.rs"));
 }
 

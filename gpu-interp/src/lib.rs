@@ -1,14 +1,15 @@
+extern crate cranelift;
+extern crate cranelift_module;
+extern crate cranelift_simplejit;
 extern crate euclid;
 extern crate ocl;
 
+pub mod ast_walk;
 mod buffer;
-pub mod bytecode;
-mod gpu_interp;
-pub mod walk_interp;
+pub mod gpu;
+pub mod jit;
 
 pub use buffer::*;
-pub use bytecode::compile;
-pub use gpu_interp::{execute, Triad};
 
 pub type AstPtr<'a> = &'a Ast<'a>;
 pub type AstSlice<'a> = &'a [Ast<'a>];

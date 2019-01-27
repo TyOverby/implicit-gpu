@@ -2,8 +2,9 @@ use super::Ast;
 
 pub fn interpret(ast: &Ast, x: f32, y: f32, z: f32) -> f32 {
     match ast {
-        Ast::Constant(c) => *c,
         Ast::Buffer(_) => unimplemented!(),
+        Ast::DistToPoly(_) => unimplemented!(),
+        Ast::Constant(c) => *c,
         Ast::Transform { target, matrix } => {
             let ::euclid::Point3D { x, y, z, .. } = matrix
                 .transform_point3d(&::euclid::point3(x, y, z))
@@ -39,6 +40,5 @@ pub fn interpret(ast: &Ast, x: f32, y: f32, z: f32) -> f32 {
             let v = interpret(a, x, y, z);
             v * v
         }
-        Ast::DistToPoly(_) => unimplemented!(),
     }
 }

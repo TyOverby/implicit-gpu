@@ -10,7 +10,7 @@ pub trait Inspector {
     fn duplicate(&self) -> BoxedInspector;
     fn specialize(&self, name: &str) -> BoxedInspector;
     fn write_ast(&self, name: &str, ast: &::gpu_interp::Ast);
-    fn write_compiled(&self, name: &str, ast: &::gpu_interp::bytecode::CompilationResult);
+    fn write_compiled(&self, name: &str, ast: &::gpu_interp::gpu::bytecode::CompilationResult);
     fn write_field(&self, name: &str, buffer: &FieldBuffer);
     fn write_segments(&self, name: &str, segments: &[PathSegment]);
     fn write_lines(&self, name: &str, lines: &[(Point, Point)]);
@@ -24,7 +24,7 @@ impl Inspector for () {
     fn specialize(&self, _name: &str) -> BoxedInspector {
         Box::new(())
     }
-    fn write_compiled(&self, _name: &str, _ast: &::gpu_interp::bytecode::CompilationResult) {}
+    fn write_compiled(&self, _name: &str, _ast: &::gpu_interp::gpu::bytecode::CompilationResult) {}
     fn write_ast(&self, _name: &str, _ast: &::gpu_interp::Ast) {}
     fn write_field(&self, _name: &str, _buffer: &FieldBuffer) {}
     fn write_segments(&self, _name: &str, _segments: &[PathSegment]) {}
@@ -45,7 +45,7 @@ impl Inspector for Provider {
         let mut w_text = self.diagnostic().text_writer(format!("{}.ast.txt", name));
         write!(w_text, "{:#?}", ast).unwrap();
     }
-    fn write_compiled(&self, name: &str, ast: &::gpu_interp::bytecode::CompilationResult) {
+    fn write_compiled(&self, name: &str, ast: &::gpu_interp::gpu::bytecode::CompilationResult) {
         use std::io::Write;
         let mut w_text = self
             .diagnostic()

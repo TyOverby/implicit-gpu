@@ -1,50 +1,10 @@
 use inspector::BoxedInspector;
 use ocaml::{Id, Shape};
-use old_compiler::{compile, CompileResult};
 use opencl::{FieldBuffer, OpenClContext};
 
 #[cfg(test)]
 use expectation::{extensions::*, Provider};
 use expectation_plugin::expectation_test;
-
-pub fn exec_shape_old<F>(
-    ctx: &OpenClContext,
-    shape: Shape,
-    width: usize,
-    height: usize,
-    buffer_find: F,
-) -> FieldBuffer
-where
-    F: Fn(Id) -> FieldBuffer,
-{
-    let mut writer: Vec<u8> = vec![];
-    let CompileResult { dependencies, .. } = compile(&shape, &mut writer).unwrap();
-
-    let out = ctx.field_buffer(width, height, 1, None);
-
-    let mut kernel = ctx.compile("apply", String::from_utf8(writer).unwrap(), |register| {
-        register.buffer("buffer");
-        register.long("width");
-
-        for dep in &dependencies {
-            register.buffer(format!("field__{}", dep));
-        }
-    });
-
-    kernel.set_default_global_work_size(::ocl::SpatialDims::Two(width, height));
-    kernel.set_arg("buffer", out.buffer()).unwrap();
-    kernel.set_arg("width", width as u64).unwrap();
-
-    for dep in dependencies {
-        kernel
-            .set_arg(format!("field__{}", dep), buffer_find(dep).buffer())
-            .unwrap();
-    }
-
-    unsafe { kernel.enq().unwrap() };
-
-    out
-}
 
 pub fn exec_shape<F>(
     ctx: &OpenClContext,
@@ -61,14 +21,14 @@ where
     let output = ::compiler::compile(&shape, &arena, &buffer_find);
     inspector.write_ast("ast", &output);
 
-    let compiled = ::gpu_interp::compile(&output);
+    let compiled = ::gpu_interp::gpu::compile(&output);
     inspector.write_compiled("compiled", &compiled);
-    let mut buf = ::gpu_interp::execute(
+    let mut buf = ::gpu_interp::gpu::execute(
         compiled,
         width as u32,
         height as u32,
         1,
-        ::gpu_interp::Triad {
+        ::gpu_interp::gpu::Triad {
             context: ctx.context().clone(),
             queue: ctx.queue().clone(),
         },

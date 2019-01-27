@@ -1,6 +1,6 @@
 use super::bytecode::CompilationResult;
-use super::Buffer;
 use ocl::{Buffer as OclBuffer, Context, Kernel, Program, Queue};
+use Buffer;
 
 #[derive(Clone)]
 pub struct Triad {
@@ -24,7 +24,7 @@ pub fn execute(
     depth: u32,
     Triad { context, queue }: Triad,
 ) -> Buffer {
-    assert!(compilation.buffers.len() <= ::bytecode::ops::BUFFER_COUNT);
+    assert!(compilation.buffers.len() <= super::bytecode::ops::BUFFER_COUNT);
 
     let mut buffer_input = vec![];
 
@@ -82,10 +82,11 @@ pub fn execute(
 
     let program = Program::builder()
         .source(concat!(
-            include_str!("../../implicit/src/shaders/dist_to_line.c"),
+            include_str!("../../../implicit/src/shaders/dist_to_line.c"),
             include_str!(concat!(env!("OUT_DIR"), "/opcodes.c")),
             include_str!("./interp.c")
-        )).build(&context)
+        ))
+        .build(&context)
         .unwrap();
 
     let mut kernel_builder = Kernel::builder();
@@ -105,7 +106,7 @@ pub fn execute(
     for mut buffer in compilation.buffers {
         buffer_input.push(buffer.to_opencl(&queue).clone());
     }
-    for _ in 0..(::bytecode::ops::BUFFER_COUNT - buffer_count) {
+    for _ in 0..(super::bytecode::ops::BUFFER_COUNT - buffer_count) {
         buffer_input.push(
             OclBuffer::builder()
                 .len([1])
@@ -135,6 +136,9 @@ pub fn execute(
 
     Buffer::from_opencl(output, width, height, depth)
 }
+
+#[cfg(test)]
+use ::*;
 
 #[test]
 fn interpret_constant() {

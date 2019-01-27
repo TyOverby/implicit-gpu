@@ -8,6 +8,9 @@ build="./build.rs"
 [dependencies]
 #ocl = "*"
 euclid = "*"
+cranelift = "0.25.0"
+cranelift-module = "0.25.0"
+cranelift-simplejit = "0.25.0"
 
 [dependencies.ocl]
 path = "../../ocl/ocl"

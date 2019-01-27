@@ -217,13 +217,13 @@ fn get_data() -> (Vec<Vertex>, Vec<u32>) {
     let arena = Arena::new();
     let ctx = OpenClContext::default();
     let program = sphere(10.0, 10.0, 10.0, 5.0, &arena);
-    let compiled = ::gpu_interp::compile(&program);
-    let mut buf = ::gpu_interp::execute(
+    let compiled = ::gpu_interp::gpu::compile(&program);
+    let mut buf = ::gpu_interp::gpu::execute(
         compiled,
         20,
         20,
         20,
-        ::gpu_interp::Triad {
+        ::gpu_interp::gpu::Triad {
             context: ctx.context().clone(),
             queue: ctx.queue().clone(),
         },
