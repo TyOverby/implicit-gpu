@@ -114,3 +114,47 @@ fn x_abs() {
     assert_eq!(run_test(&Ast::Abs(&Ast::X), 2.0, 3.0, 0.0), 2.0);
     assert_eq!(run_test(&Ast::Abs(&Ast::X), -2.0, 1.0, 0.0), 2.0);
 }
+
+#[test]
+fn easy_scale() {
+    let ast = &Ast::Transform {
+        target: &Ast::Add(&[Ast::X, Ast::Y]),
+        matrix: ::euclid::Transform3D::create_scale(2.0, 2.0, 2.0),
+    };
+    assert_eq!(run_test(ast, 1.0, 1.0, 0.0), 4.0);
+    assert_eq!(run_test(ast, 1.0, 0.0, 0.0), 2.0);
+    assert_eq!(run_test(ast, 0.0, 1.0, 0.0), 2.0);
+}
+
+#[test]
+fn x_scale() {
+    let ast = &Ast::Transform {
+        target: &Ast::X,
+        matrix: ::euclid::Transform3D::create_scale(2.0, 2.0, 2.0),
+    };
+    assert_eq!(run_test(ast, 1.0, 1.0, 0.0), 2.0);
+    assert_eq!(run_test(ast, 1.0, 0.0, 1.0), 2.0);
+    assert_eq!(run_test(ast, 0.0, 1.0, 0.0), 0.0);
+}
+
+#[test]
+fn y_scale() {
+    let ast = &Ast::Transform {
+        target: &Ast::Y,
+        matrix: ::euclid::Transform3D::create_scale(2.0, 2.0, 2.0),
+    };
+    assert_eq!(run_test(ast, 1.0, 1.0, 1.0), 2.0);
+    assert_eq!(run_test(ast, 1.0, 0.0, 1.0), 0.0);
+    assert_eq!(run_test(ast, 0.0, 1.0, 1.0), 2.0);
+}
+
+#[test]
+fn z_scale() {
+    let ast = &Ast::Transform {
+        target: &Ast::Z,
+        matrix: ::euclid::Transform3D::create_scale(2.0, 2.0, 2.0),
+    };
+    assert_eq!(run_test(ast, 1.0, 1.0, 1.0), 2.0);
+    assert_eq!(run_test(ast, 1.0, 0.0, 1.0), 2.0);
+    assert_eq!(run_test(ast, 0.0, 1.0, 1.0), 2.0);
+}
