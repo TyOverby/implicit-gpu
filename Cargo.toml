@@ -6,5 +6,7 @@ members = [
     "./vectorphile",
     "./testsuite",
     "./gpu-interp",
-    "./vis_3d"
+    "./vis_3d",
+    "./buffer_dump",
+    "./buffer_view"
 ]
