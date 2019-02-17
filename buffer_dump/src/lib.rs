@@ -9,7 +9,7 @@ pub mod util {
     use gpu_interp::Buffer;
     pub fn slice(buffer: &mut Buffer, depth: u32, out: &mut Vec<f32>) {
         let width = buffer.width as usize;
-        let height = buffer.width as usize;
+        let height = buffer.height as usize;
         let buff = buffer.to_memory();
         let pos = |x: usize, y: usize| x + y * width + depth as usize * width * height;
         out.resize(width * height, 0.0);

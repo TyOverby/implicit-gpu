@@ -58,6 +58,11 @@ impl Inspector for Provider {
         save_field_buffer(buffer, w_color, ColorMode::Debug);
         let w_bw = self.png_writer(format!("{}.bw.png", name));
         save_field_buffer(buffer, w_bw, ColorMode::BlackAndWhite);
+
+        let mut buf =
+            self.diagnostic()
+                .custom_test("buffer.buf", |_, _| panic!(), |_, _, _, _| panic!());
+        buffer_dump::write(&mut buf, buffer).unwrap();
     }
 
     fn write_segments(&self, name: &str, segments: &[PathSegment]) {

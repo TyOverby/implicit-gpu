@@ -2,9 +2,12 @@ extern crate buffer_dump;
 extern crate gpu_interp;
 extern crate minifb;
 
+mod util;
+
 use minifb::{Key, Window, WindowOptions};
 use std::fs::File;
 use std::io::BufReader;
+use util::*;
 
 enum Event {
     Up,
@@ -31,10 +34,11 @@ fn get_event(window: &Window) -> Event {
     }
 }
 
-fn update_draw(buffer: &mut gpu_interp::Buffer, draw: &mut Vec<u32>, depth: u32) {
+fn update_draw(buffer: &mut gpu_interp::Buffer, depth: u32) -> Image {
     let mut layer = vec![];
     buffer_dump::util::slice(buffer, depth, &mut layer);
-    for (&data, pixel) in layer.iter().zip(draw.iter_mut()) {
+    let mut image = Image::new(buffer.width as usize, buffer.height as usize, 0xFF00FF);
+    for (&data, pixel) in layer.iter().zip(image.data.iter_mut()) {
         if data == 0.0 {
             *pixel = 0x0000FF;
         } else if data <= 0.0 {
@@ -43,6 +47,7 @@ fn update_draw(buffer: &mut gpu_interp::Buffer, draw: &mut Vec<u32>, depth: u32)
             *pixel = 0x00FF00;
         }
     }
+    image
 }
 
 fn main() {
@@ -60,21 +65,20 @@ fn main() {
     let mut buffer = buffer_dump::read(&mut file).unwrap();
     let buffer_depth = buffer.depth;
 
-    let mut layer = vec![];
-    buffer_dump::util::slice(&mut buffer, 0, &mut layer);
-    let mut draw = layer.iter().map(|_| 0x000000).collect::<Vec<_>>();
-    update_draw(&mut buffer, &mut draw, buffer_depth / 2);
+    let mut image = update_draw(&mut buffer, buffer_depth / 2)
+        .pixelize()
+        .pixelize()
+        .pixelize();
 
     let mut window = Window::new(
         "Test - ESC to exit",
-        buffer.width as usize,
-        buffer.height as usize,
+        image.width,
+        image.height,
         WindowOptions::default(),
     )
     .unwrap();
 
     let mut depth_view = buffer_depth / 2;
-
     while window.is_open() && !window.is_key_down(Key::Escape) {
         let should_redraw = match get_event(&window) {
             Event::Down if depth_view != 0 => {
@@ -88,8 +92,15 @@ fn main() {
             _ => false,
         };
         if should_redraw {
-            update_draw(&mut buffer, &mut draw, depth_view)
+            image = update_draw(&mut buffer, depth_view)
+                .pixelize()
+                .pixelize()
+                .pixelize();
         }
-        window.update_with_buffer(&draw).unwrap();
+
+        let (w, h) = window.get_size();
+        let image_to_draw = image.pad(w, h, 0xFFFF00);
+
+        window.update_with_buffer(&image_to_draw.data).unwrap();
     }
 }
