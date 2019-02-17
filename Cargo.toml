@@ -1,12 +1,11 @@
 [workspace]
 members = [
     "./implicit",
-    "./aabb-quadtree",
-    "./line-stitch",
-    "./vectorphile",
+    "./util/aabb-quadtree",
+    "./util/line-stitch",
+    "./util/vectorphile",
     "./testsuite",
-    "./gpu-interp",
-    "./vis_3d",
-    "./buffer_dump",
-    "./buffer_view"
+    "./util/gpu-interp",
+    "./util/buffer_dump",
+    "./util/buffer_view"
 ]

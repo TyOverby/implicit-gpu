@@ -12,7 +12,7 @@ cgmath = ""
 typed-arena = ""
 
 [dependencies.gpu-interp]
-path = "../gpu-interp"
+path = "../../util/gpu-interp"
 
 [dependencies.implicit]
-path = "../implicit"
+path = "../../implicit"

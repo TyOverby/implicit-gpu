@@ -48,16 +48,16 @@ features = ["serde"]
 path = "../../snoot"
 
 [dependencies.gpu-interp]
-path = "../gpu-interp"
+path = "../util/gpu-interp"
 
 [dependencies.line-stitch]
-path = "../line-stitch"
+path = "../util/line-stitch"
 
 [dependencies.aabb-quadtree]
-path = "../aabb-quadtree"
+path = "../util/aabb-quadtree"
 
 [dependencies.vectorphile]
-path = "../vectorphile"
+path = "../util/vectorphile"
 
 [dependencies.buffer_dump]
-path = "../buffer_dump"
+path = "../util/buffer_dump"

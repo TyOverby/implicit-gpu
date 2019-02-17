@@ -1,6 +1,6 @@
 ## Implicit-GPU
 
-Implicit-GPU is an implementation of 2d-implicit surfaces using Rust and OpenCL.
+Implicit-GPU is an implementation of implicit surfaces using Rust and OpenCL.
 
 It is very early stages, so there's no real documentation yet.
 
