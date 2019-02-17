@@ -6,7 +6,7 @@ use opencl::{FieldBuffer, OpenClContext};
 use expectation::{extensions::TextDiffExtension, Provider};
 use expectation_plugin::expectation_test;
 #[cfg(test)]
-use ocaml::Shape;
+use extern_api::Shape;
 
 pub fn extract_lines(
     ctx: &OpenClContext,
@@ -53,7 +53,7 @@ fn run_shape_paths(shape: Shape, width: u32, height: u32, provider: Provider) {
 
 #[expectation_test]
 fn extract_circle(provider: Provider) {
-    use ocaml::*;
+    use extern_api::*;
 
     let shape = Shape::Terminal(Terminal::Circle(Circle {
         x: 11.0,
@@ -66,7 +66,7 @@ fn extract_circle(provider: Provider) {
 
 #[expectation_test]
 fn extract_subtraction(provider: Provider) {
-    use ocaml::*;
+    use extern_api::*;
 
     let a = Shape::Terminal(Terminal::Circle(Circle {
         x: 11.0,

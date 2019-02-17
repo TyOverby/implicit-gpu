@@ -1,6 +1,5 @@
+use extern_api::{Id, Shape, Terminal};
 use gpu_interp::Ast;
-use ocaml::Id;
-use ocaml::{Shape, Terminal};
 use opencl::FieldBuffer;
 use typed_arena::Arena;
 
@@ -24,7 +23,7 @@ where
             Ast::Buffer(buffer)
         }
         Shape::Terminal(Terminal::Rect(rect)) => {
-            let ::ocaml::Rect { x, y, w, h } = *rect;
+            let ::extern_api::Rect { x, y, w, h } = *rect;
             let top = (x, y, x + w, y);
             let right = (x + w, y, x + w, y + h);
             let bot = (x + w, y + h, x, y + h);

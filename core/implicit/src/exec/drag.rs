@@ -1,7 +1,7 @@
 #[cfg(test)]
 use expectation::{extensions::*, Provider};
 #[cfg(test)]
-use ocaml::Shape;
+use extern_api::Shape;
 
 use expectation_plugin::expectation_test;
 use opencl::{FieldBuffer, OpenClContext};
@@ -71,7 +71,7 @@ fn drag_shape_helper(shape: Shape, width: u32, height: u32, dx: f32, dy: f32, pr
 
 #[expectation_test]
 fn drag_circle(provider: Provider) {
-    use ocaml::*;
+    use extern_api::*;
 
     let shape = Shape::Terminal(Terminal::Circle(Circle {
         x: 11.0,
@@ -84,7 +84,7 @@ fn drag_circle(provider: Provider) {
 
 #[expectation_test]
 fn drag_rect(provider: Provider) {
-    use ocaml::*;
+    use extern_api::*;
 
     let shape = Shape::Terminal(Terminal::Rect(Rect {
         x: 1.0,

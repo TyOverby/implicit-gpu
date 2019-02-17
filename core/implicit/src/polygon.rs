@@ -1,5 +1,5 @@
 use geometry::Point;
-use ocaml::Matrix;
+use extern_api::Matrix;
 use ocl::Kernel;
 use opencl::{FieldBuffer, LineBuffer, OpenClContext};
 

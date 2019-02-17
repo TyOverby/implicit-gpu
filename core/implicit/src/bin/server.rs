@@ -4,11 +4,12 @@ extern crate flame;
 extern crate implicit;
 extern crate serde;
 extern crate snoot;
+extern crate extern_api;
 
 use expectation::Provider;
 use expectation_shared::filesystem::RealFileSystem;
+use extern_api::*;
 use implicit::inspector::Inspector;
-use implicit::ocaml::*;
 use snoot::serde_serialization::{deserialize, DeserializeResult};
 use std::io::Read;
 use std::io::{stdin, stdout};

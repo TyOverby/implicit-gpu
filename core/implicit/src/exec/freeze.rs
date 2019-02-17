@@ -4,10 +4,9 @@ use polygon::run_poly_raw_with_sign;
 
 #[cfg(test)]
 use expectation::{extensions::ImageDiffExtension, Provider};
+use extern_api::Matrix;
 #[cfg(test)]
-use ocaml::Shape;
-
-use ocaml::Matrix;
+use extern_api::Shape;
 
 pub fn exec_freeze(ctx: &OpenClContext, field: &mut FieldBuffer) -> FieldBuffer {
     let (field_width, field_height) = (field.width, field.height);
@@ -54,7 +53,7 @@ fn freeze_shape_helper(shape: Shape, width: u32, height: u32, provider: Provider
 
 #[expectation_test]
 fn freeze_circle(provider: Provider) {
-    use ocaml::*;
+    use extern_api::*;
 
     let shape = Shape::Terminal(Terminal::Circle(Circle {
         x: 11.0,
@@ -67,7 +66,7 @@ fn freeze_circle(provider: Provider) {
 
 #[expectation_test]
 fn freeze_subtraction(provider: Provider) {
-    use ocaml::*;
+    use extern_api::*;
 
     let a = Shape::Terminal(Terminal::Circle(Circle {
         x: 11.0,
@@ -88,7 +87,7 @@ fn freeze_subtraction(provider: Provider) {
 
 #[expectation_test]
 fn freeze_union(provider: Provider) {
-    use ocaml::*;
+    use extern_api::*;
 
     let a = Shape::Terminal(Terminal::Circle(Circle {
         x: 11.0,

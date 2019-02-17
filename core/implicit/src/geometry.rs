@@ -39,37 +39,18 @@ impl aabb_quadtree::Spatial<UnknownUnit> for Line {
     }
 }
 
-// TODO: this is *way* too expensive
 pub fn bb_for_line(l: Line, margin: f32) -> Rect {
-    compute_bounding_box(vec![l.0, l.1]).inflate(margin, margin)
-}
-
-// TODO: rename
-pub fn compute_bounding_box<I: IntoIterator<Item = Point>>(i: I) -> Rect {
     use euclid::{point2, vec2};
-    use std::f32;
+    let Line(Point { x: x1, y: y1, .. }, Point { x: x2, y: y2, .. }) = l;
+    let min_x = x1.min(x2);
+    let min_y = y1.min(y2);
 
-    let mut min_x = f32::INFINITY;
-    let mut min_y = f32::INFINITY;
-    let mut max_x = f32::NEG_INFINITY;
-    let mut max_y = f32::NEG_INFINITY;
-
-    for pt in i {
-        min_x = min_x.min(pt.x);
-        min_y = min_y.min(pt.y);
-
-        max_x = max_x.max(pt.x);
-        max_y = max_y.max(pt.y);
-    }
+    let max_x = x1.max(x2);
+    let max_y = y1.max(y2);
 
     Rect::new(
         point2(min_x, min_y),
         vec2(max_x - min_x, max_y - min_y).to_size(),
     )
-}
-
-#[allow(dead_code)]
-pub(crate) fn centered_with_radius(pt: Point, radius: f32) -> Rect {
-    let half = euclid::vec2(radius, radius);
-    euclid::TypedRect::new(pt - half, (half * 2.0).to_size())
+    .inflate(margin, margin)
 }

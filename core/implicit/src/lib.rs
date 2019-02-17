@@ -9,6 +9,8 @@ extern crate expectation;
 extern crate expectation_plugin;
 extern crate expectation_shared;
 
+extern crate extern_api;
+
 // External Crates
 extern crate euclid;
 extern crate flame;
@@ -20,7 +22,6 @@ extern crate serde;
 extern crate typed_arena;
 extern crate vecmath;
 
-#[macro_use]
 extern crate serde_derive;
 #[cfg(test)]
 extern crate serde_json;
@@ -38,4 +39,3 @@ pub mod polygon;
 pub mod surface_net;
 
 pub mod exec;
-pub mod ocaml;

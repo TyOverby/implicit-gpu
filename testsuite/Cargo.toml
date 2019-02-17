@@ -14,4 +14,4 @@ path = "../../expectation/expectation"
 path = "../../snoot"
 
 [dependencies.implicit]
-path = "../implicit"
+path = "../core/implicit"

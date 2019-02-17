@@ -1,3 +1,8 @@
+#[macro_use]
+extern crate serde_derive;
+extern crate euclid;
+extern crate serde;
+
 use euclid::{Point2D, Transform2D};
 use serde::Deserializer;
 

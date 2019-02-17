@@ -1,5 +1,5 @@
 use inspector::BoxedInspector;
-use ocaml::{Id, Shape};
+use extern_api::{Id, Shape};
 use opencl::{FieldBuffer, OpenClContext};
 
 #[cfg(test)]
@@ -61,7 +61,7 @@ fn run_shape_helper(
 
 #[expectation_test]
 fn exec_circle(provider: Provider) {
-    use ocaml::*;
+    use extern_api::*;
 
     let ctx = OpenClContext::default();
     let shape = Shape::Terminal(Terminal::Circle(Circle {
@@ -76,7 +76,7 @@ fn exec_circle(provider: Provider) {
 #[expectation_test]
 fn exec_circle_with_matrix(provider: Provider) {
     use euclid::*;
-    use ocaml::*;
+    use extern_api::*;
 
     let ctx = OpenClContext::default();
     let shape = Shape::Transform(
@@ -94,8 +94,8 @@ fn exec_circle_with_matrix(provider: Provider) {
 #[expectation_test]
 fn exec_rounded_rect_with_scale_on_top(provider: Provider) {
     use euclid::*;
-    use ocaml::Rect;
-    use ocaml::*;
+    use extern_api::Rect;
+    use extern_api::*;
 
     let ctx = OpenClContext::default();
     let inner_rect = Shape::Terminal(Terminal::Rect(Rect {
@@ -113,8 +113,8 @@ fn exec_rounded_rect_with_scale_on_top(provider: Provider) {
 #[expectation_test]
 fn exec_rect_translated(provider: Provider) {
     use euclid::*;
-    use ocaml::Rect;
-    use ocaml::*;
+    use extern_api::Rect;
+    use extern_api::*;
 
     let ctx = OpenClContext::default();
     let inner_rect = Shape::Terminal(Terminal::Rect(Rect {
@@ -134,7 +134,7 @@ fn exec_rect_translated(provider: Provider) {
 #[expectation_test]
 fn exec_circle_translated(provider: Provider) {
     use euclid::*;
-    use ocaml::*;
+    use extern_api::*;
 
     let ctx = OpenClContext::default();
     let inner_rect = Shape::Terminal(Terminal::Circle(Circle {
@@ -153,8 +153,8 @@ fn exec_circle_translated(provider: Provider) {
 
 #[expectation_test]
 fn exec_rect(provider: Provider) {
-    use ocaml::Rect;
-    use ocaml::*;
+    use extern_api::Rect;
+    use extern_api::*;
 
     let ctx = OpenClContext::default();
     let shape = Shape::Terminal(Terminal::Rect(Rect {
@@ -169,7 +169,7 @@ fn exec_rect(provider: Provider) {
 
 #[expectation_test]
 fn exec_field(provider: Provider) {
-    use ocaml::*;
+    use extern_api::*;
 
     let ctx = OpenClContext::default();
     let circle = Shape::Terminal(Terminal::Circle(Circle {
@@ -187,7 +187,7 @@ fn exec_field(provider: Provider) {
 
 #[expectation_test]
 fn exec_field_intersection(provider: Provider) {
-    use ocaml::*;
+    use extern_api::*;
 
     let ctx = OpenClContext::default();
     let circle_1 = Shape::Terminal(Terminal::Circle(Circle {

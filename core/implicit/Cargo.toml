@@ -2,7 +2,6 @@
 name = "implicit"
 version = "0.1.0"
 authors = ["Ty Overby <ty@pre-alpha.com>"]
-workspace = "../"
 
 [[bin]]
 name = "server"
@@ -31,33 +30,36 @@ typed-arena = "1.4.1"
 #expectation = "0.1.*"
 #expectation_plugin  = "0.1.2"
 [dependencies.expectation]
-path = "../../expectation/expectation"
+path = "../../../expectation/expectation"
 [dependencies.expectation-shared]
-path = "../../expectation/expectation-shared"
+path = "../../../expectation/expectation-shared"
 [dependencies.expectation_plugin]
-path = "../../expectation/expectation-plugin"
+path = "../../../expectation/expectation-plugin"
 
 [dependencies.ocl]
-path = "../../ocl/ocl"
+path = "../../../ocl/ocl"
+
+[dependencies.extern_api]
+path = "../extern_api"
 
 [dependencies.euclid]
 version = "0.19.0"
 features = ["serde"]
 
 [dependencies.snoot]
-path = "../../snoot"
+path = "../../../snoot"
 
 [dependencies.gpu-interp]
-path = "../util/gpu-interp"
+path = "../../util/gpu-interp"
 
 [dependencies.line-stitch]
-path = "../util/line-stitch"
+path = "../../util/line-stitch"
 
 [dependencies.aabb-quadtree]
-path = "../util/aabb-quadtree"
+path = "../../util/aabb-quadtree"
 
 [dependencies.vectorphile]
-path = "../util/vectorphile"
+path = "../../util/vectorphile"
 
 [dependencies.buffer_dump]
-path = "../util/buffer_dump"
+path = "../../util/buffer_dump"

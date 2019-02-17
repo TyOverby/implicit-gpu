@@ -82,7 +82,7 @@ pub fn execute(
 
     let program = Program::builder()
         .source(concat!(
-            include_str!("../../../../implicit/src/shaders/dist_to_line.c"),
+            include_str!("../../../../core/implicit/src/shaders/dist_to_line.c"),
             include_str!(concat!(env!("OUT_DIR"), "/opcodes.c")),
             include_str!("./interp.c")
         ))

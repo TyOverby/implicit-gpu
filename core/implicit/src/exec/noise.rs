@@ -4,7 +4,7 @@ use debug::*;
 use expectation::{extensions::*, Provider};
 
 use expectation_plugin::expectation_test;
-use ocaml::Matrix;
+use extern_api::Matrix;
 use opencl::{FieldBuffer, OpenClContext};
 
 const PROGRAM: &'static str = include_str!("../shaders/simplex.c");
@@ -40,7 +40,7 @@ pub fn get_noise(
 
 #[expectation_test]
 fn exec_noise(provider: Provider) {
-    use ocaml::Matrix;
+    use extern_api::Matrix;
     use opencl::*;
 
     let ctx = OpenClContext::default();

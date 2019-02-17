@@ -13,9 +13,9 @@ pub use self::poly::*;
 pub use self::shape::*;
 
 use expectation_plugin::expectation_test;
+use extern_api::*;
 use geometry::PathSegment;
 use inspector::*;
-use ocaml::*;
 use opencl::{FieldBuffer, OpenClContext};
 use std::collections::HashMap;
 
@@ -112,7 +112,7 @@ fn exec_inner(
 #[expectation_test]
 fn exec_program_single(provider: Provider) {
     use debug::print_path_segments;
-    use ocaml::*;
+    use extern_api::*;
 
     let shape = Shape::Terminal(Terminal::Circle(Circle {
         x: 11.0,
@@ -136,7 +136,7 @@ fn exec_program_single(provider: Provider) {
 fn exec_program_with_multiple(provider: Provider) {
     use debug::print_path_segments;
     use euclid::*;
-    use ocaml::*;
+    use extern_api::*;
 
     let shape = Shape::Terminal(Terminal::Circle(Circle {
         x: 11.0,
@@ -180,7 +180,7 @@ fn exec_program_with_multiple(provider: Provider) {
 #[expectation_test]
 fn exec_program_single_noise(provider: Provider) {
     use debug::print_path_segments;
-    use ocaml::*;
+    use extern_api::*;
 
     let program = Command::Serially(vec![
         Command::Simplex(

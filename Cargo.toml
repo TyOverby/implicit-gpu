@@ -1,6 +1,7 @@
 [workspace]
 members = [
-    "./implicit",
+    "./core/implicit",
+    "./core/extern_api",
     "./util/aabb-quadtree",
     "./util/line-stitch",
     "./util/vectorphile",

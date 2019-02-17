@@ -3,7 +3,7 @@ use debug::*;
 #[cfg(test)]
 use expectation::{extensions::*, Provider};
 use expectation_plugin::expectation_test;
-use ocaml::Polygon;
+use extern_api::Polygon;
 use opencl::{FieldBuffer, OpenClContext};
 use polygon::run_poly;
 
@@ -14,7 +14,7 @@ pub fn exec_poly(ctx: &OpenClContext, poly: Polygon, width: u32, height: u32) ->
 #[expectation_test]
 fn exec_triangle(provider: Provider) {
     use euclid::*;
-    use ocaml::*;
+    use extern_api::*;
 
     let ctx = OpenClContext::default();
     let polygon = Polygon {
@@ -40,7 +40,7 @@ fn exec_triangle(provider: Provider) {
 #[expectation_test]
 fn exec_line_bad(provider: Provider) {
     use euclid::*;
-    use ocaml::*;
+    use extern_api::*;
 
     let ctx = OpenClContext::default();
     let polygon = Polygon {
@@ -64,7 +64,7 @@ fn exec_line_bad(provider: Provider) {
 #[expectation_test]
 fn exec_triangle_scaled(provider: Provider) {
     use euclid::*;
-    use ocaml::*;
+    use extern_api::*;
 
     let ctx = OpenClContext::default();
     let polygon = Polygon {
