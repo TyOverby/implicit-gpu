@@ -9,3 +9,6 @@ minifb = "0.11.2"
 
 [dependencies.buffer_dump]
 path = "../buffer_dump"
+
+[dependencies.gpu-interp]
+path = "../gpu-interp"

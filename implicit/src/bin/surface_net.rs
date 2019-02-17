@@ -1,3 +1,4 @@
+extern crate buffer_dump;
 extern crate euclid;
 extern crate gpu_interp;
 extern crate implicit;
@@ -95,6 +96,9 @@ fn main() {
             queue: ctx.queue().clone(),
         },
     );
+    let mut out_dbg = std::io::BufWriter::new(std::fs::File::create("out.buf").unwrap());
+    buffer_dump::write(&mut out_dbg, &mut field_buffer).unwrap();
+
     let (index_buffer, count, mut pos_buffer, mut normal_buffer) =
         implicit::surface_net::run_surface_net(&mut field_buffer, &ctx);
     let index_buffer = index_buffer.values(Some(count));
