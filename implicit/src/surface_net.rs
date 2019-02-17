@@ -3,21 +3,24 @@ use opencl::{FieldBuffer, IndexBuffer, OpenClContext};
 const PROGRAM: &'static str = include_str!("shaders/surfacenet.c");
 
 pub fn run_surface_net(
-    input: &FieldBuffer,
+    input: &mut FieldBuffer,
     ctx: &OpenClContext,
 ) -> (IndexBuffer, u32, FieldBuffer, FieldBuffer) {
-    let (centers, normal_buffer) = run_surface_net_phase_1(input, ctx);
-    let (idx, count) = run_surface_net_phase_2(input, &centers, ctx);
+    let (mut centers, normal_buffer) = run_surface_net_phase_1(input, ctx);
+    let (idx, count) = run_surface_net_phase_2(input, &mut centers, ctx);
     (idx, count, centers, normal_buffer)
 }
 
 pub fn run_surface_net_phase_1(
-    input: &FieldBuffer,
+    input: &mut FieldBuffer,
     ctx: &OpenClContext,
 ) -> (FieldBuffer, FieldBuffer) {
     let _guard = ::flame::start_guard("opencl surface net phase 1 [run_surface_net]");
 
-    let (width, height, depth) = input.dims;
+    let width = input.width;
+    let height = input.height;
+    let depth = input.depth;
+
     let mut phase_1_kernel = ctx.compile("phase_1", PROGRAM, |register| {
         register.buffer("buffer");
         register.long("width");
@@ -27,20 +30,26 @@ pub fn run_surface_net_phase_1(
         register.buffer("normals");
     });
 
-    let center_buffer = ctx.field_buffer(width, height, depth * 3, None);
-    let normal_buffer = ctx.field_buffer(width, height, depth * 3, None);
+    let mut center_buffer = ctx.field_buffer(width, height, depth * 3, None);
+    let mut normal_buffer = ctx.field_buffer(width, height, depth * 3, None);
 
     ::flame::start("setup phase_1_kernel");
-    phase_1_kernel.set_default_global_work_size(::ocl::SpatialDims::Three(width, height, depth));
-    phase_1_kernel.set_arg("buffer", input.buffer()).unwrap();
+    phase_1_kernel.set_default_global_work_size(::ocl::SpatialDims::Three(
+        width as usize,
+        height as usize,
+        depth as usize,
+    ));
+    phase_1_kernel
+        .set_arg("buffer", input.to_opencl(ctx.queue()))
+        .unwrap();
     phase_1_kernel.set_arg("width", width as u64).unwrap();
     phase_1_kernel.set_arg("height", height as u64).unwrap();
     phase_1_kernel.set_arg("depth", depth as u64).unwrap();
     phase_1_kernel
-        .set_arg("out", center_buffer.buffer())
+        .set_arg("out", center_buffer.to_opencl(ctx.queue()))
         .unwrap();
     phase_1_kernel
-        .set_arg("normals", normal_buffer.buffer())
+        .set_arg("normals", normal_buffer.to_opencl(ctx.queue()))
         .unwrap();
     ::flame::end("setup phase_1_kernel");
 
@@ -53,13 +62,15 @@ pub fn run_surface_net_phase_1(
     (center_buffer, normal_buffer)
 }
 pub fn run_surface_net_phase_2(
-    input: &FieldBuffer,
-    center_buffer: &FieldBuffer,
+    input: &mut FieldBuffer,
+    center_buffer: &mut FieldBuffer,
     ctx: &OpenClContext,
 ) -> (IndexBuffer, u32) {
     let _guard = ::flame::start_guard("opencl surface net [run_surface_net]");
 
-    let (width, height, depth) = input.dims;
+    let width = input.width;
+    let height = input.height;
+    let depth = input.depth;
     let mut phase_1_kernel = ctx.compile("phase_2", PROGRAM, |register| {
         register.buffer("buffer");
         register.buffer("centers");
@@ -70,14 +81,21 @@ pub fn run_surface_net_phase_2(
         register.buffer("atomic");
     });
 
-    let index_buffer = ctx.index_buffer_uninit(width * height * depth * 6);
+    let index_buffer =
+        ctx.index_buffer_uninit(width as usize * height as usize * depth as usize * 6);
     let sync_buffer = ctx.sync_buffer();
 
     ::flame::start("setup phase_1_kernel");
-    phase_1_kernel.set_default_global_work_size(::ocl::SpatialDims::Three(width, height, depth));
-    phase_1_kernel.set_arg("buffer", input.buffer()).unwrap();
+    phase_1_kernel.set_default_global_work_size(::ocl::SpatialDims::Three(
+        width as usize,
+        height as usize,
+        depth as usize,
+    ));
     phase_1_kernel
-        .set_arg("centers", center_buffer.buffer())
+        .set_arg("buffer", input.to_opencl(ctx.queue()))
+        .unwrap();
+    phase_1_kernel
+        .set_arg("centers", center_buffer.to_opencl(ctx.queue()))
         .unwrap();
     phase_1_kernel.set_arg("width", width as u64).unwrap();
     phase_1_kernel.set_arg("height", height as u64).unwrap();

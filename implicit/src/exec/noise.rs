@@ -11,12 +11,12 @@ const PROGRAM: &'static str = include_str!("../shaders/simplex.c");
 
 pub fn get_noise(
     ctx: &OpenClContext,
-    width: usize,
-    height: usize,
+    width: u32,
+    height: u32,
     cutoff: f32,
     matrix: Matrix,
 ) -> FieldBuffer {
-    let out = ctx.field_buffer(width, height, 1, None);
+    let mut out = ctx.field_buffer(width, height, 1, None);
     let mut kernel = ctx.compile("apply", PROGRAM, |register| {
         register.buffer("buffer");
         register.long("width");
@@ -24,8 +24,10 @@ pub fn get_noise(
         register.matrix();
     });
 
-    kernel.set_default_global_work_size(::ocl::SpatialDims::Two(width, height));
-    kernel.set_arg("buffer", out.buffer()).unwrap();
+    kernel.set_default_global_work_size(::ocl::SpatialDims::Two(width as usize, height as usize));
+    kernel
+        .set_arg("buffer", out.to_opencl(ctx.queue()))
+        .unwrap();
     kernel.set_arg("width", width as u64).unwrap();
     kernel.set_arg("cutoff", cutoff).unwrap();
     let kernel = ::polygon::add_matrix(kernel, matrix);
@@ -42,11 +44,11 @@ fn exec_noise(provider: Provider) {
     use opencl::*;
 
     let ctx = OpenClContext::default();
-    let buffer = get_noise(&ctx, 20, 20, 0.5, Matrix::identity());
+    let mut buffer = get_noise(&ctx, 20, 20, 0.5, Matrix::identity());
 
     let w_color = provider.png_writer("out.color.png");
-    save_field_buffer(&buffer, w_color, ColorMode::Debug);
+    save_field_buffer(&mut buffer, w_color, ColorMode::Debug);
 
     let w_bw = provider.png_writer("out.bw.png");
-    save_field_buffer(&buffer, w_bw, ColorMode::BlackAndWhite);
+    save_field_buffer(&mut buffer, w_bw, ColorMode::BlackAndWhite);
 }

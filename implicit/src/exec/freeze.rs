@@ -9,14 +9,14 @@ use ocaml::Shape;
 
 use ocaml::Matrix;
 
-pub fn exec_freeze(ctx: &OpenClContext, field: &FieldBuffer) -> FieldBuffer {
-    let (width, height) = field.size();
-    let (lines_buffer, count) = ::marching::run_marching(&field, ctx);
+pub fn exec_freeze(ctx: &OpenClContext, field: &mut FieldBuffer) -> FieldBuffer {
+    let (field_width, field_height) = (field.width, field.height);
+    let (lines_buffer, count) = ::marching::run_marching(field, ctx);
     run_poly_raw_with_sign(
         lines_buffer,
         field,
-        width,
-        height,
+        field_width,
+        field_height,
         count as usize,
         Matrix::identity(),
         ctx,
@@ -24,14 +24,14 @@ pub fn exec_freeze(ctx: &OpenClContext, field: &FieldBuffer) -> FieldBuffer {
 }
 
 #[cfg(test)]
-fn freeze_shape_helper(shape: Shape, width: usize, height: usize, provider: Provider) {
+fn freeze_shape_helper(shape: Shape, width: u32, height: u32, provider: Provider) {
     use debug::*;
     use exec::exec_shape;
     use inspector::Inspector;
 
     let ctx = OpenClContext::default();
 
-    let before_buffer = exec_shape(
+    let mut before_buffer = exec_shape(
         &ctx,
         provider.duplicate(),
         shape,
@@ -39,17 +39,17 @@ fn freeze_shape_helper(shape: Shape, width: usize, height: usize, provider: Prov
         height,
         |_| unimplemented!(),
     );
-    let after_buffer = exec_freeze(&ctx, &before_buffer);
+    let mut after_buffer = exec_freeze(&ctx, &mut before_buffer);
 
     let w_color = provider.png_writer("before.color.png");
-    save_field_buffer(&before_buffer, w_color, ColorMode::Debug);
+    save_field_buffer(&mut before_buffer, w_color, ColorMode::Debug);
     let w_bw = provider.png_writer("before.bw.png");
-    save_field_buffer(&before_buffer, w_bw, ColorMode::BlackAndWhite);
+    save_field_buffer(&mut before_buffer, w_bw, ColorMode::BlackAndWhite);
 
     let w_color = provider.png_writer("after.color.png");
-    save_field_buffer(&after_buffer, w_color, ColorMode::Debug);
+    save_field_buffer(&mut after_buffer, w_color, ColorMode::Debug);
     let w_bw = provider.png_writer("after.bw.png");
-    save_field_buffer(&after_buffer, w_bw, ColorMode::BlackAndWhite);
+    save_field_buffer(&mut after_buffer, w_bw, ColorMode::BlackAndWhite);
 }
 
 #[expectation_test]

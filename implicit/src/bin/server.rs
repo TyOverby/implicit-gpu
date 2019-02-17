@@ -44,8 +44,8 @@ fn main() {
         )
         .duplicate(),
         //Box::new(()),
-        w.ceil() as usize,
-        h.ceil() as usize,
+        w.ceil() as u32,
+        h.ceil() as u32,
     );
     let output: Vec<_> = output.into_iter().flat_map(|(_, v)| v).collect();
     implicit::debug::svg_path_segments(stdout(), &output).unwrap();

@@ -52,8 +52,8 @@ fn expectation_test_all() {
                 implicit::exec::exec(
                     command,
                     provider.duplicate(),
-                    w.ceil() as usize,
-                    h.ceil() as usize,
+                    w.ceil() as u32,
+                    h.ceil() as u32,
                 );
             });
         });

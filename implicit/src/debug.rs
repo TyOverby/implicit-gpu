@@ -14,10 +14,11 @@ pub enum ColorMode {
     Debug,
 }
 
-pub fn save_field_buffer<W: Write>(buffer: &FieldBuffer, writer: W, color_mode: ColorMode) {
+pub fn save_field_buffer<W: Write>(buffer: &mut FieldBuffer, writer: W, color_mode: ColorMode) {
+    let buffer_width = buffer.width;
     let _guard = ::flame::start_guard("save_field_buffer");
-    let samples = ::flame::span_of("fetch values", || buffer.values());
-    save_image(&samples, buffer.width(), writer, color_mode);
+    let samples = ::flame::span_of("fetch values", || buffer.to_memory());
+    save_image(&samples, buffer_width as usize, writer, color_mode);
 }
 
 fn save_image<W: Write>(samples: &[f32], width: usize, mut writer: W, color_mode: ColorMode) {

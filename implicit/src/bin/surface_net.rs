@@ -85,7 +85,7 @@ fn main() {
     };
     eprintln!("compiled: {:#?}", program);
     let compiled = ::gpu_interp::gpu::compile(&program);
-    let mut buf = ::gpu_interp::gpu::execute(
+    let mut field_buffer = ::gpu_interp::gpu::execute(
         compiled,
         40 * factor,
         40 * factor,
@@ -95,19 +95,11 @@ fn main() {
             queue: ctx.queue().clone(),
         },
     );
-    let field_buffer = FieldBuffer {
-        dims: (
-            40 * factor as usize,
-            40 * factor as usize,
-            40 * factor as usize,
-        ),
-        internal: buf.to_opencl(ctx.queue()).clone(),
-    };
-    let (index_buffer, count, pos_buffer, normal_buffer) =
-        implicit::surface_net::run_surface_net(&field_buffer, &ctx);
+    let (index_buffer, count, mut pos_buffer, mut normal_buffer) =
+        implicit::surface_net::run_surface_net(&mut field_buffer, &ctx);
     let index_buffer = index_buffer.values(Some(count));
-    let pos_buffer = pos_buffer.values();
-    let normal_buffer = normal_buffer.values();
+    let pos_buffer = pos_buffer.to_memory();
+    let normal_buffer = normal_buffer.to_memory();
 
     /*
     for position in pos_buffer.chunks(3) {

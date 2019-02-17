@@ -25,8 +25,8 @@ use expectation::{extensions::TextDiffExtension, Provider};
 pub fn exec(
     command: Command,
     inspector: BoxedInspector,
-    width: usize,
-    height: usize,
+    width: u32,
+    height: u32,
 ) -> HashMap<Id, Vec<PathSegment>> {
     let ctx = OpenClContext::default();
     let mut mapping = HashMap::new();
@@ -49,35 +49,43 @@ fn exec_inner(
     mapping: &mut HashMap<Id, FieldBuffer>,
     output: &mut HashMap<Id, Vec<PathSegment>>,
     inspector: BoxedInspector,
-    width: usize,
-    height: usize,
+    width: u32,
+    height: u32,
 ) {
     match command {
         Command::Simplex(id, simplex) => {
-            let field = get_noise(ctx, width, height, simplex.cutoff, simplex.matrix);
-            inspector.write_field(&format!("simplex_{}", id), &field);
+            let mut field = get_noise(ctx, width, height, simplex.cutoff, simplex.matrix);
+            inspector.write_field(&format!("simplex_{}", id), &mut field);
             mapping.insert(id, field);
         }
         Command::Define(id, Value::BasicShape(shape)) => {
-            let field = exec_shape(ctx, inspector.duplicate(), shape, width, height, |id| {
+            let mut field = exec_shape(ctx, inspector.duplicate(), shape, width, height, |id| {
                 mapping[&id].clone()
             });
-            inspector.write_field(&format!("shape_{}", id), &field);
+            inspector.write_field(&format!("shape_{}", id), &mut field);
             mapping.insert(id, field);
         }
         Command::Define(id, Value::Polygon(poly)) => {
-            let field = exec_poly(ctx, poly, width, height);
-            inspector.write_field(&format!("poly_{}", id), &field);
+            let mut field = exec_poly(ctx, poly, width, height);
+            inspector.write_field(&format!("poly_{}", id), &mut field);
             mapping.insert(id, field);
         }
         Command::Freeze { target, id } => {
-            let field = exec_freeze(ctx, &mapping[&target]);
-            inspector.write_field(&format!("freeze_{}", id), &field);
+            let field = {
+                let buffer = mapping.get_mut(&target).unwrap();
+                let mut field = exec_freeze(ctx, buffer);
+                inspector.write_field(&format!("freeze_{}", id), &mut field);
+                field
+            };
             mapping.insert(id, field);
         }
         Command::Drag { target, id, dx, dy } => {
-            let field = exec_drag(ctx, &mapping[&target], dx, dy);
-            inspector.write_field(&format!("drag_{}", id), &field);
+            let field = {
+                let buffer = mapping.get_mut(&target).unwrap();
+                let mut field = exec_drag(ctx, buffer, dx, dy);
+                inspector.write_field(&format!("drag_{}", id), &mut field);
+                field
+            };
             mapping.insert(id, field);
         }
         Command::Concurrently(commands) | Command::Serially(commands) => {
@@ -94,7 +102,8 @@ fn exec_inner(
             }
         }
         Command::Export(id) => {
-            let lines = extract_lines(ctx, inspector, &mapping[&id]);
+            let buffer = mapping.get_mut(&id).unwrap();
+            let lines = extract_lines(ctx, inspector, buffer);
             output.insert(id, lines);
         }
     }

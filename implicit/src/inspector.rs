@@ -11,7 +11,7 @@ pub trait Inspector {
     fn specialize(&self, name: &str) -> BoxedInspector;
     fn write_ast(&self, name: &str, ast: &::gpu_interp::Ast);
     fn write_compiled(&self, name: &str, ast: &::gpu_interp::gpu::bytecode::CompilationResult);
-    fn write_field(&self, name: &str, buffer: &FieldBuffer);
+    fn write_field(&self, name: &str, buffer: &mut FieldBuffer);
     fn write_segments(&self, name: &str, segments: &[PathSegment]);
     fn write_lines(&self, name: &str, lines: &[(Point, Point)]);
     fn do_slow(&self, f: &Fn());
@@ -26,7 +26,7 @@ impl Inspector for () {
     }
     fn write_compiled(&self, _name: &str, _ast: &::gpu_interp::gpu::bytecode::CompilationResult) {}
     fn write_ast(&self, _name: &str, _ast: &::gpu_interp::Ast) {}
-    fn write_field(&self, _name: &str, _buffer: &FieldBuffer) {}
+    fn write_field(&self, _name: &str, _buffer: &mut FieldBuffer) {}
     fn write_segments(&self, _name: &str, _segments: &[PathSegment]) {}
     fn write_lines(&self, _name: &str, _lines: &[(Point, Point)]) {}
 
@@ -52,12 +52,12 @@ impl Inspector for Provider {
             .text_writer(format!("{}.compiled.txt", name));
         write!(w_text, "{:#?}", ast).unwrap();
     }
-    fn write_field(&self, name: &str, buffer: &FieldBuffer) {
+    fn write_field(&self, name: &str, buffer: &mut FieldBuffer) {
         use debug::*;
         let w_color = self.png_writer(format!("{}.color.png", name));
-        save_field_buffer(&buffer, w_color, ColorMode::Debug);
+        save_field_buffer(buffer, w_color, ColorMode::Debug);
         let w_bw = self.png_writer(format!("{}.bw.png", name));
-        save_field_buffer(&buffer, w_bw, ColorMode::BlackAndWhite);
+        save_field_buffer(buffer, w_bw, ColorMode::BlackAndWhite);
     }
 
     fn write_segments(&self, name: &str, segments: &[PathSegment]) {

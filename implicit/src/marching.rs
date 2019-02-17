@@ -2,10 +2,10 @@ use opencl::{FieldBuffer, LineBuffer, OpenClContext};
 
 const PROGRAM: &'static str = include_str!("shaders/marching.c");
 
-pub fn run_marching(input: &FieldBuffer, ctx: &OpenClContext) -> (LineBuffer, u32) {
+pub fn run_marching(input: &mut FieldBuffer, ctx: &OpenClContext) -> (LineBuffer, u32) {
     let _guard = ::flame::start_guard("opencl marching [run_marching]");
 
-    let (width, height) = (input.width(), input.height());
+    let (width, height) = (input.width as usize, input.height as usize);
     let mut kernel = ctx.compile("apply", PROGRAM, |register| {
         register.buffer("buffer");
         register.long("width");
@@ -19,7 +19,9 @@ pub fn run_marching(input: &FieldBuffer, ctx: &OpenClContext) -> (LineBuffer, u3
 
     ::flame::start("setup kernel");
     kernel.set_default_global_work_size(::ocl::SpatialDims::Two(width, height));
-    kernel.set_arg("buffer", input.buffer()).unwrap();
+    kernel
+        .set_arg("buffer", input.to_opencl(ctx.queue()))
+        .unwrap();
     kernel.set_arg("width", width as u64).unwrap();
     kernel.set_arg("height", height as u64).unwrap();
     kernel.set_arg("out", line_buffer.buffer()).unwrap();
@@ -37,8 +39,8 @@ pub fn run_marching(input: &FieldBuffer, ctx: &OpenClContext) -> (LineBuffer, u3
 #[test]
 fn basic() {
     fn test_this(a: f32, b: f32, c: f32, d: f32, ctx: &OpenClContext) -> ((f32, f32), (f32, f32)) {
-        let buf = ctx.field_buffer(2, 2, 1, Some(&[a, b, d, c]));
-        let lines = run_marching(&buf, &ctx).0.values(None);
+        let mut buf = ctx.field_buffer(2, 2, 1, Some(&[a, b, d, c]));
+        let lines = run_marching(&mut buf, &ctx).0.values(None);
 
         return ((lines[0], lines[1]), (lines[2], lines[3]));
     }

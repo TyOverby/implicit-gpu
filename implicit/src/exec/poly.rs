@@ -7,7 +7,7 @@ use ocaml::Polygon;
 use opencl::{FieldBuffer, OpenClContext};
 use polygon::run_poly;
 
-pub fn exec_poly(ctx: &OpenClContext, poly: Polygon, width: usize, height: usize) -> FieldBuffer {
+pub fn exec_poly(ctx: &OpenClContext, poly: Polygon, width: u32, height: u32) -> FieldBuffer {
     run_poly(poly.points, None, width, height, poly.matrix, ctx).unwrap()
 }
 
@@ -28,13 +28,13 @@ fn exec_triangle(provider: Provider) {
         ],
         matrix: Matrix::identity(),
     };
-    let buffer = exec_poly(&ctx, polygon, 20, 20);
+    let mut buffer = exec_poly(&ctx, polygon, 20, 20);
 
     let w_color = provider.png_writer("out.color.png");
-    save_field_buffer(&buffer, w_color, ColorMode::Debug);
+    save_field_buffer(&mut buffer, w_color, ColorMode::Debug);
 
     let w_bw = provider.png_writer("out.bw.png");
-    save_field_buffer(&buffer, w_bw, ColorMode::BlackAndWhite);
+    save_field_buffer(&mut buffer, w_bw, ColorMode::BlackAndWhite);
 }
 
 #[expectation_test]
@@ -52,13 +52,13 @@ fn exec_line_bad(provider: Provider) {
         ],
         matrix: Matrix::identity(),
     };
-    let buffer = exec_poly(&ctx, polygon, 20, 20);
+    let mut buffer = exec_poly(&ctx, polygon, 20, 20);
 
     let w_color = provider.png_writer("out.color.png");
-    save_field_buffer(&buffer, w_color, ColorMode::Debug);
+    save_field_buffer(&mut buffer, w_color, ColorMode::Debug);
 
     let w_bw = provider.png_writer("out.bw.png");
-    save_field_buffer(&buffer, w_bw, ColorMode::BlackAndWhite);
+    save_field_buffer(&mut buffer, w_bw, ColorMode::BlackAndWhite);
 }
 
 #[expectation_test]
@@ -78,11 +78,11 @@ fn exec_triangle_scaled(provider: Provider) {
         ],
         matrix: Matrix::create_scale(2.0, 1.0),
     };
-    let buffer = exec_poly(&ctx, polygon, 40, 20);
+    let mut buffer = exec_poly(&ctx, polygon, 40, 20);
 
     let w_color = provider.png_writer("out.color.png");
-    save_field_buffer(&buffer, w_color, ColorMode::Debug);
+    save_field_buffer(&mut buffer, w_color, ColorMode::Debug);
 
     let w_bw = provider.png_writer("out.bw.png");
-    save_field_buffer(&buffer, w_bw, ColorMode::BlackAndWhite);
+    save_field_buffer(&mut buffer, w_bw, ColorMode::BlackAndWhite);
 }

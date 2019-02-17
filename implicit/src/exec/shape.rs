@@ -10,8 +10,8 @@ pub fn exec_shape<F>(
     ctx: &OpenClContext,
     inspector: BoxedInspector,
     shape: Shape,
-    width: usize,
-    height: usize,
+    width:u32,
+    height:u32,
     buffer_find: F,
 ) -> FieldBuffer
 where
@@ -23,7 +23,7 @@ where
 
     let compiled = ::gpu_interp::gpu::compile(&output);
     inspector.write_compiled("compiled", &compiled);
-    let mut buf = ::gpu_interp::gpu::execute(
+    ::gpu_interp::gpu::execute(
         compiled,
         width as u32,
         height as u32,
@@ -32,34 +32,29 @@ where
             context: ctx.context().clone(),
             queue: ctx.queue().clone(),
         },
-    );
-
-    FieldBuffer {
-        dims: (width, height, 1),
-        internal: buf.to_opencl(ctx.queue()).clone(),
-    }
+    )
 }
 
 #[cfg(test)]
 fn run_shape_helper(
     ctx: &OpenClContext,
     shape: Shape,
-    width: usize,
-    height: usize,
+    width: u32,
+    height: u32,
     provider: Provider,
     fields: &[FieldBuffer],
 ) -> FieldBuffer {
     use debug::*;
     use inspector::Inspector;
 
-    let buffer = exec_shape(ctx, provider.duplicate(), shape, width, height, |i| {
+    let mut buffer = exec_shape(ctx, provider.duplicate(), shape, width, height, |i| {
         fields[i as usize].clone()
     });
 
     let w_color = provider.png_writer("out.color.png");
-    save_field_buffer(&buffer, w_color, ColorMode::Debug);
+    save_field_buffer(&mut buffer, w_color, ColorMode::Debug);
     let w_bw = provider.png_writer("out.bw.png");
-    save_field_buffer(&buffer, w_bw, ColorMode::BlackAndWhite);
+    save_field_buffer(&mut buffer, w_bw, ColorMode::BlackAndWhite);
 
     buffer
 }

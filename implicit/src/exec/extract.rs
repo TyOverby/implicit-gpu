@@ -11,13 +11,13 @@ use ocaml::Shape;
 pub fn extract_lines(
     ctx: &OpenClContext,
     inspector: BoxedInspector,
-    field: &FieldBuffer,
+    field: &mut FieldBuffer,
 ) -> Vec<PathSegment> {
     use euclid::point2;
     use itertools::Itertools;
     use lines::connect_lines;
 
-    let (lines, count) = ::marching::run_marching(&field, ctx);
+    let (lines, count) = ::marching::run_marching(field, ctx);
     let lines = lines.values(Some(count));
     let lines = lines
         .into_iter()
@@ -30,14 +30,21 @@ pub fn extract_lines(
 }
 
 #[cfg(test)]
-fn run_shape_paths(shape: Shape, width: usize, height: usize, provider: Provider) {
+fn run_shape_paths(shape: Shape, width: u32, height: u32, provider: Provider) {
     use debug::print_path_segments;
     use exec::exec_shape;
     use opencl::OpenClContext;
 
     let ctx = OpenClContext::default();
-    let buffer = exec_shape(&ctx, provider.duplicate(), shape, width, height, |_| unimplemented!());
-    let mut extracted = extract_lines(&ctx, provider.duplicate(), &buffer);
+    let mut buffer = exec_shape(
+        &ctx,
+        provider.duplicate(),
+        shape,
+        width,
+        height,
+        |_| unimplemented!(),
+    );
+    let mut extracted = extract_lines(&ctx, provider.duplicate(), &mut buffer);
     extracted.sort();
 
     let out = provider.text_writer("out.lines.txt");

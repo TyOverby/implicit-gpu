@@ -8,12 +8,11 @@ const PROGRAM: &'static str = concat!(
     include_str!("shaders/polygon.c")
 );
 
-// TODO: rewrite this function so that it just takes &[f32]
 pub fn run_poly<I>(
     points: I,
-    signfield: Option<&FieldBuffer>,
-    width: usize,
-    height: usize,
+    signfield: Option<&mut FieldBuffer>,
+    width: u32,
+    height: u32,
     matrix: Matrix,
     ctx: &OpenClContext,
 ) -> Option<FieldBuffer>
@@ -21,8 +20,8 @@ where
     I: IntoIterator<Item = Point>,
 {
     if let Some(signfield) = &signfield {
-        assert_eq!(signfield.height(), height);
-        assert_eq!(signfield.width(), width);
+        assert_eq!(signfield.height, height);
+        assert_eq!(signfield.width, width);
     }
 
     let _guard = ::flame::start_guard("run_poly");
@@ -62,13 +61,13 @@ pub fn add_matrix(kernel: Kernel, matrix: Matrix) -> Kernel {
 
 pub fn run_poly_raw_no_sign(
     lines: LineBuffer,
-    width: usize,
-    height: usize,
+    width: u32,
+    height: u32,
     matrix: Matrix,
     ctx: &OpenClContext,
 ) -> FieldBuffer {
     let _guard = ::flame::start_guard("run_poly_raw");
-    let out = ctx.field_buffer(width, height, 1, None);
+    let mut out = ctx.field_buffer(width, height, 1, None);
     let mut kernel = ctx.compile("apply_no_sign", PROGRAM, |register| {
         register.buffer("buffer");
         register.long("width");
@@ -77,8 +76,10 @@ pub fn run_poly_raw_no_sign(
         register.matrix();
     });
 
-    kernel.set_default_global_work_size(::ocl::SpatialDims::Two(width, height));
-    kernel.set_arg("buffer", out.buffer()).unwrap();
+    kernel.set_default_global_work_size(::ocl::SpatialDims::Two(width as usize, height as usize));
+    kernel
+        .set_arg("buffer", out.to_opencl(ctx.queue()))
+        .unwrap();
     kernel.set_arg("width", width as u64).unwrap();
     kernel.set_arg("lines", lines.buffer()).unwrap();
     kernel.set_arg("count", lines.size()).unwrap();
@@ -91,15 +92,15 @@ pub fn run_poly_raw_no_sign(
 
 pub fn run_poly_raw_with_sign(
     lines: LineBuffer,
-    signfield: &FieldBuffer,
-    width: usize,
-    height: usize,
+    signfield: &mut FieldBuffer,
+    width: u32,
+    height: u32,
     count: usize,
     matrix: Matrix,
     ctx: &OpenClContext,
 ) -> FieldBuffer {
     let _guard = ::flame::start_guard("run_poly_raw");
-    let out = ctx.field_buffer(width, height, 1, None);
+    let mut out = ctx.field_buffer(width, height, 1, None);
     let mut kernel = ctx.compile("apply_with_sign", PROGRAM, |register| {
         register.buffer("buffer");
         register.buffer("signbuffer");
@@ -109,9 +110,13 @@ pub fn run_poly_raw_with_sign(
         register.matrix();
     });
 
-    kernel.set_default_global_work_size(::ocl::SpatialDims::Two(width, height));
-    kernel.set_arg("buffer", out.buffer()).unwrap();
-    kernel.set_arg("signbuffer", signfield.buffer()).unwrap();
+    kernel.set_default_global_work_size(::ocl::SpatialDims::Two(width as usize, height as usize));
+    kernel
+        .set_arg("buffer", out.to_opencl(ctx.queue()))
+        .unwrap();
+    kernel
+        .set_arg("signbuffer", signfield.to_opencl(ctx.queue()))
+        .unwrap();
     kernel.set_arg("width", width as u64).unwrap();
     kernel.set_arg("lines", lines.buffer()).unwrap();
     kernel.set_arg("count", count).unwrap();

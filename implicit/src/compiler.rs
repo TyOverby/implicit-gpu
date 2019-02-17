@@ -21,13 +21,7 @@ where
         }
         Shape::Terminal(Terminal::Field(id)) => {
             let buffer = find_buffer(*id);
-            let (width, height, depth) = buffer.dims;
-            Ast::Buffer(::gpu_interp::Buffer::from_opencl(
-                buffer.internal.clone(),
-                width as u32,
-                height as u32,
-                depth as u32,
-            ))
+            Ast::Buffer(buffer)
         }
         Shape::Terminal(Terminal::Rect(rect)) => {
             let ::ocaml::Rect { x, y, w, h } = *rect;

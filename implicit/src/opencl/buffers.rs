@@ -1,10 +1,13 @@
 use ocl::Buffer;
 
+/*
 #[derive(Debug, Clone)]
 pub struct FieldBuffer {
     pub dims: (usize, usize, usize),
     pub internal: Buffer<f32>,
 }
+*/
+pub type FieldBuffer = gpu_interp::Buffer;
 
 #[derive(Debug, Clone)]
 pub struct LineBuffer {
@@ -36,6 +39,7 @@ impl SyncBuffer {
     }
 }
 
+/*
 impl FieldBuffer {
     pub fn size(&self) -> (usize, usize) {
         (self.width(), self.height())
@@ -61,6 +65,7 @@ impl FieldBuffer {
         &self.internal
     }
 }
+*/
 
 impl LineBuffer {
     pub fn size(&self) -> usize {
