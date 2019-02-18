@@ -1,0 +1,8 @@
+[package]
+name = "strategy"
+version = "0.1.0"
+authors = ["Ty Overby <ty@pre-alpha.com>"]
+edition = "2018"
+
+[dependencies.extern_api]
+path = "../extern_api"

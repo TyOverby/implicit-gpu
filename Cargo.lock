@@ -232,6 +232,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "debug_helpers"
+version = "0.1.0"
+dependencies = [
+ "buffer_dump 0.1.0",
+ "euclid 0.19.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "expectation 0.1.1",
+ "expectation-shared 0.1.0",
+ "expectation_plugin 0.1.2",
+ "flame 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "gpu-interp 0.1.0",
+ "image 0.19.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "line-stitch 0.1.0",
+ "strategy 0.1.0",
+ "vectorphile 0.1.4-pre",
+]
+
+[[package]]
 name = "deflate"
 version = "0.7.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -483,6 +500,26 @@ dependencies = [
  "cranelift-simplejit 0.25.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "euclid 0.19.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "ocl 0.19.0",
+ "strategy 0.1.0",
+]
+
+[[package]]
+name = "gpu_strategy"
+version = "0.1.0"
+dependencies = [
+ "debug_helpers 0.1.0",
+ "euclid 0.19.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "expectation 0.1.1",
+ "expectation-shared 0.1.0",
+ "expectation_plugin 0.1.2",
+ "extern_api 0.1.0",
+ "flame 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "gpu-interp 0.1.0",
+ "itertools 0.7.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "line-stitch 0.1.0",
+ "ocl 0.19.0",
+ "strategy 0.1.0",
+ "typed-arena 1.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1115,6 +1152,13 @@ dependencies = [
  "serde_derive 1.0.76 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json 0.9.10 (registry+https://github.com/rust-lang/crates.io-index)",
  "tendril 0.2.4 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "strategy"
+version = "0.1.0"
+dependencies = [
+ "extern_api 0.1.0",
 ]
 
 [[package]]

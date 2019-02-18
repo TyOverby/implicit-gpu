@@ -1,12 +1,15 @@
 [workspace]
 members = [
-    "./core/implicit",
     "./core/extern_api",
-    "./util/aabb-quadtree",
-    "./util/line-stitch",
-    "./util/vectorphile",
+    "./core/gpu_strategy",
+    "./core/implicit",
+    "./core/strategy",
     "./testsuite",
-    "./util/gpu-interp",
+    "./util/aabb-quadtree",
     "./util/buffer_dump",
-    "./util/buffer_view"
+    "./util/buffer_view",
+    "./util/debug_helpers",
+    "./util/gpu-interp",
+    "./util/line-stitch",
+    "./util/vectorphile"
 ]

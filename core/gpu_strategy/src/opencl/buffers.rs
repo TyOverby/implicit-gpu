@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use ocl::Buffer;
 
 pub type FieldBuffer = gpu_interp::Buffer;
@@ -31,35 +33,6 @@ impl SyncBuffer {
         out[0] * 4 // Multiply by 4 because there are 4 floats in a line
     }
 }
-
-/*
-impl FieldBuffer {
-    pub fn size(&self) -> (usize, usize) {
-        (self.width(), self.height())
-    }
-    pub fn width(&self) -> usize {
-        self.dims.0
-    }
-    pub fn height(&self) -> usize {
-        self.dims.1
-    }
-    pub fn depth(&self) -> usize {
-        self.dims.2
-    }
-
-    pub fn values(&self) -> Vec<f32> {
-        let _guard = ::flame::start_guard("field buffer values");
-        let mut out = vec![0.0; self.width() * self.height() * self.depth()];
-        self.internal.read(&mut out).enq().unwrap();
-        out
-    }
-
-    pub fn buffer(&self) -> &Buffer<f32> {
-        &self.internal
-    }
-}
-*/
-
 impl LineBuffer {
     pub fn size(&self) -> usize {
         self.size

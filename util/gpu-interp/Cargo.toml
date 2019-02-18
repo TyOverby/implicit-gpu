@@ -14,3 +14,6 @@ cranelift-simplejit = "0.25.0"
 
 [dependencies.ocl]
 path = "../../../ocl/ocl"
+
+[dependencies.strategy]
+path = "../../core/strategy"

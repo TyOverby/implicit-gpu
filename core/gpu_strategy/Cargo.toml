@@ -1,0 +1,42 @@
+[package]
+name = "gpu_strategy"
+version = "0.1.0"
+authors = ["Ty Overby <ty@pre-alpha.com>"]
+edition = "2018"
+
+[dependencies]
+flame = "0.2.0"
+typed-arena = "1.4.1"
+itertools="0.7.4"
+
+[dependencies.strategy]
+path = "../strategy"
+
+[dependencies.extern_api]
+path = "../extern_api"
+
+[dependencies.ocl]
+path = "../../../ocl/ocl"
+
+[dependencies.gpu-interp]
+path = "../../util/gpu-interp"
+
+[dependencies.line-stitch]
+path = "../../util/line-stitch"
+
+[dependencies.debug_helpers]
+path = "../../util/debug_helpers"
+
+[dependencies.euclid]
+version = "0.19.0"
+features = ["serde"]
+
+[dependencies.expectation]
+path = "../../../expectation/expectation"
+
+[dependencies.expectation-shared]
+path = "../../../expectation/expectation-shared"
+
+[dependencies.expectation_plugin]
+path = "../../../expectation/expectation-plugin"
+

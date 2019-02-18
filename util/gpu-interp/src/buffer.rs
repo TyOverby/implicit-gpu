@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct Buffer {
     pub width: u32,
@@ -100,5 +102,21 @@ impl Buffer {
             BufferKind::Both(_, c) => c,
             _ => unreachable!(),
         }
+    }
+}
+
+impl strategy::FieldBuffer for Buffer {
+    fn width(&self) -> u32 {
+        self.width
+    }
+    fn height(&self) -> u32 {
+        self.height
+    }
+    fn depth(&self) -> u32 {
+        self.depth
+    }
+
+    fn values(&mut self) -> Cow<[f32]> {
+        Cow::Borrowed(self.to_memory())
     }
 }
