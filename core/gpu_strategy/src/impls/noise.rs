@@ -30,7 +30,7 @@ pub fn get_noise(
         .unwrap();
     kernel.set_arg("width", width as u64).unwrap();
     kernel.set_arg("cutoff", cutoff).unwrap();
-    let kernel = crate::polygon::add_matrix(kernel, matrix);
+    let kernel = crate::impls::poly::add_matrix(kernel, matrix);
 
     unsafe {
         kernel.enq().unwrap();

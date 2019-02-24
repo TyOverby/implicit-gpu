@@ -21,6 +21,15 @@ pub struct SyncBuffer {
     pub internal: Buffer<u32>,
 }
 
+impl strategy::LineBuffer for LineBuffer {
+    fn all_values(&mut self) -> std::borrow::Cow<[f32]> {
+        std::borrow::Cow::Owned(self.values(None))
+    }
+    fn first_values(&mut self, count: u32) -> std::borrow::Cow<[f32]> {
+        std::borrow::Cow::Owned(self.values(Some(count)))
+    }
+}
+
 impl SyncBuffer {
     pub fn buffer(&self) -> &Buffer<u32> {
         &self.internal

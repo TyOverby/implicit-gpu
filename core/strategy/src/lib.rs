@@ -12,14 +12,15 @@ pub trait FieldBuffer {
 }
 
 pub trait LineBuffer {
-    fn values(&mut self) -> Cow<[f32]>;
+    fn all_values(&mut self) -> Cow<[f32]>;
+    fn first_values(&mut self, count: u32) -> Cow<[f32]>;
 }
 
 pub trait Strategy {
     type FieldBuf: FieldBuffer;
     type LineBuf: LineBuffer;
 
-    fn march_2d(&self, buf: Self::FieldBuf) -> Self::LineBuf;
+    fn march_2d(&self, buf: Self::FieldBuf) -> (Self::LineBuf, u32);
 
     fn drag_2d(&self, buf: Self::FieldBuf, dx: f32, dy: f32) -> Self::FieldBuf;
     fn freeze_2d(&self, buf: Self::FieldBuf) -> Self::FieldBuf;

@@ -20,34 +20,25 @@ use std::borrow::Cow;
 mod compiler;
 mod impls;
 mod opencl;
-mod polygon;
-
-pub struct LineBuf(opencl::LineBuffer);
 
 pub struct GpuStrategy {
     cl_context: opencl::OpenClContext,
 }
 
-impl strategy::LineBuffer for LineBuf {
-    fn values(&mut self) -> Cow<[f32]> {
-        Cow::Owned(self.0.values(None))
-    }
-}
-
 impl strategy::Strategy for GpuStrategy {
     type FieldBuf = gpu_interp::Buffer;
-    type LineBuf = LineBuf;
+    type LineBuf = opencl::LineBuffer;
 
-    fn march_2d(&self, buf: gpu_interp::Buffer) -> LineBuf {
-        unimplemented!();
+    fn march_2d(&self, mut buf: gpu_interp::Buffer) -> (Self::LineBuf, u32) {
+        impls::run_marching(&mut buf, &self.cl_context)
     }
 
-    fn drag_2d(&self, buf: gpu_interp::Buffer, dx: f32, dy: f32) -> gpu_interp::Buffer {
-        unimplemented!();
+    fn drag_2d(&self, mut buf: gpu_interp::Buffer, dx: f32, dy: f32) -> gpu_interp::Buffer {
+        impls::exec_drag(&self.cl_context, &mut buf, dx, dy)
     }
 
-    fn freeze_2d(&self, buf: gpu_interp::Buffer) -> gpu_interp::Buffer {
-        unimplemented!();
+    fn freeze_2d(&self, mut buf: gpu_interp::Buffer) -> gpu_interp::Buffer {
+        impls::exec_freeze(&self.cl_context, &mut buf)
     }
 
     fn noise_2d(
@@ -57,11 +48,11 @@ impl strategy::Strategy for GpuStrategy {
         cutoff: f32,
         matrix: extern_api::Matrix,
     ) -> gpu_interp::Buffer {
-        unimplemented!()
+        impls::get_noise(&self.cl_context, width, height, cutoff, matrix)
     }
 
     fn poly_2d(&self, polygon: Polygon, width: u32, height: u32) -> gpu_interp::Buffer {
-        unimplemented!()
+        impls::exec_poly(&self.cl_context, polygon, width, height)
     }
 
     fn shape<F>(&self, shape: Shape, width: u32, height: u32, buffer_find: F) -> gpu_interp::Buffer

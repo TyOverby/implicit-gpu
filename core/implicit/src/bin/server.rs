@@ -1,10 +1,10 @@
 extern crate expectation;
 extern crate expectation_shared;
+extern crate extern_api;
 extern crate flame;
 extern crate implicit;
 extern crate serde;
 extern crate snoot;
-extern crate extern_api;
 
 use expectation::Provider;
 use expectation_shared::filesystem::RealFileSystem;

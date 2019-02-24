@@ -1,5 +1,5 @@
+use crate::impls::poly::run_poly_raw_with_sign;
 use crate::opencl::{FieldBuffer, OpenClContext};
-use crate::polygon::run_poly_raw_with_sign;
 use expectation_plugin::expectation_test;
 
 #[cfg(test)]
