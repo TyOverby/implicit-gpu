@@ -21,6 +21,7 @@ pub fn compare_points(
     }
 }
 
+
 impl ::std::cmp::PartialOrd for Line {
     fn partial_cmp(&self, other: &Line) -> Option<::std::cmp::Ordering> {
         let p1c = compare_points(self.0, other.0);

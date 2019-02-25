@@ -1,5 +1,5 @@
-use geometry::Point;
 use extern_api::Matrix;
+use geometry::Point;
 use ocl::Kernel;
 use opencl::{FieldBuffer, LineBuffer, OpenClContext};
 
@@ -66,6 +66,7 @@ pub fn run_poly_raw_no_sign(
     matrix: Matrix,
     ctx: &OpenClContext,
 ) -> FieldBuffer {
+    eprintln!("CALLED");
     let _guard = ::flame::start_guard("run_poly_raw");
     let mut out = ctx.field_buffer(width, height, 1, None);
     let mut kernel = ctx.compile("apply_no_sign", PROGRAM, |register| {
@@ -99,6 +100,7 @@ pub fn run_poly_raw_with_sign(
     matrix: Matrix,
     ctx: &OpenClContext,
 ) -> FieldBuffer {
+    eprintln!("CALLED");
     let _guard = ::flame::start_guard("run_poly_raw");
     let mut out = ctx.field_buffer(width, height, 1, None);
     let mut kernel = ctx.compile("apply_with_sign", PROGRAM, |register| {

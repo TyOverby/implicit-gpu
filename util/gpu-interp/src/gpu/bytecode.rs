@@ -67,7 +67,7 @@ pub fn compile(ast: &Ast) -> CompilationResult {
         use std::cmp::max;
         match ast {
             Ast::X | Ast::Y | Ast::Z | Ast::Constant(_) | Ast::Buffer(_) => 1,
-            Ast::DistToPoly(v) => 2 * (v.len() as u32),
+            Ast::DistToPoly(v) => v.len() as u32,
             Ast::Transform { target, .. } => depth(target),
             Ast::Sub(l, r) => max(depth(l), depth(r)) + 1,
             Ast::Mul(lst) | Ast::Add(lst) | Ast::Min(lst) | Ast::Max(lst) => {

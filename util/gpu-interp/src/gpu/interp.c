@@ -37,6 +37,7 @@ __kernel void apply(
     size_t position_stack_ptr = pos * max_position_stack * 3;
 
     PUSH_POS((float) x, (float) y, (float) z);
+    int winding = 0;
 
     for (ulong i = 0; i < instr_length; i++) {
         char code = program[i];
@@ -121,28 +122,42 @@ __kernel void apply(
                 float y2 = FETCH_SMALL();
                 float x_s = X_POS();
                 float y_s = Y_POS();
-                float2 d2 = dist_to_line_comp(x_s, y_s, x1, y1, x2, y2);
-                PUSH(d2.x);
-                PUSH(d2.y);
-                //printf("d: %f\n", d2.x);
+                float2 res = dist_to_line_comp(x_s, y_s, x1, y1, x2, y2);
+
+                float new = res.x;
+                float is_left = res.y;
+                if (y1 <= y_s) {
+                    if(y2 > y_s) {
+                        if (is_left > 0.0) {
+                            winding ++;
+                        }
+                    }
+                } else {
+                    if (y2 <= y_s) {
+                        if (is_left < 0.0) {
+                            winding--;
+                        }
+                    }
+                }
+
+                PUSH(new);
                 break;
             }
             case OP_COLLECT_POLY: {
                 int count = program[++i];
-                float min = INFINITY;
-                float min_sign = 0.0;
+                float minimum = INFINITY;
                 for (int i = 0; i < count; i++) {
-                    float s = POP();
                     float d = POP();
-                    if (fabs(d) <= min) {
-                        min = fabs(d);
-                        min_sign = s;
-                    }
+                    minimum = min(minimum, fabs(d));
                 }
-                if (min_sign == 0) {
-                    min_sign = -1;
+                float s;
+                if (winding == 0) {
+                    s = 1.0;
+                } else {
+                    s = -1.0;
                 }
-                PUSH(copysign(min, -min_sign));
+                PUSH(copysign(minimum, s));
+                winding = 0;
                 break;
             }
             case OP_PUSH_TRANSFORM: {
@@ -173,7 +188,6 @@ __kernel void apply(
                 float w = x_s * m14 + y_s * m24 + z_s * m34 + m44;
 
                 PUSH_POS(x / w, y / w, z / w);
-                //printf("before: %f %f %f | after: %f %f %f\n", x_s, y_s, z_s, X_POS(), Y_POS(), Z_POS());
                 break;
             }
             case OP_POP_TRANSFORM: {
