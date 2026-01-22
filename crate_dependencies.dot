@@ -1,0 +1,121 @@
+digraph crate_dependencies {
+    // Graph settings
+    rankdir=TB;
+    node [shape=box, style=rounded, fontname="Helvetica"];
+    edge [color="#666666"];
+
+    // Subgraph for core crates
+    subgraph cluster_core {
+        label="core";
+        style=dashed;
+        color="#4a90d9";
+
+        extern_api [label="extern_api"];
+        strategy [label="strategy"];
+        gpu_strategy [label="gpu_strategy"];
+        implicit [label="implicit"];
+    }
+
+    // Subgraph for utility crates
+    subgraph cluster_util {
+        label="util";
+        style=dashed;
+        color="#50c878";
+
+        aabb_quadtree [label="aabb-quadtree"];
+        buffer_dump [label="buffer_dump"];
+        bufferview [label="bufferview"];
+        debug_helpers [label="debug_helpers"];
+        gpu_interp [label="gpu-interp"];
+        line_stitch [label="line-stitch"];
+        vectorphile [label="vectorphile"];
+    }
+
+    // Subgraph for vendor crates
+    subgraph cluster_vendor {
+        label="vendor";
+        style=dashed;
+        color="#ff8c00";
+
+        snoot [label="snoot"];
+        expectation [label="expectation"];
+        expectation_shared [label="expectation-shared"];
+        expectation_plugin [label="expectation_plugin"];
+        cargo_expect [label="cargo-expect"];
+    }
+
+    // Subgraph for old/legacy crates
+    subgraph cluster_old {
+        label="old";
+        style=dashed;
+        color="#999999";
+
+        test_app [label="test-app"];
+        surface_nets [label="surface-nets"];
+    }
+
+    // Subgraph for testsuite
+    subgraph cluster_testsuite {
+        label="testsuite";
+        style=dashed;
+        color="#9370db";
+
+        testsuite [label="testsuite"];
+    }
+
+    // Core dependencies
+    strategy -> extern_api;
+
+    gpu_strategy -> strategy;
+    gpu_strategy -> extern_api;
+    gpu_strategy -> gpu_interp;
+    gpu_strategy -> line_stitch;
+    gpu_strategy -> debug_helpers;
+    gpu_strategy -> expectation;
+    gpu_strategy -> expectation_shared;
+    gpu_strategy -> expectation_plugin;
+
+    implicit -> extern_api;
+    implicit -> expectation;
+    implicit -> expectation_shared;
+    implicit -> expectation_plugin;
+    implicit -> snoot;
+    implicit -> gpu_interp;
+    implicit -> line_stitch;
+    implicit -> aabb_quadtree;
+    implicit -> vectorphile;
+    implicit -> buffer_dump;
+
+    // Utility dependencies
+    buffer_dump -> gpu_interp;
+
+    bufferview -> buffer_dump;
+    bufferview -> gpu_interp;
+
+    debug_helpers -> vectorphile;
+    debug_helpers -> line_stitch;
+    debug_helpers -> gpu_interp;
+    debug_helpers -> buffer_dump;
+    debug_helpers -> strategy;
+    debug_helpers -> expectation;
+    debug_helpers -> expectation_shared;
+    debug_helpers -> expectation_plugin;
+
+    gpu_interp -> strategy;
+
+    line_stitch -> aabb_quadtree;
+
+    // Vendor dependencies
+    expectation -> expectation_shared;
+    cargo_expect -> expectation_shared;
+
+    // Old/legacy dependencies
+    test_app -> gpu_interp;
+    test_app -> implicit;
+
+    // Testsuite dependencies
+    testsuite -> expectation;
+    testsuite -> snoot;
+    testsuite -> implicit;
+    testsuite -> extern_api;
+}
