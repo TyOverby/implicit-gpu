@@ -101,6 +101,6 @@ fn main() {
         let (w, h) = window.get_size();
         let image_to_draw = image.pad(w, h, 0xFFFF00);
 
-        window.update_with_buffer(&image_to_draw.data).unwrap();
+        window.update_with_buffer(&image_to_draw.data, image_to_draw.width, image_to_draw.height).unwrap();
     }
 }

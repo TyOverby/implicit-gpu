@@ -9,3 +9,19 @@ out.html
 main_out
 out.svg
 perf.html
+
+# Bind-mounted config files
+.bash_profile
+.bashrc
+.gitconfig
+.gitmodules
+.mcp.json
+.profile
+.ripgreprc
+.zprofile
+.zshrc
+.claude/settings.json
+.claude/agents
+.claude/commands
+.idea
+.vscode

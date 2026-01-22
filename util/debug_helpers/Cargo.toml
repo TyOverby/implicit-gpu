@@ -28,11 +28,11 @@ path = "../buffer_dump"
 path ="../../core/strategy"
 
 [dependencies.expectation]
-path = "../../../expectation/expectation"
+path = "../../vendor/expectation"
 
 [dependencies.expectation-shared]
-path = "../../../expectation/expectation-shared"
+version = "0.1.0"
 
 [dependencies.expectation_plugin]
-path = "../../../expectation/expectation-plugin"
+version = "0.1.2"
 

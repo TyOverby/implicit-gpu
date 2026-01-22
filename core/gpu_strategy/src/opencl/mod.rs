@@ -120,7 +120,7 @@ impl OpenClContext {
                 let mut builder = KernelBuilder::new();
                 builder.queue(self.queue.clone()).name(name).program(p);
                 f(&mut Register { b: &mut builder });
-                return builder.build_unfinished().unwrap();
+                return builder.build().unwrap();
             }
         }
 
@@ -143,7 +143,7 @@ impl OpenClContext {
                 .name(name)
                 .program(&program);
             f(&mut Register { b: &mut builder });
-            return builder.build_unfinished().unwrap();
+            return builder.build().unwrap();
         }
     }
 

@@ -6,12 +6,11 @@ authors = ["Ty Overby <ty@pre-alpha.com>"]
 [dependencies]
 serde = "1.*.*"
 
-#expectation = "0.1.*"
 [dependencies.expectation]
-path = "../../expectation/expectation"
+path = "../vendor/expectation"
 
 [dependencies.snoot]
-path = "../../snoot"
+path = "../vendor/snoot"
 
 [dependencies.implicit]
 path = "../core/implicit"
