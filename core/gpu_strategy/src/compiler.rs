@@ -3,6 +3,7 @@ use extern_api::{Id, Shape, Terminal};
 use gpu_interp::Ast;
 use typed_arena::Arena;
 
+#[allow(dead_code)]
 pub fn compile<'a, F>(shape: &Shape, arena: &'a Arena<Ast<'a>>, find_buffer: &F) -> Ast<'a>
 where
     F: Fn(Id) -> FieldBuffer,

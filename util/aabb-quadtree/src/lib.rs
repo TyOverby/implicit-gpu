@@ -248,7 +248,7 @@ impl<T, S, A: Array<Item = (ItemId, Rect<S>)>> QuadTree<T, S, A> {
     }
 
     /// Returns an iterator over all the items in the tree.
-    pub fn iter(&self) -> ::std::collections::hash_map::Iter<ItemId, (T, Rect<S>)> {
+    pub fn iter(&self) -> ::std::collections::hash_map::Iter<'_, ItemId, (T, Rect<S>)> {
         self.elements.iter()
     }
 

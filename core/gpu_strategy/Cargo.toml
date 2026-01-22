@@ -39,5 +39,5 @@ path = "../../vendor/expectation"
 version = "0.1.0"
 
 [dependencies.expectation_plugin]
-version = "0.1.2"
+path = "../../vendor/expectation/expectation_plugin"
 

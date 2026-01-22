@@ -116,7 +116,7 @@ impl strategy::FieldBuffer for Buffer {
         self.depth
     }
 
-    fn values(&mut self) -> Cow<[f32]> {
+    fn values(&mut self) -> Cow<'_, [f32]> {
         Cow::Borrowed(self.to_memory())
     }
 }

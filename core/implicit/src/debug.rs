@@ -2,7 +2,7 @@
 
 use euclid::TypedPoint2D;
 use geometry::PathSegment;
-use image::{DynamicImage, ImageBuffer, ImageRgb8, Rgb, PNG};
+use image::{codecs::png::PngEncoder, ColorType, ImageBuffer, ImageEncoder, Rgb};
 
 use opencl::FieldBuffer;
 use std::f32::{INFINITY, NEG_INFINITY};
@@ -21,7 +21,7 @@ pub fn save_field_buffer<W: Write>(buffer: &mut FieldBuffer, writer: W, color_mo
     save_image(&samples, buffer_width as usize, writer, color_mode);
 }
 
-fn save_image<W: Write>(samples: &[f32], width: usize, mut writer: W, color_mode: ColorMode) {
+fn save_image<W: Write>(samples: &[f32], width: usize, writer: W, color_mode: ColorMode) {
     let _guard = ::flame::start_guard("save_image");
     let mut min = INFINITY;
     let mut max = NEG_INFINITY;
@@ -62,8 +62,8 @@ fn save_image<W: Write>(samples: &[f32], width: usize, mut writer: W, color_mode
         *pixel = Rgb(color);
     }
 
-    let d: DynamicImage = ImageRgb8(buf);
-    d.write_to(&mut writer, PNG).unwrap();
+    let encoder = PngEncoder::new(writer);
+    encoder.write_image(buf.as_raw(), buf.width(), buf.height(), ColorType::Rgb8).unwrap();
 }
 
 pub fn svg_path_segments<W: Write>(out: W, extracted: &[PathSegment]) -> IoResult<()> {

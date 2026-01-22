@@ -2,6 +2,7 @@
 name = "implicit"
 version = "0.1.0"
 authors = ["Ty Overby <ty@pre-alpha.com>"]
+edition = "2015"
 
 [[bin]]
 name = "server"
@@ -15,7 +16,7 @@ path = "src/bin/surface_net.rs"
 ocl = "0.19.*"
 flame = "0.2.0"
 lazy_static = "0.2.*"
-image = "0.19.*"
+image = "0.24"
 itertools = "0.5.*"
 vecmath = "*"
 fnv = "1.0.6"
@@ -32,7 +33,7 @@ path = "../../vendor/expectation"
 [dependencies.expectation-shared]
 version = "0.1.0"
 [dependencies.expectation_plugin]
-version = "0.1.2"
+path = "../../vendor/expectation/expectation_plugin"
 
 #[dependencies.ocl]
 #path = "../../../ocl/ocl"

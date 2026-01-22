@@ -3,7 +3,7 @@ use crate::*;
 use expectation::{extensions::*, Provider};
 
 type Point = euclid::Point2D<f32>;
-pub type BoxedInspector = Box<Inspector>;
+pub type BoxedInspector = Box<dyn Inspector>;
 
 pub trait Inspector {
     fn duplicate(&self) -> BoxedInspector;
@@ -13,7 +13,7 @@ pub trait Inspector {
     fn write_field(&self, name: &str, buffer: &mut gpu_interp::Buffer);
     fn write_segments(&self, name: &str, segments: &[PathSegment]);
     fn write_lines(&self, name: &str, lines: &[(Point, Point)]);
-    fn do_slow(&self, f: &Fn());
+    fn do_slow(&self, f: &dyn Fn());
 }
 
 impl Inspector for () {
@@ -29,7 +29,7 @@ impl Inspector for () {
     fn write_segments(&self, _name: &str, _segments: &[PathSegment]) {}
     fn write_lines(&self, _name: &str, _lines: &[(Point, Point)]) {}
 
-    fn do_slow(&self, _f: &Fn()) {}
+    fn do_slow(&self, _f: &dyn Fn()) {}
 }
 
 impl Inspector for Provider {
@@ -76,7 +76,7 @@ impl Inspector for Provider {
         }
     }
 
-    fn do_slow(&self, f: &Fn()) {
+    fn do_slow(&self, f: &dyn Fn()) {
         f()
     }
 }

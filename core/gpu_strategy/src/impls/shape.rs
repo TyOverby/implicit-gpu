@@ -6,6 +6,7 @@ use extern_api::{Id, Shape};
 use expectation::{extensions::*, Provider};
 use expectation_plugin::expectation_test;
 
+#[allow(dead_code)]
 pub fn exec_shape<F>(
     ctx: &OpenClContext,
     inspector: BoxedInspector,

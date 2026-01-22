@@ -13,7 +13,7 @@ mod inspector;
 pub use inspector::*;
 
 use euclid::{TypedPoint2D, UnknownUnit};
-use image::{DynamicImage, ImageBuffer, ImageRgb8, Rgb, PNG};
+use image::{codecs::png::PngEncoder, ColorType, ImageBuffer, ImageEncoder, Rgb};
 
 type PathSegment = line_stitch::PathSegment<UnknownUnit>;
 
@@ -27,7 +27,7 @@ pub enum ColorMode {
 }
 
 pub fn save_field_buffer<W: Write>(
-    buffer: &mut strategy::FieldBuffer,
+    buffer: &mut dyn strategy::FieldBuffer,
     writer: W,
     color_mode: ColorMode,
 ) {
@@ -37,7 +37,7 @@ pub fn save_field_buffer<W: Write>(
     save_image(&samples, buffer_width as usize, writer, color_mode);
 }
 
-fn save_image<W: Write>(samples: &[f32], width: usize, mut writer: W, color_mode: ColorMode) {
+fn save_image<W: Write>(samples: &[f32], width: usize, writer: W, color_mode: ColorMode) {
     let _guard = ::flame::start_guard("save_image");
     let mut min = INFINITY;
     let mut max = NEG_INFINITY;
@@ -78,8 +78,8 @@ fn save_image<W: Write>(samples: &[f32], width: usize, mut writer: W, color_mode
         *pixel = Rgb(color);
     }
 
-    let d: DynamicImage = ImageRgb8(buf);
-    d.write_to(&mut writer, PNG).unwrap();
+    let encoder = PngEncoder::new(writer);
+    encoder.write_image(buf.as_raw(), buf.width(), buf.height(), ColorType::Rgb8).unwrap();
 }
 
 pub fn svg_path_segments<W: Write>(out: W, extracted: &[PathSegment]) -> IoResult<()> {

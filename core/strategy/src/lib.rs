@@ -8,12 +8,12 @@ pub trait FieldBuffer {
     fn height(&self) -> u32;
     fn depth(&self) -> u32;
 
-    fn values(&mut self) -> Cow<[f32]>;
+    fn values(&mut self) -> Cow<'_, [f32]>;
 }
 
 pub trait LineBuffer {
-    fn all_values(&mut self) -> Cow<[f32]>;
-    fn first_values(&mut self, count: u32) -> Cow<[f32]>;
+    fn all_values(&mut self) -> Cow<'_, [f32]>;
+    fn first_values(&mut self, count: u32) -> Cow<'_, [f32]>;
 }
 
 pub trait Strategy {

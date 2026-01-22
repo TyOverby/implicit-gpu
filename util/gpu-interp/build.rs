@@ -4,7 +4,7 @@ use std::fs::File;
 use std::io::{Read, Write};
 use std::path::Path;
 
-fn main() -> Result<(), Box<Error>> {
+fn main() -> Result<(), Box<dyn Error>> {
     let mut in_file = File::open("./src/gpu/opcodes.txt")?;
     let mut in_contents = String::new();
     in_file.read_to_string(&mut in_contents)?;
@@ -39,36 +39,36 @@ fn main() -> Result<(), Box<Error>> {
             "pub const {}:u8 = {};",
             op.to_uppercase(),
             i
-        );
-        writeln!(&mut opencl_file, "#define OP_{} {}", op.to_uppercase(), i);
+        )?;
+        writeln!(&mut opencl_file, "#define OP_{} {}", op.to_uppercase(), i)?;
     }
 
     writeln!(
         &mut rust_file,
         "pub const BUFFER_COUNT:usize = {};",
         buffer_count
-    );
+    )?;
     {
-        write!(&mut opencl_file, "#define INPUT_BUFFERS ");
+        write!(&mut opencl_file, "#define INPUT_BUFFERS ")?;
         let mut args = (0..buffer_count)
             .map(|i| format!("__global float* BUFFER_{}", i))
             .flat_map(|a| vec![a, ",".to_string()])
             .collect::<Vec<_>>();
         args.pop();
         let args = args.concat();
-        writeln!(&mut opencl_file, "{}", args);
+        writeln!(&mut opencl_file, "{}", args)?;
     }
     {
-        write!(&mut opencl_file, "#define IMPLEMENT_INPUT_BUFFERS ");
+        write!(&mut opencl_file, "#define IMPLEMENT_INPUT_BUFFERS ")?;
         for i in 0..buffer_count {
             let pusher = "stack[stack_ptr++] = v;";
             write!(
                 &mut opencl_file,
                 "case {}: {{float v = BUFFER_{}[pos]; {} break;}}",
                 i, i, pusher
-            );
+            )?;
         }
-        writeln!(&mut opencl_file);
+        writeln!(&mut opencl_file)?;
     }
 
     Ok(())

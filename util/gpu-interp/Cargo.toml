@@ -2,6 +2,7 @@
 name = "gpu-interp"
 version = "0.1.0"
 authors = ["Ty Overby <ty@pre-alpha.com>"]
+edition = "2015"
 
 build="./build.rs"
 

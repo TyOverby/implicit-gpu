@@ -34,9 +34,9 @@ impl<S: 'static> DualQuadTree<S> {
         }
     }
 
-    pub fn into_iter(self) -> Box<Iterator<Item = PathSegment<S>>> {
+    pub fn into_iter(self) -> Box<dyn Iterator<Item = PathSegment<S>>> {
         let iterator = self.id_to_segment.into_iter().map(|(_, (p, _, _))| p);
-        Box::new(iterator) as Box<Iterator<Item = PathSegment<S>>>
+        Box::new(iterator) as Box<dyn Iterator<Item = PathSegment<S>>>
     }
 
     pub fn slow_iter(&self) -> Vec<PathSegment<S>>

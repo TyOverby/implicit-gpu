@@ -1,0 +1,6 @@
+[submodule "vendor/snoot"]
+	path = vendor/snoot
+	url = https://github.com/tyoverby/snoot
+[submodule "vendor/expectation"]
+	path = vendor/expectation
+	url = git@github.com:tyoverby/expectation.git
