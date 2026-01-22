@@ -14,13 +14,13 @@ CompilationResult {
         11,
         8,
         15,
-        10
+        10,
     ],
     constants: [
         10.0,
-        11.0
+        11.0,
     ],
     max_stack: 4,
     transform_depth: 1,
-    buffers: []
+    buffers: [],
 }

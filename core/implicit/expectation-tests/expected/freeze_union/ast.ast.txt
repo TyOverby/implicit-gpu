@@ -2,7 +2,7 @@ Min(
     [
         Sub(
             Constant(
-                10.0
+                10.0,
             ),
             Sqrt(
                 Add(
@@ -11,25 +11,25 @@ Min(
                             Sub(
                                 X,
                                 Constant(
-                                    11.0
-                                )
-                            )
+                                    11.0,
+                                ),
+                            ),
                         ),
                         Square(
                             Sub(
                                 Y,
                                 Constant(
-                                    11.0
-                                )
-                            )
-                        )
-                    ]
-                )
-            )
+                                    11.0,
+                                ),
+                            ),
+                        ),
+                    ],
+                ),
+            ),
         ),
         Sub(
             Constant(
-                10.0
+                10.0,
             ),
             Sqrt(
                 Add(
@@ -38,21 +38,21 @@ Min(
                             Sub(
                                 X,
                                 Constant(
-                                    21.0
-                                )
-                            )
+                                    21.0,
+                                ),
+                            ),
                         ),
                         Square(
                             Sub(
                                 Y,
                                 Constant(
-                                    11.0
-                                )
-                            )
-                        )
-                    ]
-                )
-            )
-        )
-    ]
+                                    11.0,
+                                ),
+                            ),
+                        ),
+                    ],
+                ),
+            ),
+        ),
+    ],
 )

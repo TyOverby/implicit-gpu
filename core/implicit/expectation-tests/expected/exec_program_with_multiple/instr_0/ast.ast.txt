@@ -1,6 +1,6 @@
 Sub(
     Constant(
-        10.0
+        10.0,
     ),
     Sqrt(
         Add(
@@ -9,19 +9,19 @@ Sub(
                     Sub(
                         X,
                         Constant(
-                            11.0
-                        )
-                    )
+                            11.0,
+                        ),
+                    ),
                 ),
                 Square(
                     Sub(
                         Y,
                         Constant(
-                            11.0
-                        )
-                    )
-                )
-            ]
-        )
-    )
+                            11.0,
+                        ),
+                    ),
+                ),
+            ],
+        ),
+    ),
 )

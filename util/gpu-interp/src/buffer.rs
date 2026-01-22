@@ -17,8 +17,16 @@ enum BufferKind {
     Debug,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 struct OpenclBuffer(::ocl::Buffer<f32>);
+
+impl std::fmt::Debug for OpenclBuffer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_tuple("OpenclBuffer")
+            .field(&format_args!("<ocl::Buffer len={}>", self.0.len()))
+            .finish()
+    }
+}
 
 impl PartialEq for OpenclBuffer {
     fn eq(&self, other: &OpenclBuffer) -> bool {

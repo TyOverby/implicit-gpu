@@ -10,13 +10,13 @@ Line Segment 1
 2 points
 Clockwise? true
 (0.0,11.871331)
-(0.26195204,12.0)
+(0.26195195,12.0)
 
 Line Segment 2 
 2 points
 Clockwise? true
 (0.0,23.357502)
-(0.22679007,23.0)
+(0.2267901,23.0)
 
 Line Segment 3 
 2 points
@@ -52,66 +52,66 @@ Line Segment 8
 2 points
 Clockwise? true
 (0.06531471,37.0)
-(0.25092113,36.0)
+(0.2509212,36.0)
 
 Line Segment 9 
 2 points
 Clockwise? false
-(0.14802217,31.0)
+(0.1480222,31.0)
 (0.0,30.765764)
 
 Line Segment 10 
 2 points
 Clockwise? true
-(0.22679007,23.0)
-(0.9298214,22.0)
+(0.22679016,23.0)
+(0.92982143,22.0)
 
 Line Segment 11 
 2 points
 Clockwise? true
-(0.25092113,36.0)
-(0.43110526,35.0)
+(0.2509212,36.0)
+(0.43110532,35.0)
 
 Line Segment 12 
 2 points
 Clockwise? true
-(0.26195204,12.0)
+(0.26195195,12.0)
 (0.89723647,13.0)
 
 Line Segment 13 
 2 points
 Clockwise? true
 (0.2662025,96.0)
-(0.7072715,97.0)
+(0.70727146,97.0)
 
 Line Segment 14 
 2 points
 Clockwise? true
-(0.268964,47.0)
-(0.33931017,46.0)
+(0.26896393,47.0)
+(0.3393102,46.0)
 
 Line Segment 15 
 2 points
 Clockwise? true
-(0.33931017,46.0)
-(0.6140685,45.0)
+(0.3393102,46.0)
+(0.61406845,45.0)
 
 Line Segment 16 
 2 points
 Clockwise? true
-(0.43110526,35.0)
+(0.43110532,35.0)
 (0.63835835,34.0)
 
 Line Segment 17 
 2 points
 Clockwise? true
-(0.4917904,27.0)
+(0.49179038,27.0)
 (0.63014454,28.0)
 
 Line Segment 18 
 2 points
 Clockwise? false
-(0.53163517,43.0)
+(0.5316351,43.0)
 (0.0,42.32412)
 
 Line Segment 19 
@@ -123,7 +123,7 @@ Clockwise? false
 Line Segment 20 
 2 points
 Clockwise? false
-(0.6140685,45.0)
+(0.61406845,45.0)
 (0.6033669,44.0)
 
 Line Segment 21 
@@ -135,7 +135,7 @@ Clockwise? false
 Line Segment 22 
 2 points
 Clockwise? true
-(0.6301445,28.0)
+(0.63014454,28.0)
 (1.0,28.15704)
 
 Line Segment 23 
@@ -159,14 +159,14 @@ Clockwise? true
 Line Segment 26 
 2 points
 Clockwise? true
-(0.7875387,66.0)
+(0.78753865,66.0)
 (0.93738675,67.0)
 
 Line Segment 27 
 2 points
 Clockwise? false
 (0.84902984,32.0)
-(0.14802212,31.0)
+(0.14802217,31.0)
 
 Line Segment 28 
 2 points
@@ -183,13 +183,13 @@ Clockwise? false
 Line Segment 30 
 2 points
 Clockwise? true
-(0.8972364,13.0)
+(0.89723647,13.0)
 (1.0,13.95889)
 
 Line Segment 31 
 2 points
 Clockwise? true
-(0.92982143,22.0)
+(0.9298214,22.0)
 (1.0,21.836222)
 
 Line Segment 32 
@@ -220,7 +220,7 @@ Line Segment 36
 2 points
 Clockwise? false
 (1.0,26.082602)
-(0.4917904,27.0)
+(0.4917905,27.0)
 
 Line Segment 37 
 2 points
@@ -232,7 +232,7 @@ Line Segment 38
 2 points
 Clockwise? false
 (1.0,47.620453)
-(0.26896396,47.0)
+(0.268964,47.0)
 
 Line Segment 39 
 2 points
@@ -262,7 +262,7 @@ Line Segment 43
 2 points
 Clockwise? true
 (1.0,80.19957)
-(1.1747569,80.0)
+(1.174757,80.0)
 
 Line Segment 44 
 2 points
@@ -292,7 +292,7 @@ Line Segment 48
 2 points
 Clockwise? true
 (1.0030286,14.0)
-(1.0958714,15.0)
+(1.0958713,15.0)
 
 Line Segment 49 
 2 points
@@ -303,31 +303,31 @@ Clockwise? false
 Line Segment 50 
 2 points
 Clockwise? true
-(1.0729029,4.0)
+(1.0729028,4.0)
 (1.3037398,3.0)
 
 Line Segment 51 
 2 points
 Clockwise? true
-(1.0958714,15.0)
+(1.0958713,15.0)
 (1.2484463,16.0)
 
 Line Segment 52 
 2 points
 Clockwise? true
 (1.0990916,98.0)
-(1.607198,99.0)
+(1.6071981,99.0)
 
 Line Segment 53 
 2 points
 Clockwise? true
-(1.1747569,80.0)
-(1.4861443,79.0)
+(1.174757,80.0)
+(1.4861444,79.0)
 
 Line Segment 54 
 2 points
 Clockwise? false
-(1.1941439,73.0)
+(1.194144,73.0)
 (1.0,72.96064)
 
 Line Segment 55 
@@ -346,7 +346,7 @@ Line Segment 57
 2 points
 Clockwise? true
 (1.3037398,3.0)
-(2.0,2.131053)
+(2.0,2.1310527)
 
 Line Segment 58 
 2 points
@@ -358,18 +358,18 @@ Line Segment 59
 2 points
 Clockwise? true
 (1.3727345,57.0)
-(1.6142766,58.0)
+(1.6142768,58.0)
 
 Line Segment 60 
 2 points
 Clockwise? false
-(1.4541175,5.0)
-(1.0729029,4.0)
+(1.4541174,5.0)
+(1.0729028,4.0)
 
 Line Segment 61 
 2 points
 Clockwise? true
-(1.4861443,79.0)
+(1.4861444,79.0)
 (1.5507574,78.0)
 
 Line Segment 62 
@@ -393,13 +393,13 @@ Clockwise? true
 Line Segment 65 
 2 points
 Clockwise? true
-(1.6142766,58.0)
-(1.9037278,59.0)
+(1.6142768,58.0)
+(1.9037279,59.0)
 
 Line Segment 66 
 2 points
 Clockwise? true
-(1.7069743,69.0)
+(1.7069744,69.0)
 (2.0,69.53623)
 
 Line Segment 67 
@@ -412,7 +412,7 @@ Line Segment 68
 2 points
 Clockwise? false
 (1.7645288,6.0)
-(1.4541175,5.0)
+(1.4541174,5.0)
 
 Line Segment 69 
 2 points
@@ -429,7 +429,7 @@ Clockwise? true
 Line Segment 71 
 2 points
 Clockwise? false
-(1.8473842,56.0)
+(1.8473843,56.0)
 (1.3727345,57.0)
 
 Line Segment 72 
@@ -441,7 +441,7 @@ Clockwise? false
 Line Segment 73 
 2 points
 Clockwise? true
-(1.9037278,59.0)
+(1.9037279,59.0)
 (1.9817693,60.0)
 
 Line Segment 74 
@@ -508,7 +508,7 @@ Line Segment 84
 2 points
 Clockwise? false
 (2.0,55.84541)
-(1.8473842,56.0)
+(1.8473843,56.0)
 
 Line Segment 85 
 2 points
@@ -532,7 +532,7 @@ Line Segment 88
 2 points
 Clockwise? false
 (2.0,73.147354)
-(1.1941439,73.0)
+(1.194144,73.0)
 
 Line Segment 89 
 2 points
@@ -597,13 +597,13 @@ Clockwise? true
 Line Segment 99 
 2 points
 Clockwise? false
-(2.2094388,25.0)
+(2.209439,25.0)
 (2.0,25.151943)
 
 Line Segment 100 
 2 points
 Clockwise? false
-(2.226461,19.0)
+(2.2264607,19.0)
 (2.0332708,20.0)
 
 Line Segment 101 
@@ -663,14 +663,14 @@ Clockwise? false
 Line Segment 110 
 2 points
 Clockwise? false
-(2.8089373,93.0)
+(2.8089375,93.0)
 (2.6864064,92.0)
 
 Line Segment 111 
 2 points
 Clockwise? false
 (2.9380848,94.0)
-(2.8089373,93.0)
+(2.8089375,93.0)
 
 Line Segment 112 
 2 points
@@ -718,7 +718,7 @@ Line Segment 119
 2 points
 Clockwise? false
 (3.0,18.075687)
-(2.2264607,19.0)
+(2.226461,19.0)
 
 Line Segment 120 
 2 points
@@ -730,7 +730,7 @@ Line Segment 121
 2 points
 Clockwise? false
 (3.0,24.168282)
-(2.2094388,25.0)
+(2.209439,25.0)
 
 Line Segment 122 
 2 points
@@ -760,7 +760,7 @@ Line Segment 126
 2 points
 Clockwise? true
 (3.0,53.592644)
-(3.797136,54.0)
+(3.7971363,54.0)
 
 Line Segment 127 
 2 points
@@ -855,7 +855,7 @@ Clockwise? false
 Line Segment 142 
 2 points
 Clockwise? false
-(3.4230418,97.0)
+(3.4230416,97.0)
 (3.2823107,96.0)
 
 Line Segment 143 
@@ -873,14 +873,14 @@ Clockwise? true
 Line Segment 145 
 2 points
 Clockwise? true
-(3.5295947,6.0)
+(3.5295944,6.0)
 (4.0,6.3169594)
 
 Line Segment 146 
 2 points
 Clockwise? false
 (3.5724807,98.0)
-(3.4230418,97.0)
+(3.4230416,97.0)
 
 Line Segment 147 
 2 points
@@ -904,7 +904,7 @@ Line Segment 150
 2 points
 Clockwise? true
 (3.6531243,35.0)
-(3.6969373,36.0)
+(3.6969376,36.0)
 
 Line Segment 151 
 2 points
@@ -921,7 +921,7 @@ Clockwise? false
 Line Segment 153 
 2 points
 Clockwise? true
-(3.7971363,54.0)
+(3.797136,54.0)
 (4.0,54.161)
 
 Line Segment 154 
@@ -940,7 +940,7 @@ Line Segment 156
 2 points
 Clockwise? false
 (3.983933,13.0)
-(3.424767,12.0)
+(3.4247668,12.0)
 
 Line Segment 157 
 2 points
@@ -1006,7 +1006,7 @@ Line Segment 167
 2 points
 Clockwise? false
 (4.0,32.524567)
-(3.6351693,33.0)
+(3.6351695,33.0)
 
 Line Segment 168 
 2 points
@@ -1330,7 +1330,7 @@ Line Segment 221
 2 points
 Clockwise? true
 (5.0869465,44.0)
-(5.4196024,43.0)
+(5.419603,43.0)
 
 Line Segment 222 
 2 points
@@ -1348,7 +1348,7 @@ Line Segment 224
 2 points
 Clockwise? false
 (5.2655997,42.0)
-(5.028624,41.0)
+(5.0286236,41.0)
 
 Line Segment 225 
 2 points
@@ -1365,7 +1365,7 @@ Clockwise? true
 Line Segment 227 
 2 points
 Clockwise? false
-(5.4196024,43.0)
+(5.419603,43.0)
 (5.2655997,42.0)
 
 Line Segment 228 
@@ -1377,7 +1377,7 @@ Clockwise? false
 Line Segment 229 
 2 points
 Clockwise? true
-(5.5440454,92.0)
+(5.544045,92.0)
 (6.0,92.94232)
 
 Line Segment 230 
@@ -1437,7 +1437,7 @@ Clockwise? true
 Line Segment 239 
 2 points
 Clockwise? false
-(6.0,13.270763)
+(6.0,13.270764)
 (5.0686865,14.0)
 
 Line Segment 240 
@@ -1498,7 +1498,7 @@ Line Segment 249
 2 points
 Clockwise? false
 (6.0,68.462074)
-(5.654444,69.0)
+(5.6544447,69.0)
 
 Line Segment 250 
 2 points
@@ -1582,7 +1582,7 @@ Line Segment 263
 2 points
 Clockwise? false
 (6.2572207,13.0)
-(6.0,13.270763)
+(6.0,13.270764)
 
 Line Segment 264 
 2 points
@@ -1665,7 +1665,7 @@ Clockwise? false
 Line Segment 277 
 2 points
 Clockwise? false
-(6.9830875,57.0)
+(6.983087,57.0)
 (6.8035,58.0)
 
 Line Segment 278 
@@ -1803,7 +1803,7 @@ Clockwise? false
 Line Segment 300 
 2 points
 Clockwise? false
-(7.189339,89.0)
+(7.1893396,89.0)
 (7.0,88.709885)
 
 Line Segment 301 
@@ -1828,7 +1828,7 @@ Line Segment 304
 2 points
 Clockwise? false
 (7.349536,90.0)
-(7.189339,89.0)
+(7.1893396,89.0)
 
 Line Segment 305 
 2 points
@@ -1924,7 +1924,7 @@ Line Segment 320
 2 points
 Clockwise? true
 (8.0,14.757044)
-(8.977415,14.0)
+(8.977416,14.0)
 
 Line Segment 321 
 2 points
@@ -2079,7 +2079,7 @@ Clockwise? false
 Line Segment 346 
 2 points
 Clockwise? true
-(8.184561,43.0)
+(8.184562,43.0)
 (8.198001,44.0)
 
 Line Segment 347 
@@ -2097,8 +2097,8 @@ Clockwise? true
 Line Segment 349 
 2 points
 Clockwise? false
-(8.319801,42.0)
-(8.184561,43.0)
+(8.3198,42.0)
+(8.184562,43.0)
 
 Line Segment 350 
 2 points
@@ -2122,7 +2122,7 @@ Line Segment 353
 2 points
 Clockwise? false
 (8.460687,41.0)
-(8.319801,42.0)
+(8.3198,42.0)
 
 Line Segment 354 
 2 points
@@ -2224,7 +2224,7 @@ Line Segment 370
 2 points
 Clockwise? true
 (9.0,35.791325)
-(9.1988535,36.0)
+(9.198853,36.0)
 
 Line Segment 371 
 2 points
@@ -2313,7 +2313,7 @@ Clockwise? false
 Line Segment 385 
 2 points
 Clockwise? true
-(9.032917,88.0)
+(9.032916,88.0)
 (9.146352,89.0)
 
 Line Segment 386 
@@ -2392,7 +2392,7 @@ Line Segment 398
 2 points
 Clockwise? false
 (9.871562,87.0)
-(9.032917,88.0)
+(9.032916,88.0)
 
 Line Segment 399 
 2 points
@@ -2788,7 +2788,7 @@ Line Segment 464
 2 points
 Clockwise? true
 (11.0,66.58815)
-(11.483055,66.0)
+(11.483054,66.0)
 
 Line Segment 465 
 2 points
@@ -2902,7 +2902,7 @@ Line Segment 483
 2 points
 Clockwise? false
 (11.479774,12.0)
-(11.327848,13.0)
+(11.327849,13.0)
 
 Line Segment 484 
 2 points
@@ -3082,7 +3082,7 @@ Line Segment 513
 2 points
 Clockwise? true
 (12.125114,73.0)
-(12.738634,72.0)
+(12.738635,72.0)
 
 Line Segment 514 
 2 points
@@ -3376,7 +3376,7 @@ Line Segment 562
 2 points
 Clockwise? true
 (13.913913,48.0)
-(14.0,47.89693)
+(14.0,47.896935)
 
 Line Segment 563 
 2 points
@@ -3459,7 +3459,7 @@ Clockwise? false
 Line Segment 576 
 2 points
 Clockwise? true
-(14.0,47.89693)
+(14.0,47.896935)
 (14.617249,47.0)
 
 Line Segment 577 
@@ -3639,7 +3639,7 @@ Clockwise? true
 Line Segment 606 
 2 points
 Clockwise? true
-(14.723019,90.0)
+(14.723018,90.0)
 (15.0,89.49378)
 
 Line Segment 607 
@@ -3717,7 +3717,7 @@ Clockwise? true
 Line Segment 619 
 2 points
 Clockwise? false
-(15.0,9.722023)
+(15.0,9.722022)
 (14.642091,9.0)
 
 Line Segment 620 
@@ -3747,7 +3747,7 @@ Clockwise? false
 Line Segment 624 
 2 points
 Clockwise? true
-(15.0,32.71177)
+(15.0,32.711765)
 (15.251991,33.0)
 
 Line Segment 625 
@@ -3933,7 +3933,7 @@ Clockwise? false
 Line Segment 655 
 2 points
 Clockwise? false
-(15.517427,56.0)
+(15.5174265,56.0)
 (15.0,55.19846)
 
 Line Segment 656 
@@ -3964,7 +3964,7 @@ Line Segment 660
 2 points
 Clockwise? false
 (15.648617,10.0)
-(15.0,9.722023)
+(15.0,9.722022)
 
 Line Segment 661 
 2 points
@@ -3999,7 +3999,7 @@ Clockwise? true
 Line Segment 666 
 2 points
 Clockwise? false
-(16.0,0.09869814)
+(16.0,0.09869817)
 (15.0,0.58157593)
 
 Line Segment 667 
@@ -4203,7 +4203,7 @@ Clockwise? false
 Line Segment 700 
 2 points
 Clockwise? false
-(16.606411,22.0)
+(16.606413,22.0)
 (16.265453,23.0)
 
 Line Segment 701 
@@ -4228,7 +4228,7 @@ Line Segment 704
 2 points
 Clockwise? true
 (16.769644,24.0)
-(17.0,24.068916)
+(17.0,24.068918)
 
 Line Segment 705 
 2 points
@@ -4240,7 +4240,7 @@ Line Segment 706
 2 points
 Clockwise? false
 (16.802423,1.0)
-(16.0,0.09869814)
+(16.0,0.09869817)
 
 Line Segment 707 
 2 points
@@ -4593,7 +4593,7 @@ Clockwise? true
 Line Segment 765 
 2 points
 Clockwise? false
-(18.0,97.46123)
+(18.0,97.46122)
 (17.435534,98.0)
 
 Line Segment 766 
@@ -4672,7 +4672,7 @@ Line Segment 778
 2 points
 Clockwise? false
 (18.56257,97.0)
-(18.0,97.46123)
+(18.0,97.46122)
 
 Line Segment 779 
 2 points
@@ -5212,7 +5212,7 @@ Line Segment 868
 2 points
 Clockwise? true
 (20.545597,77.0)
-(21.0,77.53926)
+(21.0,77.53927)
 
 Line Segment 869 
 2 points
@@ -6141,7 +6141,7 @@ Clockwise? true
 Line Segment 1023 
 2 points
 Clockwise? false
-(24.907692,21.0)
+(24.907694,21.0)
 (24.0,20.665417)
 
 Line Segment 1024 
@@ -6177,7 +6177,7 @@ Clockwise? false
 Line Segment 1029 
 2 points
 Clockwise? false
-(25.0,5.187891)
+(25.0,5.1878905)
 (24.546068,5.0)
 
 Line Segment 1030 
@@ -6202,7 +6202,7 @@ Line Segment 1033
 2 points
 Clockwise? false
 (25.0,21.087397)
-(24.907692,21.0)
+(24.907694,21.0)
 
 Line Segment 1034 
 2 points
@@ -6334,7 +6334,7 @@ Line Segment 1055
 2 points
 Clockwise? false
 (25.314451,5.0)
-(25.0,5.187891)
+(25.0,5.1878905)
 
 Line Segment 1056 
 2 points
@@ -6406,7 +6406,7 @@ Line Segment 1067
 2 points
 Clockwise? true
 (26.0,17.887142)
-(27.0,17.351974)
+(27.0,17.351973)
 
 Line Segment 1068 
 2 points
@@ -6640,7 +6640,7 @@ Line Segment 1106
 2 points
 Clockwise? true
 (26.684317,70.0)
-(27.0,69.0756)
+(27.0,69.07559)
 
 Line Segment 1107 
 2 points
@@ -6652,7 +6652,7 @@ Line Segment 1108
 2 points
 Clockwise? true
 (26.723392,31.0)
-(27.0,30.700127)
+(27.0,30.700125)
 
 Line Segment 1109 
 2 points
@@ -6699,7 +6699,7 @@ Clockwise? false
 Line Segment 1116 
 2 points
 Clockwise? true
-(27.0,17.351974)
+(27.0,17.351973)
 (27.234522,17.0)
 
 Line Segment 1117 
@@ -6771,7 +6771,7 @@ Clockwise? false
 Line Segment 1128 
 2 points
 Clockwise? true
-(27.0,69.0756)
+(27.0,69.07559)
 (27.011686,69.0)
 
 Line Segment 1129 
@@ -7216,7 +7216,7 @@ Line Segment 1202
 2 points
 Clockwise? true
 (28.629839,68.0)
-(29.0,67.62679)
+(29.0,67.626785)
 
 Line Segment 1203 
 2 points
@@ -7461,7 +7461,7 @@ Clockwise? false
 Line Segment 1243 
 2 points
 Clockwise? false
-(29.487865,67.0)
+(29.487864,67.0)
 (29.485764,66.0)
 
 Line Segment 1244 
@@ -7497,7 +7497,7 @@ Clockwise? true
 Line Segment 1249 
 2 points
 Clockwise? true
-(29.807903,52.0)
+(29.807901,52.0)
 (30.0,51.676655)
 
 Line Segment 1250 
@@ -7570,7 +7570,7 @@ Line Segment 1261
 2 points
 Clockwise? true
 (30.0,23.63624)
-(30.48624,23.0)
+(30.486242,23.0)
 
 Line Segment 1262 
 2 points
@@ -7767,7 +7767,7 @@ Clockwise? false
 Line Segment 1294 
 2 points
 Clockwise? true
-(30.48624,23.0)
+(30.486242,23.0)
 (31.0,22.364338)
 
 Line Segment 1295 
@@ -7786,7 +7786,7 @@ Line Segment 1297
 2 points
 Clockwise? true
 (30.544338,4.0)
-(31.0,3.5759828)
+(31.0,3.575983)
 
 Line Segment 1298 
 2 points
@@ -7804,7 +7804,7 @@ Line Segment 1300
 2 points
 Clockwise? true
 (30.64323,8.0)
-(31.0,8.313629)
+(31.0,8.313628)
 
 Line Segment 1301 
 2 points
@@ -7863,13 +7863,13 @@ Clockwise? false
 Line Segment 1310 
 2 points
 Clockwise? false
-(31.0,0.9333284)
+(31.0,0.93332815)
 (30.066381,0.0)
 
 Line Segment 1311 
 2 points
 Clockwise? true
-(31.0,3.5759828)
+(31.0,3.575983)
 (31.463816,3.0)
 
 Line Segment 1312 
@@ -8014,7 +8014,7 @@ Line Segment 1335
 2 points
 Clockwise? false
 (31.028679,1.0)
-(31.0,0.9333284)
+(31.0,0.93332815)
 
 Line Segment 1336 
 2 points
@@ -8206,7 +8206,7 @@ Line Segment 1367
 2 points
 Clockwise? true
 (32.0,28.469563)
-(33.0,28.578434)
+(33.0,28.578436)
 
 Line Segment 1368 
 2 points
@@ -8319,7 +8319,7 @@ Clockwise? false
 Line Segment 1386 
 2 points
 Clockwise? true
-(32.13988,55.0)
+(32.139877,55.0)
 (33.0,55.431507)
 
 Line Segment 1387 
@@ -8469,13 +8469,13 @@ Clockwise? true
 Line Segment 1411 
 2 points
 Clockwise? false
-(33.0,25.444666)
+(33.0,25.444668)
 (32.0,25.552813)
 
 Line Segment 1412 
 2 points
 Clockwise? true
-(33.0,28.578434)
+(33.0,28.578436)
 (33.914658,28.0)
 
 Line Segment 1413 
@@ -8668,7 +8668,7 @@ Line Segment 1444
 2 points
 Clockwise? true
 (33.78372,2.0)
-(34.0,2.7573433)
+(34.0,2.7573435)
 
 Line Segment 1445 
 2 points
@@ -8721,7 +8721,7 @@ Clockwise? false
 Line Segment 1453 
 2 points
 Clockwise? true
-(34.0,2.7573433)
+(34.0,2.7573435)
 (34.087173,3.0)
 
 Line Segment 1454 
@@ -8764,7 +8764,7 @@ Line Segment 1460
 2 points
 Clockwise? false
 (34.0,25.412798)
-(33.0,25.444666)
+(33.0,25.444668)
 
 Line Segment 1461 
 2 points
@@ -8787,7 +8787,7 @@ Clockwise? true
 Line Segment 1464 
 2 points
 Clockwise? false
-(34.0,39.14296)
+(34.0,39.142956)
 (33.13715,40.0)
 
 Line Segment 1465 
@@ -8806,7 +8806,7 @@ Line Segment 1467
 2 points
 Clockwise? true
 (34.0,58.526596)
-(34.409477,59.0)
+(34.40948,59.0)
 
 Line Segment 1468 
 2 points
@@ -8890,7 +8890,7 @@ Line Segment 1481
 2 points
 Clockwise? false
 (34.158398,39.0)
-(34.0,39.14296)
+(34.0,39.142956)
 
 Line Segment 1482 
 2 points
@@ -8926,7 +8926,7 @@ Line Segment 1487
 2 points
 Clockwise? true
 (34.551815,8.0)
-(35.0,7.3391056)
+(35.0,7.339105)
 
 Line Segment 1488 
 2 points
@@ -9969,7 +9969,7 @@ Clockwise? true
 Line Segment 1661 
 2 points
 Clockwise? false
-(39.0,87.16125)
+(39.0,87.161255)
 (38.0,87.01904)
 
 Line Segment 1662 
@@ -10066,7 +10066,7 @@ Line Segment 1677
 2 points
 Clockwise? false
 (39.454006,87.0)
-(39.0,87.16125)
+(39.0,87.161255)
 
 Line Segment 1678 
 2 points
@@ -10371,7 +10371,7 @@ Clockwise? true
 Line Segment 1728 
 2 points
 Clockwise? false
-(41.0,0.12445328)
+(41.0,0.12445325)
 (40.661095,0.0)
 
 Line Segment 1729 
@@ -10390,7 +10390,7 @@ Line Segment 1731
 2 points
 Clockwise? true
 (41.0,12.159807)
-(42.0,12.063034)
+(42.0,12.063033)
 
 Line Segment 1732 
 2 points
@@ -10642,7 +10642,7 @@ Line Segment 1773
 2 points
 Clockwise? false
 (42.0,0.322179)
-(41.0,0.12445328)
+(41.0,0.12445325)
 
 Line Segment 1774 
 2 points
@@ -10659,7 +10659,7 @@ Clockwise? false
 Line Segment 1776 
 2 points
 Clockwise? true
-(42.0,12.063034)
+(42.0,12.063033)
 (42.366207,13.0)
 
 Line Segment 1777 
@@ -10815,7 +10815,7 @@ Clockwise? true
 Line Segment 1802 
 2 points
 Clockwise? false
-(42.180557,53.0)
+(42.180553,53.0)
 (42.100357,52.0)
 
 Line Segment 1803 
@@ -10858,7 +10858,7 @@ Line Segment 1809
 2 points
 Clockwise? true
 (42.366207,13.0)
-(43.0,13.966019)
+(43.0,13.96602)
 
 Line Segment 1810 
 2 points
@@ -10881,14 +10881,14 @@ Clockwise? true
 Line Segment 1813 
 2 points
 Clockwise? false
-(42.494415,22.0)
+(42.49442,22.0)
 (42.17708,21.0)
 
 Line Segment 1814 
 2 points
 Clockwise? false
 (42.54147,54.0)
-(42.180557,53.0)
+(42.180553,53.0)
 
 Line Segment 1815 
 2 points
@@ -10930,7 +10930,7 @@ Line Segment 1821
 2 points
 Clockwise? false
 (42.783077,23.0)
-(42.494415,22.0)
+(42.49442,22.0)
 
 Line Segment 1822 
 2 points
@@ -11410,7 +11410,7 @@ Line Segment 1901
 2 points
 Clockwise? true
 (44.51057,0.0)
-(45.0,0.6186261)
+(45.0,0.6186262)
 
 Line Segment 1902 
 2 points
@@ -11446,7 +11446,7 @@ Line Segment 1907
 2 points
 Clockwise? true
 (45.0,0.6186261)
-(46.0,0.9760652)
+(46.0,0.9760653)
 
 Line Segment 1908 
 2 points
@@ -11763,7 +11763,7 @@ Clockwise? false
 Line Segment 1960 
 2 points
 Clockwise? true
-(46.0,0.9760652)
+(46.0,0.9760653)
 (46.632458,0.0)
 
 Line Segment 1961 
@@ -11943,7 +11943,7 @@ Clockwise? true
 Line Segment 1990 
 2 points
 Clockwise? false
-(46.444817,39.0)
+(46.44482,39.0)
 (46.39775,38.0)
 
 Line Segment 1991 
@@ -11974,7 +11974,7 @@ Line Segment 1995
 2 points
 Clockwise? false
 (46.605747,40.0)
-(46.444817,39.0)
+(46.44482,39.0)
 
 Line Segment 1996 
 2 points
@@ -12015,7 +12015,7 @@ Clockwise? false
 Line Segment 2002 
 2 points
 Clockwise? false
-(47.0,1.3275911)
+(47.0,1.327591)
 (46.046543,2.0)
 
 Line Segment 2003 
@@ -12213,7 +12213,7 @@ Clockwise? true
 Line Segment 2035 
 2 points
 Clockwise? true
-(47.50332,61.0)
+(47.503315,61.0)
 (48.0,61.816784)
 
 Line Segment 2036 
@@ -12238,7 +12238,7 @@ Line Segment 2039
 2 points
 Clockwise? true
 (47.766987,21.0)
-(48.0,21.368309)
+(48.0,21.36831)
 
 Line Segment 2040 
 2 points
@@ -12255,8 +12255,8 @@ Clockwise? false
 Line Segment 2042 
 2 points
 Clockwise? false
-(48.0,1.5834763)
-(47.0,1.3275911)
+(48.0,1.5834764)
+(47.0,1.327591)
 
 Line Segment 2043 
 2 points
@@ -12537,8 +12537,8 @@ Clockwise? false
 Line Segment 2089 
 2 points
 Clockwise? false
-(49.0,1.8329471)
-(48.0,1.5834763)
+(49.0,1.8329473)
+(48.0,1.5834764)
 
 Line Segment 2090 
 2 points
@@ -12609,7 +12609,7 @@ Clockwise? true
 Line Segment 2101 
 2 points
 Clockwise? false
-(49.0,52.571938)
+(49.0,52.57194)
 (48.0,52.278572)
 
 Line Segment 2102 
@@ -12748,7 +12748,7 @@ Line Segment 2124
 2 points
 Clockwise? false
 (49.699,2.0)
-(49.0,1.8329471)
+(49.0,1.8329473)
 
 Line Segment 2125 
 2 points
@@ -12850,7 +12850,7 @@ Line Segment 2141
 2 points
 Clockwise? false
 (50.0,52.91496)
-(49.0,52.571938)
+(49.0,52.57194)
 
 Line Segment 2142 
 2 points
@@ -13126,7 +13126,7 @@ Line Segment 2187
 2 points
 Clockwise? true
 (51.042713,64.0)
-(51.133255,65.0)
+(51.13325,65.0)
 
 Line Segment 2188 
 2 points
@@ -13137,7 +13137,7 @@ Clockwise? false
 Line Segment 2189 
 2 points
 Clockwise? true
-(51.133255,65.0)
+(51.13325,65.0)
 (51.244015,66.0)
 
 Line Segment 2190 
@@ -13335,7 +13335,7 @@ Clockwise? false
 Line Segment 2222 
 2 points
 Clockwise? true
-(52.0,25.390743)
+(52.0,25.390745)
 (52.612244,26.0)
 
 Line Segment 2223 
@@ -13545,7 +13545,7 @@ Clockwise? false
 Line Segment 2257 
 2 points
 Clockwise? false
-(53.0,1.8949313)
+(53.0,1.8949312)
 (52.925896,2.0)
 
 Line Segment 2258 
@@ -13599,7 +13599,7 @@ Clockwise? false
 Line Segment 2266 
 2 points
 Clockwise? true
-(53.0,30.810862)
+(53.0,30.81086)
 (53.06371,31.0)
 
 Line Segment 2267 
@@ -13774,7 +13774,7 @@ Line Segment 2295
 2 points
 Clockwise? false
 (53.265644,1.0)
-(53.0,1.8949313)
+(53.0,1.8949312)
 
 Line Segment 2296 
 2 points
@@ -13803,7 +13803,7 @@ Clockwise? false
 Line Segment 2300 
 2 points
 Clockwise? true
-(53.616554,11.0)
+(53.616558,11.0)
 (54.0,11.675729)
 
 Line Segment 2301 
@@ -14038,7 +14038,7 @@ Line Segment 2339
 2 points
 Clockwise? false
 (54.274204,18.0)
-(54.16179,19.0)
+(54.161785,19.0)
 
 Line Segment 2340 
 2 points
@@ -14067,7 +14067,7 @@ Clockwise? false
 Line Segment 2344 
 2 points
 Clockwise? false
-(54.628674,91.0)
+(54.62867,91.0)
 (54.0,90.93861)
 
 Line Segment 2345 
@@ -14086,7 +14086,7 @@ Line Segment 2347
 2 points
 Clockwise? true
 (54.756897,4.0)
-(55.0,4.4513464)
+(55.0,4.451347)
 
 Line Segment 2348 
 2 points
@@ -14104,12 +14104,12 @@ Line Segment 2350
 2 points
 Clockwise? false
 (54.996464,43.0)
-(54.105324,44.0)
+(54.105328,44.0)
 
 Line Segment 2351 
 2 points
 Clockwise? true
-(55.0,4.4513464)
+(55.0,4.451347)
 (55.77078,5.0)
 
 Line Segment 2352 
@@ -14224,7 +14224,7 @@ Line Segment 2370
 2 points
 Clockwise? false
 (55.0,91.04155)
-(54.628674,91.0)
+(54.62867,91.0)
 
 Line Segment 2371 
 2 points
@@ -14541,7 +14541,7 @@ Clockwise? true
 Line Segment 2423 
 2 points
 Clockwise? false
-(57.0,15.280969)
+(57.0,15.28097)
 (56.0,15.199097)
 
 Line Segment 2424 
@@ -14734,7 +14734,7 @@ Line Segment 2455
 2 points
 Clockwise? false
 (58.0,15.583807)
-(57.0,15.280969)
+(57.0,15.28097)
 
 Line Segment 2456 
 2 points
@@ -15724,7 +15724,7 @@ Line Segment 2620
 2 points
 Clockwise? true
 (61.455196,85.0)
-(62.0,85.67446)
+(62.0,85.67445)
 
 Line Segment 2621 
 2 points
@@ -15819,7 +15819,7 @@ Clockwise? true
 Line Segment 2636 
 2 points
 Clockwise? false
-(62.0,36.854027)
+(62.0,36.85403)
 (61.60454,37.0)
 
 Line Segment 2637 
@@ -16005,7 +16005,7 @@ Clockwise? true
 Line Segment 2667 
 2 points
 Clockwise? false
-(63.0,0.08675909)
+(63.0,0.08675906)
 (62.73129,0.0)
 
 Line Segment 2668 
@@ -16066,7 +16066,7 @@ Line Segment 2677
 2 points
 Clockwise? false
 (63.0,36.729218)
-(62.0,36.854027)
+(62.0,36.85403)
 
 Line Segment 2678 
 2 points
@@ -16221,14 +16221,14 @@ Clockwise? false
 Line Segment 2703 
 2 points
 Clockwise? false
-(64.0,0.11083487)
-(63.0,0.08675909)
+(64.0,0.11083484)
+(63.0,0.08675906)
 
 Line Segment 2704 
 2 points
 Clockwise? true
 (64.0,6.799847)
-(64.11869,7.0)
+(64.11868,7.0)
 
 Line Segment 2705 
 2 points
@@ -16335,7 +16335,7 @@ Clockwise? true
 Line Segment 2722 
 2 points
 Clockwise? true
-(64.11869,7.0)
+(64.11868,7.0)
 (64.74985,8.0)
 
 Line Segment 2723 
@@ -16384,7 +16384,7 @@ Line Segment 2730
 2 points
 Clockwise? false
 (64.39142,0.0)
-(64.0,0.11083487)
+(64.0,0.11083484)
 
 Line Segment 2731 
 2 points
@@ -16719,7 +16719,7 @@ Clockwise? false
 Line Segment 2786 
 2 points
 Clockwise? true
-(65.72983,12.0)
+(65.72982,12.0)
 (66.0,12.124838)
 
 Line Segment 2787 
@@ -16791,7 +16791,7 @@ Clockwise? true
 Line Segment 2798 
 2 points
 Clockwise? false
-(66.0,16.675188)
+(66.0,16.67519)
 (65.0,16.521278)
 
 Line Segment 2799 
@@ -16888,7 +16888,7 @@ Line Segment 2814
 2 points
 Clockwise? false
 (66.08734,17.0)
-(66.0,16.675188)
+(66.0,16.67519)
 
 Line Segment 2815 
 2 points
@@ -16924,7 +16924,7 @@ Line Segment 2820
 2 points
 Clockwise? true
 (66.26868,2.0)
-(67.0,1.6402371)
+(67.0,1.6402372)
 
 Line Segment 2821 
 2 points
@@ -17200,7 +17200,7 @@ Line Segment 2866
 2 points
 Clockwise? true
 (67.81731,84.0)
-(68.0,84.548996)
+(68.0,84.54899)
 
 Line Segment 2867 
 2 points
@@ -17307,7 +17307,7 @@ Clockwise? true
 Line Segment 2884 
 2 points
 Clockwise? false
-(68.0,76.75782)
+(68.0,76.75783)
 (67.0,76.57801)
 
 Line Segment 2885 
@@ -17325,7 +17325,7 @@ Clockwise? false
 Line Segment 2887 
 2 points
 Clockwise? true
-(68.0,84.548996)
+(68.0,84.54899)
 (68.21888,85.0)
 
 Line Segment 2888 
@@ -17404,7 +17404,7 @@ Line Segment 2900
 2 points
 Clockwise? false
 (68.51324,77.0)
-(68.0,76.75782)
+(68.0,76.75783)
 
 Line Segment 2901 
 2 points
@@ -17692,7 +17692,7 @@ Line Segment 2948
 2 points
 Clockwise? true
 (69.73558,12.0)
-(70.0,11.305094)
+(70.0,11.305093)
 
 Line Segment 2949 
 2 points
@@ -17751,7 +17751,7 @@ Clockwise? false
 Line Segment 2958 
 2 points
 Clockwise? true
-(70.0,11.305094)
+(70.0,11.305093)
 (70.07901,11.0)
 
 Line Segment 2959 
@@ -18687,7 +18687,7 @@ Clockwise? true
 Line Segment 3114 
 2 points
 Clockwise? false
-(74.0,0.103184104)
+(74.0,0.103184074)
 (73.67137,0.0)
 
 Line Segment 3115 
@@ -18921,8 +18921,8 @@ Clockwise? false
 Line Segment 3153 
 2 points
 Clockwise? false
-(75.0,0.30463424)
-(74.0,0.103184104)
+(75.0,0.3046342)
+(74.0,0.103184074)
 
 Line Segment 3154 
 2 points
@@ -19114,12 +19114,12 @@ Line Segment 3185
 2 points
 Clockwise? false
 (76.0,0.09084776)
-(75.0,0.30463424)
+(75.0,0.3046342)
 
 Line Segment 3186 
 2 points
 Clockwise? true
-(76.0,5.8315873)
+(76.0,5.831588)
 (76.55697,5.0)
 
 Line Segment 3187 
@@ -19845,7 +19845,7 @@ Clockwise? false
 Line Segment 3307 
 2 points
 Clockwise? true
-(79.0,2.409448)
+(79.0,2.4094477)
 (79.2332,3.0)
 
 Line Segment 3308 
@@ -20092,7 +20092,7 @@ Line Segment 3348
 2 points
 Clockwise? true
 (79.71918,4.0)
-(80.0,4.51461)
+(80.0,4.5146093)
 
 Line Segment 3349 
 2 points
@@ -20914,12 +20914,12 @@ Line Segment 3485
 2 points
 Clockwise? true
 (82.36924,4.0)
-(82.369385,3.0)
+(82.36939,3.0)
 
 Line Segment 3486 
 2 points
 Clockwise? false
-(82.369385,3.0)
+(82.36939,3.0)
 (82.34372,2.0)
 
 Line Segment 3487 
@@ -20986,7 +20986,7 @@ Line Segment 3497
 2 points
 Clockwise? true
 (82.94978,25.0)
-(83.0,24.950861)
+(83.0,24.95086)
 
 Line Segment 3498 
 2 points
@@ -21003,7 +21003,7 @@ Clockwise? false
 Line Segment 3500 
 2 points
 Clockwise? true
-(83.0,24.950861)
+(83.0,24.95086)
 (84.0,24.283438)
 
 Line Segment 3501 
@@ -21304,7 +21304,7 @@ Line Segment 3550
 2 points
 Clockwise? true
 (84.31933,0.0)
-(85.0,0.96440864)
+(85.0,0.9644085)
 
 Line Segment 3551 
 2 points
@@ -21375,7 +21375,7 @@ Clockwise? true
 Line Segment 3562 
 2 points
 Clockwise? true
-(85.0,0.96440864)
+(85.0,0.9644086)
 (85.01483,1.0)
 
 Line Segment 3563 
@@ -21640,7 +21640,7 @@ Line Segment 3606
 2 points
 Clockwise? true
 (85.6771,13.0)
-(86.0,13.153065)
+(86.0,13.153066)
 
 Line Segment 3607 
 2 points
@@ -21814,7 +21814,7 @@ Line Segment 3635
 2 points
 Clockwise? true
 (86.113625,98.0)
-(86.20715,97.0)
+(86.20716,97.0)
 
 Line Segment 3636 
 2 points
@@ -21831,7 +21831,7 @@ Clockwise? false
 Line Segment 3638 
 2 points
 Clockwise? false
-(86.20715,97.0)
+(86.20716,97.0)
 (86.0,96.87064)
 
 Line Segment 3639 
@@ -22371,7 +22371,7 @@ Clockwise? true
 Line Segment 3728 
 2 points
 Clockwise? false
-(89.0,12.844266)
+(89.0,12.844267)
 (88.700356,13.0)
 
 Line Segment 3729 
@@ -22593,8 +22593,8 @@ Clockwise? true
 Line Segment 3765 
 2 points
 Clockwise? false
-(90.0,12.280555)
-(89.0,12.844266)
+(90.0,12.280556)
+(89.0,12.844267)
 
 Line Segment 3766 
 2 points
@@ -22798,7 +22798,7 @@ Line Segment 3799
 2 points
 Clockwise? false
 (90.51372,12.0)
-(90.0,12.280555)
+(90.0,12.280556)
 
 Line Segment 3800 
 2 points
@@ -23091,7 +23091,7 @@ Clockwise? true
 Line Segment 3848 
 2 points
 Clockwise? false
-(92.0,4.7608852)
+(92.0,4.760885)
 (91.0,4.76097)
 
 Line Segment 3849 
@@ -23320,7 +23320,7 @@ Line Segment 3886
 2 points
 Clockwise? false
 (93.0,4.7501225)
-(92.0,4.7608852)
+(92.0,4.760885)
 
 Line Segment 3887 
 2 points
@@ -23649,7 +23649,7 @@ Clockwise? false
 Line Segment 3941 
 2 points
 Clockwise? true
-(94.0,98.61564)
+(94.0,98.61563)
 (95.0,98.44614)
 
 Line Segment 3942 
@@ -23686,7 +23686,7 @@ Line Segment 3947
 2 points
 Clockwise? true
 (94.57925,0.0)
-(95.0,0.076164186)
+(95.0,0.076164156)
 
 Line Segment 3948 
 2 points
@@ -23968,7 +23968,7 @@ Line Segment 3994
 2 points
 Clockwise? true
 (96.0,0.16583475)
-(97.0,0.37535468)
+(97.0,0.3753547)
 
 Line Segment 3995 
 2 points
@@ -24225,8 +24225,8 @@ Clockwise? true
 Line Segment 4037 
 2 points
 Clockwise? true
-(97.0,0.37535468)
-(98.0,0.67535627)
+(97.0,0.3753547)
+(98.0,0.6753562)
 
 Line Segment 4038 
 2 points
@@ -24489,7 +24489,7 @@ Clockwise? true
 Line Segment 4081 
 2 points
 Clockwise? true
-(98.0,0.67535627)
+(98.0,0.6753562)
 (99.0,0.78628075)
 
 Line Segment 4082 

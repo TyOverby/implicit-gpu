@@ -21,13 +21,13 @@ CompilationResult {
         0,
         0,
         18,
-        4
+        4,
     ],
     constants: [
         1.0,
-        21.0
+        21.0,
     ],
-    max_stack: 8,
+    max_stack: 4,
     transform_depth: 1,
-    buffers: []
+    buffers: [],
 }

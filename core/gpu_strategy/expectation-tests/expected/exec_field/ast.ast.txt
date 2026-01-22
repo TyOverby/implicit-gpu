@@ -5,28 +5,7 @@ Buffer(
         depth: 1,
         kind: Both(
             OpenclBuffer(
-                Buffer {
-                    obj_core: Mem(
-                        0x0000715c3514bfb0,
-                    ),
-                    queue: Some(
-                        Queue {
-                            obj_core: CommandQueue(
-                                0x0000715c350bbbb0,
-                            ),
-                            device_version: OpenclVersion {
-                                ver: [
-                                    3,
-                                    0,
-                                ],
-                            },
-                        },
-                    ),
-                    len: 484,
-                    offset: None,
-                    extension_functions: None,
-                    _data: PhantomData<f32>,
-                },
+                <ocl::Buffer len=484>,
             ),
             [
                 5.556349,

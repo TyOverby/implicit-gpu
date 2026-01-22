@@ -39,8 +39,8 @@ Clockwise? false
 Line Segment 6 
 2 points
 Clockwise? false
+(15.0,5.0)
 (15.0,6.0)
-(15.0,7.0)
 
 Line Segment 7 
 2 points
@@ -63,8 +63,8 @@ Clockwise? true
 Line Segment 10 
 2 points
 Clockwise? false
+(15.0,13.0)
 (15.0,14.0)
-(15.0,15.0)
 
 Line Segment 11 
 2 points
@@ -75,8 +75,8 @@ Clockwise? true
 Line Segment 12 
 2 points
 Clockwise? false
+(15.0,1.0)
 (15.0,2.0)
-(15.0,3.0)
 
 Line Segment 13 
 2 points
@@ -105,8 +105,8 @@ Clockwise? true
 Line Segment 17 
 2 points
 Clockwise? false
+(15.0,14.0)
 (15.0,15.0)
-(14.0,14.0)
 
 Line Segment 18 
 2 points
@@ -134,21 +134,21 @@ Clockwise? true
 
 Line Segment 22 
 2 points
-Clockwise? true
+Clockwise? false
+(15.0,9.0)
 (15.0,10.0)
-(15.000001,11.0)
 
 Line Segment 23 
 2 points
 Clockwise? false
+(15.0,7.0)
 (15.0,8.0)
-(15.0,9.0)
 
 Line Segment 24 
 2 points
 Clockwise? false
+(15.0,6.0)
 (15.0,7.0)
-(15.0,8.0)
 
 Line Segment 25 
 2 points
@@ -159,14 +159,14 @@ Clockwise? false
 Line Segment 26 
 2 points
 Clockwise? false
+(15.0,3.0)
 (15.0,4.0)
-(15.0,5.0)
 
 Line Segment 27 
 2 points
 Clockwise? false
+(15.0,2.0)
 (15.0,3.0)
-(15.0,4.0)
 
 Line Segment 28 
 2 points
@@ -213,26 +213,26 @@ Clockwise? true
 Line Segment 35 
 2 points
 Clockwise? false
+(15.0,12.0)
 (15.0,13.0)
-(15.0,14.0)
 
 Line Segment 36 
 2 points
 Clockwise? false
-(15.0,12.0)
-(15.0,13.0)
+(15.0,10.0)
+(14.999999,11.0)
 
 Line Segment 37 
 2 points
 Clockwise? false
+(15.0,8.0)
 (15.0,9.0)
-(15.0,10.0)
 
 Line Segment 38 
 2 points
 Clockwise? false
+(15.0,4.0)
 (15.0,5.0)
-(15.0,6.0)
 
 Line Segment 39 
 2 points
@@ -243,11 +243,11 @@ Clockwise? false
 Line Segment 40 
 2 points
 Clockwise? false
-(15.000001,11.0)
-(15.0,12.0)
+(15.0,15.0)
+(14.0,14.0)
 
 Line Segment 41 
 2 points
-Clockwise? false
-(15.0,1.0)
-(15.0,2.0)
+Clockwise? true
+(14.999999,11.0)
+(15.0,12.0)

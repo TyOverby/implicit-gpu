@@ -16,10 +16,10 @@ CompilationResult {
         15,
         10,
         4,
-        0,
+        2,
         5,
         4,
-        2,
+        1,
         10,
         11,
         6,
@@ -30,14 +30,15 @@ CompilationResult {
         8,
         15,
         10,
-        13
+        16,
+        12,
     ],
     constants: [
         10.0,
         11.0,
-        21.0
+        5.0,
     ],
     max_stack: 5,
     transform_depth: 1,
-    buffers: []
+    buffers: [],
 }
