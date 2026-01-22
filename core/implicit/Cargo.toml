@@ -29,11 +29,11 @@ num-traits = "0.2.*"
 typed-arena = "1.4.1"
 
 [dependencies.expectation]
-path = "../../vendor/expectation"
+path = "../../vendor/expectation/expectation"
 [dependencies.expectation-shared]
-version = "0.1.0"
+path = "../../vendor/expectation/expectation-shared"
 [dependencies.expectation_plugin]
-path = "../../vendor/expectation/expectation_plugin"
+path = "../../vendor/expectation/expectation/expectation_plugin"
 
 #[dependencies.ocl]
 #path = "../../../ocl/ocl"

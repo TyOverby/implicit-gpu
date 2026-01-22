@@ -8,7 +8,7 @@ edition = "2024"
 serde = "1.*.*"
 
 [dependencies.expectation]
-path = "../vendor/expectation"
+path = "../vendor/expectation/expectation"
 
 [dependencies.snoot]
 path = "../vendor/snoot"

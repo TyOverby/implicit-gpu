@@ -20,7 +20,8 @@
       "WebFetch(domain:index.crates.io)",
       "WebFetch(domain:static.crates.io)",
       "Bash(cargo test:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(git lfs pull:*)"
     ]
   },
   "sandbox": {

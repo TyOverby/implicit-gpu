@@ -15,4 +15,4 @@ members = [
     "./util/vectorphile"
 ]
 
-
+exclude = ["vendor"]

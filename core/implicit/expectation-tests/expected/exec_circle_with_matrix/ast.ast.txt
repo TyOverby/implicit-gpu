@@ -1,7 +1,7 @@
 Transform {
     target: Sub(
         Constant(
-            10.0
+            10.0,
         ),
         Sqrt(
             Add(
@@ -10,21 +10,21 @@ Transform {
                         Sub(
                             X,
                             Constant(
-                                11.0
-                            )
-                        )
+                                11.0,
+                            ),
+                        ),
                     ),
                     Square(
                         Sub(
                             Y,
                             Constant(
-                                11.0
-                            )
-                        )
-                    )
-                ]
-            )
-        )
+                                11.0,
+                            ),
+                        ),
+                    ),
+                ],
+            ),
+        ),
     ),
     matrix: [
         0.5,
@@ -42,6 +42,6 @@ Transform {
         0.0,
         0.0,
         0.0,
-        1.0
-    ]
+        1.0,
+    ],
 }

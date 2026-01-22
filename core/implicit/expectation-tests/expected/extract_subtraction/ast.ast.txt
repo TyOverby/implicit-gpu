@@ -2,7 +2,7 @@ Max(
     [
         Sub(
             Constant(
-                10.0
+                10.0,
             ),
             Sqrt(
                 Add(
@@ -11,26 +11,26 @@ Max(
                             Sub(
                                 X,
                                 Constant(
-                                    11.0
-                                )
-                            )
+                                    11.0,
+                                ),
+                            ),
                         ),
                         Square(
                             Sub(
                                 Y,
                                 Constant(
-                                    11.0
-                                )
-                            )
-                        )
-                    ]
-                )
-            )
+                                    11.0,
+                                ),
+                            ),
+                        ),
+                    ],
+                ),
+            ),
         ),
         Neg(
             Sub(
                 Constant(
-                    5.0
+                    5.0,
                 ),
                 Sqrt(
                     Add(
@@ -39,22 +39,22 @@ Max(
                                 Sub(
                                     X,
                                     Constant(
-                                        11.0
-                                    )
-                                )
+                                        11.0,
+                                    ),
+                                ),
                             ),
                             Square(
                                 Sub(
                                     Y,
                                     Constant(
-                                        11.0
-                                    )
-                                )
-                            )
-                        ]
-                    )
-                )
-            )
-        )
-    ]
+                                        11.0,
+                                    ),
+                                ),
+                            ),
+                        ],
+                    ),
+                ),
+            ),
+        ),
+    ],
 )
