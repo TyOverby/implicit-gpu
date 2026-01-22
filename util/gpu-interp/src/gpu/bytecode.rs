@@ -1,4 +1,4 @@
-use *;
+use crate::*;
 
 pub mod ops {
     include!(concat!(env!("OUT_DIR"), "/opcodes.rs"));

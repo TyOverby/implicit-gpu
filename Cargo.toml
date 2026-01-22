@@ -1,4 +1,5 @@
 [workspace]
+resolver = "3"
 members = [
     "./core/extern_api",
     "./core/gpu_strategy",

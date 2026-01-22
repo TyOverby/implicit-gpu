@@ -1,7 +1,7 @@
 use extern_api::Matrix;
-use geometry::Point;
+use crate::geometry::Point;
 use ocl::Kernel;
-use opencl::{FieldBuffer, LineBuffer, OpenClContext};
+use crate::opencl::{FieldBuffer, LineBuffer, OpenClContext};
 
 const PROGRAM: &'static str = concat!(
     include_str!("shaders/dist_to_line.c"),

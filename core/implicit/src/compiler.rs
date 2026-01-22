@@ -1,6 +1,6 @@
 use extern_api::{Id, Shape, Terminal};
 use gpu_interp::Ast;
-use opencl::FieldBuffer;
+use crate::opencl::FieldBuffer;
 use typed_arena::Arena;
 
 pub fn compile<'a, F>(shape: &Shape, arena: &'a Arena<Ast<'a>>, find_buffer: &F) -> Ast<'a>

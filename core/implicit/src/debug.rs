@@ -1,10 +1,10 @@
 #![cfg_attr(not(test), allow(dead_code))]
 
 use euclid::TypedPoint2D;
-use geometry::PathSegment;
+use crate::geometry::PathSegment;
 use image::{codecs::png::PngEncoder, ColorType, ImageBuffer, ImageEncoder, Rgb};
 
-use opencl::FieldBuffer;
+use crate::opencl::FieldBuffer;
 use std::f32::{INFINITY, NEG_INFINITY};
 use std::io::{Result as IoResult, Write};
 

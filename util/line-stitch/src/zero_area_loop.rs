@@ -1,6 +1,6 @@
 use euclid::approxeq::ApproxEq;
-use util::*;
-use *;
+use crate::util::*;
+use crate::*;
 
 type Rect<S> = euclid::TypedRect<f32, S>;
 

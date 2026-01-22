@@ -1,6 +1,6 @@
 use expectation_plugin::expectation_test;
-use opencl::{FieldBuffer, OpenClContext};
-use polygon::run_poly_raw_with_sign;
+use crate::opencl::{FieldBuffer, OpenClContext};
+use crate::polygon::run_poly_raw_with_sign;
 
 #[cfg(test)]
 use expectation::{extensions::ImageDiffExtension, Provider};
@@ -10,7 +10,7 @@ use extern_api::Shape;
 
 pub fn exec_freeze(ctx: &OpenClContext, field: &mut FieldBuffer) -> FieldBuffer {
     let (field_width, field_height) = (field.width, field.height);
-    let (lines_buffer, count) = ::marching::run_marching(field, ctx);
+    let (lines_buffer, count) = crate::marching::run_marching(field, ctx);
     run_poly_raw_with_sign(
         lines_buffer,
         field,

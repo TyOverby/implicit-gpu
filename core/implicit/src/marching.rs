@@ -1,4 +1,4 @@
-use opencl::{FieldBuffer, LineBuffer, OpenClContext};
+use crate::opencl::{FieldBuffer, LineBuffer, OpenClContext};
 
 const PROGRAM: &'static str = include_str!("shaders/marching.c");
 

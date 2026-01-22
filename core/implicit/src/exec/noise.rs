@@ -1,11 +1,11 @@
 #[cfg(test)]
-use debug::*;
+use crate::debug::*;
 #[cfg(test)]
 use expectation::{extensions::*, Provider};
 
 use expectation_plugin::expectation_test;
 use extern_api::Matrix;
-use opencl::{FieldBuffer, OpenClContext};
+use crate::opencl::{FieldBuffer, OpenClContext};
 
 const PROGRAM: &'static str = include_str!("../shaders/simplex.c");
 
@@ -30,7 +30,7 @@ pub fn get_noise(
         .unwrap();
     kernel.set_arg("width", width as u64).unwrap();
     kernel.set_arg("cutoff", cutoff).unwrap();
-    let kernel = ::polygon::add_matrix(kernel, matrix);
+    let kernel = crate::polygon::add_matrix(kernel, matrix);
 
     unsafe {
         kernel.enq().unwrap();

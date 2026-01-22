@@ -1,5 +1,5 @@
 use rayon::prelude::*;
-use *;
+use crate::*;
 
 /// Remoes all line segments that can't possibly be part of
 /// a cycle.

@@ -2,7 +2,7 @@
 name = "line-stitch"
 version = "0.1.0"
 authors = ["Ty Overby <ty@pre-alpha.com>"]
-edition = "2015"
+edition = "2024"
 
 [dependencies]
 smallvec = "0.6.0"

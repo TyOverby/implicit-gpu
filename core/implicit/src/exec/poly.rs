@@ -1,11 +1,11 @@
 #[cfg(test)]
-use debug::*;
+use crate::debug::*;
 #[cfg(test)]
 use expectation::{extensions::*, Provider};
 use expectation_plugin::expectation_test;
 use extern_api::Polygon;
-use opencl::{FieldBuffer, OpenClContext};
-use polygon::run_poly;
+use crate::opencl::{FieldBuffer, OpenClContext};
+use crate::polygon::run_poly;
 
 pub fn exec_poly(ctx: &OpenClContext, poly: Polygon, width: u32, height: u32) -> FieldBuffer {
     run_poly(poly.points, None, width, height, poly.matrix, ctx).unwrap()

@@ -1,5 +1,5 @@
-use geometry::{PathSegment, Point};
-use inspector::*;
+use crate::geometry::{PathSegment, Point};
+use crate::inspector::*;
 use line_stitch::*;
 use std::cmp::Ordering;
 

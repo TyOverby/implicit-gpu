@@ -1,6 +1,6 @@
-use geometry::PathSegment;
-use geometry::Point;
-use opencl::FieldBuffer;
+use crate::geometry::PathSegment;
+use crate::geometry::Point;
+use crate::opencl::FieldBuffer;
 
 use expectation::{extensions::*, Provider};
 
@@ -51,7 +51,7 @@ impl Inspector for Provider {
         write!(w_text, "{:#?}", ast).unwrap();
     }
     fn write_field(&self, name: &str, buffer: &mut FieldBuffer) {
-        use debug::*;
+        use crate::debug::*;
         let w_color = self.png_writer(format!("{}.color.png", name));
         save_field_buffer(buffer, w_color, ColorMode::Debug);
         let w_bw = self.png_writer(format!("{}.bw.png", name));
@@ -63,7 +63,7 @@ impl Inspector for Provider {
     }
 
     fn write_segments(&self, name: &str, segments: &[PathSegment]) {
-        use debug::*;
+        use crate::debug::*;
 
         let tuple_writer = self.text_writer(format!("{}.txt", name));
         print_path_segments(tuple_writer, segments);

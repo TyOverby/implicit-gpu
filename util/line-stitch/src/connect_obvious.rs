@@ -1,7 +1,7 @@
 use itertools::{repeat_call, Itertools};
 use std::cell::RefCell;
-use util::*;
-use *;
+use crate::util::*;
+use crate::*;
 
 /// todo: doc
 pub fn connect_obvious<P, I, S: 'static>(

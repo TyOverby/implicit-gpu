@@ -1,4 +1,4 @@
-use opencl::{FieldBuffer, IndexBuffer, OpenClContext};
+use crate::opencl::{FieldBuffer, IndexBuffer, OpenClContext};
 
 const PROGRAM: &'static str = include_str!("shaders/surfacenet.c");
 

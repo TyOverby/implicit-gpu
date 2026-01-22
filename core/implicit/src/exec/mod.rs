@@ -14,9 +14,9 @@ pub use self::shape::*;
 
 use expectation_plugin::expectation_test;
 use extern_api::*;
-use geometry::PathSegment;
-use inspector::*;
-use opencl::{FieldBuffer, OpenClContext};
+use crate::geometry::PathSegment;
+use crate::inspector::*;
+use crate::opencl::{FieldBuffer, OpenClContext};
 use std::collections::HashMap;
 
 #[cfg(test)]

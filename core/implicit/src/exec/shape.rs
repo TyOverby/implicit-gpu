@@ -1,6 +1,6 @@
-use inspector::BoxedInspector;
+use crate::inspector::BoxedInspector;
 use extern_api::{Id, Shape};
-use opencl::{FieldBuffer, OpenClContext};
+use crate::opencl::{FieldBuffer, OpenClContext};
 
 #[cfg(test)]
 use expectation::{extensions::*, Provider};
@@ -18,7 +18,7 @@ where
     F: Fn(Id) -> FieldBuffer,
 {
     let arena = ::typed_arena::Arena::new();
-    let output = ::compiler::compile(&shape, &arena, &buffer_find);
+    let output = crate::compiler::compile(&shape, &arena, &buffer_find);
     inspector.write_ast("ast", &output);
 
     let compiled = ::gpu_interp::gpu::compile(&output);

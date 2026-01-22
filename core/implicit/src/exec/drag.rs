@@ -4,7 +4,7 @@ use expectation::{extensions::*, Provider};
 use extern_api::Shape;
 
 use expectation_plugin::expectation_test;
-use opencl::{FieldBuffer, OpenClContext};
+use crate::opencl::{FieldBuffer, OpenClContext};
 
 const PROGRAM: &'static str = include_str!("../shaders/drag.c");
 

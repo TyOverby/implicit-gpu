@@ -1,6 +1,6 @@
 use super::bytecode::CompilationResult;
 use ocl::{Buffer as OclBuffer, Context, Kernel, Program, Queue};
-use Buffer;
+use crate::Buffer;
 
 #[derive(Clone)]
 pub struct Triad {
@@ -138,7 +138,7 @@ pub fn execute(
 }
 
 #[cfg(test)]
-use ::*;
+use crate::*;
 
 #[test]
 fn interpret_constant() {

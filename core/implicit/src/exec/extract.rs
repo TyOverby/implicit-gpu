@@ -1,6 +1,6 @@
-use geometry::PathSegment;
-use inspector::*;
-use opencl::{FieldBuffer, OpenClContext};
+use crate::geometry::PathSegment;
+use crate::inspector::*;
+use crate::opencl::{FieldBuffer, OpenClContext};
 
 #[cfg(test)]
 use expectation::{extensions::TextDiffExtension, Provider};
@@ -15,9 +15,9 @@ pub fn extract_lines(
 ) -> Vec<PathSegment> {
     use euclid::point2;
     use itertools::Itertools;
-    use lines::connect_lines;
+    use crate::lines::connect_lines;
 
-    let (lines, count) = ::marching::run_marching(field, ctx);
+    let (lines, count) = crate::marching::run_marching(field, ctx);
     let lines = lines.values(Some(count));
     let lines = lines
         .into_iter()

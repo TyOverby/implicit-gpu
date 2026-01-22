@@ -1,6 +1,6 @@
 use euclid;
 use fnv::FnvHashMap as HashMap;
-use *;
+use crate::*;
 
 const QUAD_TREE_LEAF_SIZE: usize = 128;
 

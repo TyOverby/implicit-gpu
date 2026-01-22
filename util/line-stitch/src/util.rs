@@ -1,5 +1,5 @@
 use euclid::*;
-use *;
+use crate::*;
 
 pub fn populate<I, P, S: 'static>(segments: I, epsilon: f32) -> DualQuadTree<S>
 where
