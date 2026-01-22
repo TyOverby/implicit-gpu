@@ -499,8 +499,6 @@ dependencies = [
 [[package]]
 name = "expectation-shared"
 version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7ff3b3796c0f3fb2f34973ec47cafed412ac5329f4286e5e5e5142636c93d735"
 dependencies = [
  "serde 1.0.228",
  "serde_derive",
