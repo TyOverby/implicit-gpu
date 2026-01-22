@@ -1,11 +1,11 @@
 #[cfg(test)]
 use crate::debug::*;
 #[cfg(test)]
-use expectation::{extensions::*, Provider};
+use expectation::{Provider, extensions::*};
 
+use crate::opencl::{FieldBuffer, OpenClContext};
 use expectation_plugin::expectation_test;
 use extern_api::Matrix;
-use crate::opencl::{FieldBuffer, OpenClContext};
 
 const PROGRAM: &'static str = include_str!("../shaders/simplex.c");
 
@@ -40,8 +40,8 @@ pub fn get_noise(
 
 #[expectation_test]
 fn exec_noise(provider: Provider) {
-    use extern_api::Matrix;
     use crate::opencl::*;
+    use extern_api::Matrix;
 
     let ctx = OpenClContext::default();
     let mut buffer = get_noise(&ctx, 20, 20, 0.5, Matrix::identity());

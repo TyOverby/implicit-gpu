@@ -3,7 +3,7 @@ use crate::inspector::*;
 use crate::opencl::{FieldBuffer, OpenClContext};
 
 #[cfg(test)]
-use expectation::{extensions::TextDiffExtension, Provider};
+use expectation::{Provider, extensions::TextDiffExtension};
 use expectation_plugin::expectation_test;
 #[cfg(test)]
 use extern_api::Shape;
@@ -13,9 +13,9 @@ pub fn extract_lines(
     inspector: BoxedInspector,
     field: &mut FieldBuffer,
 ) -> Vec<PathSegment> {
+    use crate::lines::connect_lines;
     use euclid::point2;
     use itertools::Itertools;
-    use crate::lines::connect_lines;
 
     let (lines, count) = crate::marching::run_marching(field, ctx);
     let lines = lines.values(Some(count));

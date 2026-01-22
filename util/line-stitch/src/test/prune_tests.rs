@@ -1,7 +1,7 @@
 use super::util::*;
-use euclid::{point2, UnknownUnit};
-use permutohedron::heap_recursive as permute;
 use crate::prune;
+use euclid::{UnknownUnit, point2};
+use permutohedron::heap_recursive as permute;
 
 type Point = crate::Point<UnknownUnit>;
 type PathSegment = crate::PathSegment<UnknownUnit>;

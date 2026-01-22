@@ -1,10 +1,10 @@
 #[cfg(test)]
-use expectation::{extensions::*, Provider};
+use expectation::{Provider, extensions::*};
 #[cfg(test)]
 use extern_api::Shape;
 
-use expectation_plugin::expectation_test;
 use crate::opencl::{FieldBuffer, OpenClContext};
+use expectation_plugin::expectation_test;
 
 const PROGRAM: &'static str = include_str!("../shaders/drag.c");
 

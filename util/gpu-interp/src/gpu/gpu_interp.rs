@@ -1,6 +1,6 @@
 use super::bytecode::CompilationResult;
-use ocl::{Buffer as OclBuffer, Context, Kernel, Program, Queue};
 use crate::Buffer;
+use ocl::{Buffer as OclBuffer, Context, Kernel, Program, Queue};
 
 #[derive(Clone)]
 pub struct Triad {

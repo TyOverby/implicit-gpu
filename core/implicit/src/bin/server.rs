@@ -10,7 +10,7 @@ use expectation::Provider;
 use expectation_shared::filesystem::RealFileSystem;
 use extern_api::*;
 use implicit::inspector::Inspector;
-use snoot::serde_serialization::{deserialize, DeserializeResult};
+use snoot::serde_serialization::{DeserializeResult, deserialize};
 use std::io::Read;
 use std::io::{stdin, stdout};
 

@@ -1,9 +1,9 @@
-use expectation_plugin::expectation_test;
 use crate::opencl::{FieldBuffer, OpenClContext};
 use crate::polygon::run_poly_raw_with_sign;
+use expectation_plugin::expectation_test;
 
 #[cfg(test)]
-use expectation::{extensions::ImageDiffExtension, Provider};
+use expectation::{Provider, extensions::ImageDiffExtension};
 use extern_api::Matrix;
 #[cfg(test)]
 use extern_api::Shape;

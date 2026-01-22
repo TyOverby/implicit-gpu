@@ -2,7 +2,7 @@ use crate::opencl::{FieldBuffer, LineBuffer, OpenClContext};
 #[cfg(test)]
 use debug_helpers::*;
 #[cfg(test)]
-use expectation::{extensions::*, Provider};
+use expectation::{Provider, extensions::*};
 use expectation_plugin::expectation_test;
 use extern_api::Matrix;
 use extern_api::Polygon;

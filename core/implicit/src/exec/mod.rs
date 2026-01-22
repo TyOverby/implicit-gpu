@@ -12,15 +12,15 @@ pub use self::noise::*;
 pub use self::poly::*;
 pub use self::shape::*;
 
-use expectation_plugin::expectation_test;
-use extern_api::*;
 use crate::geometry::PathSegment;
 use crate::inspector::*;
 use crate::opencl::{FieldBuffer, OpenClContext};
+use expectation_plugin::expectation_test;
+use extern_api::*;
 use std::collections::HashMap;
 
 #[cfg(test)]
-use expectation::{extensions::TextDiffExtension, Provider};
+use expectation::{Provider, extensions::TextDiffExtension};
 
 pub fn exec(
     command: Command,

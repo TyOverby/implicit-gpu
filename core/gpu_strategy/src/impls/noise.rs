@@ -1,7 +1,7 @@
 #[cfg(test)]
 use debug_helpers::*;
 #[cfg(test)]
-use expectation::{extensions::*, Provider};
+use expectation::{Provider, extensions::*};
 
 use crate::opencl::{FieldBuffer, OpenClContext};
 use expectation_plugin::expectation_test;

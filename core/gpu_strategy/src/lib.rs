@@ -54,7 +54,13 @@ impl strategy::Strategy for GpuStrategy {
         impls::exec_poly(&self.cl_context, polygon, width, height)
     }
 
-    fn shape<F>(&self, _shape: Shape, _width: u32, _height: u32, _buffer_find: F) -> gpu_interp::Buffer
+    fn shape<F>(
+        &self,
+        _shape: Shape,
+        _width: u32,
+        _height: u32,
+        _buffer_find: F,
+    ) -> gpu_interp::Buffer
     where
         F: Fn(Id) -> gpu_interp::Buffer,
     {

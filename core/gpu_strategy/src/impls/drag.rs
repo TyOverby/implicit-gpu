@@ -1,5 +1,5 @@
 #[cfg(test)]
-use expectation::{extensions::*, Provider};
+use expectation::{Provider, extensions::*};
 #[cfg(test)]
 use extern_api::Shape;
 

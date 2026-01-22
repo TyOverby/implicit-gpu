@@ -3,7 +3,7 @@ use debug_helpers::*;
 use extern_api::{Id, Shape};
 
 #[cfg(test)]
-use expectation::{extensions::*, Provider};
+use expectation::{Provider, extensions::*};
 use expectation_plugin::expectation_test;
 
 #[allow(dead_code)]

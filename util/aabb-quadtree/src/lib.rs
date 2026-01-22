@@ -215,7 +215,8 @@ impl<T, S, A: Array<Item = (ItemId, Rect<S>)>> QuadTree<T, S, A> {
         T: ::std::fmt::Debug,
     {
         let mut out: SmallVec<[(_, _, _); 3]> = Default::default();
-        let _ = self.root
+        let _ = self
+            .root
             .query::<(), _>(bounding_box, &self.config, &mut |id, bb| {
                 out.push((&self.elements.get(&id).unwrap().0, bb, id));
                 Ok(())
@@ -471,7 +472,8 @@ impl<S, A: Array<Item = (ItemId, Rect<S>)>> QuadNode<S, A> {
             self.query::<(), _>(aabb, config, &mut |id, bb| {
                 elements.push((id, bb));
                 Ok(())
-            }).ok();
+            })
+            .ok();
             elements.sort_by(|&(id1, _), &(ref id2, _)| id1.cmp(id2));
             elements.dedup();
             *self = QuadNode::Leaf {

@@ -1,9 +1,9 @@
 extern crate cranelift;
-extern crate cranelift_module;
 extern crate cranelift_jit;
+extern crate cranelift_module;
 extern crate euclid;
-extern crate strategy;
 extern crate ocl;
+extern crate strategy;
 
 pub mod ast_walk;
 mod buffer;

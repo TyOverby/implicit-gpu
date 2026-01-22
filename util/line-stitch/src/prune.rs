@@ -1,5 +1,5 @@
-use rayon::prelude::*;
 use crate::*;
+use rayon::prelude::*;
 
 /// Remoes all line segments that can't possibly be part of
 /// a cycle.
@@ -40,11 +40,7 @@ fn prune_one_iter<S: Send + Sync + 'static>(
             let d = || dual_qt.has_forward_neighbor(id, end, epsilon);
 
             let should_be_removed = (a || (!only_starts && b())) && (c || (!only_starts && d()));
-            if should_be_removed {
-                None
-            } else {
-                Some(id)
-            }
+            if should_be_removed { None } else { Some(id) }
         })
         .collect();
     ::flame::end("finding items to remove");

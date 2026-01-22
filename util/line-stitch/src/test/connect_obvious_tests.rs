@@ -1,6 +1,6 @@
 use super::util::*;
 use crate::connect_obvious;
-use euclid::{point2, UnknownUnit};
+use euclid::{UnknownUnit, point2};
 use permutohedron::heap_recursive as permute;
 
 type Point = crate::Point<UnknownUnit>;

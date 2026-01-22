@@ -1,8 +1,8 @@
 #![cfg_attr(not(test), allow(dead_code))]
 
-use euclid::TypedPoint2D;
 use crate::geometry::PathSegment;
-use image::{codecs::png::PngEncoder, ColorType, ImageBuffer, ImageEncoder, Rgb};
+use euclid::TypedPoint2D;
+use image::{ColorType, ImageBuffer, ImageEncoder, Rgb, codecs::png::PngEncoder};
 
 use crate::opencl::FieldBuffer;
 use std::f32::{INFINITY, NEG_INFINITY};
@@ -63,7 +63,9 @@ fn save_image<W: Write>(samples: &[f32], width: usize, writer: W, color_mode: Co
     }
 
     let encoder = PngEncoder::new(writer);
-    encoder.write_image(buf.as_raw(), buf.width(), buf.height(), ColorType::Rgb8).unwrap();
+    encoder
+        .write_image(buf.as_raw(), buf.width(), buf.height(), ColorType::Rgb8)
+        .unwrap();
 }
 
 pub fn svg_path_segments<W: Write>(out: W, extracted: &[PathSegment]) -> IoResult<()> {

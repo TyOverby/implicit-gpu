@@ -49,7 +49,9 @@ impl JIT {
             .define_function(id, &mut self.ctx)
             .map_err(|e| e.to_string())?;
         self.module.clear_context(&mut self.ctx);
-        self.module.finalize_definitions().map_err(|e| e.to_string())?;
+        self.module
+            .finalize_definitions()
+            .map_err(|e| e.to_string())?;
         let code = self.module.get_finalized_function(id);
 
         Ok(code)

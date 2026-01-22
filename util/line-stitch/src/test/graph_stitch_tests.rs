@@ -1,6 +1,6 @@
 use super::util::*;
-use euclid::{point2, UnknownUnit};
 use crate::graph_stitch;
+use euclid::{UnknownUnit, point2};
 use permutohedron::heap_recursive as permute;
 
 type PathSegment = crate::PathSegment<UnknownUnit>;

@@ -1,7 +1,7 @@
 use super::*;
 use aabb_quadtree::{ItemId, QuadTree};
 use euclid::approxeq::ApproxEq;
-use euclid::{point2, vec2, TypedRect};
+use euclid::{TypedRect, point2, vec2};
 use std::collections::{HashMap, HashSet};
 use util::{centered_with_radius, compute_bounding_box};
 
@@ -24,7 +24,8 @@ fn is_close<S>(p1: Point<S>, p2: Point<S>) -> bool {
 impl<S> Graph<S> {
     fn new(v: Vec<PathSegment<S>>) -> Graph<S> {
         let size_hint = v.len();
-        let v: Vec<_> = v.into_iter()
+        let v: Vec<_> = v
+            .into_iter()
             .map(|v| (compute_bounding_box(vec![v.first(), v.last()]), v))
             .collect();
 
@@ -51,7 +52,8 @@ impl<S> Graph<S> {
 
         let last_point = segment.last();
         let query = centered_with_radius(last_point, 1.0 / 4.0);
-        return self.tree
+        return self
+            .tree
             .query(query)
             .into_iter()
             .filter_map(|(ref v, _, id2)| {

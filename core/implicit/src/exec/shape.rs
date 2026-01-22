@@ -1,17 +1,17 @@
 use crate::inspector::BoxedInspector;
-use extern_api::{Id, Shape};
 use crate::opencl::{FieldBuffer, OpenClContext};
+use extern_api::{Id, Shape};
 
 #[cfg(test)]
-use expectation::{extensions::*, Provider};
+use expectation::{Provider, extensions::*};
 use expectation_plugin::expectation_test;
 
 pub fn exec_shape<F>(
     ctx: &OpenClContext,
     inspector: BoxedInspector,
     shape: Shape,
-    width:u32,
-    height:u32,
+    width: u32,
+    height: u32,
     buffer_find: F,
 ) -> FieldBuffer
 where

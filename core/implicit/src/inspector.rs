@@ -2,7 +2,7 @@ use crate::geometry::PathSegment;
 use crate::geometry::Point;
 use crate::opencl::FieldBuffer;
 
-use expectation::{extensions::*, Provider};
+use expectation::{Provider, extensions::*};
 
 pub type BoxedInspector = Box<dyn Inspector>;
 
@@ -57,8 +57,7 @@ impl Inspector for Provider {
         let w_bw = self.png_writer(format!("{}.bw.png", name));
         save_field_buffer(buffer, w_bw, ColorMode::BlackAndWhite);
 
-        let mut buf =
-            self.custom_test("buffer.buf", |_, _| Ok(true), |_, _, _, _| Ok(()));
+        let mut buf = self.custom_test("buffer.buf", |_, _| Ok(true), |_, _, _, _| Ok(()));
         buffer_dump::write(&mut buf, buffer).unwrap();
     }
 

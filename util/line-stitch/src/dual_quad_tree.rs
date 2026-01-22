@@ -1,6 +1,6 @@
+use crate::*;
 use euclid;
 use fnv::FnvHashMap as HashMap;
-use crate::*;
 
 const QUAD_TREE_LEAF_SIZE: usize = 128;
 
@@ -43,7 +43,8 @@ impl<S: 'static> DualQuadTree<S> {
     where
         S: Clone,
     {
-        let iterator = self.id_to_segment
+        let iterator = self
+            .id_to_segment
             .iter()
             .map(|(_, &(ref p, _, _))| p.clone());
         iterator.collect()
@@ -92,11 +93,7 @@ impl<S: 'static> DualQuadTree<S> {
         let id = self.id_to_segment[&id].1;
         self.ends
             .custom_query::<(), _>(query_aabb, &mut |qid, _| {
-                if qid != id {
-                    Err(())
-                } else {
-                    Ok(())
-                }
+                if qid != id { Err(()) } else { Ok(()) }
             })
             .is_err()
     }
@@ -106,11 +103,7 @@ impl<S: 'static> DualQuadTree<S> {
         let id = self.id_to_segment[&id].2;
         self.starts
             .custom_query::<(), _>(query_aabb, &mut |qid, _| {
-                if qid != id {
-                    Err(())
-                } else {
-                    Ok(())
-                }
+                if qid != id { Err(()) } else { Ok(()) }
             })
             .is_err()
     }
@@ -234,11 +227,7 @@ impl<S: 'static> DualQuadTree<S> {
         }
         let dist_for_id = |id| {
             let elem = &self.id_to_segment.get(id).unwrap().0;
-            let pa = if is_start {
-                elem.first()
-            } else {
-                elem.last()
-            };
+            let pa = if is_start { elem.first() } else { elem.last() };
 
             let dist = (point - pa).square_length();
             dist
