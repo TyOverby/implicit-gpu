@@ -5,22 +5,21 @@ mod test;
 
 use super::*;
 use cranelift::prelude::*;
-use cranelift_module::{DataContext, Linkage, Module};
-use cranelift_simplejit::{SimpleJITBackend, SimpleJITBuilder};
+use cranelift_jit::{JITBuilder, JITModule};
+use cranelift_module::{Linkage, Module};
 use std::collections::HashMap;
 
 pub struct JIT {
     builder_context: FunctionBuilderContext,
     ctx: codegen::Context,
-    data_ctx: DataContext,
-    module: Module<SimpleJITBackend>,
+    module: JITModule,
 }
 
 struct FunctionTranslator<'a> {
     float: types::Type,
     builder: FunctionBuilder<'a>,
     variables: HashMap<String, Variable>,
-    module: &'a mut Module<SimpleJITBackend>,
+    module: &'a mut JITModule,
 }
 
 impl JIT {
@@ -31,12 +30,11 @@ impl JIT {
             unimplemented!();
         }
 
-        let builder = SimpleJITBuilder::new();
-        let module = Module::new(builder);
+        let builder = JITBuilder::new(cranelift_module::default_libcall_names()).unwrap();
+        let module = JITModule::new(builder);
         Self {
             builder_context: FunctionBuilderContext::new(),
             ctx: module.make_context(),
-            data_ctx: DataContext::new(),
             module,
         }
     }
@@ -51,7 +49,7 @@ impl JIT {
             .define_function(id, &mut self.ctx)
             .map_err(|e| e.to_string())?;
         self.module.clear_context(&mut self.ctx);
-        self.module.finalize_definitions();
+        self.module.finalize_definitions().map_err(|e| e.to_string())?;
         let code = self.module.get_finalized_function(id);
 
         Ok(code)
@@ -68,11 +66,11 @@ impl JIT {
         self.ctx.func.signature.returns.push(AbiParam::new(float));
         let mut builder = FunctionBuilder::new(&mut self.ctx.func, &mut self.builder_context);
 
-        let entry_ebb = builder.create_ebb();
-        builder.append_ebb_params_for_function_params(entry_ebb);
-        builder.switch_to_block(entry_ebb);
-        builder.seal_block(entry_ebb);
-        let variables = declare_variables(float, &mut builder, entry_ebb, expr);
+        let entry_block = builder.create_block();
+        builder.append_block_params_for_function_params(entry_block);
+        builder.switch_to_block(entry_block);
+        builder.seal_block(entry_block);
+        let variables = declare_variables(float, &mut builder, entry_block, expr);
         let x_var = variables.get("x").unwrap().clone();
         let y_var = variables.get("y").unwrap().clone();
         let z_var = variables.get("z").unwrap().clone();
@@ -249,23 +247,22 @@ impl<'a> FunctionTranslator<'a> {
 fn declare_variables(
     float: types::Type,
     builder: &mut FunctionBuilder,
-    entry_ebb: Ebb,
+    entry_block: Block,
     ast: AstPtr,
 ) -> HashMap<String, Variable> {
     let mut variables = HashMap::new();
-    let mut index = 0;
 
     // x, y, z
     for (i, name) in ["x", "y", "z"].iter().enumerate() {
-        let val = builder.ebb_params(entry_ebb)[i];
-        let var = declare_variable(float, builder, &mut variables, &mut index, name);
+        let val = builder.block_params(entry_block)[i];
+        let var = declare_variable(float, builder, &mut variables, name);
         builder.def_var(var, val);
     }
 
     for i in 0..max_depth_transforms(ast) {
         for dim in ["x", "y", "z", "w"].iter() {
-            let var = format!("{}_{}", dim, i);
-            declare_variable(float, builder, &mut variables, &mut index, &var);
+            let var_name = format!("{}_{}", dim, i);
+            declare_variable(float, builder, &mut variables, &var_name);
         }
     }
 
@@ -275,15 +272,13 @@ fn declare_variable(
     float: types::Type,
     builder: &mut FunctionBuilder,
     variables: &mut HashMap<String, Variable>,
-    index: &mut usize,
     name: &str,
 ) -> Variable {
-    let var = Variable::new(*index);
-    if !variables.contains_key(name) {
-        variables.insert(name.into(), var);
-        builder.declare_var(var, float);
-        *index += 1;
+    if let Some(&var) = variables.get(name) {
+        return var;
     }
+    let var = builder.declare_var(float);
+    variables.insert(name.into(), var);
     var
 }
 
