@@ -44,8 +44,8 @@ fn run_shape_helper(
     provider: Provider,
     fields: &[FieldBuffer],
 ) -> FieldBuffer {
-    use debug::*;
-    use inspector::Inspector;
+    use crate::debug::*;
+    use crate::inspector::Inspector;
 
     let mut buffer = exec_shape(ctx, provider.duplicate(), shape, width, height, |i| {
         fields[i as usize].clone()

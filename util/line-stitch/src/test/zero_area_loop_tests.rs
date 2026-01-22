@@ -1,10 +1,10 @@
 use super::util::*;
 use euclid::UnknownUnit;
 use permutohedron::heap_recursive as permute;
-use remove_zero_area_loops;
+use crate::remove_zero_area_loops;
 
-type Point = ::Point<UnknownUnit>;
-type PathSegment = ::PathSegment<UnknownUnit>;
+type Point = crate::Point<UnknownUnit>;
+type PathSegment = crate::PathSegment<UnknownUnit>;
 const EPSILON: f32 = 0.001;
 
 #[derive(Clone)]

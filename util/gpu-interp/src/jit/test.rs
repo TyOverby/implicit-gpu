@@ -1,5 +1,4 @@
 use super::*;
-use *;
 
 fn run_test(ast: AstPtr, x: f32, y: f32, z: f32) -> f32 {
     let mut jit = JIT::new();

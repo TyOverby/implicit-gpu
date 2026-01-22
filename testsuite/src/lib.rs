@@ -1,4 +1,5 @@
 extern crate expectation;
+extern crate extern_api;
 extern crate implicit;
 extern crate serde;
 extern crate snoot;
@@ -43,7 +44,7 @@ fn expectation_test_all() {
                 let mut test_contents = String::new();
                 test_file.read_to_string(&mut test_contents).unwrap();
 
-                let deser: Option<(implicit::ocaml::Command, (f32, f32))> = deser(&test_contents);
+                let deser: Option<(extern_api::Command, (f32, f32))> = deser(&test_contents);
                 let (command, (w, h)) = deser.unwrap();
 
                 provider.debug(format!("command.txt"), &command).unwrap();

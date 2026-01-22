@@ -1,5 +1,5 @@
 use euclid::{point2, Point2D, UnknownUnit};
-use *;
+use crate::{connect_obvious, prune};
 
 const EPSILON: f32 = 0.001;
 // CIRCLES 99 actually has 97 circles

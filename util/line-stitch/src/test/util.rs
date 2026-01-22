@@ -1,4 +1,4 @@
-type PathSegment = ::PathSegment<::euclid::UnknownUnit>;
+type PathSegment = crate::PathSegment<::euclid::UnknownUnit>;
 
 pub fn rotate_1<T>(arr: &mut [T]) {
     {

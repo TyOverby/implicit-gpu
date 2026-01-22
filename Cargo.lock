@@ -1601,6 +1601,7 @@ name = "testsuite"
 version = "0.1.0"
 dependencies = [
  "expectation",
+ "extern_api",
  "implicit",
  "serde 1.0.228",
  "snoot",

@@ -42,9 +42,9 @@ pub fn exec_drag(ctx: &OpenClContext, input: &mut FieldBuffer, dx: f32, dy: f32)
 
 #[cfg(test)]
 fn drag_shape_helper(shape: Shape, width: u32, height: u32, dx: f32, dy: f32, provider: Provider) {
-    use debug::*;
-    use exec::exec_shape;
-    use inspector::Inspector;
+    use crate::debug::*;
+    use crate::exec::exec_shape;
+    use crate::inspector::Inspector;
 
     let ctx = OpenClContext::default();
 

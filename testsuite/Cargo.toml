@@ -15,3 +15,6 @@ path = "../vendor/snoot"
 
 [dependencies.implicit]
 path = "../core/implicit"
+
+[dependencies.extern_api]
+path = "../core/extern_api"

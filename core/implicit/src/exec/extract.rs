@@ -31,9 +31,9 @@ pub fn extract_lines(
 
 #[cfg(test)]
 fn run_shape_paths(shape: Shape, width: u32, height: u32, provider: Provider) {
-    use debug::print_path_segments;
-    use exec::exec_shape;
-    use opencl::OpenClContext;
+    use crate::debug::print_path_segments;
+    use crate::exec::exec_shape;
+    use crate::opencl::OpenClContext;
 
     let ctx = OpenClContext::default();
     let mut buffer = exec_shape(

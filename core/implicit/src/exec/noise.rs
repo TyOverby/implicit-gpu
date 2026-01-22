@@ -41,7 +41,7 @@ pub fn get_noise(
 #[expectation_test]
 fn exec_noise(provider: Provider) {
     use extern_api::Matrix;
-    use opencl::*;
+    use crate::opencl::*;
 
     let ctx = OpenClContext::default();
     let mut buffer = get_noise(&ctx, 20, 20, 0.5, Matrix::identity());

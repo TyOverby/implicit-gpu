@@ -1,13 +1,14 @@
 use super::util::*;
 use euclid::{point2, UnknownUnit};
-use graph_stitch;
+use crate::graph_stitch;
 use permutohedron::heap_recursive as permute;
 
-type PathSegment = ::PathSegment<UnknownUnit>;
+type PathSegment = crate::PathSegment<UnknownUnit>;
 
 const EPSILON: f32 = 0.001;
 
 #[derive(Clone)]
+#[allow(dead_code)]
 struct Problem {
     input: Vec<PathSegment>,
     expected: Vec<PathSegment>,

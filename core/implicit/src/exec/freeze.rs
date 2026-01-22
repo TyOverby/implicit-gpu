@@ -24,9 +24,9 @@ pub fn exec_freeze(ctx: &OpenClContext, field: &mut FieldBuffer) -> FieldBuffer 
 
 #[cfg(test)]
 fn freeze_shape_helper(shape: Shape, width: u32, height: u32, provider: Provider) {
-    use debug::*;
-    use exec::exec_shape;
-    use inspector::Inspector;
+    use crate::debug::*;
+    use crate::exec::exec_shape;
+    use crate::inspector::Inspector;
 
     let ctx = OpenClContext::default();
 

@@ -11,3 +11,5 @@ pub use self::freeze::*;
 pub use self::marching::*;
 pub use self::noise::*;
 pub use self::poly::*;
+#[cfg(test)]
+pub use self::shape::*;
